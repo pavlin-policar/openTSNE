@@ -199,7 +199,31 @@ class TSNE(Projector):
         model.name = '%s (%s)' % (self.name, data.name)
         return model
 
-    def fit(self, X: np.ndarray, Y: np.ndarray = None) -> np.ndarray:
+    def fit(self, X: np.ndarray, Y: np.ndarray = None,
+            neighbors: np.ndarray = None, distances: np.ndarray = None) -> np.ndarray:
+        """Perform t-SNE dimensionality reduction.
+
+        Parameters
+        ----------
+        X : np.ndarray
+        Y : Optional[np.ndarray]
+        neighbors : Optional[np.ndarray]
+            Often times, we want to run t-SNE multiple times. If computing the
+            nearest neighbors takes a long time, re-using those results for
+            different runs will drastically speed up the process. When
+            providing precomputed neighbors, be sure to include `distances` as
+            well as well as to verify they are of the same shape.
+            Contains indices of the k nearest neighbors (or approximate nn).
+        distances : Optional[np.ndarray]
+            See `neighbors` parameter. Contains the distances to the k nearest
+            neighbors (or approximate nn).
+
+        Returns
+        -------
+        np.ndarray
+            The t-SNE embedding.
+
+        """
         n_samples, n_dims = X.shape
 
         # If no early exaggeration value is proposed, use the update scheme
@@ -223,8 +247,13 @@ class TSNE(Projector):
         k_neighbors = min(n_samples - 1, int(3 * perplexity))
 
         start = time.time()
-        # Find each points' nearest neighbors
-        if self.neighbors_method == 'exact':
+        # Find each points' nearest neighbors or use the precomputed ones, if
+        # provided
+        if neighbors is not None and distances is not None:
+            assert neighbors.shape == distances.shape, \
+                'The `distances` and `neighbors` dimensions must match exactly!'
+            logging.info('Nearest neighbors provided, using precomputed neighbors.')
+        elif self.neighbors_method == 'exact':
             knn = NearestNeighbors(algorithm='auto', metric=self.metric, n_jobs=self.n_jobs)
             knn.fit(X)
             distances, neighbors = knn.kneighbors(n_neighbors=k_neighbors)
@@ -542,9 +571,10 @@ def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
     for iteration in range(n_iter):
         should_eval_error = (iteration + 1) % 50 == 0
 
-        error, gradient = kl_divergence_fft(
-            embedding, P, dof, reference_embedding, n_jobs=n_jobs,
-            should_eval_error=should_eval_error,
+        error, gradient = gradient_method(
+            embedding, P, dof=dof, theta=theta,
+            reference_embedding=reference_embedding, n_jobs=n_jobs,
+            should_eval_error=True,
         )
         error1, gradient = kl_divergence_bh(embedding, P, dof=dof, theta=theta, should_eval_error=True)
         print(error, error1)
