@@ -102,7 +102,7 @@ cpdef np.ndarray[np.float64_t, ndim=2] compute_gaussian_perplexity(
     return np.asarray(P, dtype=np.float64)
 
 
-cpdef tuple compute_positive_gradients(
+cpdef tuple estimate_positive_gradient_nn(
     int[:] indices,
     int[:] indptr,
     double[:] P_data,
@@ -165,7 +165,7 @@ cpdef tuple compute_positive_gradients(
     return sum_P, kl_divergence
 
 
-cpdef double compute_negative_gradients_bh(
+cpdef double estimate_negative_gradient_bh(
     QuadTree tree,
     double[:, ::1] embedding,
     double[:, ::1] gradient,
@@ -197,7 +197,7 @@ cpdef double compute_negative_gradients_bh(
         sum_Qi[i] = 0
 
     for i in prange(num_points, nogil=True, num_threads=num_threads, schedule='guided'):
-        estimate_negative_gradient(
+        _estimate_negative_gradient_single(
             &tree.root, &embedding[i, 0], &gradient[i, 0], &sum_Qi[i], theta, dof)
 
     for i in range(num_points):
@@ -213,7 +213,7 @@ cpdef double compute_negative_gradients_bh(
     return sum_Q
 
 
-cdef void estimate_negative_gradient(
+cdef void _estimate_negative_gradient_single(
     Node * node,
     double * point,
     double * gradient,
@@ -249,14 +249,14 @@ cdef void estimate_negative_gradient(
 
     # Otherwise we have to look for summaries in the children
     for d in range(1 << node.n_dims):
-        estimate_negative_gradient(&node.children[d], point, gradient, sum_Q, theta, dof)
+        _estimate_negative_gradient_single(&node.children[d], point, gradient, sum_Q, theta, dof)
 
 
-cdef double cauchy_1d(double x, double y):
+cdef inline double squared_cauchy_1d(double x, double y):
     return (1 + (x - y) ** 2) ** -2
 
 
-cdef double cauchy_2d(double x1, double x2, double y1, double y2):
+cdef inline double squared_cauchy_2d(double x1, double x2, double y1, double y2):
     return (1 + (x1 - y1) ** 2 + (x2 - y2) ** 2) ** -2
 
 
@@ -267,6 +267,7 @@ cdef void interpolate(
     double[::1] y_tilde_spacings,
     double[:, ::1] interpolated_values,
 ):
+    """Lagrangian polynomial interpolation."""
     cdef double[::1] denominator = np.empty(n_interpolation_points, dtype=float)
     cdef Py_ssize_t i, j, k
 
@@ -285,7 +286,7 @@ cdef void interpolate(
             interpolated_values[i, j] /= denominator[j]
 
 
-cpdef double compute_negative_gradients_fft_1d(
+cpdef double estimate_negative_gradient_fft_1d(
     double[::1] embedding,
     double[::1] gradient,
     Py_ssize_t n_interpolation_points=3,
@@ -339,7 +340,7 @@ cpdef double compute_negative_gradients_fft_1d(
         complex[::1] fft_kernel_tilde = np.empty(2 * total_interpolation_points, dtype=complex)
 
     for i in range(total_interpolation_points):
-        kernel_tilde[total_interpolation_points + i] = cauchy_1d(y_tilde[0], y_tilde[i])
+        kernel_tilde[total_interpolation_points + i] = squared_cauchy_1d(y_tilde[0], y_tilde[i])
     for i in range(1, total_interpolation_points):
         kernel_tilde[i] = kernel_tilde[2 * total_interpolation_points - i]
 
@@ -450,7 +451,7 @@ cpdef double compute_negative_gradients_fft_1d(
     return z_sum
 
 
-cpdef double compute_negative_gradients_fft_2d(
+cpdef double estimate_negative_gradient_fft_2d(
     double[:, ::1] embedding,
     double[:, ::1] gradient,
     Py_ssize_t n_interpolation_points=3,
@@ -527,7 +528,7 @@ cpdef double compute_negative_gradients_fft_2d(
 
     for i in range(n_interpolation_points_1d):
         for j in range(n_interpolation_points_1d):
-            tmp = cauchy_2d(y_tilde[0], x_tilde[0], y_tilde[i], x_tilde[j])
+            tmp = squared_cauchy_2d(y_tilde[0], x_tilde[0], y_tilde[i], x_tilde[j])
 
             kernel_tilde[n_interpolation_points_1d + i, n_interpolation_points_1d + j] = tmp
             kernel_tilde[n_interpolation_points_1d - i, n_interpolation_points_1d + j] = tmp

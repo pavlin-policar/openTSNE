@@ -454,12 +454,12 @@ def kl_divergence_bh(embedding, P, dof, theta, reference_embedding=None,
 
     # Compute negative gradient
     tree = QuadTree(reference_embedding)
-    sum_Q = _tsne.compute_negative_gradients_bh(
+    sum_Q = _tsne.estimate_negative_gradient_bh(
         tree, embedding, gradient, theta=theta, dof=dof, num_threads=n_jobs)
     del tree
 
     # Compute positive gradient
-    sum_P, kl_divergence_ = _tsne.compute_positive_gradients(
+    sum_P, kl_divergence_ = _tsne.estimate_positive_gradient_nn(
         P.indices, P.indptr, P.data, embedding, reference_embedding, gradient,
         dof, num_threads=n_jobs, should_eval_error=should_eval_error,
     )
@@ -486,15 +486,15 @@ def kl_divergence_fft(embedding, P, dof, reference_embedding=None,
 
     # Compute negative gradient
     if embedding.ndim == 1 or embedding.shape[1] == 1:
-        sum_Q = _tsne.compute_negative_gradients_fft_1d(embedding, gradient)
+        sum_Q = _tsne.estimate_negative_gradient_fft_1d(embedding, gradient)
     elif embedding.shape[1] == 2:
-        sum_Q = _tsne.compute_negative_gradients_fft_2d(embedding, gradient)
+        sum_Q = _tsne.estimate_negative_gradient_fft_2d(embedding, gradient)
     else:
         raise RuntimeError('Interpolation based t-SNE for >2 dimensions is '
                            'currently unsupported (and generally a bad idea)')
 
     # Compute positive gradient
-    sum_P, kl_divergence_ = _tsne.compute_positive_gradients(
+    sum_P, kl_divergence_ = _tsne.estimate_positive_gradient_nn(
         P.indices, P.indptr, P.data, embedding, reference_embedding, gradient,
         dof, num_threads=n_jobs, should_eval_error=should_eval_error,
     )
