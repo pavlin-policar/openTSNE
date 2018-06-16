@@ -20,9 +20,6 @@ cdef extern from 'fftw3.h':
 
     ctypedef double fftw_complex[2]
 
-    void *fftw_malloc(size_t)
-    void fftw_free(void *)
-
     ctypedef struct _fftw_plan:
        pass
 
@@ -30,7 +27,6 @@ cdef extern from 'fftw3.h':
 
     void fftw_execute(fftw_plan)
     void fftw_destroy_plan(fftw_plan)
-    void fftw_print_plan(fftw_plan)
     fftw_plan fftw_plan_dft_1d(int, fftw_complex*, fftw_complex*, int, unsigned)
     fftw_plan fftw_plan_dft_r2c_2d(int, int, double*, fftw_complex*, unsigned)
     fftw_plan fftw_plan_dft_c2r_2d(int, int, fftw_complex*, double*, unsigned)
