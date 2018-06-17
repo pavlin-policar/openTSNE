@@ -2,6 +2,8 @@
 # cython: boundscheck=False
 # cython: wraparound=False
 # cython: cdivision=True
+# cython: initializedcheck=False
+# cython: warn.undeclared=True
 cimport numpy as np
 import numpy as np
 from .quad_tree cimport QuadTree, Node, is_duplicate
@@ -436,7 +438,7 @@ cpdef double estimate_negative_gradient_fft_1d(
             for d in range(n_terms):
                 potentials[i, d] += interpolated_values[i, j] * y_tilde_values[box_idx + j, d]
 
-    cdef double z_sum = 0
+    cdef double z_sum = 0, phi1, phi2, phi3
     for i in range(N):
         phi1 = potentials[i, 0]
         phi2 = potentials[i, 1]
@@ -526,6 +528,7 @@ cpdef double estimate_negative_gradient_fft_2d(
         double[:, ::1] kernel_tilde = np.zeros((n_fft_coeffs, n_fft_coeffs), dtype=float)
         complex[::1] fft_kernel_tilde = np.empty(n_fft_coeffs * (n_fft_coeffs / 2 + 1), dtype=complex)
 
+    cdef double tmp
     for i in range(n_interpolation_points_1d):
         for j in range(n_interpolation_points_1d):
             tmp = squared_cauchy_2d(y_tilde[0], x_tilde[0], y_tilde[i], x_tilde[j])
@@ -564,6 +567,7 @@ cpdef double estimate_negative_gradient_fft_2d(
     cdef:
         double[::1] x_in_box = np.empty(N, dtype=float)
         double[::1] y_in_box = np.empty(N, dtype=float)
+        double y_min, x_min
 
     for i in range(N):
         box_idx = point_box_idx[i]
@@ -580,8 +584,11 @@ cpdef double estimate_negative_gradient_fft_2d(
     interpolate(n_interpolation_points, N, y_in_box, y_tilde_spacing, y_interpolated_values)
 
     # Compute the w coefficients
-    cdef int total_interpolation_points = n_total_boxes * n_interpolation_points ** 2
-    cdef double[:, ::1] w_coefficients = np.zeros((total_interpolation_points, n_terms), dtype=float)
+    cdef:
+        int total_interpolation_points = n_total_boxes * n_interpolation_points ** 2
+        double[:, ::1] w_coefficients = np.zeros((total_interpolation_points, n_terms), dtype=float)
+        Py_ssize_t box_i, box_j, interp_i, interp_j, idx
+
     for i in range(N):
         box_idx = point_box_idx[i]
         box_i = box_idx % n_boxes_1d
@@ -668,7 +675,7 @@ cpdef double estimate_negative_gradient_fft_2d(
                         y_interpolated_values[i, interp_j] * \
                         y_tilde_values[idx, d]
 
-    cdef double z_sum = 0
+    cdef double z_sum = 0, phi1, phi2, phi3, phi4, y1, y2
     for i in range(N):
         phi1 = potentials[i, 0]
         phi2 = potentials[i, 1]

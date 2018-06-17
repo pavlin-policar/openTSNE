@@ -90,7 +90,7 @@ class TSNEModel(Projection):
         # Compute the joint probabilities. Don't symmetrize, because P will be
         # a `n_samples * n_new_samples` matrix, which is not necessarily square
         start = time.time()
-        P = joint_probabilities(
+        P = joint_probabilities_nn(
             distances, neighbors, perplexity, symmetrize=False,
             n_reference_samples=n_reference_samples, n_jobs=self.n_jobs,
         )
@@ -276,7 +276,7 @@ class TSNE(Projector):
 
         start = time.time()
         # Compute the symmetric joint probabilities of points being neighbors
-        P = joint_probabilities(distances, neighbors, perplexity, n_jobs=self.n_jobs)
+        P = joint_probabilities_nn(distances, neighbors, perplexity, n_jobs=self.n_jobs)
         print('joint probabilities', time.time() - start)
 
         # Initialize the embedding as a C contigous array for our fast cython
@@ -351,12 +351,11 @@ class TSNE(Projector):
             raise ValueError('Unrecognized initialization scheme')
 
 
-def joint_probabilities(distances, neighbors, perplexity, symmetrize=True,
-                        n_reference_samples=None, n_jobs=1):
+def joint_probabilities_nn(distances, neighbors, perplexity, symmetrize=True,
+                           n_reference_samples=None, n_jobs=1):
     """Compute the conditional probability matrix P_{j|i}.
 
-    This method computes an approximation to P using just the nearest
-    neighbors.
+    This method computes an approximation to P using the nearest neighbors.
 
     Parameters
     ----------
@@ -604,6 +603,7 @@ def sqeuclidean(x, y):
 
 
 def kl_divergence(P, embedding):
+    """Compute the KL divergence for a given embedding and P_{ij}s."""
     n_samples, n_dims = embedding.shape
 
     pairwise_distances = np.empty((n_samples, n_samples))
@@ -611,23 +611,20 @@ def kl_divergence(P, embedding):
         for j in range(n_samples):
             pairwise_distances[i, j] = sqeuclidean(embedding[i], embedding[j])
 
-    Q = np.zeros((n_samples, n_samples))
+    Q_unnormalized = np.zeros((n_samples, n_samples))
     for i in range(n_samples):
         for j in range(n_samples):
             if i != j:
-                Q[i, j] = 1 / (1 + pairwise_distances[i, j])
+                Q_unnormalized[i, j] = 1 / (1 + pairwise_distances[i, j])
 
-    sum_Q = np.sum(Q)
+    sum_Q = np.sum(Q_unnormalized)
 
-    Q_normalized = Q / sum_Q
+    Q = Q_unnormalized / sum_Q
 
     kl_divergence_ = 0
     for i in range(n_samples):
         for j in range(n_samples):
             if P[i, j] > 0:
-                # kl_divergence_ += P[i, j] * np.log(P[i, j] / (Q_normalized[i, j] + EPSILON)
                 kl_divergence_ += P[i, j] * np.log(P[i, j] / (Q[i, j] + EPSILON))
-
-    kl_divergence_ += np.sum(P) * np.log(sum_Q + EPSILON)
 
     return kl_divergence_
