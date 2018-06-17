@@ -148,7 +148,7 @@ cpdef tuple estimate_positive_gradient_nn(
 
                 q_ij = dof / (dof + d_ij)
                 if dof != 1:
-                    q_ij = q_ij ** (dof + 1) / 2
+                    q_ij = q_ij ** ((dof + 1) / 2)
 
                 # Compute F_{attr} of point `j` on point `i`
                 for d in range(n_dims):
@@ -241,7 +241,7 @@ cdef void _estimate_negative_gradient_single(
     if node.is_leaf or node.length / sqrt(distance) < theta:
         q_ij = dof / (dof + distance)
         if dof != 1:
-            q_ij = q_ij ** (dof + 1) / 2
+            q_ij = q_ij ** ((dof + 1) / 2)
         sum_Q[0] += node.num_points * q_ij
 
         for d in range(node.n_dims):
