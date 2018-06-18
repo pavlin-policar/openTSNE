@@ -538,10 +538,7 @@ cdef double[:, ::1] matrix_multiply_fft_2d(
 
         # Take the Hadamard product of two complex vectors
         for i in range(n_fft_coeffs * (n_fft_coeffs / 2 + 1)):
-            fft_w_coefficients[i].real = fft_w_coefficients[i].real * fft_kernel_tilde[i].real - \
-                fft_w_coefficients[i].imag * fft_kernel_tilde[i].imag
-            fft_w_coefficients[i].imag = fft_w_coefficients[i].real * fft_kernel_tilde[i].imag + \
-                fft_kernel_tilde[i].real * fft_w_coefficients[i].imag
+            fft_w_coefficients[i] = fft_w_coefficients[i] * fft_kernel_tilde[i]
 
         # Invert the computed values at the interpolated nodes
         fftw_execute(plan_idft)
