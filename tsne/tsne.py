@@ -485,7 +485,7 @@ def kl_divergence_fft(embedding, P, dof, reference_embedding=None,
 
     # Compute negative gradient
     if embedding.ndim == 1 or embedding.shape[1] == 1:
-        sum_Q = _tsne.estimate_negative_gradient_fft_1d(embedding, gradient)
+        sum_Q = _tsne.estimate_negative_gradient_fft_1d(embedding.ravel(), gradient.ravel())
     elif embedding.shape[1] == 2:
         sum_Q = _tsne.estimate_negative_gradient_fft_2d(embedding, gradient)
     else:
