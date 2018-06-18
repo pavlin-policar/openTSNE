@@ -86,18 +86,24 @@ def run():
 
     print(x.shape)
 
+    def plot_callback(error, embedding):
+        plt.title('tsne')
+        plot(embedding, y)
+        plt.show()
+        return True
+
     start = time.time()
     tsne = TSNE(
         perplexity=perplexity, learning_rate=lr, early_exaggeration=ee,
-        n_jobs=threads, angle=angle, init='pca', metric=metric, n_components=1,
+        n_jobs=threads, angle=angle, init='pca', metric=metric, n_components=2,
         n_iter=750, early_exaggeration_iter=250, neighbors='exact', grad='fft',
-        late_exaggeration_iter=100, late_exaggeration=2.,
+        late_exaggeration_iter=100, late_exaggeration=2., callback=plot_callback,
     )
     # x = PCA(n_components=50).fit_transform(x)
     embedding = tsne.fit(x)
     print('tsne', time.time() - start)
     plt.title('tsne')
-    plot1d(embedding, y)
+    plot(embedding, y)
     plt.show()
 
     # pca_embedding = PCA(n_components=50).fit_transform(x)

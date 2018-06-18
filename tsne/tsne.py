@@ -17,6 +17,10 @@ EPSILON = np.finfo(np.float64).eps
 log = logging.getLogger(__name__)
 
 
+class OptimizationInterrupt(KeyboardInterrupt):
+    pass
+
+
 class TSNEModel(Projection):
     def __init__(self, existing_data, existing_embedding, metric,
                  perplexity=30, learning_rate=10, exaggeration=4,
@@ -158,7 +162,8 @@ class TSNE(Projector):
                  n_iter=750, late_exaggeration_iter=0, late_exaggeration=1.2,
                  angle=0.5, init='pca', metric='sqeuclidean',
                  initial_momentum=0.5, final_momentum=0.8, n_jobs=1,
-                 neighbors='exact', grad='bh', preprocessors=None):
+                 neighbors='exact', grad='bh', preprocessors=None,
+                 callback=None, callback_every_iters=50):
         super().__init__(preprocessors=preprocessors)
         self.n_components = n_components
         self.perplexity = perplexity
@@ -176,6 +181,12 @@ class TSNE(Projector):
         self.n_jobs = n_jobs
         self.neighbors_method = neighbors
         self.gradient_method = grad
+
+        if callback is not None and not callable(callback):
+            raise ValueError('`callback` must be a callable object!')
+        self.use_callback = callback is not None
+        self.callback = callback
+        self.callback_every_iters = callback_every_iters
 
     def __call__(self, data: Table) -> TSNEModel:
         data = self.preprocess(data)
@@ -300,35 +311,43 @@ class TSNE(Projector):
             raise ValueError('Invalid gradient scheme! Please choose one of '
                              'the supported strings or provide a valid callback.')
 
-        # Early exaggeration with lower momentum to allow points to find more
-        # easily move around and find their neighbors
-        P *= early_exaggeration
-        embedding = gradient_descent(
-            embedding=embedding, P=P, dof=degrees_of_freedom,
-            gradient_method=gradient_method, n_iter=self.early_exaggeration_iter,
-            learning_rate=learning_rate, momentum=self.initial_momentum,
-            theta=self.angle, n_jobs=self.n_jobs,
-        )
+        callback_params = {'use_callback': self.use_callback,
+                           'callback': self.callback,
+                           'callback_every_iters': self.callback_every_iters}
 
-        # Restore actual affinity probabilities and increase momentum to get
-        # final, optimized embedding
-        P /= early_exaggeration
-        embedding = gradient_descent(
-            embedding=embedding, P=P, dof=degrees_of_freedom,
-            gradient_method=gradient_method, n_iter=self.n_iter,
-            learning_rate=learning_rate, momentum=self.final_momentum,
-            theta=self.angle, n_jobs=self.n_jobs,
-        )
+        try:
+            # Early exaggeration with lower momentum to allow points to find more
+            # easily move around and find their neighbors
+            P *= early_exaggeration
+            embedding = gradient_descent(
+                embedding=embedding, P=P, dof=degrees_of_freedom,
+                gradient_method=gradient_method, n_iter=self.early_exaggeration_iter,
+                learning_rate=learning_rate, momentum=self.initial_momentum,
+                theta=self.angle, n_jobs=self.n_jobs, **callback_params,
+            )
 
-        # Use the trick described in [4]_ to get more separated clusters of
-        # points by applying a late exaggeration phase
-        P *= self.late_exaggeration
-        embedding = gradient_descent(
-            embedding=embedding, P=P, dof=degrees_of_freedom,
-            gradient_method=gradient_method, n_iter=self.late_exaggeration_iter,
-            learning_rate=learning_rate, momentum=self.final_momentum,
-            theta=self.angle, n_jobs=self.n_jobs,
-        )
+            # Restore actual affinity probabilities and increase momentum to get
+            # final, optimized embedding
+            P /= early_exaggeration
+            embedding = gradient_descent(
+                embedding=embedding, P=P, dof=degrees_of_freedom,
+                gradient_method=gradient_method, n_iter=self.n_iter,
+                learning_rate=learning_rate, momentum=self.final_momentum,
+                theta=self.angle, n_jobs=self.n_jobs, **callback_params,
+            )
+
+            # Use the trick described in [4]_ to get more separated clusters of
+            # points by applying a late exaggeration phase
+            P *= self.late_exaggeration
+            embedding = gradient_descent(
+                embedding=embedding, P=P, dof=degrees_of_freedom,
+                gradient_method=gradient_method, n_iter=self.late_exaggeration_iter,
+                learning_rate=learning_rate, momentum=self.final_momentum,
+                theta=self.angle, n_jobs=self.n_jobs, **callback_params,
+            )
+
+        except OptimizationInterrupt:
+            log.info('Optimization was interrupted with callback.')
 
         return embedding
 
@@ -507,7 +526,8 @@ def kl_divergence_fft(embedding, P, dof, reference_embedding=None,
 
 def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
                      momentum, min_gain=0.01, min_grad_norm=1e-8, theta=0.5,
-                     reference_embedding=None, n_jobs=1):
+                     reference_embedding=None, n_jobs=1, use_callback=False,
+                     callback=None, callback_every_iters=50):
     """Perform batch gradient descent with momentum and gains.
 
     Parameters
@@ -547,11 +567,24 @@ def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
         the gradients and errors w.r.t. the existing embedding.
     n_jobs : int
         Number of threads.
+    use_callback : bool
+    callback : Callable[[float, np.ndarray] -> bool]
+        The callback should accept two parameters, the first is the error of
+        the current iteration (the KL divergence), the second is the current
+        embedding. The callback should return a boolean value indicating
+        whether or not to continue optimization i.e. False to stop.
+    callback_every_iters : int
+        How often should the callback be called.
 
     Returns
     -------
     np.ndarray
         The optimized embedding Y.
+
+    Raises
+    ------
+    OptimizationInterrupt
+        If the provided callback interrupts the optimization, this is raised.
 
     """
     assert isinstance(embedding, np.ndarray), \
@@ -590,6 +623,11 @@ def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
 
         # Zero-mean the embedding
         embedding -= np.mean(embedding, axis=0)
+
+        if use_callback and (iteration + 1) % callback_every_iters == 0:
+            should_continue = bool(callback(error, embedding))
+            if not should_continue:
+                raise OptimizationInterrupt()
 
         if np.linalg.norm(gradient) < min_grad_norm:
             log.info('Gradient norm eps reached. Finished.')
