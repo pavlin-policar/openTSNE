@@ -320,26 +320,17 @@ cpdef double estimate_negative_gradient_fft_1d(
         box_upper_bounds[box_idx] = (box_idx + 1) * box_width + y_min
 
     cdef int total_interpolation_points = n_interpolation_points * n_boxes
-    # Prepare the interpolants
-    cdef double[::1] y_tilde_spacing = np.empty(n_interpolation_points, dtype=float)
+    # Prepare the interpolants for a single interval, so we can use their
+    # relative positions later on
+    cdef double[::1] y_tilde = np.empty(n_interpolation_points, dtype=float)
     cdef double h = 1. / n_interpolation_points
-    y_tilde_spacing[0] = h / 2
+    y_tilde[0] = h / 2
     for i in range(1, n_interpolation_points):
-        y_tilde_spacing[i] = y_tilde_spacing[i - 1] + h
-
-    cdef double[::1] y_tilde = np.empty(total_interpolation_points, dtype=float)
-    h = h * box_width
-    y_tilde[0] = h / 2 + y_min
-    for i in range(1, total_interpolation_points):
         y_tilde[i] = y_tilde[i - 1] + h
 
-    # Evaluate the kernel at the interpolation nodes and form the embedded
-    # generating kernel vector for a circulant matrix
-    cdef double[::1] kernel_tilde = np.zeros(2 * total_interpolation_points, dtype=float)
-    for i in range(total_interpolation_points):
-        kernel_tilde[total_interpolation_points + i] = squared_cauchy_1d(y_tilde[0], y_tilde[i])
-    for i in range(1, total_interpolation_points):
-        kernel_tilde[i] = kernel_tilde[2 * total_interpolation_points - i]
+    # Evaluate the kernel at the interpolation nodes
+    cdef double[::1] kernel_tilde = compute_kernel_tilde_1d(
+        total_interpolation_points, y_min, h * box_width)
 
     # Determine which box each point belongs to
     cdef int *point_box_idx = <int *>PyMem_Malloc(N * sizeof(int))
@@ -356,12 +347,12 @@ cpdef double estimate_negative_gradient_fft_1d(
     cdef double[::1] y_in_box = np.empty(N, dtype=float)
     for i in range(N):
         box_idx = point_box_idx[i]
-        y_in_box[i] = (embedding[i] - box_lower_bounds[box_idx]) / box_width;
+        y_in_box[i] = (embedding[i] - box_lower_bounds[box_idx]) / box_width
 
-    # Step 1: Interpolate kernel using Lagrange polynomials and compute the w
-    # coefficients
-    cdef double[:, ::1] interpolated_values = interpolate(y_in_box, y_tilde_spacing)
+    # Interpolate kernel using Lagrange polynomials
+    cdef double[:, ::1] interpolated_values = interpolate(y_in_box, y_tilde)
 
+    # Step 1: Compute the w coefficients
     cdef double[:, ::1] w_coefficients = np.zeros((total_interpolation_points, n_terms), dtype=float)
     for i in range(N):
         box_idx = point_box_idx[i] * n_interpolation_points
@@ -369,8 +360,7 @@ cpdef double estimate_negative_gradient_fft_1d(
             for d in range(n_terms):
                 w_coefficients[box_idx + j, d] += interpolated_values[i, j] * charges_Qij[i, d]
 
-    # Step 2: Compute the values v_{m, n} at the equispaced nodes, multiply the
-    # kernel matrix with the coefficients w
+    # Step 2: Compute the kernel values evaluated at the interpolation nodes
     cdef double[:, ::1] y_tilde_values = matrix_multiply_fft_1d(kernel_tilde, w_coefficients)
 
     # Step 3: Compute the potentials \tilde{\phi}
@@ -484,6 +474,35 @@ cdef double[:, ::1] matrix_multiply_fft_1d(
     fftw_destroy_plan(plan_idft)
 
     return y_tilde_values
+
+
+cdef double[::1] compute_kernel_tilde_1d(
+    Py_ssize_t n_interpolation_points_1d,
+    double coord_min,
+    double coord_spacing,
+):
+    cdef:
+        double[::1] y_tilde = np.empty(n_interpolation_points_1d, dtype=float)
+
+        Py_ssize_t embedded_size = 2 * n_interpolation_points_1d
+        double[::1] kernel_tilde = np.zeros(embedded_size, dtype=float)
+
+        Py_ssize_t i
+
+    y_tilde[0] = coord_spacing / 2 + coord_min
+    for i in range(1, n_interpolation_points_1d):
+        y_tilde[i] = y_tilde[i - 1] + coord_spacing
+
+    # Evaluate the kernel at the interpolation nodes and form the embedded
+    # generating kernel vector for a circulant matrix
+    cdef double tmp
+    for i in range(n_interpolation_points_1d):
+        tmp = squared_cauchy_1d(y_tilde[0], y_tilde[i])
+
+        kernel_tilde[n_interpolation_points_1d + i] = tmp
+        kernel_tilde[n_interpolation_points_1d - i] = tmp
+
+    return kernel_tilde
 
 
 cdef double[:, ::1] matrix_multiply_fft_2d(
@@ -664,15 +683,15 @@ cpdef double estimate_negative_gradient_fft_2d(
             box_y_lower_bounds[i * n_boxes_1d + j] = i * box_width + coord_min
             box_y_upper_bounds[i * n_boxes_1d + j] = (i + 1) * box_width + coord_min
 
-    # Prepare the interpolants for a single box, so we can use their relative
-    # positions later on
+    # Prepare the interpolants for a single interval, so we can use their
+    # relative positions later on
     cdef double[::1] y_tilde = np.empty(n_interpolation_points, dtype=float)
     cdef double h = 1. / n_interpolation_points
     y_tilde[0] = h / 2
     for i in range(1, n_interpolation_points):
         y_tilde[i] = y_tilde[i - 1] + h
 
-    # Compute the kernel matrix evaluated at the interpolants
+    # Evaluate the kernel at the interpolation nodes
     cdef double[:, ::1] kernel_tilde = compute_kernel_tilde_2d(
         n_interpolation_points * n_boxes_1d, coord_min, h * box_width)
 
