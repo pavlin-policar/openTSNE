@@ -262,14 +262,12 @@ cdef inline double squared_cauchy_2d(double x1, double x2, double y1, double y2)
     return (1 + (x1 - y1) ** 2 + (x2 - y2) ** 2) ** -2
 
 
-cdef void interpolate(
-    Py_ssize_t n_interpolation_points,
-    Py_ssize_t N,
-    double[::1] y_in_box,
-    double[::1] y_tilde_spacings,
-    double[:, ::1] interpolated_values,
-):
+cdef double[:, ::1] interpolate(double[::1] y_in_box, double[::1] y_tilde):
     """Lagrangian polynomial interpolation."""
+    cdef Py_ssize_t N = y_in_box.shape[0]
+    cdef Py_ssize_t n_interpolation_points = y_tilde.shape[0]
+
+    cdef double[:, ::1] interpolated_values = np.empty((N, n_interpolation_points), dtype=float)
     cdef double[::1] denominator = np.empty(n_interpolation_points, dtype=float)
     cdef Py_ssize_t i, j, k
 
@@ -277,15 +275,17 @@ cdef void interpolate(
         denominator[i] = 1
         for j in range(n_interpolation_points):
             if i != j:
-                denominator[i] *= y_tilde_spacings[i] - y_tilde_spacings[j]
+                denominator[i] *= y_tilde[i] - y_tilde[j]
 
     for i in range(N):
         for j in range(n_interpolation_points):
             interpolated_values[i, j] = 1
             for k in range(n_interpolation_points):
                 if j != k:
-                    interpolated_values[i, j] *= y_in_box[i] - y_tilde_spacings[k]
+                    interpolated_values[i, j] *= y_in_box[i] - y_tilde[k]
             interpolated_values[i, j] /= denominator[j]
+
+    return interpolated_values
 
 
 cpdef double estimate_negative_gradient_fft_1d(
@@ -376,8 +376,7 @@ cpdef double estimate_negative_gradient_fft_1d(
 
     # Step 1: Interpolate kernel using Lagrange polynomials and compute the w
     # coefficients
-    cdef double[:, ::1] interpolated_values = np.empty((N, n_interpolation_points), dtype=float)
-    interpolate(n_interpolation_points, N, y_in_box, y_tilde_spacing, interpolated_values)
+    cdef double[:, ::1] interpolated_values = interpolate(y_in_box, y_tilde_spacing)
 
     cdef double[:, ::1] w_coeffs = np.zeros((total_interpolation_points, n_terms), dtype=float)
     for i in range(N):
@@ -438,19 +437,149 @@ cpdef double estimate_negative_gradient_fft_1d(
             for d in range(n_terms):
                 potentials[i, d] += interpolated_values[i, j] * y_tilde_values[box_idx + j, d]
 
-    cdef double z_sum = 0, phi1, phi2, phi3
+    cdef double sum_Q = 0, phi1, phi2, phi3
     for i in range(N):
         phi1 = potentials[i, 0]
         phi2 = potentials[i, 1]
         phi3 = potentials[i, 2]
 
-        z_sum += (1 + embedding[i] ** 2) * phi1 - 2 * embedding[i] * phi2 + phi3
-    z_sum -= N
+        sum_Q += (1 + embedding[i] ** 2) * phi1 - 2 * embedding[i] * phi2 + phi3
+    sum_Q -= N
 
     for i in range(N):
-        gradient[i] -= (embedding[i] * potentials[i, 0] - potentials[i, 1]) / z_sum
+        gradient[i] -= (embedding[i] * potentials[i, 0] - potentials[i, 1]) / sum_Q
 
-    return z_sum
+    return sum_Q
+
+
+cdef double[:, ::1] matrix_multiply_fft_2d(
+    double[:, ::1] kernel_tilde,
+    double[:, ::1] w_coefficients,
+):
+    """Multiply the the kernel matrix K tilde with the w coefficients.
+    
+    Parameters
+    ----------
+    kernel_tilde : memoryview
+        The generating matrix of the 3d Toeplitz tensor i.e. the kernel 
+        evaluated all all interpolation points from the top left most 
+        interpolation point, embedded in a circulant matrix (doubled in size 
+        from (n_interp, n_interp) to (2 * n_interp, 2 * n_interp) and 
+        symmetrized. See how to embed Toeplitz into circulant matrices.
+    w_coefficients : memoryview
+        The coefficients calculated in Step 1 of the paper, a
+        (n_total_interp, n_terms) matrix.
+        
+    Returns
+    -------
+    memoryview
+        The output. Contains the evaluated kernel values at the equspaced 
+        interpolation nodes.
+    
+    """
+    cdef:
+        Py_ssize_t total_interpolation_points = w_coefficients.shape[0]
+        Py_ssize_t n_terms = w_coefficients.shape[1]
+        Py_ssize_t n_fft_coeffs = kernel_tilde.shape[0]
+        Py_ssize_t n_interpolation_points_1d = n_fft_coeffs / 2
+
+        double[:, ::1] y_tilde_values = np.zeros((total_interpolation_points, n_terms))
+
+        fftw_plan plan_dft, plan_idft
+        complex[::1] fft_w_coefficients = np.zeros(n_fft_coeffs * (n_fft_coeffs / 2 + 1), dtype=complex)
+        complex[::1] fft_kernel_tilde = np.empty(n_fft_coeffs * (n_fft_coeffs / 2 + 1), dtype=complex)
+
+        Py_ssize_t d, i, j, idx
+
+    cdef:
+        double[:, ::1] zmpol = np.zeros((n_fft_coeffs, n_fft_coeffs))
+        double[:, ::1] zmpolfo = np.zeros((n_fft_coeffs, n_fft_coeffs))
+
+    plan_dft = fftw_plan_dft_r2c_2d(
+        n_fft_coeffs, n_fft_coeffs,
+        &kernel_tilde[0, 0], <fftw_complex *>(&fft_kernel_tilde[0]),
+        FFTW_ESTIMATE,
+    )
+    fftw_execute(plan_dft)
+    fftw_destroy_plan(plan_dft)
+
+    plan_dft = fftw_plan_dft_r2c_2d(
+        n_fft_coeffs, n_fft_coeffs,
+        &zmpol[0, 0], <fftw_complex *>(&fft_w_coefficients[0]),
+        FFTW_ESTIMATE
+    )
+    plan_idft = fftw_plan_dft_c2r_2d(
+        n_fft_coeffs, n_fft_coeffs,
+        <fftw_complex *>(&fft_w_coefficients[0]), &zmpolfo[0, 0],
+        FFTW_ESTIMATE
+    )
+
+    for d in range(n_terms):
+        for i in range(n_interpolation_points_1d):
+            for j in range(n_interpolation_points_1d):
+                zmpol[i, j] = w_coefficients[i * n_interpolation_points_1d + j, d]
+
+        fftw_execute(plan_dft)
+
+        # Take the Hadamard product of two complex vectors
+        for i in range(n_fft_coeffs * (n_fft_coeffs / 2 + 1)):
+            fft_w_coefficients[i].real = fft_w_coefficients[i].real * fft_kernel_tilde[i].real - \
+                fft_w_coefficients[i].imag * fft_kernel_tilde[i].imag
+            fft_w_coefficients[i].imag = fft_w_coefficients[i].real * fft_kernel_tilde[i].imag + \
+                fft_kernel_tilde[i].real * fft_w_coefficients[i].imag
+
+        # Invert the computed values at the interpolated nodes
+        fftw_execute(plan_idft)
+        # FFTW doesn't perform IDFT normalization, so we have to do it
+        # ourselves. This is done by multiplying the result with the number of
+        # points in the input
+        for i in range(n_interpolation_points_1d):
+            for j in range(n_interpolation_points_1d):
+                idx = i * n_interpolation_points_1d + j
+                y_tilde_values[idx, d] = zmpolfo[n_interpolation_points_1d + i,
+                                                 n_interpolation_points_1d + j] / n_fft_coeffs ** 2
+
+    fftw_destroy_plan(plan_dft)
+    fftw_destroy_plan(plan_idft)
+
+    return y_tilde_values
+
+
+cdef double[:, ::1] compute_kernel_tilde_2d(
+    Py_ssize_t n_interpolation_points_1d,
+    double coord_min,
+    double coord_spacing,
+):
+    cdef:
+        double[::1] y_tilde = np.empty(n_interpolation_points_1d, dtype=float)
+        double[::1] x_tilde = np.empty(n_interpolation_points_1d, dtype=float)
+
+        Py_ssize_t embedded_size = 2 * n_interpolation_points_1d
+        double[:, ::1] kernel_tilde = np.zeros((embedded_size, embedded_size), dtype=float)
+
+        Py_ssize_t i, j
+
+    x_tilde = np.empty(n_interpolation_points_1d)
+    y_tilde = np.empty(n_interpolation_points_1d)
+    x_tilde[0] = coord_min + coord_spacing / 2
+    y_tilde[0] = coord_min + coord_spacing / 2
+    for i in range(1, n_interpolation_points_1d):
+        x_tilde[i] = x_tilde[i - 1] + coord_spacing
+        y_tilde[i] = y_tilde[i - 1] + coord_spacing
+
+    # Evaluate the kernel at the interpolation nodes and form the embedded
+    # generating kernel vector for a circulant matrix
+    cdef double tmp
+    for i in range(n_interpolation_points_1d):
+        for j in range(n_interpolation_points_1d):
+            tmp = squared_cauchy_2d(y_tilde[0], x_tilde[0], y_tilde[i], x_tilde[j])
+
+            kernel_tilde[n_interpolation_points_1d + i, n_interpolation_points_1d + j] = tmp
+            kernel_tilde[n_interpolation_points_1d - i, n_interpolation_points_1d + j] = tmp
+            kernel_tilde[n_interpolation_points_1d + i, n_interpolation_points_1d - j] = tmp
+            kernel_tilde[n_interpolation_points_1d - i, n_interpolation_points_1d - j] = tmp
+
+    return kernel_tilde
 
 
 cpdef double estimate_negative_gradient_fft_2d(
@@ -500,53 +629,17 @@ cpdef double estimate_negative_gradient_fft_2d(
             box_y_lower_bounds[i * n_boxes_1d + j] = i * box_width + coord_min
             box_y_upper_bounds[i * n_boxes_1d + j] = (i + 1) * box_width + coord_min
 
-    # Prepare the interpolants
-    cdef double[::1] y_tilde_spacing = np.empty(n_interpolation_points, dtype=float)
+    # Prepare the interpolants for a single box, so we can use the relative
+    # spacing later on
+    cdef double[::1] y_tilde = np.empty(n_interpolation_points, dtype=float)
     cdef double h = 1. / n_interpolation_points
-    y_tilde_spacing[0] = h / 2
+    y_tilde[0] = h / 2
     for i in range(1, n_interpolation_points):
-        y_tilde_spacing[i] = y_tilde_spacing[i - 1] + h
-
-    cdef:
-        int n_interpolation_points_1d = n_interpolation_points * n_boxes_1d
-        double[::1] y_tilde = np.empty(n_interpolation_points_1d, dtype=float)
-        double[::1] x_tilde = np.empty(n_interpolation_points_1d, dtype=float)
-
-    h = h * box_width
-    x_tilde = np.empty(n_interpolation_points_1d)
-    y_tilde = np.empty(n_interpolation_points_1d)
-    x_tilde[0] = coord_min + h / 2
-    y_tilde[0] = coord_min + h / 2
-    for i in range(1, n_interpolation_points_1d):
-        x_tilde[i] = x_tilde[i - 1] + h
         y_tilde[i] = y_tilde[i - 1] + h
 
-    # Evaluate the kernel at the interpolation nodes and form the embedded
-    # generating kernel vector for a circulant matrix
-    cdef:
-        int n_fft_coeffs = 2 * n_interpolation_points_1d
-        double[:, ::1] kernel_tilde = np.zeros((n_fft_coeffs, n_fft_coeffs), dtype=float)
-        complex[::1] fft_kernel_tilde = np.empty(n_fft_coeffs * (n_fft_coeffs / 2 + 1), dtype=complex)
-
-    cdef double tmp
-    for i in range(n_interpolation_points_1d):
-        for j in range(n_interpolation_points_1d):
-            tmp = squared_cauchy_2d(y_tilde[0], x_tilde[0], y_tilde[i], x_tilde[j])
-
-            kernel_tilde[n_interpolation_points_1d + i, n_interpolation_points_1d + j] = tmp
-            kernel_tilde[n_interpolation_points_1d - i, n_interpolation_points_1d + j] = tmp
-            kernel_tilde[n_interpolation_points_1d + i, n_interpolation_points_1d - j] = tmp
-            kernel_tilde[n_interpolation_points_1d - i, n_interpolation_points_1d - j] = tmp
-
-    # Compute the FFT of the kernel vector
-    cdef fftw_plan plan_dft, plan_idft
-    plan_dft = fftw_plan_dft_r2c_2d(
-        n_fft_coeffs, n_fft_coeffs,
-        &kernel_tilde[0, 0], <fftw_complex *>(&fft_kernel_tilde[0]),
-        FFTW_ESTIMATE,
-    )
-    fftw_execute(plan_dft)
-    fftw_destroy_plan(plan_dft)
+    # Compute the kernel matrix evaluated at the interpolants
+    cdef double[:, ::1] kernel_tilde = compute_kernel_tilde_2d(
+        n_interpolation_points * n_boxes_1d, coord_min, h * box_width)
 
     # Determine which box each point belongs to
     cdef int *point_box_idx = <int *>PyMem_Malloc(N * sizeof(int))
@@ -576,14 +669,11 @@ cpdef double estimate_negative_gradient_fft_2d(
         x_in_box[i] = (embedding[i, 0] - x_min) / box_width
         y_in_box[i] = (embedding[i, 1] - y_min) / box_width
 
-    # Step 1: Interpolate kernel using Lagrange polynomials and compute the w
-    # coefficients
-    cdef double[:, ::1] x_interpolated_values = np.empty((N, n_interpolation_points), dtype=float)
-    interpolate(n_interpolation_points, N, x_in_box, y_tilde_spacing, x_interpolated_values)
-    cdef double[:, ::1] y_interpolated_values = np.empty((N, n_interpolation_points), dtype=float)
-    interpolate(n_interpolation_points, N, y_in_box, y_tilde_spacing, y_interpolated_values)
+    # Interpolate kernel using Lagrange polynomials
+    cdef double[:, ::1] x_interpolated_values = interpolate(x_in_box, y_tilde)
+    cdef double[:, ::1] y_interpolated_values = interpolate(y_in_box, y_tilde)
 
-    # Compute the w coefficients
+    # Step 1: Compute the w coefficients
     cdef:
         int total_interpolation_points = n_total_boxes * n_interpolation_points ** 2
         double[:, ::1] w_coefficients = np.zeros((total_interpolation_points, n_terms), dtype=float)
@@ -605,57 +695,8 @@ cpdef double estimate_negative_gradient_fft_2d(
                         y_interpolated_values[i, interp_j] * \
                         charges_Qij[i, d]
 
-    cdef:
-        double[::1] mpol_sort = np.zeros(total_interpolation_points)
-        double[:, ::1] y_tilde_values = np.zeros((total_interpolation_points, n_terms))
-        double[:, ::1] zmpol = np.zeros((n_fft_coeffs, n_fft_coeffs))
-        complex[::1] fft_w_coeffs = np.zeros(n_fft_coeffs * (n_fft_coeffs / 2 + 1), dtype=complex)
-        double[:, ::1] zmpolfo = np.zeros((n_fft_coeffs, n_fft_coeffs))
-
-    plan_dft = fftw_plan_dft_r2c_2d(
-        n_fft_coeffs, n_fft_coeffs,
-        &zmpol[0, 0], <fftw_complex *>(&fft_w_coeffs[0]),
-        FFTW_ESTIMATE
-    )
-    plan_idft = fftw_plan_dft_c2r_2d(
-        n_fft_coeffs, n_fft_coeffs,
-        <fftw_complex *>(&fft_w_coeffs[0]), &zmpolfo[0, 0],
-        FFTW_ESTIMATE
-    )
-
-    for d in range(n_terms):
-        for i in range(total_interpolation_points):
-            mpol_sort[i] = w_coefficients[i, d]
-
-        for i in range(n_interpolation_points_1d):
-            for j in range(n_interpolation_points_1d):
-                zmpol[i, j] = mpol_sort[i * n_interpolation_points_1d + j]
-
-        fftw_execute(plan_dft)
-
-        # Take the Hadamard product of two complex vectors
-        for i in range(n_fft_coeffs * (n_fft_coeffs / 2 + 1)):
-            fft_w_coeffs[i].real = fft_w_coeffs[i].real * fft_kernel_tilde[i].real - \
-                fft_w_coeffs[i].imag * fft_kernel_tilde[i].imag
-            fft_w_coeffs[i].imag = fft_w_coeffs[i].real * fft_kernel_tilde[i].imag + \
-                fft_kernel_tilde[i].real * fft_w_coeffs[i].imag
-
-        # Invert the computed values at the interpolated nodes
-        fftw_execute(plan_idft)
-        # FFTW doesn't perform IDFT normalization, so we have to do it
-        # ourselves. This is done by multiplying the result with the number of
-        # points in the input
-        for i in range(n_interpolation_points_1d):
-            for j in range(n_interpolation_points_1d):
-                idx = i * n_interpolation_points_1d + j
-                mpol_sort[idx] = zmpolfo[n_interpolation_points_1d + i,
-                                         n_interpolation_points_1d + j] / n_fft_coeffs ** 2
-
-        for i in range(n_interpolation_points_1d ** 2):
-            y_tilde_values[i, d] = mpol_sort[i]
-
-    fftw_destroy_plan(plan_dft)
-    fftw_destroy_plan(plan_idft)
+    # Step 2: Compute the kernel values evaluated at the interpolation nodes
+    cdef double[:, ::1] y_tilde_values = matrix_multiply_fft_2d(kernel_tilde, w_coefficients)
 
     # Step 3: Compute the potentials \tilde{\phi}
     cdef double[:, ::1] potentials = np.zeros((N, n_terms), dtype=float)
@@ -675,7 +716,7 @@ cpdef double estimate_negative_gradient_fft_2d(
                         y_interpolated_values[i, interp_j] * \
                         y_tilde_values[idx, d]
 
-    cdef double z_sum = 0, phi1, phi2, phi3, phi4, y1, y2
+    cdef double sum_Q = 0, phi1, phi2, phi3, phi4, y1, y2
     for i in range(N):
         phi1 = potentials[i, 0]
         phi2 = potentials[i, 1]
@@ -684,11 +725,11 @@ cpdef double estimate_negative_gradient_fft_2d(
         y1 = embedding[i, 0]
         y2 = embedding[i, 1]
 
-        z_sum += (1 + y1 ** 2 + y2 ** 2) * phi1 - 2 * (y1 * phi2 + y2 * phi3) + phi4
-    z_sum -= N
+        sum_Q += (1 + y1 ** 2 + y2 ** 2) * phi1 - 2 * (y1 * phi2 + y2 * phi3) + phi4
+    sum_Q -= N
 
     for i in range(N):
-        gradient[i, 0] -= (embedding[i, 0] * potentials[i, 0] - potentials[i, 1]) / z_sum
-        gradient[i, 1] -= (embedding[i, 1] * potentials[i, 0] - potentials[i, 2]) / z_sum
+        gradient[i, 0] -= (embedding[i, 0] * potentials[i, 0] - potentials[i, 1]) / sum_Q
+        gradient[i, 1] -= (embedding[i, 1] * potentials[i, 0] - potentials[i, 2]) / sum_Q
 
-    return z_sum
+    return sum_Q
