@@ -422,8 +422,7 @@ cdef double[:, ::1] matrix_multiply_fft_1d(
     cdef fftw_plan plan_dft, plan_idft
     plan_dft = fftw_plan_dft_r2c_1d(
         n_fft_coeffs,
-        &kernel_tilde[0],
-        <fftw_complex *>(&fft_kernel_tilde[0]),
+        &kernel_tilde[0], <fftw_complex *>(&fft_kernel_tilde[0]),
         FFTW_ESTIMATE,
     )
     fftw_execute(plan_dft)
@@ -431,14 +430,12 @@ cdef double[:, ::1] matrix_multiply_fft_1d(
 
     plan_dft = fftw_plan_dft_r2c_1d(
         n_fft_coeffs,
-        &fft_io_buffer[0],
-        <fftw_complex *>(&fft_w_coeffs[0]),
+        &fft_io_buffer[0], <fftw_complex *>(&fft_w_coeffs[0]),
         FFTW_ESTIMATE,
     )
     plan_idft = fftw_plan_dft_c2r_1d(
         n_fft_coeffs,
-        <fftw_complex *>(&fft_w_coeffs[0]),
-        &fft_io_buffer[0],
+        <fftw_complex *>(&fft_w_coeffs[0]), &fft_io_buffer[0],
         FFTW_ESTIMATE,
     )
 
@@ -498,17 +495,20 @@ cdef double[:, ::1] matrix_multiply_fft_2d(
         Py_ssize_t n_fft_coeffs = kernel_tilde.shape[0]
         Py_ssize_t n_interpolation_points_1d = n_fft_coeffs / 2
 
-        double[:, ::1] y_tilde_values = np.zeros((total_interpolation_points, n_terms))
+        double[:, ::1] y_tilde_values = np.empty((total_interpolation_points, n_terms))
 
         fftw_plan plan_dft, plan_idft
-        complex[::1] fft_w_coefficients = np.zeros(n_fft_coeffs * (n_fft_coeffs / 2 + 1), dtype=complex)
+        complex[::1] fft_w_coefficients = np.empty(n_fft_coeffs * (n_fft_coeffs / 2 + 1), dtype=complex)
         complex[::1] fft_kernel_tilde = np.empty(n_fft_coeffs * (n_fft_coeffs / 2 + 1), dtype=complex)
+        # Note that we can't use the same buffer for the input and output like
+        # in the 1d case, since we only write to the top quadrant of the in
+        # matrix - we'd need to manually zero out the rest of the entries that
+        # were inevitably changed during the IDFT, so it's faster to use two
+        # buffers, at the cost of some memory
+        double[:, ::1] fft_in_buffer = np.zeros((n_fft_coeffs, n_fft_coeffs))
+        double[:, ::1] fft_out_buffer = np.zeros((n_fft_coeffs, n_fft_coeffs))
 
         Py_ssize_t d, i, j, idx
-
-    cdef:
-        double[:, ::1] zmpol = np.zeros((n_fft_coeffs, n_fft_coeffs))
-        double[:, ::1] zmpolfo = np.zeros((n_fft_coeffs, n_fft_coeffs))
 
     plan_dft = fftw_plan_dft_r2c_2d(
         n_fft_coeffs, n_fft_coeffs,
@@ -520,19 +520,19 @@ cdef double[:, ::1] matrix_multiply_fft_2d(
 
     plan_dft = fftw_plan_dft_r2c_2d(
         n_fft_coeffs, n_fft_coeffs,
-        &zmpol[0, 0], <fftw_complex *>(&fft_w_coefficients[0]),
+        &fft_in_buffer[0, 0], <fftw_complex *>(&fft_w_coefficients[0]),
         FFTW_ESTIMATE
     )
     plan_idft = fftw_plan_dft_c2r_2d(
         n_fft_coeffs, n_fft_coeffs,
-        <fftw_complex *>(&fft_w_coefficients[0]), &zmpolfo[0, 0],
+        <fftw_complex *>(&fft_w_coefficients[0]), &fft_out_buffer[0, 0],
         FFTW_ESTIMATE
     )
 
     for d in range(n_terms):
         for i in range(n_interpolation_points_1d):
             for j in range(n_interpolation_points_1d):
-                zmpol[i, j] = w_coefficients[i * n_interpolation_points_1d + j, d]
+                fft_in_buffer[i, j] = w_coefficients[i * n_interpolation_points_1d + j, d]
 
         fftw_execute(plan_dft)
 
@@ -551,8 +551,8 @@ cdef double[:, ::1] matrix_multiply_fft_2d(
         for i in range(n_interpolation_points_1d):
             for j in range(n_interpolation_points_1d):
                 idx = i * n_interpolation_points_1d + j
-                y_tilde_values[idx, d] = zmpolfo[n_interpolation_points_1d + i,
-                                                 n_interpolation_points_1d + j] / n_fft_coeffs ** 2
+                y_tilde_values[idx, d] = fft_out_buffer[n_interpolation_points_1d + i,
+                                                        n_interpolation_points_1d + j] / n_fft_coeffs ** 2
 
     fftw_destroy_plan(plan_dft)
     fftw_destroy_plan(plan_idft)
