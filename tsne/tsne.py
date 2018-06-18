@@ -608,8 +608,6 @@ def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
             reference_embedding=reference_embedding, n_jobs=n_jobs,
             should_eval_error=True,
         )
-        error1, gradient = kl_divergence_bh(embedding, P, dof=dof, theta=theta, should_eval_error=True)
-        print(error, error1)
 
         if should_eval_error:
             print('Iteration % 4d, error %.4f' % (iteration + 1, error))

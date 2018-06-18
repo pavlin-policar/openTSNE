@@ -90,49 +90,46 @@ def run():
         plt.title('tsne')
         plot(embedding, y)
         plt.show()
-        return True
+        return False
 
     start = time.time()
     tsne = TSNE(
         perplexity=perplexity, learning_rate=lr, early_exaggeration=ee,
         n_jobs=threads, angle=angle, init='pca', metric=metric, n_components=2,
         n_iter=750, early_exaggeration_iter=250, neighbors='exact', grad='fft',
-        late_exaggeration_iter=100, late_exaggeration=2., callback=plot_callback,
+        late_exaggeration_iter=0, late_exaggeration=2.,
     )
     # x = PCA(n_components=50).fit_transform(x)
     embedding = tsne.fit(x)
+    print('-' * 80)
     print('tsne', time.time() - start)
     plt.title('tsne')
     plot(embedding, y)
     plt.show()
 
-    # pca_embedding = PCA(n_components=50).fit_transform(x)
-    # embedding = tsne.fit(pca_embedding)
-    # plt.title('tsne 50 pca')
-    # plot(embedding, y)
-    # plt.show()
+    init = PCA(n_components=2).fit_transform(x)
+    start = time.time()
+    embedding = MulticoreTSNE(
+        early_exaggeration=ee, learning_rate=lr, perplexity=perplexity,
+        n_jobs=threads, cheat_metric=False, angle=angle, init=init,
+        metric=metric, verbose=True
+    ).fit_transform(x)
+    print('-' * 80)
+    print('mctsne', time.time() - start)
+    plt.title('mctsne')
+    plot(embedding, y)
+    plt.show()
 
-    # init = PCA(n_components=2).fit_transform(x)
-    # start = time.time()
-    # embedding = MulticoreTSNE(
-    #     early_exaggeration=ee, learning_rate=lr, perplexity=perplexity,
-    #     n_jobs=threads, cheat_metric=False, angle=angle, init=init,
-    #     metric=metric, verbose=True
-    # ).fit_transform(x)
-    # print('mctsne', time.time() - start)
-    # plt.title('mctsne')
-    # plot(embedding, y)
-    # plt.show()
-
-    # start = time.time()
-    # embedding = SKLTSNE(
-    #     early_exaggeration=ee, learning_rate=lr, angle=angle,
-    #     perplexity=perplexity, init='pca', metric=metric,
-    # ).fit_transform(x)
-    # print('sklearn', time.time() - start)
-    # plt.title('sklearn')
-    # plot(embedding, y)
-    # plt.show()
+    start = time.time()
+    embedding = SKLTSNE(
+        early_exaggeration=ee, learning_rate=lr, angle=angle,
+        perplexity=perplexity, init='pca', metric=metric,
+    ).fit_transform(x)
+    print('-' * 80)
+    print('sklearn', time.time() - start)
+    plt.title('sklearn')
+    plot(embedding, y)
+    plt.show()
 
 
 def transform():
