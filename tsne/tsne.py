@@ -18,7 +18,9 @@ log = logging.getLogger(__name__)
 
 
 class OptimizationInterrupt(KeyboardInterrupt):
-    pass
+    def __init__(self, final_embedding: np.ndarray):
+        super().__init__()
+        self.final_embedding = final_embedding
 
 
 class TSNEModel(Projection):
@@ -346,8 +348,9 @@ class TSNE(Projector):
                 theta=self.angle, n_jobs=self.n_jobs, **callback_params,
             )
 
-        except OptimizationInterrupt:
+        except OptimizationInterrupt as ex:
             log.info('Optimization was interrupted with callback.')
+            embedding = ex.final_embedding
 
         return embedding
 
@@ -625,7 +628,7 @@ def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
         if use_callback and (iteration + 1) % callback_every_iters == 0:
             should_continue = bool(callback(error, embedding))
             if not should_continue:
-                raise OptimizationInterrupt()
+                raise OptimizationInterrupt(final_embedding=embedding)
 
         if np.linalg.norm(gradient) < min_grad_norm:
             log.info('Gradient norm eps reached. Finished.')
