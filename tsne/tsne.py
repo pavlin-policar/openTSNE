@@ -4,7 +4,7 @@ import time
 import numpy as np
 from Orange.data import Domain, ContinuousVariable, Table
 from Orange.projection import Projector, Projection
-from annoy import AnnoyIndex
+from pynndescent import NNDescent
 from scipy.sparse import csr_matrix
 from sklearn.decomposition import PCA
 from sklearn.neighbors import NearestNeighbors
@@ -276,17 +276,9 @@ class TSNE(Projector):
             distances, neighbors = knn.kneighbors(n_neighbors=k_neighbors)
             del knn
         elif self.neighbors_method == 'approx':
-            index = AnnoyIndex(n_dims, metric=self.metric)
-            for i in range(n_samples):
-                index.add_item(i, X[i])
-            index.build(50)
-
-            search_neighbors = max(n_samples - 1, k_neighbors + 1)
-            neighbors = np.zeros((n_samples, search_neighbors), dtype=int)
-            distances = np.zeros((n_samples, search_neighbors), dtype=float)
-            for i in range(n_samples):
-                neighbors[i], distances[i] = index.get_nns_by_item(
-                    i, search_neighbors, include_distances=True)
+            index = NNDescent(X, metric=self.metric, n_neighbors=5)
+            search_neighbors = min(n_samples - 1, k_neighbors + 1)
+            neighbors, distances = index.query(X, k=search_neighbors, queue_size=1)
             neighbors, distances = neighbors[:, 1:], distances[:, 1:]
 
         print('NN search', time.time() - start)
