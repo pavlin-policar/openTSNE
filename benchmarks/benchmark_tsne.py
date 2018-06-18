@@ -86,17 +86,12 @@ def run():
 
     print(x.shape)
 
-    def plot_callback(error, embedding):
-        plt.title('tsne')
-        plot(embedding, y)
-        plt.show()
-        return False
-
     start = time.time()
     tsne = TSNE(
         perplexity=perplexity, learning_rate=lr, early_exaggeration=ee,
-        n_jobs=threads, angle=angle, init='pca', metric=metric, n_components=2,
-        n_iter=750, early_exaggeration_iter=250, neighbors='exact', grad='fft',
+        n_jobs=threads, angle=angle, initialization='pca', metric=metric, n_components=2,
+        n_iter=750, early_exaggeration_iter=250, neighbors='exact', negative_gradient_method='fft',
+        min_num_intervals=5, ints_in_inverval=20,
         late_exaggeration_iter=0, late_exaggeration=2.,
     )
     # x = PCA(n_components=50).fit_transform(x)
@@ -141,7 +136,7 @@ def transform():
 
     start = time.time()
     model = TSNE(
-        n_components=2, perplexity=5, early_exaggeration=4, init='random',
+        n_components=2, perplexity=5, early_exaggeration=4, initialization='random',
         n_jobs=8,
         # late_exaggeration=1.1, late_exaggeration_iter=250,
     )(train)  # type: TSNEModel

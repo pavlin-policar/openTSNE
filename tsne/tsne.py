@@ -162,10 +162,11 @@ class TSNE(Projector):
     def __init__(self, n_components=2, perplexity=30, learning_rate=10,
                  early_exaggeration_iter=250, early_exaggeration=12,
                  n_iter=750, late_exaggeration_iter=0, late_exaggeration=1.2,
-                 angle=0.5, init='pca', metric='sqeuclidean',
+                 angle=0.5, n_interpolation_points=3, min_num_intervals=10,
+                 ints_in_inverval=10, initialization='pca', metric='sqeuclidean',
                  initial_momentum=0.5, final_momentum=0.8, n_jobs=1,
-                 neighbors='exact', grad='bh', preprocessors=None,
-                 callback=None, callback_every_iters=50):
+                 neighbors='exact', negative_gradient_method='bh',
+                 callback=None, callback_every_iters=50, preprocessors=None):
         super().__init__(preprocessors=preprocessors)
         self.n_components = n_components
         self.perplexity = perplexity
@@ -176,13 +177,16 @@ class TSNE(Projector):
         self.late_exaggeration = late_exaggeration
         self.late_exaggeration_iter = late_exaggeration_iter
         self.angle = angle
-        self.init = init
+        self.n_interpolation_points = n_interpolation_points
+        self.min_num_intervals = min_num_intervals
+        self.ints_in_inverval = ints_in_inverval
+        self.initialization = initialization
         self.metric = metric
         self.initial_momentum = initial_momentum
         self.final_momentum = final_momentum
         self.n_jobs = n_jobs
         self.neighbors_method = neighbors
-        self.gradient_method = grad
+        self.negative_gradient_method = negative_gradient_method
 
         if callback is not None and not callable(callback):
             raise ValueError('`callback` must be a callable object!')
@@ -303,11 +307,11 @@ class TSNE(Projector):
 
         # Optimization
         # Determine which method will be used for optimization
-        if callable(self.gradient_method):
-            gradient_method = self.gradient_method
-        elif self.gradient_method in {'bh', 'BH', 'barnes-hut'}:
+        if callable(self.negative_gradient_method):
+            gradient_method = self.negative_gradient_method
+        elif self.negative_gradient_method in {'bh', 'BH', 'barnes-hut'}:
             gradient_method = kl_divergence_bh
-        elif self.gradient_method in {'fft', 'FFT', 'interpolation'}:
+        elif self.negative_gradient_method in {'fft', 'FFT', 'interpolation'}:
             gradient_method = kl_divergence_fft
         else:
             raise ValueError('Invalid gradient scheme! Please choose one of '
@@ -316,6 +320,9 @@ class TSNE(Projector):
         callback_params = {'use_callback': self.use_callback,
                            'callback': self.callback,
                            'callback_every_iters': self.callback_every_iters}
+        fft_params = {'n_interpolation_points': self.n_interpolation_points,
+                      'min_num_intervals': self.min_num_intervals,
+                      'ints_in_interval': self.ints_in_inverval}
 
         try:
             # Early exaggeration with lower momentum to allow points to find more
@@ -325,7 +332,7 @@ class TSNE(Projector):
                 embedding=embedding, P=P, dof=degrees_of_freedom,
                 gradient_method=gradient_method, n_iter=self.early_exaggeration_iter,
                 learning_rate=learning_rate, momentum=self.initial_momentum,
-                theta=self.angle, n_jobs=self.n_jobs, **callback_params,
+                theta=self.angle, n_jobs=self.n_jobs, **callback_params, **fft_params,
             )
 
             # Restore actual affinity probabilities and increase momentum to get
@@ -335,7 +342,7 @@ class TSNE(Projector):
                 embedding=embedding, P=P, dof=degrees_of_freedom,
                 gradient_method=gradient_method, n_iter=self.n_iter,
                 learning_rate=learning_rate, momentum=self.final_momentum,
-                theta=self.angle, n_jobs=self.n_jobs, **callback_params,
+                theta=self.angle, n_jobs=self.n_jobs, **callback_params, **fft_params,
             )
 
             # Use the trick described in [4]_ to get more separated clusters of
@@ -345,7 +352,7 @@ class TSNE(Projector):
                 embedding=embedding, P=P, dof=degrees_of_freedom,
                 gradient_method=gradient_method, n_iter=self.late_exaggeration_iter,
                 learning_rate=learning_rate, momentum=self.final_momentum,
-                theta=self.angle, n_jobs=self.n_jobs, **callback_params,
+                theta=self.angle, n_jobs=self.n_jobs, **callback_params, **fft_params,
             )
 
         except OptimizationInterrupt as ex:
@@ -356,17 +363,17 @@ class TSNE(Projector):
 
     def get_initial_embedding_for(self, X):
         # If initial positions are given in an array, use a copy of that
-        if isinstance(self.init, np.ndarray):
-            return np.array(self.init)
+        if isinstance(self.initialization, np.ndarray):
+            return np.array(self.initialization)
 
         # Initialize the embedding using a PCA projection into the desired
         # number of components
-        elif self.init == 'pca':
+        elif self.initialization == 'pca':
             pca = PCA(n_components=self.n_components)
             return pca.fit_transform(X)
 
         # Random initialization
-        elif self.init == 'random':
+        elif self.initialization == 'random':
             return np.random.normal(0, 1e-2, (X.shape[0], self.n_components))
 
         else:
@@ -429,41 +436,8 @@ def joint_probabilities_nn(distances, neighbors, perplexity, symmetrize=True,
     return P
 
 
-def kl_divergence_bh(embedding, P, dof, theta, reference_embedding=None,
+def kl_divergence_bh(embedding, P, dof, bh_params, reference_embedding=None,
                      should_eval_error=False, n_jobs=1, **_):
-    """Compute the gradient of the t-SNE objective function D_{KL}(P || Q).
-
-    Parameters
-    ----------
-    embedding : np.ndarray
-        The current embedding Y in the desired space.
-    P : csr_matrix
-        Joint probability matrix P_{ij}.
-    dof : float
-        Degrees of freedom of the Student's t-distribution.
-    theta : float
-        This is the trade-off parameter between speed and accuracy of the
-        Barnes-Hut approximation of the negative forces. Setting a lower value
-        will produce more accurate results, while setting a higher value will
-        search through less of the space providing a rougher approximation.
-        Scikit-learn recommends values between 0.2-0.8.
-    reference_embedding : Optional[np.ndarray]
-        If we are adding points to an existing embedding, we have to compute
-        the gradients and errors w.r.t. the existing embedding.
-    should_eval_error : bool
-        Evaluating the KL divergence error at every iteration severely impacts
-        performance.
-    n_jobs : int
-        Number of threads.
-
-    Returns
-    -------
-    float
-        KL divergence if the `should_eval_error` flag is set, otherwise 0.
-    np.ndarray
-        The gradient of the error
-
-    """
     gradient = np.zeros_like(embedding, dtype=np.float64, order='C')
 
     # In the event that we wish to embed new points into an existing embedding
@@ -476,7 +450,7 @@ def kl_divergence_bh(embedding, P, dof, theta, reference_embedding=None,
     # Compute negative gradient
     tree = QuadTree(reference_embedding)
     sum_Q = _tsne.estimate_negative_gradient_bh(
-        tree, embedding, gradient, theta=theta, dof=dof, num_threads=n_jobs)
+        tree, embedding, gradient, **bh_params, dof=dof, num_threads=n_jobs)
     del tree
 
     # Compute positive gradient
@@ -494,7 +468,7 @@ def kl_divergence_bh(embedding, P, dof, theta, reference_embedding=None,
     return kl_divergence_, gradient
 
 
-def kl_divergence_fft(embedding, P, dof, reference_embedding=None,
+def kl_divergence_fft(embedding, P, dof, fft_params, reference_embedding=None,
                       should_eval_error=False, n_jobs=1, **_):
     gradient = np.zeros_like(embedding, dtype=np.float64, order='C')
 
@@ -507,9 +481,11 @@ def kl_divergence_fft(embedding, P, dof, reference_embedding=None,
 
     # Compute negative gradient
     if embedding.ndim == 1 or embedding.shape[1] == 1:
-        sum_Q = _tsne.estimate_negative_gradient_fft_1d(embedding.ravel(), gradient.ravel())
+        sum_Q = _tsne.estimate_negative_gradient_fft_1d(
+            embedding.ravel(), gradient.ravel(), **fft_params)
     elif embedding.shape[1] == 2:
-        sum_Q = _tsne.estimate_negative_gradient_fft_2d(embedding, gradient)
+        sum_Q = _tsne.estimate_negative_gradient_fft_2d(
+            embedding, gradient, **fft_params)
     else:
         raise RuntimeError('Interpolation based t-SNE for >2 dimensions is '
                            'currently unsupported (and generally a bad idea)')
@@ -529,8 +505,9 @@ def kl_divergence_fft(embedding, P, dof, reference_embedding=None,
 
 def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
                      momentum, min_gain=0.01, min_grad_norm=1e-8, theta=0.5,
-                     reference_embedding=None, n_jobs=1, use_callback=False,
-                     callback=None, callback_every_iters=50):
+                     n_interpolation_points=3, min_num_intervals=10,
+                     ints_in_interval=10, reference_embedding=None, n_jobs=1,
+                     use_callback=False, callback=None, callback_every_iters=50):
     """Perform batch gradient descent with momentum and gains.
 
     Parameters
@@ -564,7 +541,24 @@ def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
         Barnes-Hut approximation of the negative forces. Setting a lower value
         will produce more accurate results, while setting a higher value will
         search through less of the space providing a rougher approximation.
-        Scikit-learn recommends values between 0.2-0.8.
+        Scikit-learn recommends values between 0.2-0.8. This value is ignored
+        unless the Barnes-Hut algorithm is used for gradients.
+    n_interpolation_points : int
+        The number of interpolation points to use for FFT accelerated
+        interpolation based tSNE. It is recommended leaving this value at the
+        default=3 as otherwise the interpolation may suffer from the Runge
+        phenomenon. This value is ignored unless the interpolation based
+        algorithm is used.
+    min_num_intervals : int
+        The minimum number of intervals into which we split our embedding. A
+        larger value will produce better embeddings at the cost of performance.
+        This value is ignored unless the interpolation based algorithm is used.
+    ints_in_interval : float
+        Since the coordinate range of the embedding will certainly change
+        during optimization, this value tells us how many integer values should
+        appear in a single interval. This number of intervals affect the
+        embedding quality at the cost of performance. Less ints per interval
+        will incur a larger number of intervals.
     reference_embedding : Optional[np.ndarray]
         If we are adding points to an existing embedding, we have to compute
         the gradients and errors w.r.t. the existing embedding.
@@ -603,11 +597,16 @@ def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
     update = np.zeros_like(embedding)
     gains = np.ones_like(embedding)
 
+    bh_params = {'theta': theta}
+    fft_params = {'n_interpolation_points': n_interpolation_points,
+                  'min_num_intervals': min_num_intervals,
+                  'ints_in_interval': ints_in_interval}
+
     for iteration in range(n_iter):
         should_eval_error = (iteration + 1) % 50 == 0
 
         error, gradient = gradient_method(
-            embedding, P, dof=dof, theta=theta,
+            embedding, P, dof=dof, bh_params=bh_params, fft_params=fft_params,
             reference_embedding=reference_embedding, n_jobs=n_jobs,
             should_eval_error=True,
         )
