@@ -371,6 +371,8 @@ cpdef double estimate_negative_gradient_fft_1d(
             for d in range(n_terms):
                 potentials[i, d] += interpolated_values[i, j] * y_tilde_values[box_idx + j, d]
 
+    # Compute the normalizatio term Z or sum of q_{ij}s, this is not desribed
+    # in the paper, but can be worked out
     cdef double sum_Q = 0, phi1, phi2, phi3
     for i in range(N):
         phi1 = potentials[i, 0]
@@ -380,6 +382,8 @@ cpdef double estimate_negative_gradient_fft_1d(
         sum_Q += (1 + embedding[i] ** 2) * phi1 - 2 * embedding[i] * phi2 + phi3
     sum_Q -= N
 
+    # Compute the gradient using a slight variation on the formula provided in
+    # the paper
     for i in range(N):
         gradient[i] -= (embedding[i] * potentials[i, 0] - potentials[i, 1]) / sum_Q
 
@@ -770,6 +774,8 @@ cpdef double estimate_negative_gradient_fft_2d(
                         y_interpolated_values[i, interp_j] * \
                         y_tilde_values[idx, d]
 
+    # Compute the normalizatio term Z or sum of q_{ij}s, this is not desribed
+    # in the paper, but can be worked out
     cdef double sum_Q = 0, phi1, phi2, phi3, phi4, y1, y2
     for i in range(N):
         phi1 = potentials[i, 0]
@@ -782,6 +788,8 @@ cpdef double estimate_negative_gradient_fft_2d(
         sum_Q += (1 + y1 ** 2 + y2 ** 2) * phi1 - 2 * (y1 * phi2 + y2 * phi3) + phi4
     sum_Q -= N
 
+    # Compute the gradient using a slight variation on the formula provided in
+    # the paper
     for i in range(N):
         gradient[i, 0] -= (embedding[i, 0] * potentials[i, 0] - potentials[i, 1]) / sum_Q
         gradient[i, 1] -= (embedding[i, 1] * potentials[i, 0] - potentials[i, 2]) / sum_Q
