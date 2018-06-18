@@ -40,6 +40,7 @@ cdef extern from 'math.h':
     double log(double x) nogil
     double exp(double x) nogil
     double fabs(double x) nogil
+    double fmax(double x, double y) nogil
     double isinf(long double) nogil
     double INFINITY
 
@@ -302,7 +303,7 @@ cpdef double estimate_negative_gradient_fft_1d(
         elif embedding[i] > y_max:
             y_max = embedding[i]
 
-    cdef int n_boxes = <int>max(min_num_intervals, (y_max - y_min) / ints_in_interval)
+    cdef int n_boxes = <int>fmax(min_num_intervals, (y_max - y_min) / ints_in_interval)
     cdef double box_width = (y_max - y_min) / n_boxes
 
     cdef int n_terms = 3
@@ -658,7 +659,7 @@ cpdef double estimate_negative_gradient_fft_2d(
         elif embedding[i, 1] > coord_max:
             coord_max = embedding[i, 1]
 
-    cdef int n_boxes_1d = <int>max(min_num_intervals, (coord_max - coord_min) / ints_in_interval)
+    cdef int n_boxes_1d = <int>fmax(min_num_intervals, (coord_max - coord_min) / ints_in_interval)
     cdef int n_total_boxes = n_boxes_1d ** 2
     cdef double box_width = (coord_max - coord_min) / n_boxes_1d
 

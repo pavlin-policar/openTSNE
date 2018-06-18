@@ -6,13 +6,13 @@ import numpy as np
 
 extensions = [
     Extension('tsne.quad_tree', ['tsne/quad_tree.pyx'],
-              extra_compile_args=['-fopenmp'],
-              extra_link_args=['-fopenmp'],
+              extra_compile_args=['-fopenmp', '-O3'],
+              extra_link_args=['-fopenmp', '-O3'],
               include_dirs=[np.get_include()],
               ),
     Extension('tsne._tsne', ['tsne/_tsne.pyx'],
-              extra_compile_args=['-fopenmp', '-lfftw3'],
-              extra_link_args=['-fopenmp', '-lfftw3'],
+              extra_compile_args=['-fopenmp', '-lfftw3', '-O3'],
+              extra_link_args=['-fopenmp', '-lfftw3', '-O3'],
               include_dirs=[np.get_include()],
               ),
 ]
