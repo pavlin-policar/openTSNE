@@ -319,7 +319,7 @@ cpdef double estimate_negative_gradient_fft_1d(
         box_lower_bounds[box_idx] = box_idx * box_width + y_min
         box_upper_bounds[box_idx] = (box_idx + 1) * box_width + y_min
 
-    cdef int total_interpolation_points = n_interpolation_points * n_boxes
+    cdef int n_interpolation_points_1d = n_interpolation_points * n_boxes
     # Prepare the interpolants for a single interval, so we can use their
     # relative positions later on
     cdef double[::1] y_tilde = np.empty(n_interpolation_points, dtype=float)
@@ -330,7 +330,7 @@ cpdef double estimate_negative_gradient_fft_1d(
 
     # Evaluate the kernel at the interpolation nodes
     cdef double[::1] kernel_tilde = compute_kernel_tilde_1d(
-        total_interpolation_points, y_min, h * box_width)
+        n_interpolation_points_1d, y_min, h * box_width)
 
     # Determine which box each point belongs to
     cdef int *point_box_idx = <int *>PyMem_Malloc(N * sizeof(int))
@@ -353,7 +353,7 @@ cpdef double estimate_negative_gradient_fft_1d(
     cdef double[:, ::1] interpolated_values = interpolate(y_in_box, y_tilde)
 
     # Step 1: Compute the w coefficients
-    cdef double[:, ::1] w_coefficients = np.zeros((total_interpolation_points, n_terms), dtype=float)
+    cdef double[:, ::1] w_coefficients = np.zeros((n_interpolation_points_1d, n_terms), dtype=float)
     for i in range(N):
         box_idx = point_box_idx[i] * n_interpolation_points
         for j in range(n_interpolation_points):
