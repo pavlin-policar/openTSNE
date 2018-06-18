@@ -252,11 +252,11 @@ cdef void _estimate_negative_gradient_single(
         _estimate_negative_gradient_single(&node.children[d], point, gradient, sum_Q, theta, dof)
 
 
-cdef inline double squared_cauchy_1d(double x, double y):
+cdef inline double squared_cauchy_1d(double x, double y) nogil:
     return (1 + (x - y) ** 2) ** -2
 
 
-cdef inline double squared_cauchy_2d(double x1, double x2, double y1, double y2):
+cdef inline double squared_cauchy_2d(double x1, double x2, double y1, double y2) nogil:
     return (1 + (x1 - y1) ** 2 + (x2 - y2) ** 2) ** -2
 
 
@@ -412,8 +412,7 @@ cdef double[:, ::1] matrix_multiply_fft_1d(
     Returns
     -------
     memoryview
-        The output. Contains the evaluated kernel values at the equspaced 
-        interpolation nodes.
+        Contains the kernel values at the equspaced interpolation nodes.
     
     """
     cdef:
@@ -531,8 +530,7 @@ cdef double[:, ::1] matrix_multiply_fft_2d(
     Returns
     -------
     memoryview
-        The output. Contains the evaluated kernel values at the equspaced 
-        interpolation nodes.
+        Contains the kernel values at the equspaced interpolation nodes.
     
     """
     cdef:
