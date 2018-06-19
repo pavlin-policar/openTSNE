@@ -1,5 +1,6 @@
 import logging
 import time
+from typing import Tuple
 
 import numpy as np
 from Orange.data import Domain, ContinuousVariable, Table
@@ -259,29 +260,14 @@ class TSNE(Projector):
         else:
             perplexity = self.perplexity
 
-        # Need -2: -1 because indexing starts at zero, -1 because neighbor
-        # methods, find query point as closest with distance zero
-        k_neighbors = min(n_samples - 1, int(3 * perplexity))
-
-        start = time.time()
         # Find each points' nearest neighbors or use the precomputed ones, if
         # provided
         if neighbors is not None and distances is not None:
             assert neighbors.shape == distances.shape, \
                 'The `distances` and `neighbors` dimensions must match exactly!'
             logging.info('Nearest neighbors provided, using precomputed neighbors.')
-        elif self.neighbors_method == 'exact':
-            knn = NearestNeighbors(algorithm='auto', metric=self.metric, n_jobs=self.n_jobs)
-            knn.fit(X)
-            distances, neighbors = knn.kneighbors(n_neighbors=k_neighbors)
-            del knn
-        elif self.neighbors_method == 'approx':
-            index = NNDescent(X, metric=self.metric, n_neighbors=5)
-            search_neighbors = min(n_samples - 1, k_neighbors + 1)
-            neighbors, distances = index.query(X, k=search_neighbors, queue_size=1)
-            neighbors, distances = neighbors[:, 1:], distances[:, 1:]
-
-        print('NN search', time.time() - start)
+        else:
+            neighbors, distances = self.get_nearest_neighbors(X)
 
         start = time.time()
         # Compute the symmetric joint probabilities of points being neighbors
@@ -353,7 +339,7 @@ class TSNE(Projector):
 
         return embedding
 
-    def get_initial_embedding_for(self, X):
+    def get_initial_embedding_for(self, X: np.ndarray) -> np.ndarray:
         # If initial positions are given in an array, use a copy of that
         if isinstance(self.initialization, np.ndarray):
             return np.array(self.initialization)
@@ -370,6 +356,42 @@ class TSNE(Projector):
 
         else:
             raise ValueError('Unrecognized initialization scheme')
+
+    def get_nearest_neighbors(self, X: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        """Compute the nearest neighbors for a given dataset.
+
+        This can be called separately so the neighbours can be precomputed and
+        cached across multiple tSNE runs.
+
+        """
+        n_samples = X.shape[0]
+
+        # Check for valid perplexity value
+        if n_samples - 1 < 3 * self.perplexity:
+            perplexity = (n_samples - 1) / 3
+            log.warning('Perplexity value is too high. Using perplexity %.2f' % perplexity)
+        else:
+            perplexity = self.perplexity
+
+        # Need -2: -1 because indexing starts at zero, -1 because neighbor
+        # methods, find query point as closest with distance zero
+        k_neighbors = min(n_samples - 1, int(3 * perplexity))
+
+        start = time.time()
+        if self.neighbors_method == 'exact':
+            knn = NearestNeighbors(algorithm='auto', metric=self.metric, n_jobs=self.n_jobs)
+            knn.fit(X)
+            distances, neighbors = knn.kneighbors(n_neighbors=k_neighbors)
+            del knn
+        elif self.neighbors_method == 'approx':
+            index = NNDescent(X, metric=self.metric, n_neighbors=5)
+            search_neighbors = min(n_samples - 1, k_neighbors + 1)
+            neighbors, distances = index.query(X, k=search_neighbors, queue_size=1)
+            neighbors, distances = neighbors[:, 1:], distances[:, 1:]
+
+        print('NN search', time.time() - start)
+
+        return neighbors, distances
 
 
 def joint_probabilities_nn(distances, neighbors, perplexity, symmetrize=True,
