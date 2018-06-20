@@ -65,11 +65,9 @@ def tmp():
         negative_gradient_method='bh', min_num_intervals=10, ints_in_inverval=2,
         late_exaggeration_iter=0, late_exaggeration=4,
     )
-    embedding = tsne.get_initial_embedding_for(x)
     optimizer = tsne.get_optimizer_for(x)
-    plot(embedding, y)
+    embedding = tsne.get_initial_embedding_for(x)
     embedding = optimizer.optimize(embedding, n_iter=250, exaggeration=12, momentum=0.5)
-    plot(embedding, y)
     embedding = optimizer.optimize(embedding, n_iter=750, momentum=0.8)
     plot(embedding, y)
 
