@@ -3,8 +3,6 @@ import time
 from typing import Tuple
 
 import numpy as np
-from Orange.data import Domain, ContinuousVariable, Table
-from Orange.projection import Projector, Projection
 from pynndescent import NNDescent
 from scipy.sparse import csr_matrix
 from sklearn.decomposition import PCA
@@ -24,7 +22,7 @@ class OptimizationInterrupt(KeyboardInterrupt):
         self.final_embedding = final_embedding
 
 
-class TSNEModel(Projection):
+class TSNEModel:
     def __init__(self, existing_data, existing_embedding, metric,
                  perplexity=30, learning_rate=10, exaggeration=4,
                  exaggeration_iter=50, angle=0.5, momentum=0.5,
@@ -40,14 +38,6 @@ class TSNEModel(Projection):
         self.angle = angle
         self.momentum = momentum
         self.n_jobs = n_jobs
-
-    def __call__(self, data: Table, **kwargs) -> Table:
-        # If we want to transform new data, ensure that we use correct domain
-        if data.domain != self.pre_domain:
-            data = data.transform(self.pre_domain)
-
-        embedding = self.transform(data.X, **kwargs)
-        return Table(self.embedding.domain, embedding, data.Y, data.metas)
 
     def transform(self, X, n_iter=200, learning_rate=None, perplexity=None,
                   init='closest', exaggeration=None, exaggeration_iter=None):
@@ -157,9 +147,7 @@ class TSNEModel(Projection):
             raise ValueError('Unrecognized initialization scheme')
 
 
-class TSNE(Projector):
-    name = 't-SNE'
-
+class TSNE:
     def __init__(self, n_components=2, perplexity=30, learning_rate=10,
                  early_exaggeration_iter=250, early_exaggeration=12,
                  n_iter=750, late_exaggeration_iter=0, late_exaggeration=1.2,
@@ -167,8 +155,7 @@ class TSNE(Projector):
                  ints_in_inverval=10, initialization='pca', metric='sqeuclidean',
                  initial_momentum=0.5, final_momentum=0.8, n_jobs=1,
                  neighbors='exact', negative_gradient_method='bh',
-                 callback=None, callback_every_iters=50, preprocessors=None):
-        super().__init__(preprocessors=preprocessors)
+                 callback=None, callback_every_iters=50):
         self.n_components = n_components
         self.perplexity = perplexity
         self.learning_rate = learning_rate
@@ -195,30 +182,8 @@ class TSNE(Projector):
         self.callback = callback
         self.callback_every_iters = callback_every_iters
 
-    def __call__(self, data: Table) -> TSNEModel:
-        data = self.preprocess(data)
-
-        # Create the t-SNE embedding
-        embedding = self.fit(data.X, data.Y)
-
-        # Put the embedding into a table
-        tsne_cols = [ContinuousVariable('t-SNE-%d' % (i + 1)) for i in range(self.n_components)]
-        embedding_domain = Domain(tsne_cols, data.domain.class_vars, data.domain.metas)
-        embedding_table = Table(embedding_domain, embedding, data.Y, data.metas)
-
-        # Build the t-SNE model
-        model = TSNEModel(
-            data, embedding_table, metric=self.metric,
-            perplexity=self.perplexity, learning_rate=self.learning_rate,
-            exaggeration=self.early_exaggeration, angle=self.angle,
-            momentum=self.initial_momentum, n_jobs=self.n_jobs
-        )
-        model.pre_domain = data.domain
-        model.name = '%s (%s)' % (self.name, data.name)
-        return model
-
-    def fit(self, X: np.ndarray, Y: np.ndarray = None,
-            neighbors: np.ndarray = None, distances: np.ndarray = None) -> np.ndarray:
+    def fit(self, X: np.ndarray, neighbors: np.ndarray = None,
+            distances: np.ndarray = None) -> np.ndarray:
         """Perform t-SNE dimensionality reduction.
 
         Parameters

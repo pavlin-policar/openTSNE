@@ -11,8 +11,6 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE as SKLTSNE
 from MulticoreTSNE import MulticoreTSNE
 
-from Orange.data import Table
-from Orange.projection import LDA, FreeViz
 from tsne.tsne import TSNE, TSNEModel
 import matplotlib.pyplot as plt
 
@@ -23,7 +21,7 @@ np.set_printoptions(precision=4, suppress=True)
 def plot(x: np.ndarray, y: np.ndarray) -> None:
     for yi in np.unique(y):
         mask = y == yi
-        plt.plot(x[mask, 0], x[mask, 1], 'o', label=str(yi), alpha=0.5, ms=3)
+        plt.plot(x[mask, 0], x[mask, 1], 'o', label=str(yi), alpha=0.5, ms=1)
     plt.legend()
 
 
@@ -31,7 +29,7 @@ def plot1d(x: np.ndarray, y: np.ndarray) -> None:
     for yi in np.unique(y):
         mask = y == yi
         jitter = np.random.randn(mask.shape[0])
-        plt.plot(x, jitter, 'o', label=str(yi), alpha=0.5, ms=3)
+        plt.plot(x, jitter, 'o', label=str(yi), alpha=0.5, ms=1)
     plt.legend()
 
 
@@ -51,36 +49,25 @@ def get_mnist_full():
     return mnist, classes
 
 
-def check_transform():
-    data = Table('iris')[::10]
-
-    # lda_model = LDA()(data)
-    # freeviz_model = FreeViz()(data)
-    tsne_model = TSNE()(data)
-
-    # lda_data = lda_model(data)
-    # freeviz_data = freeviz_model(data)
-    tsne_data = tsne_model(data)
-    print(tsne_data)
-
-
 def run():
     # mnist = datasets.load_digits()
     # x, y = mnist['data'], mnist['target']
     np.random.seed(1)
     x, y = get_mnist_full()
-    indices = np.random.choice(list(range(x.shape[0])), 500, replace=False)
+    indices = np.random.choice(list(range(x.shape[0])), 5000, replace=False)
     x, y = x[indices], y[indices]
 
-    # data = Table('cdp_expression_shekhar.pickle')
-    # data = Table('sc-aml-sample.pickle')
-    # data = Table('iris')
-    # x, y = data.X, data.Y
+    # with open('/home/pavlin/dev/tsne/benchmarks/sc-mouse-60k-1k.pkl', 'rb') as f:
+    #     x = pickle.load(f)
+    # x = x.astype(np.float32).toarray()
+    # import json
+    # with open('/home/pavlin/dev/tsne/benchmarks/y-shuffled.txt', 'rb') as f:
+    #     y = np.array(json.load(f), dtype=int)
 
     angle = 0.5
-    perplexity = 20
+    perplexity = 30
     ee = 12
-    lr = 1
+    lr = 100
     threads = 4
     metric = 'euclidean'
 
@@ -89,10 +76,10 @@ def run():
     start = time.time()
     tsne = TSNE(
         perplexity=perplexity, learning_rate=lr, early_exaggeration=ee,
-        n_jobs=threads, angle=angle, initialization='pca', metric=metric, n_components=2,
-        n_iter=750, early_exaggeration_iter=250, neighbors='approx',
-        negative_gradient_method='fft', min_num_intervals=10, ints_in_inverval=5,
-        late_exaggeration_iter=0, late_exaggeration=2.,
+        n_jobs=threads, angle=angle, initialization='random', metric=metric,
+        n_components=2, n_iter=750, early_exaggeration_iter=250, neighbors='approx',
+        negative_gradient_method='fft', min_num_intervals=10, ints_in_inverval=2,
+        late_exaggeration_iter=100, late_exaggeration=2.,
     )
     # x = PCA(n_components=50).fit_transform(x)
     embedding = tsne.fit(x)
@@ -112,6 +99,19 @@ def run():
     print('-' * 80)
     print('mctsne', time.time() - start)
     plt.title('mctsne')
+    plot(embedding, y)
+    plt.show()
+
+    x = np.ascontiguousarray(x.astype(np.float64))
+    from fitsne import FItSNE
+    start = time.time()
+    embedding = FItSNE(
+        x, 2, perplexity=perplexity, stop_lying_iter=250, ann_not_vptree=True,
+        early_exag_coeff=ee, nthreads=threads, theta=angle,
+    )
+    print('-' * 80)
+    print('fft interp %.4f' % (time.time() - start))
+    plt.title('fft interp')
     plot(embedding, y)
     plt.show()
 
