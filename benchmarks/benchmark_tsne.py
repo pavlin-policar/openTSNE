@@ -11,7 +11,7 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE as SKLTSNE
 from MulticoreTSNE import MulticoreTSNE
 
-from tsne.tsne import TSNE, TSNEModel
+from tsne.tsne import TSNE, TSNEEmbedding
 import matplotlib.pyplot as plt
 
 
@@ -23,6 +23,7 @@ def plot(x: np.ndarray, y: np.ndarray) -> None:
         mask = y == yi
         plt.plot(x[mask, 0], x[mask, 1], 'o', label=str(yi), alpha=0.5, ms=1)
     plt.legend()
+    plt.show()
 
 
 def plot1d(x: np.ndarray, y: np.ndarray) -> None:
@@ -31,6 +32,7 @@ def plot1d(x: np.ndarray, y: np.ndarray) -> None:
         jitter = np.random.randn(mask.shape[0])
         plt.plot(x, jitter, 'o', label=str(yi), alpha=0.5, ms=1)
     plt.legend()
+    plt.show()
 
 
 def get_mnist_full():
@@ -47,6 +49,32 @@ def get_mnist_full():
     classes = np.hstack((train[1], val[1], test[1]))
 
     return mnist, classes
+
+
+def tmp():
+    from tsne.tsne import TSNE
+
+    iris = datasets.load_iris()
+    x = iris['data']
+    y = iris['target']
+
+    tsne = TSNE(
+        perplexity=30, learning_rate=100, early_exaggeration=12,
+        n_jobs=4, angle=0.5, initialization='pca', metric='euclidean',
+        n_components=2, n_iter=750, early_exaggeration_iter=250, neighbors='exact',
+        negative_gradient_method='bh', min_num_intervals=10, ints_in_inverval=2,
+        late_exaggeration_iter=0, late_exaggeration=4,
+    )
+    embedding = tsne.get_initial_embedding_for(x)
+    optimizer = tsne.get_optimizer_for(x)
+    plot(embedding, y)
+    embedding = optimizer.optimize(embedding, n_iter=250, exaggeration=12, momentum=0.5)
+    plot(embedding, y)
+    embedding = optimizer.optimize(embedding, n_iter=750, momentum=0.8)
+    plot(embedding, y)
+
+    embedding = tsne.fit(x)
+    plot(embedding, y)
 
 
 def run():
@@ -139,7 +167,7 @@ def transform():
         n_components=2, perplexity=5, early_exaggeration=4, initialization='random',
         n_jobs=8,
         # late_exaggeration=1.1, late_exaggeration_iter=250,
-    )(train)  # type: TSNEModel
+    )(train)  # type: TSNEEmbedding
     print('tsne train', time.time() - start)
     plot(model.embedding, train.Y)
     plt.gca().set_color_cycle(None)

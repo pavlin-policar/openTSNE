@@ -1,15 +1,13 @@
 import logging
 import time
-from typing import Tuple
 
 import numpy as np
-from pynndescent import NNDescent
 from scipy.sparse import csr_matrix
 from sklearn.decomposition import PCA
-from sklearn.neighbors import NearestNeighbors
 
 from tsne import _tsne
-from .quad_tree import QuadTree
+from tsne.nearest_neighbors import KNNIndex, KDTree, NNDescent
+from tsne.quad_tree import QuadTree
 
 EPSILON = np.finfo(np.float64).eps
 
@@ -17,134 +15,10 @@ log = logging.getLogger(__name__)
 
 
 class OptimizationInterrupt(KeyboardInterrupt):
-    def __init__(self, final_embedding: np.ndarray):
+    def __init__(self, error: float, final_embedding: np.ndarray) -> None:
         super().__init__()
+        self.error = error
         self.final_embedding = final_embedding
-
-
-class TSNEModel:
-    def __init__(self, existing_data, existing_embedding, metric,
-                 perplexity=30, learning_rate=10, exaggeration=4,
-                 exaggeration_iter=50, angle=0.5, momentum=0.5,
-                 n_jobs=1):
-        self.data = existing_data
-        self.embedding = existing_embedding
-        self.n_components = existing_embedding.X.shape[1]
-        self.metric = metric
-        self.perplexity = perplexity
-        self.learning_rate = learning_rate
-        self.exaggeration = exaggeration
-        self.exaggeration_iter = exaggeration_iter
-        self.angle = angle
-        self.momentum = momentum
-        self.n_jobs = n_jobs
-
-    def transform(self, X, n_iter=200, learning_rate=None, perplexity=None,
-                  init='closest', exaggeration=None, exaggeration_iter=None):
-        n_new_samples, n_new_dims = X.shape
-        n_reference_samples, n_reference_dims = self.data.X.shape
-
-        assert n_new_dims == n_reference_dims, \
-            'X dimensions do not match the dimensions of the original data. ' \
-            'Expected %d, got %d!' % (n_reference_dims, n_new_dims)
-
-        # Use parameter values that were used during learning if no new ones
-        # are specified
-        if learning_rate is None:
-            learning_rate = self.learning_rate
-        if perplexity is None:
-            perplexity = self.perplexity
-        if exaggeration is None:
-            exaggeration = self.exaggeration
-        if exaggeration_iter is None:
-            exaggeration_iter = self.exaggeration_iter
-
-        # If no early exaggeration value is proposed, use the update scheme
-        # proposed in [2]_ which has some desirable properties
-        if exaggeration is None:
-            exaggeration = n_new_samples / 10
-            learning_rate = 1
-
-        # Check that perplexity isn't larger than the possible existing
-        # embedding data
-        if n_reference_samples < 3 * perplexity:
-            perplexity = n_reference_samples / 3
-            log.warning('Perplexity value is too high. Using perplexity %.2f'
-                        % perplexity)
-        else:
-            perplexity = perplexity
-
-        k_neighbors = min(n_reference_samples, int(3 * perplexity))
-
-        # Find the nearest neighbors from the new points to the existing points
-        start = time.time()
-        knn = NearestNeighbors(algorithm='auto', metric=self.metric)
-        knn.fit(self.data.X)
-        distances, neighbors = knn.kneighbors(X, n_neighbors=k_neighbors)
-        del knn
-        print('NN search', time.time() - start)
-
-        # Compute the joint probabilities. Don't symmetrize, because P will be
-        # a `n_samples * n_new_samples` matrix, which is not necessarily square
-        start = time.time()
-        P = joint_probabilities_nn(
-            distances, neighbors, perplexity, symmetrize=False,
-            n_reference_samples=n_reference_samples, n_jobs=self.n_jobs,
-        )
-        print('joint probabilities', time.time() - start)
-
-        # Initialize the embedding as a C contigous array for our fast cython
-        # implementation
-        embedding = self.get_initial_embedding_for(X, init, neighbors, distances)
-        embedding = np.asarray(embedding, dtype=np.float64, order='C')
-
-        # Degrees of freedom of the Student's t-distribution
-        degrees_of_freedom = max(self.n_components - 1, 1)
-
-        # Optimization
-        # Early exaggeration with lower momentum to allow points to find more
-        # easily move around and find their neighbors
-        P *= exaggeration
-        embedding = gradient_descent(
-            embedding, P, degrees_of_freedom, n_iter=exaggeration_iter,
-            learning_rate=learning_rate, momentum=self.momentum,
-            theta=self.angle, reference_embedding=self.embedding.X,
-            n_jobs=self.n_jobs,
-        )
-
-        # Restore actual affinity probabilities and increase momentum to get
-        # final, optimized embedding
-        P /= exaggeration
-        embedding = gradient_descent(
-            embedding, P, degrees_of_freedom, n_iter=n_iter,
-            learning_rate=learning_rate, momentum=self.momentum,
-            theta=self.angle, reference_embedding=self.embedding.X,
-            n_jobs=self.n_jobs,
-        )
-
-        return embedding
-
-    def get_initial_embedding_for(self, X, method, neighbors, distances):
-        n_new_samples = X.shape[0]
-
-        # If initial positions are given in an array, use a copy of that
-        if isinstance(method, np.ndarray):
-            return np.array(self.init)
-
-        # Use the weighted mean position of the points closes neighbors
-        elif method == 'closest':
-            embedding = np.zeros((n_new_samples, self.n_components))
-            for i in range(n_new_samples):
-                embedding[i] = np.average(
-                    self.embedding.X[neighbors[i]], axis=0, weights=distances[i])
-            return embedding
-
-        # Random initialization
-        elif method == 'random':
-            return np.random.randn(n_new_samples, self.n_components)
-
-        else:
-            raise ValueError('Unrecognized initialization scheme')
 
 
 class TSNE:
@@ -189,7 +63,6 @@ class TSNE:
         Parameters
         ----------
         X : np.ndarray
-        Y : Optional[np.ndarray]
         neighbors : Optional[np.ndarray]
             Often times, we want to run t-SNE multiple times. If computing the
             nearest neighbors takes a long time, re-using those results for
@@ -225,6 +98,8 @@ class TSNE:
         else:
             perplexity = self.perplexity
 
+        k_neighbors = min(n_samples - 1, int(3 * perplexity))
+
         # Find each points' nearest neighbors or use the precomputed ones, if
         # provided
         if neighbors is not None and distances is not None:
@@ -232,11 +107,11 @@ class TSNE:
                 'The `distances` and `neighbors` dimensions must match exactly!'
             logging.info('Nearest neighbors provided, using precomputed neighbors.')
         else:
-            neighbors, distances = self.get_nearest_neighbors(X)
+            _, neighbors, distances = self.__get_nearest_neighbors(X, k_neighbors)
 
         start = time.time()
         # Compute the symmetric joint probabilities of points being neighbors
-        P = joint_probabilities_nn(distances, neighbors, perplexity, n_jobs=self.n_jobs)
+        P = joint_probabilities_nn(neighbors, distances, perplexity, n_jobs=self.n_jobs)
         print('joint probabilities', time.time() - start)
 
         # Initialize the embedding as a C contigous array for our fast cython
@@ -271,7 +146,7 @@ class TSNE:
             # Early exaggeration with lower momentum to allow points to find more
             # easily move around and find their neighbors
             P *= early_exaggeration
-            embedding = gradient_descent(
+            error, embedding = gradient_descent(
                 embedding=embedding, P=P, dof=degrees_of_freedom,
                 gradient_method=gradient_method, n_iter=self.early_exaggeration_iter,
                 learning_rate=learning_rate, momentum=self.initial_momentum,
@@ -281,7 +156,7 @@ class TSNE:
             # Restore actual affinity probabilities and increase momentum to get
             # final, optimized embedding
             P /= early_exaggeration
-            embedding = gradient_descent(
+            error, embedding = gradient_descent(
                 embedding=embedding, P=P, dof=degrees_of_freedom,
                 gradient_method=gradient_method, n_iter=self.n_iter,
                 learning_rate=learning_rate, momentum=self.final_momentum,
@@ -291,7 +166,7 @@ class TSNE:
             # Use the trick described in [4]_ to get more separated clusters of
             # points by applying a late exaggeration phase
             P *= self.late_exaggeration
-            embedding = gradient_descent(
+            error, embedding = gradient_descent(
                 embedding=embedding, P=P, dof=degrees_of_freedom,
                 gradient_method=gradient_method, n_iter=self.late_exaggeration_iter,
                 learning_rate=learning_rate, momentum=self.final_momentum,
@@ -303,6 +178,67 @@ class TSNE:
             embedding = ex.final_embedding
 
         return embedding
+
+    def get_optimizer_for(self, data: np.ndarray):
+        n_samples = data.shape[0]
+
+        # Check for valid perplexity value
+        if n_samples - 1 < 3 * self.perplexity:
+            perplexity = (n_samples - 1) / 3
+            log.warning('Perplexity value is too high. Using perplexity %.2f' % perplexity)
+        else:
+            perplexity = self.perplexity
+
+        k_neighbors = min(n_samples - 1, int(3 * perplexity))
+        start = time.time()
+        knn_index, neighbors, distances = self.__get_nearest_neighbors(data, k_neighbors)
+        print('NN search', time.time() - start)
+
+        start = time.time()
+        # Compute the symmetric joint probabilities of points being neighbors
+        P = joint_probabilities_nn(neighbors, distances, perplexity, n_jobs=self.n_jobs)
+        print('joint probabilities', time.time() - start)
+
+        # Degrees of freedom of the Student's t-distribution. The suggestion
+        # degrees_of_freedom = n_components - 1 comes from [3]_.
+        degrees_of_freedom = max(self.n_components - 1, 1)
+
+        # Determine which method will be used for optimization
+        if callable(self.negative_gradient_method):
+            gradient_method = self.negative_gradient_method
+        elif self.negative_gradient_method in {'bh', 'BH', 'barnes-hut'}:
+            gradient_method = kl_divergence_bh
+        elif self.negative_gradient_method in {'fft', 'FFT', 'interpolation'}:
+            gradient_method = kl_divergence_fft
+        else:
+            raise ValueError('Unrecognized gradient method. Please choose one of '
+                             'the supported methods or provide a valid callback.')
+
+        gradient_descent_params = {
+            'dof': degrees_of_freedom,
+            'gradient_method': gradient_method,
+            'learning_rate': self.learning_rate,
+            # By default, use the momentum used in unexaggerated phase
+            'momentum': self.final_momentum,
+
+            # Barnes-Hut params
+            'theta': self.angle,
+            # Interpolation params
+            'n_interpolation_points': self.n_interpolation_points,
+            'min_num_intervals': self.min_num_intervals,
+            'ints_in_interval': self.ints_in_inverval,
+
+            'n_jobs': self.n_jobs,
+            # Callback params
+            'use_callback': self.use_callback,
+            'callback': self.callback,
+            'callback_every_iters': self.callback_every_iters,
+        }
+
+        return TSNEOptimizer(
+            perplexity=perplexity, knn_index=knn_index, P=P,
+            gradient_descent_params=gradient_descent_params,
+        )
 
     def get_initial_embedding_for(self, X: np.ndarray) -> np.ndarray:
         # If initial positions are given in an array, use a copy of that
@@ -322,44 +258,108 @@ class TSNE:
         else:
             raise ValueError('Unrecognized initialization scheme')
 
-    def get_nearest_neighbors(self, X: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def __get_nearest_neighbors(self, X, k_neighbors):
         """Compute the nearest neighbors for a given dataset.
 
-        This can be called separately so the neighbours can be precomputed and
-        cached across multiple tSNE runs.
+        Note that the perplexity value must be valid. This is not checked here.
+
+        Parameters
+        ----------
+        X : np.ndarray
+            The reference data against which to search for neighbors.
+        k_neighbors: int
+
+        Return
+        ------
+        KNNIndex
+            A nearest neighbor index.
+        np.ndarray
+            The indices of the k nearest neighbors.
+        np.ndarray
+            The distances of the k nearest neighbors, corresponding to the
+            indices. See above.
 
         """
-        n_samples = X.shape[0]
+        methods = {'exact': KDTree, 'approx': NNDescent}
+        if callable(self.neighbors_method):
+            assert isinstance(KNNIndex), \
+                'The nearest neighbor algorithm you provided does not ' \
+                'inherit the `KNNIndex` class!'
+            knn_index_cls = self.neighbors_method
 
-        # Check for valid perplexity value
-        if n_samples - 1 < 3 * self.perplexity:
-            perplexity = (n_samples - 1) / 3
-            log.warning('Perplexity value is too high. Using perplexity %.2f' % perplexity)
+        elif self.neighbors_method not in methods:
+            raise ValueError('Unrecognized nearest neighbor algorithm `%s`. '
+                             'Please choose one of the supported methods or '
+                             'provide a valid `KNNIndex` instance.')
         else:
-            perplexity = self.perplexity
+            knn_index_cls = methods[self.neighbors_method]
 
-        # Need -2: -1 because indexing starts at zero, -1 because neighbor
-        # methods, find query point as closest with distance zero
-        k_neighbors = min(n_samples - 1, int(3 * perplexity))
+        knn_index = knn_index_cls(metric=self.metric, n_jobs=self.n_jobs)
 
-        start = time.time()
-        if self.neighbors_method == 'exact':
-            knn = NearestNeighbors(algorithm='auto', metric=self.metric, n_jobs=self.n_jobs)
-            knn.fit(X)
-            distances, neighbors = knn.kneighbors(n_neighbors=k_neighbors)
-            del knn
-        elif self.neighbors_method == 'approx':
-            index = NNDescent(X, metric=self.metric, n_neighbors=5)
-            search_neighbors = min(n_samples - 1, k_neighbors + 1)
-            neighbors, distances = index.query(X, k=search_neighbors, queue_size=1)
-            neighbors, distances = neighbors[:, 1:], distances[:, 1:]
+        knn_index.build(X)
+        neighbors, distances = knn_index.query_train(X, k=k_neighbors)
 
-        print('NN search', time.time() - start)
-
-        return neighbors, distances
+        return knn_index, neighbors, distances
 
 
-def joint_probabilities_nn(distances, neighbors, perplexity, symmetrize=True,
+class TSNEEmbedding(np.ndarray):
+    def __new__(cls, embedding):
+        obj = np.asarray(embedding, dtype=np.float64, order='C').view(TSNEEmbedding)
+
+        obj.kl_divergence = None
+        obj.pBIC = None
+
+        return obj
+
+
+class TSNEOptimizer:
+    def __init__(self, perplexity, knn_index, P, gradient_descent_params):
+        self.perplexity = perplexity
+        self.knn_index = knn_index
+        self.P = P
+        self.gradient_descent_params = gradient_descent_params
+
+        self.kl_divergence = None
+        self.pBIC = None
+
+    def optimize(self, embedding, n_iter, inplace=False,
+                 propagate_exception=False, **gradient_descent_params):
+        assert isinstance(embedding, np.ndarray), \
+            '`embedding` must be an instance of `np.ndarray`. Got `%s` instead' \
+            % type(embedding)
+
+        # Make sure to interpret the embedding as a tSNE embedding
+        embedding = embedding.view(TSNEEmbedding)
+
+        # Typically we want to return a new embedding and keep the old one intact
+        if not inplace:
+            embedding = TSNEEmbedding(embedding)
+
+        # If optimization parameters were passed to this funciton, prefer those
+        # over the defaults specified in the TSNE object
+        optim_params = dict(self.gradient_descent_params)
+        optim_params.update(gradient_descent_params)
+        optim_params['n_iter'] = n_iter
+
+        try:
+            error, embedding = gradient_descent(
+                embedding=embedding, P=self.P, **optim_params)
+
+        except OptimizationInterrupt as ex:
+            log.info('Optimization was interrupted with callback.')
+            if propagate_exception:
+                raise ex
+            error, embedding = ex.error, ex.final_embedding
+
+        # Optimization done - time to compute error metrics
+        n_samples = embedding.shape[0]
+        embedding.kl_divergence = error
+        embedding.pBIC = 2 * error + np.log(n_samples) * self.perplexity / n_samples
+
+        return embedding
+
+
+def joint_probabilities_nn(neighbors, distances, perplexity, symmetrize=True,
                            n_reference_samples=None, n_jobs=1):
     """Compute the conditional probability matrix P_{j|i}.
 
@@ -367,12 +367,12 @@ def joint_probabilities_nn(distances, neighbors, perplexity, symmetrize=True,
 
     Parameters
     ----------
-    distances : np.ndarray
-        A `n_samples * k_neighbors` matrix containing the distances to the
-        neighbors at indices defined in the neighbors parameter.
     neighbors : np.ndarray
         A `n_samples * k_neighbors` matrix containing the indices to each
         points' nearest neighbors in descending order.
+    distances : np.ndarray
+        A `n_samples * k_neighbors` matrix containing the distances to the
+        neighbors at indices defined in the neighbors parameter.
     perplexity : double
         The desired perplexity of the probability distribution.
     symmetrize : bool
@@ -483,10 +483,11 @@ def kl_divergence_fft(embedding, P, dof, fft_params, reference_embedding=None,
 
 
 def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
-                     momentum, min_gain=0.01, min_grad_norm=1e-8, theta=0.5,
-                     n_interpolation_points=3, min_num_intervals=10,
-                     ints_in_interval=10, reference_embedding=None, n_jobs=1,
-                     use_callback=False, callback=None, callback_every_iters=50):
+                     momentum, exaggeration=1, min_gain=0.01,
+                     min_grad_norm=1e-8, theta=0.5, n_interpolation_points=3,
+                     min_num_intervals=10, ints_in_interval=10,
+                     reference_embedding=None, n_jobs=1, use_callback=False,
+                     callback=None, callback_every_iters=50):
     """Perform batch gradient descent with momentum and gains.
 
     Parameters
@@ -510,6 +511,10 @@ def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
     momentum : float
         The momentum generates a weight for previous gradients that decays
         exponentially.
+    exaggeration : float
+        The exaggeration term is used to increase the attractive forces during
+        the first steps of the optimization. This enables points to move more
+        easily through others, helping find their true neighbors quicker.
     min_gain : float
         Minimum individual gain for each parameter.
     min_grad_norm : float
@@ -554,6 +559,8 @@ def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
 
     Returns
     -------
+    float
+        The KL divergence of the optimized embedding.
     np.ndarray
         The optimized embedding Y.
 
@@ -573,6 +580,7 @@ def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
             '`reference_embedding` must be an instance of `np.ndarray`. Got ' \
             '`%s` instead' % type(reference_embedding)
 
+    error = 0
     update = np.zeros_like(embedding)
     gains = np.ones_like(embedding)
 
@@ -581,16 +589,28 @@ def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
                   'min_num_intervals': min_num_intervals,
                   'ints_in_interval': ints_in_interval}
 
+    # Lie about the P values for bigger attraction forces
+    if exaggeration != 1:
+        P *= exaggeration
+
     for iteration in range(n_iter):
-        should_eval_error = (iteration + 1) % 50 == 0
+        should_call_callback = use_callback and (iteration + 1) % callback_every_iters == 0
+        is_last_iteration = iteration == n_iter - 1
+        # We want to provide the error to the callback and a final error if
+        # we're at the final iteration, regardless of logging
+        should_eval_error = (iteration + 1) % 50 == 0 or should_call_callback or is_last_iteration
 
         error, gradient = gradient_method(
             embedding, P, dof=dof, bh_params=bh_params, fft_params=fft_params,
             reference_embedding=reference_embedding, n_jobs=n_jobs,
-            should_eval_error=True,
+            should_eval_error=should_eval_error,
         )
 
         if should_eval_error:
+            # TODO: Verify this with the KL divergence function
+            # Correct the KL divergence w.r.t. the exaggeration
+            error = (-np.sum(P) * np.log(exaggeration) + error) / exaggeration
+
             print('Iteration % 4d, error %.4f' % (iteration + 1, error))
 
         grad_direction_flipped = np.sign(update) != np.sign(gradient)
@@ -603,16 +623,23 @@ def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
         # Zero-mean the embedding
         embedding -= np.mean(embedding, axis=0)
 
-        if use_callback and (iteration + 1) % callback_every_iters == 0:
+        if should_call_callback:
             should_continue = bool(callback(error, embedding))
             if not should_continue:
-                raise OptimizationInterrupt(final_embedding=embedding)
+                # Make sure to un-exaggerate P so it's not corrupted in future runs
+                if exaggeration != 1:
+                    P /= exaggeration
+                raise OptimizationInterrupt(error=error, final_embedding=embedding)
 
         if np.linalg.norm(gradient) < min_grad_norm:
             log.info('Gradient norm eps reached. Finished.')
             break
 
-    return embedding
+    # Make sure to un-exaggerate P so it's not corrupted in future runs
+    if exaggeration != 1:
+        P /= exaggeration
+
+    return error, embedding
 
 
 def sqeuclidean(x, y):
