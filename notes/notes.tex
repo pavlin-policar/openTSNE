@@ -1,0 +1,38 @@
+\documentclass[11pt]{article}
+
+\usepackage{parskip}
+\usepackage{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amssymb}
+\usepackage{subcaption}
+\usepackage{hyperref}
+
+\geometry{
+  a4paper,
+  bottom=2.5cm,
+  right =2.5cm,
+  left  =2.5cm,
+  top   =2.5cm,
+}
+
+
+\begin{document}
+\title{t-SNE Notes}
+\author{Pavlin Poličar}
+\date{}
+\maketitle
+
+\section{KL Divergence for exaggerated P}
+
+\begin{align}
+KL(P \mid \mid Q) &= \sum_{ij} p_{ij} \log \frac{p_{ij}}{q_{ij}}
+\intertext{We need to introduce the scaling i.e. exaggeration factor $\alpha$}
+&= \sum_{ij} \frac{\alpha}{\alpha}p_{ij} \log \frac{\alpha p_{ij}}{\alpha q_{ij}} \\
+\intertext{Exaggeration means that the $p_{ij}$ terms get multiplied by $\alpha$, so we need to find an expression for the KL divergence that includes only $\alpha p_{ij}$ and $q_{ij}$ and some other factor that will correct for $\alpha$.}
+&= \frac{1}{\alpha} \sum_{ij} \alpha p_{ij} \left ( \log \frac{\alpha p_{ij}}{q_{ij}} - \log \alpha \right ) \\
+&= \frac{1}{\alpha} \left ( \sum_{ij} \alpha p_{ij} \log \frac{\alpha p_{ij}}{q_{ij}} - \sum_{ij} \alpha p_{ij}  \log \alpha \right )
+\end{align}
+
+The first term is computed by the negative gradient methods (since they don't know about exaggeration, and only care about $P$, the second term can easily be 
+
+\end{document}
