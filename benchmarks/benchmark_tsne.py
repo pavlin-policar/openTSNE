@@ -3,6 +3,7 @@ import os
 import pickle
 import time
 import urllib
+from os.path import abspath, dirname, join
 
 import fire
 import numpy as np
@@ -13,6 +14,10 @@ from MulticoreTSNE import MulticoreTSNE
 
 from tsne.tsne import TSNE, TSNEEmbedding
 import matplotlib.pyplot as plt
+
+
+FILE_DIR = dirname(abspath(__file__))
+DATA_DIR = join(FILE_DIR, 'data')
 
 
 np.set_printoptions(precision=4, suppress=True)
@@ -36,11 +41,11 @@ def plot1d(x: np.ndarray, y: np.ndarray) -> None:
 
 
 def get_mnist_full():
-    if not os.path.exists('mnist.pkl.gz'):
+    if not os.path.exists('data/mnist.pkl.gz'):
         urllib.request.urlretrieve(
-            'http://deeplearning.net/data/mnist/mnist.pkl.gz', 'mnist.pkl.gz')
+            'http://deeplearning.net/data/mnist/mnist.pkl.gz', 'data/mnist.pkl.gz')
 
-    with gzip.open('mnist.pkl.gz', 'rb') as f:
+    with gzip.open('data/mnist.pkl.gz', 'rb') as f:
         train, val, test = pickle.load(f, encoding='latin1')
     _train = np.asarray(train[0], dtype=np.float64)
     _val = np.asarray(val[0], dtype=np.float64)
@@ -78,17 +83,17 @@ def tmp():
 def run():
     # mnist = datasets.load_digits()
     # x, y = mnist['data'], mnist['target']
-    np.random.seed(1)
-    x, y = get_mnist_full()
-    indices = np.random.choice(list(range(x.shape[0])), 5000, replace=False)
-    x, y = x[indices], y[indices]
+    # np.random.seed(1)
+    # x, y = get_mnist_full()
+    # indices = np.random.choice(list(range(x.shape[0])), 5000, replace=False)
+    # x, y = x[indices], y[indices]
 
-    # with open('/home/pavlin/dev/tsne/benchmarks/sc-mouse-60k-1k.pkl', 'rb') as f:
-    #     x = pickle.load(f)
-    # x = x.astype(np.float32).toarray()
-    # import json
-    # with open('/home/pavlin/dev/tsne/benchmarks/y-shuffled.txt', 'rb') as f:
-    #     y = np.array(json.load(f), dtype=int)
+    with open(join(DATA_DIR, 'sc-mouse-60k-1k.pkl'), 'rb') as f:
+        x = pickle.load(f)
+    x = x.astype(np.float32).toarray()
+    import json
+    with open(join(DATA_DIR, 'sc-mouse-60k-1k-y.txt'), 'rb') as f:
+        y = np.array(json.load(f), dtype=int)
 
     angle = 0.5
     perplexity = 30
@@ -113,7 +118,6 @@ def run():
     print('tsne', time.time() - start)
     plt.title('tsne')
     plot(embedding, y)
-    plt.show()
 
     init = PCA(n_components=2).fit_transform(x)
     start = time.time()
