@@ -103,6 +103,35 @@ cpdef np.ndarray[np.float64_t, ndim=2] compute_gaussian_perplexity(
     return np.asarray(P, dtype=np.float64)
 
 
+cpdef double[:, :, ::1] precompute_diff_vectors(
+    int[:] indices,
+    int[:] indptr,
+    double[:, ::1] embedding,
+    double[:, ::1] reference_embedding,
+    Py_ssize_t num_threads=1,
+):
+    cdef:
+        Py_ssize_t n_samples = embedding.shape[0]
+        Py_ssize_t n_dims = embedding.shape[1]
+        Py_ssize_t k_neighbors = indptr[1]
+        Py_ssize_t i, j, k, d
+
+        double[:, :, ::1] diffs = np.empty((n_samples, k_neighbors, n_dims), dtype=float)
+
+    if num_threads < 1:
+        num_threads = 1
+
+    for i in prange(n_samples, nogil=True, schedule='guided', num_threads=num_threads):
+        # Iterate over all the neighbors `j` and precomute their diff vectors
+        for k in range(indptr[i], indptr[i + 1]):
+            j = indices[k]
+
+            for d in range(n_dims):
+                diffs[i, k % k_neighbors, d] = embedding[i, d] - reference_embedding[j, d]
+
+    return diffs
+
+
 cpdef tuple estimate_positive_gradient_nn(
     int[:] indices,
     int[:] indptr,
@@ -117,6 +146,7 @@ cpdef tuple estimate_positive_gradient_nn(
     cdef:
         Py_ssize_t n_samples = gradient.shape[0]
         Py_ssize_t n_dims = gradient.shape[1]
+        Py_ssize_t k_neighbors = indptr[1]
         double * diff
         double d_ij, p_ij, q_ij, kl_divergence = 0, sum_P = 0
 
@@ -125,43 +155,35 @@ cpdef tuple estimate_positive_gradient_nn(
     if num_threads < 1:
         num_threads = 1
 
-    with nogil, parallel(num_threads=num_threads):
-        # Use `malloc` here instead of `PyMem_Malloc` because we're in a
-        # `nogil` clause and we won't be allocating much memory
-        diff = <double *>malloc(n_dims * sizeof(double))
-        if not diff:
-            with gil:
-                raise MemoryError()
+    cdef double[:, :, ::1] diffs = precompute_diff_vectors(
+        indices, indptr, embedding, reference_embedding, num_threads)
 
-        for i in prange(n_samples, schedule='guided'):
-            # Iterate over all the neighbors `j` and sum up their contribution
-            for k in range(indptr[i], indptr[i + 1]):
-                j = indices[k]
-                p_ij = P_data[k]
-                # Compute the direction of the points attraction and the
-                # squared euclidean distance between the points
-                d_ij = 0
-                for d in range(n_dims):
-                    diff[d] = embedding[i, d] - reference_embedding[j, d]
-                    d_ij = d_ij + diff[d] ** 2
+    for i in prange(n_samples, num_threads=num_threads, nogil=True, schedule='guided'):
+        # Iterate over all the neighbors `j` and sum up their contribution
+        for k in range(indptr[i], indptr[i + 1]):
+            j = indices[k]
+            p_ij = P_data[k]
+            # Compute the direction of the points attraction and the
+            # squared euclidean distance between the points
+            d_ij = 0
+            for d in range(n_dims):
+                d_ij = d_ij + diffs[i, k % k_neighbors, d] ** 2
 
-                q_ij = dof / (dof + d_ij)
-                if dof != 1:
-                    q_ij = q_ij ** ((dof + 1) / 2)
+            q_ij = dof / (dof + d_ij)
+            if dof != 1:
+                q_ij = q_ij ** ((dof + 1) / 2)
 
-                # Compute F_{attr} of point `j` on point `i`
-                for d in range(n_dims):
-                    gradient[i, d] = gradient[i, d] + q_ij * p_ij * diff[d]
+            # Compute F_{attr} of point `j` on point `i`
+            for d in range(n_dims):
+                gradient[i, d] = gradient[i, d] + q_ij * p_ij * diffs[i, k % k_neighbors, d]
 
-                # Evaluating the following expressions can slow things down
-                # considerably if evaluated every iteration. Note that the q_ij
-                # is unnormalized, so we need to normalize once the sum of q_ij
-                # is known
-                if should_eval_error:
-                    sum_P += p_ij
-                    kl_divergence += p_ij * log(p_ij / (q_ij + EPSILON))
-
-        free(diff)
+            # Evaluating the following expressions can slow things down
+            # considerably if evaluated every iteration. Note that the q_ij
+            # is unnormalized, so we need to normalize once the sum of q_ij
+            # is known
+            if should_eval_error:
+                sum_P += p_ij
+                kl_divergence += p_ij * log(p_ij / (q_ij + EPSILON))
 
     return sum_P, kl_divergence
 
