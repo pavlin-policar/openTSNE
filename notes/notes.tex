@@ -22,7 +22,22 @@
 \date{}
 \maketitle
 
-\section{KL Divergence for exaggerated P}
+\section{Fast KL Divergence}
+
+During computation of negative gradients, we do not know the value of the normalization term $Z$ during intermediate steps. Therefore, in order to compute the KL divergence of the embedding, we would need to iterate over all the $p_{ij}$s again, at the end of the gradient computation step. By rewriting the KL divergence in terms of unnormalized $q_{ij}$s, we can save on computation time.
+
+\begin{align*}
+KL(P \mid \mid Q) &= \sum_{ij} p_{ij} \log \frac{p_{ij}}{q_{ij}} \\
+&= \sum_{ij} p_{ij} \log \left ( p_{ij} \frac{Z}{\hat{q}_{ij}} \right )
+\intertext{where $\hat{q}_{ij}$ denotes the unnormalized values $q_{ij}$}
+&= \sum_{ij} p_{ij} \log \frac{p_{ij}}{\hat{q}_{ij}} + \sum_{ij} p_{ij} \log Z
+\end{align*}
+
+\section{KL Divergence with exaggeration}
+
+The implemented optimization methods don't have a notion of exaggeration, they simply take an affinity matrix $P$ containing the probabilities of points $j$ appearing close to $i$. Exaggeration is used to scale $P$ by some constant factor $\alpha$ to help separate clusters in the beginning of the optimization. These methods also compute the KL divergence, and as such, it is incorrect because we don't account for $\alpha$.
+
+This section derives a quick and simple correction for the KL divergence error term so we can get the true error of the embedding even when $P$ is exaggerated.
 
 \begin{align}
 KL(P \mid \mid Q) &= \sum_{ij} p_{ij} \log \frac{p_{ij}}{q_{ij}}
@@ -33,6 +48,6 @@ KL(P \mid \mid Q) &= \sum_{ij} p_{ij} \log \frac{p_{ij}}{q_{ij}}
 &= \frac{1}{\alpha} \left ( \sum_{ij} \alpha p_{ij} \log \frac{\alpha p_{ij}}{q_{ij}} - \sum_{ij} \alpha p_{ij}  \log \alpha \right )
 \end{align}
 
-The first term is computed by the negative gradient methods (since they don't know about exaggeration, and only care about $P$, the second term can easily be 
+The first term is computed by the negative gradient method (since it only knows about the scaled $P$), the second term can easily be computed post-optimization, allowing us to get the correct KL divergence.
 
 \end{document}
