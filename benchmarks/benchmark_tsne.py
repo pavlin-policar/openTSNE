@@ -63,6 +63,9 @@ def tmp():
     x = iris['data']
     y = iris['target']
 
+    x_train, x_test = x[::2], x[1::2]
+    y_train, y_test = y[::2], y[1::2]
+
     tsne = TSNE(
         perplexity=30, learning_rate=100, early_exaggeration=12,
         n_jobs=4, angle=0.5, initialization='pca', metric='euclidean',
@@ -70,13 +73,15 @@ def tmp():
         negative_gradient_method='bh', min_num_intervals=10, ints_in_inverval=2,
         late_exaggeration_iter=0, late_exaggeration=4,
     )
-    embedding = tsne.get_initial_embedding_for(x)
-    embedding = embedding.optimize(n_iter=250, exaggeration=12, momentum=0.5)
-    embedding = embedding.optimize(n_iter=750, momentum=0.8)
-    plot(embedding, y)
+    embedding = tsne.fit(x_train)
+    plot(embedding, y_train)
 
-    embedding = tsne.fit(x)
-    plot(embedding, y)
+    # partial_embedding = embedding.get_partial_embedding_for(x_test, perplexity=10)
+    # partial_embedding = partial_embedding.optimize(100)
+    # plot(partial_embedding, y_test)
+
+    partial_embedding = embedding.transform(x_test, perplexity=10)
+    plot(partial_embedding, y_test)
 
 
 def run():
