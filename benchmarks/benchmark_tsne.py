@@ -70,10 +70,9 @@ def tmp():
         negative_gradient_method='bh', min_num_intervals=10, ints_in_inverval=2,
         late_exaggeration_iter=0, late_exaggeration=4,
     )
-    optimizer = tsne.get_optimizer_for(x)
     embedding = tsne.get_initial_embedding_for(x)
-    embedding = optimizer.optimize(embedding, n_iter=250, exaggeration=12, momentum=0.5)
-    embedding = optimizer.optimize(embedding, n_iter=750, momentum=0.8)
+    embedding = embedding.optimize(n_iter=250, exaggeration=12, momentum=0.5)
+    embedding = embedding.optimize(n_iter=750, momentum=0.8)
     plot(embedding, y)
 
     embedding = tsne.fit(x)
@@ -110,7 +109,7 @@ def run():
         n_jobs=threads, angle=angle, initialization='random', metric=metric,
         n_components=2, n_iter=750, early_exaggeration_iter=250, neighbors='approx',
         negative_gradient_method='fft', min_num_intervals=10, ints_in_inverval=2,
-        late_exaggeration_iter=100, late_exaggeration=2.,
+        late_exaggeration_iter=0, late_exaggeration=2.,
     )
     # x = PCA(n_components=50).fit_transform(x)
     embedding = tsne.fit(x)

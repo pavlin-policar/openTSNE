@@ -22,40 +22,27 @@ class OptimizationInterrupt(KeyboardInterrupt):
 
 
 class TSNEEmbedding(np.ndarray):
-    def __new__(cls, embedding):
+    def __new__(cls, embedding, perplexity, knn_index, P, gradient_descent_params):
         obj = np.asarray(embedding, dtype=np.float64, order='C').view(TSNEEmbedding)
+
+        obj.perplexity = perplexity
+        obj.knn_index = knn_index
+        obj.P = P
+        obj.gradient_descent_params = gradient_descent_params
 
         obj.kl_divergence = None
         obj.pBIC = None
 
         return obj
 
-
-class TSNEOptimizer:
-    def __init__(self, perplexity, knn_index, P, gradient_descent_params):
-        self.perplexity = perplexity
-        self.knn_index = knn_index
-        self.P = P
-        self.gradient_descent_params = gradient_descent_params
-
-        self.kl_divergence = None
-        self.pBIC = None
-
-    def optimize(self, embedding, n_iter, inplace=False,
-                 propagate_exception=False, **gradient_descent_params):
-        assert isinstance(embedding, np.ndarray), \
-            '`embedding` must be an instance of `np.ndarray`. Got `%s` instead' \
-            % type(embedding)
-
-        # Our algorithms require the embedding to be a C contigour array
-        embedding = np.ascontiguousarray(embedding)
-
-        # Make sure to interpret the embedding as a tSNE embedding
-        embedding = embedding.view(TSNEEmbedding)
-
+    def optimize(self, n_iter, inplace=False, propagate_exception=False,
+                 **gradient_descent_params):
         # Typically we want to return a new embedding and keep the old one intact
         if not inplace:
-            embedding = TSNEEmbedding(embedding)
+            embedding = TSNEEmbedding(self, self.perplexity, self.knn_index,
+                                      self.P, self.gradient_descent_params)
+        else:
+            embedding = self
 
         # If optimization parameters were passed to this funciton, prefer those
         # over the defaults specified in the TSNE object
@@ -79,6 +66,13 @@ class TSNEOptimizer:
         embedding.pBIC = 2 * error + np.log(n_samples) * self.perplexity / n_samples
 
         return embedding
+
+    def finalize(self):
+        """Free up memory after optimization is complete."""
+        del self.perplexity
+        del self.knn_index
+        del self.P
+        del self.gradient_descent_params
 
 
 class TSNE:
@@ -129,33 +123,31 @@ class TSNE:
 
         """
         embedding = self.get_initial_embedding_for(X)
-        optimizer = self.get_optimizer_for(X)
 
         try:
             # Early exaggeration with lower momentum to allow points to find more
             # easily move around and find their neighbors
-            optimizer.optimize(
-                embedding, n_iter=self.early_exaggeration_iter,
-                exaggeration=self.early_exaggeration,
-                momentum=self.initial_momentum,
-                inplace=True, propagate_exception=True,
+            embedding.optimize(
+                n_iter=self.early_exaggeration_iter, exaggeration=self.early_exaggeration,
+                momentum=self.initial_momentum, inplace=True, propagate_exception=True,
             )
 
             # Restore actual affinity probabilities and increase momentum to get
             # final, optimized embedding
-            optimizer.optimize(
-                embedding, n_iter=self.n_iter, momentum=self.final_momentum,
-                inplace=True, propagate_exception=True,
+            embedding.optimize(
+                n_iter=self.n_iter, momentum=self.final_momentum, inplace=True,
+                propagate_exception=True,
             )
 
             # Use the trick described in [4]_ to get more separated clusters of
             # points by applying a late exaggeration phase
-            optimizer.optimize(
-                embedding, n_iter=self.late_exaggeration_iter,
-                exaggeration=self.late_exaggeration,
-                momentum=self.final_momentum,
-                inplace=True, propagate_exception=True,
+            embedding.optimize(
+                n_iter=self.late_exaggeration_iter, exaggeration=self.late_exaggeration,
+                momentum=self.final_momentum, inplace=True, propagate_exception=True,
             )
+
+            # Free up any memory used by optimization
+            embedding.finalize()
 
         except OptimizationInterrupt as ex:
             log.info('Optimization was interrupted with callback.')
@@ -163,7 +155,54 @@ class TSNE:
 
         return embedding
 
-    def get_optimizer_for(self, data: np.ndarray) -> TSNEOptimizer:
+    def get_initial_embedding_for(self, X, initialization=None):
+        """Get an initial embedding for the data set.
+
+        Parameters
+        ----------
+        X : np.ndarray
+        initialization : Optional[Union[np.ndarray, str]]
+
+        Returns
+        -------
+        TSNEEmbedding
+
+        """
+        initialization = initialization or self.initialization
+
+        # If initial positions are given in an array, use a copy of that
+        if isinstance(initialization, np.ndarray):
+            embedding = np.array(initialization)
+
+        # Initialize the embedding using a PCA projection into the desired
+        # number of components
+        elif initialization == 'pca':
+            pca = PCA(n_components=self.n_components)
+            embedding = pca.fit_transform(X)
+
+        # Random initialization
+        elif initialization == 'random':
+            embedding = np.random.normal(0, 1e-2, (X.shape[0], self.n_components))
+
+        else:
+            raise ValueError('Unrecognized initialization scheme')
+
+        return TSNEEmbedding(embedding, **self.__get_optimization_params_for(X))
+
+    def __get_optimization_params_for(self, data):
+        """Compute and determine all the parameters needed for optimization.
+
+        Parameters
+        ----------
+        data : np.ndarray
+
+        Returns
+        -------
+        dict
+            All the parameters needed to construct a tSNE embedding object,
+            without the actual embedding itself.
+
+        """
         n_samples = data.shape[0]
 
         # Check for valid perplexity value
@@ -219,30 +258,10 @@ class TSNE:
             'callback_every_iters': self.callback_every_iters,
         }
 
-        return TSNEOptimizer(
-            perplexity=perplexity, knn_index=knn_index, P=P,
-            gradient_descent_params=gradient_descent_params,
-        )
-
-    def get_initial_embedding_for(self, X: np.ndarray) -> np.ndarray:
-        # If initial positions are given in an array, use a copy of that
-        if isinstance(self.initialization, np.ndarray):
-            embedding = np.array(self.initialization)
-
-        # Initialize the embedding using a PCA projection into the desired
-        # number of components
-        elif self.initialization == 'pca':
-            pca = PCA(n_components=self.n_components)
-            embedding = pca.fit_transform(X)
-
-        # Random initialization
-        elif self.initialization == 'random':
-            embedding = np.random.normal(0, 1e-2, (X.shape[0], self.n_components))
-
-        else:
-            raise ValueError('Unrecognized initialization scheme')
-
-        return np.ascontiguousarray(embedding)
+        return {'perplexity': perplexity,
+                'knn_index': knn_index,
+                'P': P,
+                'gradient_descent_params': gradient_descent_params}
 
     def __get_nearest_neighbors(self, X, k_neighbors):
         """Compute the nearest neighbors for a given dataset.
@@ -538,7 +557,7 @@ def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
         if should_eval_error:
             # TODO: Verify this with the KL divergence function
             # Correct the KL divergence w.r.t. the exaggeration
-            error = (-np.sum(P) * np.log(exaggeration) + error) / exaggeration
+            error = (error - np.sum(P) * np.log(exaggeration)) / exaggeration
 
             print('Iteration % 4d, error %.4f' % (iteration + 1, error))
 
