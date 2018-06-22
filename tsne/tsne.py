@@ -56,7 +56,7 @@ class PartialTSNEEmbedding(np.ndarray):
             embedding = self
         else:
             embedding = PartialTSNEEmbedding(
-                self, self.reference_embedding, self.perplexity, self.P,
+                np.copy(self), self.reference_embedding, self.perplexity, self.P,
                 self.gradient_descent_params,
             )
 
@@ -111,7 +111,7 @@ class TSNEEmbedding(np.ndarray):
         if inplace:
             embedding = self
         else:
-            embedding = TSNEEmbedding(self, self.perplexity, self.knn_index,
+            embedding = TSNEEmbedding(np.copy(self), self.perplexity, self.knn_index,
                                       self.P, self.gradient_descent_params)
 
         # If optimization parameters were passed to this funciton, prefer those
