@@ -139,28 +139,28 @@ class TSNEEmbedding(np.ndarray):
         return embedding
 
     def transform(self, X, perplexity=None, initialization='weighted',
-                  early_exaggeration=4, early_exaggeration_iter=100,
-                  initial_momentum=0.5, n_iter=300, final_momentum=0.8,
+                  early_exaggeration=2, early_exaggeration_iter=100,
+                  initial_momentum=0.2, n_iter=300, final_momentum=0.4,
                   **gradient_descent_params):
         embedding = self.get_partial_embedding_for(
             X, perplexity=perplexity, initialization=initialization)
 
+        optim_params = dict(gradient_descent_params)
+
         try:
             # Early exaggeration with lower momentum to allow points to find more
             # easily move around and find their neighbors
-            embedding.optimize(
-                n_iter=early_exaggeration_iter, exaggeration=early_exaggeration,
-                momentum=initial_momentum, inplace=True, propagate_exception=True,
-                **gradient_descent_params,
-            )
+            optim_params['momentum'] = initial_momentum
+            optim_params['exaggeration'] = early_exaggeration
+            optim_params['n_iter'] = early_exaggeration_iter
+            embedding.optimize(inplace=True, propagate_exception=True, **optim_params)
 
             # Restore actual affinity probabilities and increase momentum to get
             # final, optimized embedding
-            embedding.optimize(
-                n_iter=n_iter, exaggeration=None, momentum=final_momentum,
-                inplace=True, propagate_exception=True,
-                **gradient_descent_params,
-            )
+            optim_params['momentum'] = final_momentum
+            optim_params['exaggeration'] = None
+            optim_params['n_iter'] = n_iter
+            embedding.optimize(inplace=True, propagate_exception=True, **optim_params)
 
         except OptimizationInterrupt as ex:
             log.info('Optimization was interrupted with callback.')

@@ -11,33 +11,36 @@ from sklearn import datasets
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE as SKLTSNE
 from MulticoreTSNE import MulticoreTSNE
+from sklearn.model_selection import train_test_split
 
 from tsne.tsne import TSNE, TSNEEmbedding
 import matplotlib.pyplot as plt
 
-
 FILE_DIR = dirname(abspath(__file__))
 DATA_DIR = join(FILE_DIR, 'data')
-
 
 np.set_printoptions(precision=4, suppress=True)
 
 
-def plot(x: np.ndarray, y: np.ndarray) -> None:
+def plot(x: np.ndarray, y: np.ndarray, show: bool = True, **kwargs) -> None:
     for yi in np.unique(y):
         mask = y == yi
-        plt.plot(x[mask, 0], x[mask, 1], 'o', label=str(yi), alpha=0.5, ms=1)
+        plt.plot(x[mask, 0], x[mask, 1], 'o', label=str(yi),
+                 alpha=kwargs.get('alpha', 0.6), ms=kwargs.get('ms', 1))
     plt.legend()
-    plt.show()
+    if show:
+        plt.show()
 
 
-def plot1d(x: np.ndarray, y: np.ndarray) -> None:
+def plot1d(x: np.ndarray, y: np.ndarray, show: bool = True, **kwargs) -> None:
     for yi in np.unique(y):
         mask = y == yi
         jitter = np.random.randn(mask.shape[0])
-        plt.plot(x, jitter, 'o', label=str(yi), alpha=0.5, ms=1)
+        plt.plot(x, jitter, 'o', label=str(yi),
+                 alpha=kwargs.get('alpha', 0.6), ms=kwargs.get('ms', 1))
     plt.legend()
-    plt.show()
+    if show:
+        plt.show()
 
 
 def get_mnist_full():
@@ -161,27 +164,38 @@ def run():
     plt.show()
 
 
-def transform():
-    data = Table('cdp_expression_shekhar.pickle')
-    data.shuffle()
-    N = data.X.shape[0]
-    # data = Table('sc-aml-sample.pickle')
-    train, test = data[:N // 8], data[N // 8:]
+def transform(n_jobs=4):
+    iris = datasets.load_iris()
+    x = iris['data']
+    y = iris['target']
 
+    x_train, x_test, y_train, y_test = train_test_split(
+        x, y, test_size=0.33, random_state=42)
+
+    tsne = TSNE(
+        perplexity=30, learning_rate=100, early_exaggeration=12,
+        n_jobs=n_jobs, angle=0.5, initialization='pca', metric='euclidean',
+        n_components=2, n_iter=750, early_exaggeration_iter=250, neighbors='exact',
+        negative_gradient_method='bh', min_num_intervals=10, ints_in_inverval=2,
+        late_exaggeration_iter=0, late_exaggeration=4,
+    )
     start = time.time()
-    model = TSNE(
-        n_components=2, perplexity=5, early_exaggeration=4, initialization='random',
-        n_jobs=8,
-        # late_exaggeration=1.1, late_exaggeration_iter=250,
-    )(train)  # type: TSNEEmbedding
+    embedding = tsne.fit(x_train)
     print('tsne train', time.time() - start)
-    plot(model.embedding, train.Y)
-    plt.gca().set_color_cycle(None)
+
+    plt.subplot(121)
+    plot(embedding, y_train, show=False, ms=3)
 
     start = time.time()
-    transformed = model(test, perplexity=10, exaggeration_iter=200)
+    partial_embedding = embedding.transform(
+        x_test, perplexity=10, early_exaggeration_iter=0,
+        final_momentum=0.2, initialization='random')
     print('tsne trasnsform', time.time() - start)
-    plot(transformed, test.Y)
+
+    plt.subplot(122)
+    plot(embedding, y_train, show=False, ms=3, alpha=0.25)
+    plt.gca().set_color_cycle(None)
+    plot(partial_embedding, y_test, show=False, ms=3, alpha=0.8)
 
     plt.show()
 
