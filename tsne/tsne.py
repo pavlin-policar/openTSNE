@@ -15,7 +15,7 @@ EPSILON = np.finfo(np.float64).eps
 log = logging.getLogger(__name__)
 
 
-class OptimizationInterrupt(KeyboardInterrupt):
+class OptimizationInterrupt(InterruptedError):
     def __init__(self, error: float, final_embedding: np.ndarray) -> None:
         super().__init__()
         self.error = error
@@ -34,8 +34,7 @@ class PartialTSNEEmbedding(np.ndarray):
 
     """
 
-    def __new__(cls, embedding, reference_embedding, perplexity, P,
-                gradient_descent_params):
+    def __new__(cls, embedding, reference_embedding, perplexity, P, gradient_descent_params):
         obj = np.asarray(embedding, dtype=np.float64, order='C').view(PartialTSNEEmbedding)
 
         obj.reference_embedding = reference_embedding
@@ -93,8 +92,7 @@ class PartialTSNEEmbedding(np.ndarray):
 
 
 class TSNEEmbedding(np.ndarray):
-    def __new__(cls, embedding, perplexity, knn_index, P,
-                gradient_descent_params):
+    def __new__(cls, embedding, perplexity, knn_index, P, gradient_descent_params):
         obj = np.asarray(embedding, dtype=np.float64, order='C').view(TSNEEmbedding)
 
         obj.perplexity = perplexity  # type: float
