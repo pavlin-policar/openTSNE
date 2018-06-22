@@ -13,6 +13,7 @@ from sklearn.manifold import TSNE as SKLTSNE
 from MulticoreTSNE import MulticoreTSNE
 from sklearn.model_selection import train_test_split
 
+from tsne.callbacks import ErrorLogger
 from tsne.tsne import TSNE, TSNEEmbedding
 import matplotlib.pyplot as plt
 
@@ -66,25 +67,15 @@ def tmp():
     x = iris['data']
     y = iris['target']
 
-    x_train, x_test = x[::2], x[1::2]
-    y_train, y_test = y[::2], y[1::2]
-
     tsne = TSNE(
         perplexity=30, learning_rate=100, early_exaggeration=12,
         n_jobs=4, angle=0.5, initialization='pca', metric='euclidean',
         n_components=2, n_iter=750, early_exaggeration_iter=250, neighbors='exact',
         negative_gradient_method='bh', min_num_intervals=10, ints_in_inverval=2,
-        late_exaggeration_iter=0, late_exaggeration=4,
+        late_exaggeration_iter=0, late_exaggeration=4, callbacks=ErrorLogger(),
     )
-    embedding = tsne.fit(x_train)
-    plot(embedding, y_train)
-
-    # partial_embedding = embedding.get_partial_embedding_for(x_test, perplexity=10)
-    # partial_embedding = partial_embedding.optimize(100)
-    # plot(partial_embedding, y_test)
-
-    partial_embedding = embedding.transform(x_test, perplexity=10)
-    plot(partial_embedding, y_test)
+    embedding = tsne.fit(x)
+    plot(embedding, y)
 
 
 def run():

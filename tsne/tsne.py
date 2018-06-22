@@ -1,5 +1,6 @@
 import logging
 import time
+from collections import Iterable
 
 import numpy as np
 from scipy.sparse import csr_matrix
@@ -261,7 +262,7 @@ class TSNE:
                  ints_in_inverval=10, initialization='pca', metric='sqeuclidean',
                  initial_momentum=0.5, final_momentum=0.8, n_jobs=1,
                  neighbors='exact', negative_gradient_method='bh',
-                 callback=None, callback_every_iters=50):
+                 callbacks=None, callbacks_every_iters=50):
         self.n_components = n_components
         self.perplexity = perplexity
         self.learning_rate = learning_rate
@@ -282,11 +283,19 @@ class TSNE:
         self.neighbors_method = neighbors
         self.negative_gradient_method = negative_gradient_method
 
-        if callback is not None and not callable(callback):
-            raise ValueError('`callback` must be a callable object!')
-        self.use_callback = callback is not None
-        self.callback = callback
-        self.callback_every_iters = callback_every_iters
+        if callbacks is not None:
+            # If list was passed, make sure all of them are actually callable
+            if isinstance(callbacks, Iterable):
+                if any(not callable(c) for c in callbacks):
+                    raise ValueError('`callbacks` must contain callable objects!')
+            # The gradient descent method deals with lists
+            elif callable(callbacks):
+                callbacks = (callbacks,)
+            else:
+                raise ValueError('`callbacks` must be a callable object!')
+        self.use_callbacks = callbacks is not None
+        self.callbacks = callbacks
+        self.callbacks_every_iters = callbacks_every_iters
 
     def fit(self, X: np.ndarray) -> TSNEEmbedding:
         """Perform t-SNE dimensionality reduction.
@@ -432,9 +441,9 @@ class TSNE:
 
             'n_jobs': self.n_jobs,
             # Callback params
-            'use_callback': self.use_callback,
-            'callback': self.callback,
-            'callback_every_iters': self.callback_every_iters,
+            'use_callbacks': self.use_callbacks,
+            'callbacks': self.callbacks,
+            'callbacks_every_iters': self.callbacks_every_iters,
         }
 
         return {'perplexity': perplexity,
@@ -613,8 +622,8 @@ def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
                      momentum, exaggeration=None, min_gain=0.01,
                      min_grad_norm=1e-8, theta=0.5, n_interpolation_points=3,
                      min_num_intervals=10, ints_in_interval=10,
-                     reference_embedding=None, n_jobs=1, use_callback=False,
-                     callback=None, callback_every_iters=50):
+                     reference_embedding=None, n_jobs=1, use_callbacks=False,
+                     callbacks=None, callbacks_every_iters=50):
     """Perform batch gradient descent with momentum and gains.
 
     Parameters
@@ -675,13 +684,13 @@ def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
         the gradients and errors w.r.t. the existing embedding.
     n_jobs : int
         Number of threads.
-    use_callback : bool
-    callback : Callable[[float, np.ndarray] -> bool]
+    use_callbacks : bool
+    callbacks : Callable[[float, np.ndarray] -> bool]
         The callback should accept two parameters, the first is the error of
         the current iteration (the KL divergence), the second is the current
         embedding. The callback should return a boolean value indicating
         whether or not to continue optimization i.e. False to stop.
-    callback_every_iters : int
+    callbacks_every_iters : int
         How often should the callback be called.
 
     Returns
@@ -724,11 +733,11 @@ def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
         P *= exaggeration
 
     for iteration in range(n_iter):
-        should_call_callback = use_callback and (iteration + 1) % callback_every_iters == 0
+        # We want to report the error to the callback and a final error if
+        # we're at the final iteration
+        should_call_callback = use_callbacks and (iteration + 1) % callbacks_every_iters == 0
         is_last_iteration = iteration == n_iter - 1
-        # We want to provide the error to the callback and a final error if
-        # we're at the final iteration, regardless of logging
-        should_eval_error = (iteration + 1) % 50 == 0 or should_call_callback or is_last_iteration
+        should_eval_error = should_call_callback or is_last_iteration
 
         error, gradient = gradient_method(
             embedding, P, dof=dof, bh_params=bh_params, fft_params=fft_params,
@@ -736,12 +745,10 @@ def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
             should_eval_error=should_eval_error,
         )
 
-        if should_eval_error:
+        # Correct the KL divergence w.r.t. the exaggeration if needed
+        if should_eval_error and exaggeration != 1:
             # TODO: Verify this with the KL divergence function
-            # Correct the KL divergence w.r.t. the exaggeration
             error = (error - np.sum(P) * np.log(exaggeration)) / exaggeration
-
-            print('Iteration % 4d, error %.4f' % (iteration + 1, error))
 
         grad_direction_flipped = np.sign(update) != np.sign(gradient)
         grad_direction_same = np.invert(grad_direction_flipped)
@@ -754,7 +761,8 @@ def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
         embedding -= np.mean(embedding, axis=0)
 
         if should_call_callback:
-            should_continue = bool(callback(error, embedding))
+            # Continue only if all the callbacks say so
+            should_continue = all((bool(c(iteration + 1, error, embedding)) for c in callbacks))
             if not should_continue:
                 # Make sure to un-exaggerate P so it's not corrupted in future runs
                 if exaggeration != 1:
