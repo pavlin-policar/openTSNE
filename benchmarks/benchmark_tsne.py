@@ -69,9 +69,9 @@ def tmp():
 
     tsne = TSNE(
         perplexity=30, learning_rate=100, early_exaggeration=12,
-        n_jobs=4, angle=0.5, initialization='pca', metric='euclidean',
+        n_jobs=4, theta=0.5, initialization='pca', metric='euclidean',
         n_components=2, n_iter=750, early_exaggeration_iter=250, neighbors='exact',
-        negative_gradient_method='bh', min_num_intervals=10, ints_in_inverval=2,
+        negative_gradient_method='bh', min_num_intervals=10, ints_in_interval=2,
         late_exaggeration_iter=0, late_exaggeration=4, callbacks=ErrorLogger(),
     )
     embedding = tsne.fit(x)
@@ -105,9 +105,9 @@ def run():
     start = time.time()
     tsne = TSNE(
         perplexity=perplexity, learning_rate=lr, early_exaggeration=ee,
-        n_jobs=threads, angle=angle, initialization='random', metric=metric,
+        n_jobs=threads, theta=angle, initialization='random', metric=metric,
         n_components=2, n_iter=750, early_exaggeration_iter=250, neighbors='approx',
-        negative_gradient_method='fft', min_num_intervals=10, ints_in_inverval=2,
+        negative_gradient_method='fft', min_num_intervals=10, ints_in_interval=2,
         late_exaggeration_iter=0, late_exaggeration=2., callbacks=ErrorLogger(),
     )
     # x = PCA(n_components=50).fit_transform(x)
@@ -165,9 +165,9 @@ def transform(n_jobs=4):
 
     tsne = TSNE(
         perplexity=30, learning_rate=100, early_exaggeration=12,
-        n_jobs=n_jobs, angle=0.5, initialization='pca', metric='euclidean',
+        n_jobs=n_jobs, theta=0.5, initialization='pca', metric='euclidean',
         n_components=2, n_iter=750, early_exaggeration_iter=250, neighbors='exact',
-        negative_gradient_method='bh', min_num_intervals=10, ints_in_inverval=2,
+        negative_gradient_method='bh', min_num_intervals=10, ints_in_interval=2,
         late_exaggeration_iter=0, late_exaggeration=4,
     )
     start = time.time()

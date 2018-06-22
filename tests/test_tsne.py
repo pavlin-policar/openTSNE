@@ -68,7 +68,9 @@ class TestTSNEParameterFlow(unittest.TestCase):
     @check_params({**grad_descent_params, **{
         'early_exaggeration_iter': [50, 100],
         'early_exaggeration': [4, 12],
+        'initial_momentum': [0.2, 0.5, 0.8],
         'n_iter': [50, 100],
+        'final_momentum': [0.2, 0.5, 0.8],
         'late_exaggeration_iter': [50, 100],
         'late_exaggeration': [None, 2],
     }})
@@ -85,9 +87,15 @@ class TestTSNEParameterFlow(unittest.TestCase):
         elif param_name == 'early_exaggeration':
             check_param_name = 'exaggeration'
             call_idx = 0
+        elif param_name == 'initial_momentum':
+            check_param_name = 'momentum'
+            call_idx = 0
         # Main training loop
         elif param_name == 'n_iter':
             check_param_name = param_name
+            call_idx = 1
+        elif param_name == 'final_momentum':
+            check_param_name = 'momentum'
             call_idx = 1
         # Early exaggeration training loop
         elif param_name == 'late_exaggeration_iter':
@@ -102,8 +110,29 @@ class TestTSNEParameterFlow(unittest.TestCase):
             check_param_name = param_name
             call_idx = 0
 
-        print(param_name, param_value)
-
         TSNE(**{param_name: param_value}).fit(self.x)
+
+        self.assertEqual(3, gradient_descent.call_count)
         check_call_contains_kwargs(gradient_descent.mock_calls[call_idx],
                                    {check_param_name: param_value})
+
+    @check_params({**grad_descent_params, **{
+        'n_iter': [50, 100, 150],
+        'exaggeration': [None, 2, 5],
+        'momentum': [0.2, 0.5, 0.8],
+    }})
+    @patch('tsne.tsne.gradient_descent')
+    def test_embedding_optimize(self, param_name, param_value, gradient_descent):
+        # type: (Any, Any, MagicMock) -> None
+        # Make sure mock still conforms to signature
+        gradient_descent.return_value = (1, MagicMock())
+
+        # `optimize` requires us to specify the `n_iter`
+        params = {'n_iter': 50, param_name: param_value}
+
+        tsne = TSNE()
+        embedding = tsne.get_initial_embedding_for(self.x)
+        embedding.optimize(**params, inplace=True)
+
+        self.assertEqual(1, gradient_descent.call_count)
+        check_call_contains_kwargs(gradient_descent.mock_calls[0], params)

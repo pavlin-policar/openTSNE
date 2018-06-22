@@ -258,8 +258,8 @@ class TSNE:
     def __init__(self, n_components=2, perplexity=30, learning_rate=10,
                  early_exaggeration_iter=250, early_exaggeration=12,
                  n_iter=750, late_exaggeration_iter=0, late_exaggeration=1.2,
-                 angle=0.5, n_interpolation_points=3, min_num_intervals=10,
-                 ints_in_inverval=10, initialization='pca', metric='sqeuclidean',
+                 theta=0.5, n_interpolation_points=3, min_num_intervals=10,
+                 ints_in_interval=10, initialization='pca', metric='euclidean',
                  initial_momentum=0.5, final_momentum=0.8, n_jobs=1,
                  neighbors='exact', negative_gradient_method='bh',
                  callbacks=None, callbacks_every_iters=50):
@@ -271,10 +271,10 @@ class TSNE:
         self.n_iter = n_iter
         self.late_exaggeration = late_exaggeration
         self.late_exaggeration_iter = late_exaggeration_iter
-        self.angle = angle
+        self.theta = theta
         self.n_interpolation_points = n_interpolation_points
         self.min_num_intervals = min_num_intervals
-        self.ints_in_inverval = ints_in_inverval
+        self.ints_in_interval = ints_in_interval
         self.initialization = initialization
         self.metric = metric
         self.initial_momentum = initial_momentum
@@ -416,28 +416,28 @@ class TSNE:
 
         # Determine which method will be used for optimization
         if callable(self.negative_gradient_method):
-            gradient_method = self.negative_gradient_method
+            negative_gradient_method = self.negative_gradient_method
         elif self.negative_gradient_method in {'bh', 'BH', 'barnes-hut'}:
-            gradient_method = kl_divergence_bh
+            negative_gradient_method = kl_divergence_bh
         elif self.negative_gradient_method in {'fft', 'FFT', 'interpolation'}:
-            gradient_method = kl_divergence_fft
+            negative_gradient_method = kl_divergence_fft
         else:
             raise ValueError('Unrecognized gradient method. Please choose one of '
                              'the supported methods or provide a valid callback.')
 
         gradient_descent_params = {
             'dof': degrees_of_freedom,
-            'gradient_method': gradient_method,
+            'negative_gradient_method': negative_gradient_method,
             'learning_rate': self.learning_rate,
             # By default, use the momentum used in unexaggerated phase
             'momentum': self.final_momentum,
 
             # Barnes-Hut params
-            'theta': self.angle,
+            'theta': self.theta,
             # Interpolation params
             'n_interpolation_points': self.n_interpolation_points,
             'min_num_intervals': self.min_num_intervals,
-            'ints_in_interval': self.ints_in_inverval,
+            'ints_in_interval': self.ints_in_interval,
 
             'n_jobs': self.n_jobs,
             # Callback params
@@ -618,8 +618,8 @@ def kl_divergence_fft(embedding, P, dof, fft_params, reference_embedding=None,
     return kl_divergence_, gradient
 
 
-def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
-                     momentum, exaggeration=None, min_gain=0.01,
+def gradient_descent(embedding, P, dof, n_iter, negative_gradient_method,
+                     learning_rate, momentum, exaggeration=None, min_gain=0.01,
                      min_grad_norm=1e-8, theta=0.5, n_interpolation_points=3,
                      min_num_intervals=10, ints_in_interval=10,
                      reference_embedding=None, n_jobs=1, use_callbacks=False,
@@ -636,7 +636,7 @@ def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
         Degrees of freedom of the Student's t-distribution.
     n_iter : int
         Number of iterations to run the optimization for.
-    gradient_method : Callable[..., Tuple[float, np.ndarray]]
+    negative_gradient_method : Callable[..., Tuple[float, np.ndarray]]
         The callable takes the embedding as arguments and returns the (or an
         approximation to) KL divergence of the current embedding and the
         gradient of the embedding, with which to update the point locations.
@@ -741,7 +741,7 @@ def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
         is_last_iteration = iteration == n_iter - 1
         should_eval_error = should_call_callback or is_last_iteration
 
-        error, gradient = gradient_method(
+        error, gradient = negative_gradient_method(
             embedding, P, dof=dof, bh_params=bh_params, fft_params=fft_params,
             reference_embedding=reference_embedding, n_jobs=n_jobs,
             should_eval_error=should_eval_error,
