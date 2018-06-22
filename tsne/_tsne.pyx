@@ -9,7 +9,6 @@ import numpy as np
 from .quad_tree cimport QuadTree, Node, is_duplicate
 from cython.parallel import prange, parallel
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
-from libc.stdlib cimport malloc, free
 
 
 cdef extern from 'fftw3.h':
@@ -514,6 +513,8 @@ cpdef double estimate_negative_gradient_fft_1d(
             for d in range(n_terms):
                 phi[i, d] += interpolated_values[i, j] * y_tilde_values[box_idx + j, d]
 
+    PyMem_Free(point_box_idx)
+
     # Compute the normalization term Z or sum of q_{ij}s, this is not described
     # in the paper, but can be worked out
     cdef double sum_Q = 0
@@ -650,6 +651,9 @@ cpdef double estimate_negative_gradient_fft_1d_with_reference(
         for j in range(n_interpolation_points):
             for d in range(n_terms):
                 phi[i, d] += interpolated_values[i, j] * y_tilde_values[box_idx + j, d]
+
+    PyMem_Free(reference_point_box_idx)
+    PyMem_Free(point_box_idx)
 
     # Compute the normalization term Z or sum of q_{ij}s, this is not described
     # in the paper, but can be worked out
@@ -937,6 +941,8 @@ cpdef double estimate_negative_gradient_fft_2d(
                                  y_interpolated_values[i, interp_j] * \
                                  y_tilde_values[idx, d]
 
+    PyMem_Free(point_box_idx)
+
     # Compute the normalization term Z or sum of q_{ij}s, this is not described
     # in the paper, but can be worked out
     cdef double sum_Q = 0, y1, y2
@@ -1140,6 +1146,9 @@ cpdef double estimate_negative_gradient_fft_2d_with_reference(
                     phi[i, d] += x_interpolated_values[i, interp_i] * \
                                  y_interpolated_values[i, interp_j] * \
                                  y_tilde_values[idx, d]
+
+    PyMem_Free(reference_point_box_idx)
+    PyMem_Free(point_box_idx)
 
     # Compute the normalization term Z or sum of q_{ij}s, this is not described
     # in the paper, but can be worked out
