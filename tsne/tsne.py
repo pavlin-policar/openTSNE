@@ -587,20 +587,21 @@ def kl_divergence_fft(embedding, P, dof, fft_params, reference_embedding=None,
                       should_eval_error=False, n_jobs=1, **_):
     gradient = np.zeros_like(embedding, dtype=np.float64, order='C')
 
-    # In the event that we wish to embed new points into an existing embedding
-    # using simple optimization, we compute optimize the new embedding points
-    # w.r.t. the existing embedding. Otherwise, we want to optimize the
-    # embedding w.r.t. itself
-    if reference_embedding is None:
-        reference_embedding = embedding
-
-    # Compute negative gradient
+    # Compute negative gradient.
     if embedding.ndim == 1 or embedding.shape[1] == 1:
-        sum_Q = _tsne.estimate_negative_gradient_fft_1d(
-            embedding.ravel(), gradient.ravel(), **fft_params)
+        if reference_embedding is not None:
+            sum_Q = _tsne.estimate_negative_gradient_fft_1d_with_reference(
+                embedding.ravel(), reference_embedding.ravel(), gradient.ravel(), **fft_params)
+        else:
+            sum_Q = _tsne.estimate_negative_gradient_fft_1d(
+                embedding.ravel(), gradient.ravel(), **fft_params)
     elif embedding.shape[1] == 2:
-        sum_Q = _tsne.estimate_negative_gradient_fft_2d(
-            embedding, gradient, **fft_params)
+        if reference_embedding is not None:
+            sum_Q = _tsne.estimate_negative_gradient_fft_2d_with_reference(
+                embedding, reference_embedding, gradient, **fft_params)
+        else:
+            sum_Q = _tsne.estimate_negative_gradient_fft_2d(
+                embedding, gradient, **fft_params)
     else:
         raise RuntimeError('Interpolation based t-SNE for >2 dimensions is '
                            'currently unsupported (and generally a bad idea)')
