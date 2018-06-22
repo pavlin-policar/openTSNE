@@ -6,16 +6,16 @@ import urllib
 from os.path import abspath, dirname, join
 
 import fire
+import matplotlib.pyplot as plt
 import numpy as np
+from MulticoreTSNE import MulticoreTSNE
 from sklearn import datasets
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE as SKLTSNE
-from MulticoreTSNE import MulticoreTSNE
 from sklearn.model_selection import train_test_split
 
 from tsne.callbacks import ErrorLogger
-from tsne.tsne import TSNE, TSNEEmbedding
-import matplotlib.pyplot as plt
+from tsne.tsne import TSNE
 
 FILE_DIR = dirname(abspath(__file__))
 DATA_DIR = join(FILE_DIR, 'data')
@@ -46,11 +46,11 @@ def plot1d(x: np.ndarray, y: np.ndarray, show: bool = True, **kwargs) -> None:
 
 
 def get_mnist(n_samples=None):
-    if not os.path.exists('data/mnist.pkl.gz'):
+    if not os.path.exists(join(DATA_DIR, 'mnist.pkl.gz')):
         urllib.request.urlretrieve(
-            'http://deeplearning.net/data/mnist/mnist.pkl.gz', 'data/mnist.pkl.gz')
+            'http://deeplearning.net/data/mnist/mnist.pkl.gz', join(DATA_DIR, 'mnist.pkl.gz'))
 
-    with gzip.open('data/mnist.pkl.gz', 'rb') as f:
+    with gzip.open(join(DATA_DIR, 'mnist.pkl.gz'), 'rb') as f:
         train, val, test = pickle.load(f, encoding='latin1')
     _train = np.asarray(train[0], dtype=np.float64)
     _val = np.asarray(val[0], dtype=np.float64)
@@ -59,7 +59,7 @@ def get_mnist(n_samples=None):
     y = np.hstack((train[1], val[1], test[1]))
 
     if n_samples is not None:
-        indices = np.random.choice(list(range(x.shape[0])), 20000, replace=False)
+        indices = np.random.choice(list(range(x.shape[0])), n_samples, replace=False)
         x, y = x[indices], y[indices]
 
     return x, y
@@ -164,12 +164,12 @@ def transform(n_jobs=4, grad='bh', neighbors='approx'):
     x, y = get_mnist(20000)
 
     x_train, x_test, y_train, y_test = train_test_split(
-        x, y, test_size=0.75, random_state=42)
+        x, y, test_size=0.33, random_state=42)
 
     tsne = TSNE(
-        perplexity=30, learning_rate=100, early_exaggeration=12,
+        n_components=1, perplexity=30, learning_rate=100, early_exaggeration=12,
         n_jobs=n_jobs, theta=0.5, initialization='pca', metric='euclidean',
-        n_components=2, n_iter=750, early_exaggeration_iter=250, neighbors=neighbors,
+        n_iter=750, early_exaggeration_iter=250, neighbors=neighbors,
         negative_gradient_method=grad, min_num_intervals=10, ints_in_interval=2,
         late_exaggeration_iter=0, late_exaggeration=4,
     )
@@ -178,18 +178,18 @@ def transform(n_jobs=4, grad='bh', neighbors='approx'):
     print('tsne train', time.time() - start)
 
     plt.subplot(121)
-    plot(embedding, y_train, show=False, ms=3)
+    plot1d(embedding, y_train, show=False, ms=3)
 
     start = time.time()
     partial_embedding = embedding.get_partial_embedding_for(
-        x_test, perplexity=20, initialization='random')
-    partial_embedding.optimize(200, exaggeration=4, inplace=True, momentum=0.4)
-    print('tsne trasnsform', time.time() - start)
+        x_test, perplexity=10, initialization='random')
+    partial_embedding.optimize(200, exaggeration=2, inplace=True, momentum=0.1)
+    print('tsne transform', time.time() - start)
 
     plt.subplot(122)
-    plot(embedding, y_train, show=False, ms=3, alpha=0.25)
+    plot1d(embedding, y_train, show=False, ms=3, alpha=0.25)
     plt.gca().set_color_cycle(None)
-    plot(partial_embedding, y_test, show=False, ms=3, alpha=0.8)
+    plot1d(partial_embedding, y_test, show=False, ms=3, alpha=0.8)
 
     plt.show()
 
