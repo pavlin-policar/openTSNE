@@ -604,6 +604,10 @@ def kl_divergence_fft(embedding, P, dof, fft_params, reference_embedding=None,
         raise RuntimeError('Interpolation based t-SNE for >2 dimensions is '
                            'currently unsupported (and generally a bad idea)')
 
+    # The positive gradient function needs a reference embedding always
+    if reference_embedding is None:
+        reference_embedding = embedding
+
     # Compute positive gradient
     sum_P, kl_divergence_ = _tsne.estimate_positive_gradient_nn(
         P.indices, P.indptr, P.data, embedding, reference_embedding, gradient,
@@ -709,8 +713,7 @@ def gradient_descent(embedding, P, dof, n_iter, negative_gradient_method,
         '`embedding` must be an instance of `np.ndarray`. Got `%s` instead' \
         % type(embedding)
 
-    if reference_embedding is None:
-        reference_embedding = embedding
+    if reference_embedding is not None:
         assert isinstance(reference_embedding, np.ndarray), \
             '`reference_embedding` must be an instance of `np.ndarray`. Got ' \
             '`%s` instead' % type(reference_embedding)
