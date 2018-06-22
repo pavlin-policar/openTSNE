@@ -209,3 +209,55 @@ class TestTSNEParameterFlow(unittest.TestCase):
 
         self.assertEqual(1, gradient_descent.call_count)
         check_call_contains_kwargs(gradient_descent.mock_calls[0], params)
+
+
+class TestTSNEEmbedding(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.tsne = TSNE()
+        cls.x = np.random.randn(100, 4)
+        cls.x_test = np.random.randn(25, 4)
+
+    def test_embedding_inplace_optimization(self):
+        embedding1 = self.tsne.get_initial_embedding_for(self.x)
+
+        embedding2 = embedding1.optimize(n_iter=5, inplace=True)
+        embedding3 = embedding2.optimize(n_iter=5, inplace=True)
+
+        self.assertIs(embedding1, embedding2)
+        self.assertIs(embedding2, embedding3)
+
+    def test_embedding_not_inplace_optimization(self):
+        embedding1 = self.tsne.get_initial_embedding_for(self.x)
+
+        embedding2 = embedding1.optimize(n_iter=5, inplace=False)
+        embedding3 = embedding2.optimize(n_iter=5, inplace=False)
+
+        self.assertFalse(embedding1 is embedding2)
+        self.assertFalse(embedding2 is embedding3)
+        self.assertFalse(embedding1 is embedding3)
+
+    def test_partial_embedding_inplace_optimization(self):
+        # Prepare reference embedding
+        embedding = self.tsne.get_initial_embedding_for(self.x)
+        embedding.optimize(10, inplace=True)
+
+        partial_embedding1 = embedding.get_partial_embedding_for(self.x_test)
+        partial_embedding2 = partial_embedding1.optimize(5, inplace=True)
+        partial_embedding3 = partial_embedding2.optimize(5, inplace=True)
+
+        self.assertIs(partial_embedding1, partial_embedding2)
+        self.assertIs(partial_embedding2, partial_embedding3)
+
+    def test_partial_embedding_not_inplace_optimization(self):
+        # Prepare reference embedding
+        embedding = self.tsne.get_initial_embedding_for(self.x)
+        embedding.optimize(10, inplace=True)
+
+        partial_embedding1 = embedding.get_partial_embedding_for(self.x_test)
+        partial_embedding2 = partial_embedding1.optimize(5, inplace=False)
+        partial_embedding3 = partial_embedding2.optimize(5, inplace=False)
+
+        self.assertFalse(partial_embedding1 is partial_embedding2)
+        self.assertFalse(partial_embedding2 is partial_embedding3)
+        self.assertFalse(partial_embedding1 is partial_embedding3)
