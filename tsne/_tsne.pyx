@@ -309,110 +309,6 @@ cdef double[:, ::1] interpolate(double[::1] y_in_box, double[::1] y_tilde):
     return interpolated_values
 
 
-cpdef double estimate_negative_gradient_fft_1d(
-    double[::1] embedding,
-    double[::1] gradient,
-    Py_ssize_t n_interpolation_points=3,
-    Py_ssize_t min_num_intervals=10,
-    double ints_in_interval=1,
-):
-    cdef Py_ssize_t i, j, d, box_idx, N = embedding.shape[0]
-    cdef double y_max = -INFINITY, y_min = INFINITY
-    # Determine the min/max values of the embedding
-    for i in range(N):
-        if embedding[i] < y_min:
-            y_min = embedding[i]
-        elif embedding[i] > y_max:
-            y_max = embedding[i]
-
-    cdef int n_boxes = <int>fmax(min_num_intervals, (y_max - y_min) / ints_in_interval)
-    cdef double box_width = (y_max - y_min) / n_boxes
-
-    cdef int n_terms = 3
-    cdef double[:, ::1] charges_Qij = np.empty((N, n_terms), dtype=float)
-    for i in range(N):
-        charges_Qij[i, 0] = 1
-        charges_Qij[i, 1] = embedding[i]
-        charges_Qij[i, 2] = embedding[i] ** 2
-
-    # Compute the box bounds
-    cdef double[::1] box_lower_bounds = np.empty(n_boxes, dtype=float)
-    cdef double[::1] box_upper_bounds = np.empty(n_boxes, dtype=float)
-    for box_idx in range(n_boxes):
-        box_lower_bounds[box_idx] = box_idx * box_width + y_min
-        box_upper_bounds[box_idx] = (box_idx + 1) * box_width + y_min
-
-    cdef int n_interpolation_points_1d = n_interpolation_points * n_boxes
-    # Prepare the interpolants for a single interval, so we can use their
-    # relative positions later on
-    cdef double[::1] y_tilde = np.empty(n_interpolation_points, dtype=float)
-    cdef double h = 1. / n_interpolation_points
-    y_tilde[0] = h / 2
-    for i in range(1, n_interpolation_points):
-        y_tilde[i] = y_tilde[i - 1] + h
-
-    # Evaluate the kernel at the interpolation nodes
-    cdef double[::1] kernel_tilde = compute_kernel_tilde_1d(
-        n_interpolation_points_1d, y_min, h * box_width)
-
-    # Determine which box each point belongs to
-    cdef int *point_box_idx = <int *>PyMem_Malloc(N * sizeof(int))
-    for i in range(N):
-        box_idx = <int>((embedding[i] - y_min) / box_width)
-        # The right most point maps directly into `n_boxes`, while it should
-        # belong to the last box
-        if box_idx >= n_boxes:
-            box_idx = n_boxes - 1
-
-        point_box_idx[i] = box_idx
-
-    # Compute the relative position of each point in its box
-    cdef double[::1] y_in_box = np.empty(N, dtype=float)
-    for i in range(N):
-        box_idx = point_box_idx[i]
-        y_in_box[i] = (embedding[i] - box_lower_bounds[box_idx]) / box_width
-
-    # Interpolate kernel using Lagrange polynomials
-    cdef double[:, ::1] interpolated_values = interpolate(y_in_box, y_tilde)
-
-    # Step 1: Compute the w coefficients
-    cdef double[:, ::1] w_coefficients = np.zeros((n_interpolation_points_1d, n_terms), dtype=float)
-    for i in range(N):
-        box_idx = point_box_idx[i] * n_interpolation_points
-        for j in range(n_interpolation_points):
-            for d in range(n_terms):
-                w_coefficients[box_idx + j, d] += interpolated_values[i, j] * charges_Qij[i, d]
-
-    # Step 2: Compute the kernel values evaluated at the interpolation nodes
-    cdef double[:, ::1] y_tilde_values = matrix_multiply_fft_1d(kernel_tilde, w_coefficients)
-
-    # Step 3: Compute the potentials \tilde{\phi}
-    cdef double[:, ::1] potentials = np.zeros((N, n_terms), dtype=float)
-    for i in range(N):
-        box_idx = point_box_idx[i] * n_interpolation_points
-        for j in range(n_interpolation_points):
-            for d in range(n_terms):
-                potentials[i, d] += interpolated_values[i, j] * y_tilde_values[box_idx + j, d]
-
-    # Compute the normalizatio term Z or sum of q_{ij}s, this is not desribed
-    # in the paper, but can be worked out
-    cdef double sum_Q = 0, phi1, phi2, phi3
-    for i in range(N):
-        phi1 = potentials[i, 0]
-        phi2 = potentials[i, 1]
-        phi3 = potentials[i, 2]
-
-        sum_Q += (1 + embedding[i] ** 2) * phi1 - 2 * embedding[i] * phi2 + phi3
-    sum_Q -= N
-
-    # Compute the gradient using a slight variation on the formula provided in
-    # the paper
-    for i in range(N):
-        gradient[i] -= (embedding[i] * potentials[i, 0] - potentials[i, 1]) / sum_Q
-
-    return sum_Q
-
-
 cdef double[:, ::1] matrix_multiply_fft_1d(
     double[::1] kernel_tilde,
     double[:, ::1] w_coefficients,
@@ -529,6 +425,247 @@ cdef double[::1] compute_kernel_tilde_1d(
         kernel_tilde[n_interpolation_points_1d - i] = tmp
 
     return kernel_tilde
+
+
+cpdef double estimate_negative_gradient_fft_1d(
+    double[::1] embedding,
+    double[::1] gradient,
+    Py_ssize_t n_interpolation_points=3,
+    Py_ssize_t min_num_intervals=10,
+    double ints_in_interval=1,
+):
+    cdef Py_ssize_t i, j, d, box_idx, n_samples = embedding.shape[0]
+    cdef double y_max = -INFINITY, y_min = INFINITY
+    # Determine the min/max values of the embedding
+    for i in range(n_samples):
+        if embedding[i] < y_min:
+            y_min = embedding[i]
+        elif embedding[i] > y_max:
+            y_max = embedding[i]
+
+    cdef int n_boxes = <int>fmax(min_num_intervals, (y_max - y_min) / ints_in_interval)
+    cdef double box_width = (y_max - y_min) / n_boxes
+
+    # Compute the box bounds
+    cdef double[::1] box_lower_bounds = np.empty(n_boxes, dtype=float)
+    cdef double[::1] box_upper_bounds = np.empty(n_boxes, dtype=float)
+    for box_idx in range(n_boxes):
+        box_lower_bounds[box_idx] = box_idx * box_width + y_min
+        box_upper_bounds[box_idx] = (box_idx + 1) * box_width + y_min
+
+    # Determine which box each point belongs to
+    cdef int *point_box_idx = <int *>PyMem_Malloc(n_samples * sizeof(int))
+    for i in range(n_samples):
+        box_idx = <int>((embedding[i] - y_min) / box_width)
+        # The right most point maps directly into `n_boxes`, while it should
+        # belong to the last box
+        if box_idx >= n_boxes:
+            box_idx = n_boxes - 1
+
+        point_box_idx[i] = box_idx
+
+    cdef int n_interpolation_points_1d = n_interpolation_points * n_boxes
+    # Prepare the interpolants for a single interval, so we can use their
+    # relative positions later on
+    cdef double[::1] y_tilde = np.empty(n_interpolation_points, dtype=float)
+    cdef double h = 1. / n_interpolation_points
+    y_tilde[0] = h / 2
+    for i in range(1, n_interpolation_points):
+        y_tilde[i] = y_tilde[i - 1] + h
+
+    # Evaluate the kernel at the interpolation nodes
+    cdef double[::1] kernel_tilde = compute_kernel_tilde_1d(
+        n_interpolation_points_1d, y_min, h * box_width)
+
+    # STEP 1: Compute the w coefficients
+    # Set up q_j values
+    cdef int n_terms = 3
+    cdef double[:, ::1] q_j = np.empty((n_samples, n_terms), dtype=float)
+    for i in range(n_samples):
+        q_j[i, 0] = 1
+        q_j[i, 1] = embedding[i]
+        q_j[i, 2] = embedding[i] ** 2
+
+    # Compute the relative position of each reference point in its box
+    cdef double[::1] y_in_box = np.empty(n_samples, dtype=float)
+    for i in range(n_samples):
+        box_idx = point_box_idx[i]
+        y_in_box[i] = (embedding[i] - box_lower_bounds[box_idx]) / box_width
+
+    # Interpolate kernel using Lagrange polynomials
+    cdef double[:, ::1] interpolated_values = interpolate(y_in_box, y_tilde)
+
+    # Actually compute w_{ij}s
+    cdef double[:, ::1] w_coefficients = np.zeros((n_interpolation_points_1d, n_terms), dtype=float)
+    for i in range(n_samples):
+        box_idx = point_box_idx[i] * n_interpolation_points
+        for j in range(n_interpolation_points):
+            for d in range(n_terms):
+                w_coefficients[box_idx + j, d] += interpolated_values[i, j] * q_j[i, d]
+
+    # STEP 2: Compute the kernel values evaluated at the interpolation nodes
+    cdef double[:, ::1] y_tilde_values = matrix_multiply_fft_1d(kernel_tilde, w_coefficients)
+
+    # STEP 3: Compute the potentials \tilde{\phi(y_i)}
+    cdef double[:, ::1] phi = np.zeros((n_samples, n_terms), dtype=float)
+    for i in range(n_samples):
+        box_idx = point_box_idx[i] * n_interpolation_points
+        for j in range(n_interpolation_points):
+            for d in range(n_terms):
+                phi[i, d] += interpolated_values[i, j] * y_tilde_values[box_idx + j, d]
+
+    # Compute the normalization term Z or sum of q_{ij}s, this is not described
+    # in the paper, but can be worked out
+    cdef double sum_Q = 0
+    for i in range(n_samples):
+        sum_Q += (1 + embedding[i] ** 2) * phi[i, 0] - \
+                 2 * embedding[i] * phi[i, 1] + \
+                 phi[i, 2]
+    sum_Q -= n_samples
+
+    # Compute the gradient using a slight variation on the formula provided in
+    # the paper
+    for i in range(n_samples):
+        gradient[i] -= (embedding[i] * phi[i, 0] - phi[i, 1]) / sum_Q
+
+    return sum_Q
+
+
+cpdef double estimate_negative_gradient_fft_1d_with_reference(
+    double[::1] embedding,
+    double[::1] reference_embedding,
+    double[::1] gradient,
+    Py_ssize_t n_interpolation_points=3,
+    Py_ssize_t min_num_intervals=10,
+    double ints_in_interval=1,
+):
+    cdef:
+        Py_ssize_t i, j, d, box_idx
+        Py_ssize_t n_samples = embedding.shape[0]
+        Py_ssize_t n_reference_samples = reference_embedding.shape[0]
+
+        double y_max = -INFINITY, y_min = INFINITY
+    # Determine the min/max values of the embedding
+    # First, check the existing embedding
+    for i in range(n_reference_samples):
+        if reference_embedding[i] < y_min:
+            y_min = reference_embedding[i]
+        elif reference_embedding[i] > y_max:
+            y_max = reference_embedding[i]
+    # And check the new embedding points
+    for i in range(n_samples):
+        if embedding[i] < y_min:
+            y_min = embedding[i]
+        elif embedding[i] > y_max:
+            y_max = embedding[i]
+
+    cdef int n_boxes = <int>fmax(min_num_intervals, (y_max - y_min) / ints_in_interval)
+    cdef double box_width = (y_max - y_min) / n_boxes
+
+    # Compute the box bounds
+    cdef double[::1] box_lower_bounds = np.empty(n_boxes, dtype=float)
+    cdef double[::1] box_upper_bounds = np.empty(n_boxes, dtype=float)
+    for box_idx in range(n_boxes):
+        box_lower_bounds[box_idx] = box_idx * box_width + y_min
+        box_upper_bounds[box_idx] = (box_idx + 1) * box_width + y_min
+
+    # Determine which box each reference point belongs to
+    cdef int *reference_point_box_idx = <int *>PyMem_Malloc(n_reference_samples * sizeof(int))
+    for i in range(n_reference_samples):
+        box_idx = <int>((reference_embedding[i] - y_min) / box_width)
+        # The right most point maps directly into `n_boxes`, while it should
+        # belong to the last box
+        if box_idx >= n_boxes:
+            box_idx = n_boxes - 1
+
+        reference_point_box_idx[i] = box_idx
+
+    # Determine which box each new point belongs to
+    cdef int *point_box_idx = <int *>PyMem_Malloc(n_samples * sizeof(int))
+    for i in range(n_samples):
+        box_idx = <int>((embedding[i] - y_min) / box_width)
+        # The right most point maps directly into `n_boxes`, while it should
+        # belong to the last box
+        if box_idx >= n_boxes:
+            box_idx = n_boxes - 1
+
+        point_box_idx[i] = box_idx
+
+    cdef int n_interpolation_points_1d = n_interpolation_points * n_boxes
+    # Prepare the interpolants for a single interval, so we can use their
+    # relative positions later on
+    cdef double[::1] y_tilde = np.empty(n_interpolation_points, dtype=float)
+    cdef double h = 1. / n_interpolation_points
+    y_tilde[0] = h / 2
+    for i in range(1, n_interpolation_points):
+        y_tilde[i] = y_tilde[i - 1] + h
+
+    # Evaluate the kernel at the interpolation nodes
+    cdef double[::1] kernel_tilde = compute_kernel_tilde_1d(
+        n_interpolation_points_1d, y_min, h * box_width)
+
+    # STEP 1: Compute the w coefficients
+    # Set up q_j values
+    cdef int n_terms = 3
+    cdef double[:, ::1] q_j = np.empty((n_reference_samples, n_terms), dtype=float)
+    for i in range(n_reference_samples):
+        q_j[i, 0] = 1
+        q_j[i, 1] = reference_embedding[i]
+        q_j[i, 2] = reference_embedding[i] ** 2
+
+    # Compute the relative position of each reference point in its box
+    cdef double[::1] reference_y_in_box = np.empty(n_reference_samples, dtype=float)
+    for i in range(n_reference_samples):
+        box_idx = reference_point_box_idx[i]
+        reference_y_in_box[i] = (reference_embedding[i] - box_lower_bounds[box_idx]) / box_width
+
+    # Interpolate kernel using Lagrange polynomials
+    cdef double[:, ::1] reference_interpolated_values = interpolate(reference_y_in_box, y_tilde)
+
+    # Actually compute w_{ij}s
+    cdef double[:, ::1] w_coefficients = np.zeros((n_interpolation_points_1d, n_terms), dtype=float)
+    for i in range(n_reference_samples):
+        box_idx = reference_point_box_idx[i] * n_interpolation_points
+        for j in range(n_interpolation_points):
+            for d in range(n_terms):
+                w_coefficients[box_idx + j, d] += reference_interpolated_values[i, j] * q_j[i, d]
+
+    # STEP 2: Compute the kernel values evaluated at the interpolation nodes
+    cdef double[:, ::1] y_tilde_values = matrix_multiply_fft_1d(kernel_tilde, w_coefficients)
+
+    # STEP 3: Compute the potentials \tilde{\phi(y_i)}
+    # Compute the relative position of each new embedding point in its box
+    cdef double[::1] y_in_box = np.empty(n_samples, dtype=float)
+    for i in range(n_samples):
+        box_idx = point_box_idx[i]
+        y_in_box[i] = (embedding[i] - box_lower_bounds[box_idx]) / box_width
+
+    # Interpolate kernel using Lagrange polynomials
+    cdef double[:, ::1] interpolated_values = interpolate(y_in_box, y_tilde)
+
+    # Actually compute \tilde{\phi(y_i)}
+    cdef double[:, ::1] phi = np.zeros((n_samples, n_terms), dtype=float)
+    for i in range(n_samples):
+        box_idx = point_box_idx[i] * n_interpolation_points
+        for j in range(n_interpolation_points):
+            for d in range(n_terms):
+                phi[i, d] += interpolated_values[i, j] * y_tilde_values[box_idx + j, d]
+
+    # Compute the normalization term Z or sum of q_{ij}s, this is not described
+    # in the paper, but can be worked out
+    cdef double sum_Q = 0
+    for i in range(n_samples):
+        sum_Q += (1 + embedding[i] ** 2) * phi[i, 0] - \
+                 2 * embedding[i] * phi[i, 1] + \
+                 phi[i, 2]
+    sum_Q -= n_samples
+
+    # Compute the gradient using a slight variation on the formula provided in
+    # the paper
+    for i in range(n_samples):
+        gradient[i] -= (embedding[i] * phi[i, 0] - phi[i, 1]) / sum_Q
+
+    return sum_Q
 
 
 cdef double[:, ::1] matrix_multiply_fft_2d(
@@ -800,7 +937,7 @@ cpdef double estimate_negative_gradient_fft_2d(
                                  y_interpolated_values[i, interp_j] * \
                                  y_tilde_values[idx, d]
 
-    # Compute the normalization term Z or sum of q_{ij}s, this is not desribed
+    # Compute the normalization term Z or sum of q_{ij}s, this is not described
     # in the paper, but can be worked out
     cdef double sum_Q = 0, y1, y2
     for i in range(n_samples):
@@ -1004,7 +1141,7 @@ cpdef double estimate_negative_gradient_fft_2d_with_reference(
                                  y_interpolated_values[i, interp_j] * \
                                  y_tilde_values[idx, d]
 
-    # Compute the normalization term Z or sum of q_{ij}s, this is not desribed
+    # Compute the normalization term Z or sum of q_{ij}s, this is not described
     # in the paper, but can be worked out
     cdef double sum_Q = 0, y1, y2
     for i in range(n_samples):
