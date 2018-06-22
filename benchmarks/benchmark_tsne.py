@@ -108,7 +108,7 @@ def run():
         n_jobs=threads, angle=angle, initialization='random', metric=metric,
         n_components=2, n_iter=750, early_exaggeration_iter=250, neighbors='approx',
         negative_gradient_method='fft', min_num_intervals=10, ints_in_inverval=2,
-        late_exaggeration_iter=0, late_exaggeration=2.,
+        late_exaggeration_iter=0, late_exaggeration=2., callbacks=ErrorLogger(),
     )
     # x = PCA(n_components=50).fit_transform(x)
     embedding = tsne.fit(x)

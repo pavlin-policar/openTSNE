@@ -735,7 +735,9 @@ def gradient_descent(embedding, P, dof, n_iter, gradient_method, learning_rate,
     for iteration in range(n_iter):
         # We want to report the error to the callback and a final error if
         # we're at the final iteration
-        should_call_callback = use_callbacks and (iteration + 1) % callbacks_every_iters == 0
+        should_call_callback = use_callbacks and (
+            (iteration + 1) % callbacks_every_iters == 0 or iteration == 0
+        )
         is_last_iteration = iteration == n_iter - 1
         should_eval_error = should_call_callback or is_last_iteration
 
