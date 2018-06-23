@@ -295,7 +295,7 @@ class TSNE:
                  early_exaggeration_iter=250, early_exaggeration=12,
                  n_iter=750, late_exaggeration_iter=0, late_exaggeration=1.2,
                  theta=0.5, n_interpolation_points=3, min_num_intervals=10,
-                 ints_in_interval=10, initialization='pca', metric='euclidean',
+                 ints_in_interval=1, initialization='pca', metric='euclidean',
                  initial_momentum=0.5, final_momentum=0.8, n_jobs=1,
                  neighbors='exact', negative_gradient_method='bh',
                  callbacks=None, callbacks_every_iters=50):
