@@ -291,7 +291,7 @@ class TSNEEmbedding(np.ndarray):
 
 
 class TSNE:
-    def __init__(self, n_components=2, perplexity=30, learning_rate=10,
+    def __init__(self, n_components=2, perplexity=30, learning_rate=100,
                  early_exaggeration_iter=250, early_exaggeration=12,
                  n_iter=750, late_exaggeration_iter=0, late_exaggeration=1.2,
                  theta=0.5, n_interpolation_points=3, min_num_intervals=10,

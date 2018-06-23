@@ -3,6 +3,7 @@ import time
 from functools import partial
 
 import numpy as np
+from scipy.sparse import csr_matrix
 
 from tsne import kl_divergence
 from tsne.tsne import TSNEEmbedding
@@ -20,7 +21,6 @@ class ErrorLogger:
         if iteration == 1:
             self.iter_count = 0
             self.last_log_time = time.time()
-            return True
 
         now = time.time()
         duration = now - self.last_log_time
@@ -64,3 +64,37 @@ class VerifyExaggerationError:
         else:
             log.info('Corrected: %.4f - True %.4f [eps %.4f]' % (
                 corrected_error, true_error, abs(true_error - corrected_error)))
+
+
+class ErrorApproximations:
+    """Check how good the error approximations are. Of course, we use an
+    approximation for P so this itself is an approximation."""
+    def __init__(self, P: csr_matrix):
+        self.P = P.copy()
+        self.exact_errors = []
+        self.bh_errors = []
+        self.fft_errors = []
+
+    def __call__(self, iteration: int, error: float, embedding: TSNEEmbedding):
+        exact_error = kl_divergence.kl_divergence_exact(self.P.toarray(), embedding)
+        bh_error = kl_divergence.kl_divergence_approx_bh(
+            self.P.indices, self.P.indptr, self.P.data, embedding)
+        fft_error = kl_divergence.kl_divergence_approx_fft(
+            self.P.indices, self.P.indptr, self.P.data, embedding)
+
+        self.exact_errors.append(exact_error)
+        self.bh_errors.append(bh_error)
+        self.fft_errors.append(fft_error)
+
+    def report(self):
+        exact_errors = np.array(self.exact_errors)
+        bh_errors = np.array(self.bh_errors)
+        fft_errors = np.array(self.fft_errors)
+
+        bh_diff = bh_errors - exact_errors
+        print('Barnes-Hut: mean difference %.4f (±%.4f)' % (
+            np.mean(bh_diff), np.std(bh_diff)))
+
+        fft_diff = fft_errors - exact_errors
+        print('Interpolation: mean difference %.4f (±%.4f)' % (
+            np.mean(fft_diff), np.std(fft_diff)))
