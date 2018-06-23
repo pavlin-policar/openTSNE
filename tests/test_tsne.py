@@ -261,3 +261,89 @@ class TestTSNEEmbedding(unittest.TestCase):
         self.assertFalse(partial_embedding1.base is partial_embedding2.base)
         self.assertFalse(partial_embedding2.base is partial_embedding3.base)
         self.assertFalse(partial_embedding1.base is partial_embedding3.base)
+
+
+class TestTSNECallbackParams(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.tsne = TSNE()
+        cls.x = np.random.randn(100, 4)
+        cls.x_test = np.random.randn(25, 4)
+
+    def test_can_pass_callbacks_to_tsne_object(self):
+        callback = MagicMock()
+        callback2 = MagicMock()
+        # We don't want individual callbacks to be iterable
+        del callback.__iter__
+        del callback2.__iter__
+
+        # Should be able to pass a single callback
+        TSNE(callbacks=callback, callbacks_every_iters=1,
+             early_exaggeration_iter=0, n_iter=1).fit(self.x)
+        callback.assert_called_once()
+
+        # Should be able to pass a list callbacks
+        callback.reset_mock()
+        TSNE(callbacks=[callback], callbacks_every_iters=1,
+             early_exaggeration_iter=0, n_iter=1).fit(self.x)
+        callback.assert_called_once()
+
+        # Should be able to change the callback on the object
+        callback.reset_mock()
+        tsne = TSNE(callbacks=callback, callbacks_every_iters=1,
+                    early_exaggeration_iter=0, n_iter=1)
+        tsne.callbacks = callback2
+        tsne.fit(self.x)
+        callback.assert_not_called()
+        callback2.assert_called_once()
+
+    def test_can_pass_callbacks_to_embedding_optimize(self):
+        embedding = self.tsne.get_initial_embedding_for(self.x)
+
+        # We don't the callback to be iterable
+        callback = MagicMock()
+        del callback.__iter__
+
+        # Should be able to pass a single callback
+        embedding.optimize(1, callbacks=callback, callbacks_every_iters=1)
+        callback.assert_called_once()
+
+        # Should be able to pass a list callbacks
+        callback.reset_mock()
+        embedding.optimize(1, callbacks=[callback], callbacks_every_iters=1)
+        callback.assert_called_once()
+
+    def test_can_pass_callbacks_to_embedding_transform(self):
+        embedding = self.tsne.get_initial_embedding_for(self.x)
+
+        # We don't the callback to be iterable
+        callback = MagicMock()
+        del callback.__iter__
+
+        # Should be able to pass a single callback
+        embedding.transform(self.x_test, early_exaggeration_iter=0, n_iter=1,
+                            callbacks=callback, callbacks_every_iters=1)
+        callback.assert_called_once()
+
+        # Should be able to pass a list callbacks
+        callback.reset_mock()
+        embedding.transform(self.x_test, early_exaggeration_iter=0, n_iter=1,
+                            callbacks=[callback], callbacks_every_iters=1)
+        callback.assert_called_once()
+
+    def test_can_pass_callbacks_to_partial_embedding_optimize(self):
+        embedding = self.tsne.get_initial_embedding_for(self.x)
+
+        # We don't the callback to be iterable
+        callback = MagicMock()
+        del callback.__iter__
+
+        # Should be able to pass a single callback
+        partial_embedding = embedding.get_partial_embedding_for(self.x_test)
+        partial_embedding.optimize(1, callbacks=callback, callbacks_every_iters=1)
+        callback.assert_called_once()
+
+        # Should be able to pass a list callbacks
+        callback.reset_mock()
+        partial_embedding.optimize(1, callbacks=[callback], callbacks_every_iters=1)
+        callback.assert_called_once()

@@ -15,6 +15,29 @@ EPSILON = np.finfo(np.float64).eps
 log = logging.getLogger(__name__)
 
 
+def _check_callbacks(callbacks):
+    if callbacks is not None:
+        # If list was passed, make sure all of them are actually callable
+        if isinstance(callbacks, Iterable):
+            if any(not callable(c) for c in callbacks):
+                raise ValueError('`callbacks` must contain callable objects!')
+        # The gradient descent method deals with lists
+        elif callable(callbacks):
+            callbacks = (callbacks,)
+        else:
+            raise ValueError('`callbacks` must be a callable object!')
+
+    return callbacks
+
+
+def _handle_nice_params(optim_params: dict) -> None:
+    """Convert the user friendly params into something the optimizer can
+    understand."""
+    # Handle callbacks
+    optim_params['callbacks'] = _check_callbacks(optim_params['callbacks'])
+    optim_params['use_callbacks'] = optim_params['callbacks'] is not None
+
+
 class OptimizationInterrupt(InterruptedError):
     def __init__(self, error: float, final_embedding: np.ndarray) -> None:
         super().__init__()
@@ -64,6 +87,7 @@ class PartialTSNEEmbedding(np.ndarray):
         # over the defaults specified in the TSNE object
         optim_params = dict(self.gradient_descent_params)
         optim_params.update(gradient_descent_params)
+        _handle_nice_params(optim_params)
         optim_params['n_iter'] = n_iter
 
         try:
@@ -118,6 +142,7 @@ class TSNEEmbedding(np.ndarray):
         # over the defaults specified in the TSNE object
         optim_params = dict(self.gradient_descent_params)
         optim_params.update(gradient_descent_params)
+        _handle_nice_params(optim_params)
         optim_params['n_iter'] = n_iter
 
         try:
@@ -281,17 +306,6 @@ class TSNE:
         self.neighbors_method = neighbors
         self.negative_gradient_method = negative_gradient_method
 
-        if callbacks is not None:
-            # If list was passed, make sure all of them are actually callable
-            if isinstance(callbacks, Iterable):
-                if any(not callable(c) for c in callbacks):
-                    raise ValueError('`callbacks` must contain callable objects!')
-            # The gradient descent method deals with lists
-            elif callable(callbacks):
-                callbacks = (callbacks,)
-            else:
-                raise ValueError('`callbacks` must be a callable object!')
-        self.use_callbacks = callbacks is not None
         self.callbacks = callbacks
         self.callbacks_every_iters = callbacks_every_iters
 
@@ -439,7 +453,6 @@ class TSNE:
 
             'n_jobs': self.n_jobs,
             # Callback params
-            'use_callbacks': self.use_callbacks,
             'callbacks': self.callbacks,
             'callbacks_every_iters': self.callbacks_every_iters,
         }
