@@ -734,7 +734,6 @@ def gradient_descent(embedding, P, dof, n_iter, negative_gradient_method,
             '`reference_embedding` must be an instance of `np.ndarray`. Got ' \
             '`%s` instead' % type(reference_embedding)
 
-    error = 0
     update = np.zeros_like(embedding)
     gains = np.ones_like(embedding)
 
@@ -756,8 +755,7 @@ def gradient_descent(embedding, P, dof, n_iter, negative_gradient_method,
         should_call_callback = use_callbacks and (
             (iteration + 1) % callbacks_every_iters == 0 or iteration == 0
         )
-        is_last_iteration = iteration == n_iter - 1
-        should_eval_error = should_call_callback or is_last_iteration
+        should_eval_error = should_call_callback
 
         error, gradient = negative_gradient_method(
             embedding, P, dof=dof, bh_params=bh_params, fft_params=fft_params,
@@ -767,18 +765,7 @@ def gradient_descent(embedding, P, dof, n_iter, negative_gradient_method,
 
         # Correct the KL divergence w.r.t. the exaggeration if needed
         if should_eval_error and exaggeration != 1:
-            # TODO: Verify this with the KL divergence function
             error = (error - np.sum(P) * np.log(exaggeration)) / exaggeration
-
-        grad_direction_flipped = np.sign(update) != np.sign(gradient)
-        grad_direction_same = np.invert(grad_direction_flipped)
-        gains[grad_direction_flipped] += 0.2
-        gains[grad_direction_same] = gains[grad_direction_same] * 0.8 + min_gain
-        update = momentum * update - learning_rate * gains * gradient
-        embedding += update
-
-        # Zero-mean the embedding
-        embedding -= np.mean(embedding, axis=0)
 
         if should_call_callback:
             # Continue only if all the callbacks say so
@@ -789,6 +776,17 @@ def gradient_descent(embedding, P, dof, n_iter, negative_gradient_method,
                     P /= exaggeration
                 raise OptimizationInterrupt(error=error, final_embedding=embedding)
 
+        # Update the embedding using the gradient
+        grad_direction_flipped = np.sign(update) != np.sign(gradient)
+        grad_direction_same = np.invert(grad_direction_flipped)
+        gains[grad_direction_flipped] += 0.2
+        gains[grad_direction_same] = gains[grad_direction_same] * 0.8 + min_gain
+        update = momentum * update - learning_rate * gains * gradient
+        embedding += update
+
+        # Zero-mean the embedding
+        embedding -= np.mean(embedding, axis=0)
+
         if np.linalg.norm(gradient) < min_grad_norm:
             log.info('Gradient norm eps reached. Finished.')
             break
@@ -796,5 +794,14 @@ def gradient_descent(embedding, P, dof, n_iter, negative_gradient_method,
     # Make sure to un-exaggerate P so it's not corrupted in future runs
     if exaggeration != 1:
         P /= exaggeration
+
+    # The error from the loop is the one for the previous, non-updated
+    # embedding. We need to return the error for the actual final embedding, so
+    # compute that at the end before returning
+    error, _ = negative_gradient_method(
+        embedding, P, dof=dof, bh_params=bh_params, fft_params=fft_params,
+        reference_embedding=reference_embedding, n_jobs=n_jobs,
+        should_eval_error=True,
+    )
 
     return error, embedding

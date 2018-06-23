@@ -211,7 +211,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         check_call_contains_kwargs(gradient_descent.mock_calls[0], params)
 
 
-class TestTSNEEmbedding(unittest.TestCase):
+class TestTSNEInplaceOptimization(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.tsne = TSNE()
