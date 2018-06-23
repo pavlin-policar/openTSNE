@@ -224,8 +224,8 @@ class TestTSNEEmbedding(unittest.TestCase):
         embedding2 = embedding1.optimize(n_iter=5, inplace=True)
         embedding3 = embedding2.optimize(n_iter=5, inplace=True)
 
-        self.assertIs(embedding1, embedding2)
-        self.assertIs(embedding2, embedding3)
+        self.assertIs(embedding1.base, embedding2.base)
+        self.assertIs(embedding2.base, embedding3.base)
 
     def test_embedding_not_inplace_optimization(self):
         embedding1 = self.tsne.get_initial_embedding_for(self.x)
@@ -233,9 +233,9 @@ class TestTSNEEmbedding(unittest.TestCase):
         embedding2 = embedding1.optimize(n_iter=5, inplace=False)
         embedding3 = embedding2.optimize(n_iter=5, inplace=False)
 
-        self.assertFalse(embedding1 is embedding2)
-        self.assertFalse(embedding2 is embedding3)
-        self.assertFalse(embedding1 is embedding3)
+        self.assertFalse(embedding1.base is embedding2.base)
+        self.assertFalse(embedding2.base is embedding3.base)
+        self.assertFalse(embedding1.base is embedding3.base)
 
     def test_partial_embedding_inplace_optimization(self):
         # Prepare reference embedding
@@ -246,8 +246,8 @@ class TestTSNEEmbedding(unittest.TestCase):
         partial_embedding2 = partial_embedding1.optimize(5, inplace=True)
         partial_embedding3 = partial_embedding2.optimize(5, inplace=True)
 
-        self.assertIs(partial_embedding1, partial_embedding2)
-        self.assertIs(partial_embedding2, partial_embedding3)
+        self.assertIs(partial_embedding1.base, partial_embedding2.base)
+        self.assertIs(partial_embedding2.base, partial_embedding3.base)
 
     def test_partial_embedding_not_inplace_optimization(self):
         # Prepare reference embedding
@@ -258,6 +258,6 @@ class TestTSNEEmbedding(unittest.TestCase):
         partial_embedding2 = partial_embedding1.optimize(5, inplace=False)
         partial_embedding3 = partial_embedding2.optimize(5, inplace=False)
 
-        self.assertFalse(partial_embedding1 is partial_embedding2)
-        self.assertFalse(partial_embedding2 is partial_embedding3)
-        self.assertFalse(partial_embedding1 is partial_embedding3)
+        self.assertFalse(partial_embedding1.base is partial_embedding2.base)
+        self.assertFalse(partial_embedding2.base is partial_embedding3.base)
+        self.assertFalse(partial_embedding1.base is partial_embedding3.base)
