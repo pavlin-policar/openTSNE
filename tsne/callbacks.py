@@ -22,5 +22,3 @@ class ErrorLogger:
 
         print('Iteration % 4d, KL divergence % 6.4f, %d iterations in %.4f sec' % (
             iteration, error, n_iters, duration))
-
-        return True

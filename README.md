@@ -45,7 +45,7 @@ def callback(iteration, error, embedding):
 	...
 ```
 
-Callbacks are used to control the optimization i.e. every callback must return a boolean value indicating whether or not to continue the optimization.
+Callbacks are used to control the optimization i.e. every callback must return a boolean value indicating whether or not to stop the optimization. We return `True` if we want to stop. This is convenient because if we want a logging callback, it is easy to forget the return value, and optimization proceeds as planned.
 
 Additionally, a list of callbacks can also be passed, in which case all the callbacks must agree to continue the optimization, otherwise the process is terminated and the current embedding is returned.
 

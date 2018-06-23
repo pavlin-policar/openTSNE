@@ -704,11 +704,11 @@ def gradient_descent(embedding, P, dof, n_iter, negative_gradient_method,
     n_jobs : int
         Number of threads.
     use_callbacks : bool
-    callbacks : Callable[[float, np.ndarray] -> bool]
-        The callback should accept two parameters, the first is the error of
-        the current iteration (the KL divergence), the second is the current
-        embedding. The callback should return a boolean value indicating
-        whether or not to continue optimization i.e. False to stop.
+    callbacks : Callable[[int, float, np.ndarray] -> bool]
+        The callback should accept three parameters, the first is the current
+        iteration, the second is the current KL divergence error and the last
+        is the current embedding. The callback should return a boolean value
+        indicating whether or not to stop optimization i.e. True to stop.
     callbacks_every_iters : int
         How often should the callback be called.
 
@@ -782,8 +782,8 @@ def gradient_descent(embedding, P, dof, n_iter, negative_gradient_method,
 
         if should_call_callback:
             # Continue only if all the callbacks say so
-            should_continue = all((bool(c(iteration + 1, error, embedding)) for c in callbacks))
-            if not should_continue:
+            should_stop = any((bool(c(iteration + 1, error, embedding)) for c in callbacks))
+            if should_stop:
                 # Make sure to un-exaggerate P so it's not corrupted in future runs
                 if exaggeration != 1:
                     P /= exaggeration
