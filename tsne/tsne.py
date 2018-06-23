@@ -798,35 +798,3 @@ def gradient_descent(embedding, P, dof, n_iter, negative_gradient_method,
         P /= exaggeration
 
     return error, embedding
-
-
-def sqeuclidean(x, y):
-    return np.sum((x - y) ** 2)
-
-
-def kl_divergence(P, embedding):
-    """Compute the KL divergence for a given embedding and P_{ij}s."""
-    n_samples, n_dims = embedding.shape
-
-    pairwise_distances = np.empty((n_samples, n_samples))
-    for i in range(n_samples):
-        for j in range(n_samples):
-            pairwise_distances[i, j] = sqeuclidean(embedding[i], embedding[j])
-
-    Q_unnormalized = np.zeros((n_samples, n_samples))
-    for i in range(n_samples):
-        for j in range(n_samples):
-            if i != j:
-                Q_unnormalized[i, j] = 1 / (1 + pairwise_distances[i, j])
-
-    sum_Q = np.sum(Q_unnormalized)
-
-    Q = Q_unnormalized / sum_Q
-
-    kl_divergence_ = 0
-    for i in range(n_samples):
-        for j in range(n_samples):
-            if P[i, j] > 0:
-                kl_divergence_ += P[i, j] * np.log(P[i, j] / (Q[i, j] + EPSILON))
-
-    return kl_divergence_

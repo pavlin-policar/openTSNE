@@ -145,12 +145,7 @@ cdef void delete_node(Node * node):
 
 
 cdef class QuadTree:
-    def __init__(self, data: np.ndarray) -> None:
-        assert isinstance(data, np.ndarray), '`data` must be np.ndarray'
-        assert data.ndim == 2, '`data` must be a 2 dimensional matrix'
-        if data.dtype is not np.float64:
-            data = data.astype(np.float64)
-
+    def __init__(self, double[:, ::1] data):
         cdef:
             Py_ssize_t n_dim = data.shape[1]
             double[:] x_min = np.min(data, axis=0)

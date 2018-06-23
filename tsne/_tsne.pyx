@@ -187,24 +187,19 @@ cpdef double estimate_negative_gradient_bh(
     cdef:
         Py_ssize_t i, j, num_points = embedding.shape[0]
         double sum_Q = 0
-        double * sum_Qi = <double *>PyMem_Malloc(num_points * sizeof(double))
+        double[::1] sum_Qi = np.zeros(num_points, dtype=float)
 
     if num_threads < 1:
         num_threads = 1
 
     # In order to run gradient estimation in parallel, we need to pass each
     # worker it's own memory slot to write sum_Qs
-    for i in range(num_points):
-        sum_Qi[i] = 0
-
     for i in prange(num_points, nogil=True, num_threads=num_threads, schedule='guided'):
         _estimate_negative_gradient_single(
             &tree.root, &embedding[i, 0], &gradient[i, 0], &sum_Qi[i], theta, dof)
 
     for i in range(num_points):
         sum_Q += sum_Qi[i]
-
-    PyMem_Free(sum_Qi)
 
     # Normalize q_{ij}s
     for i in range(gradient.shape[0]):

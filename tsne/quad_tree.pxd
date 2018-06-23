@@ -18,7 +18,7 @@ ctypedef struct Node:
     Py_ssize_t num_points
 
 
-cdef inline bint is_duplicate(Node * node, double * point, double duplicate_eps=*) nogil
+cdef bint is_duplicate(Node * node, double * point, double duplicate_eps=*) nogil
 
 
 cdef class QuadTree:
