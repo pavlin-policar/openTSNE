@@ -14,8 +14,11 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE as SKLTSNE
 from sklearn.model_selection import train_test_split
 
-from tsne.callbacks import ErrorLogger
+from tsne.callbacks import ErrorLogger, VerifyExaggerationError, ErrorApproximations
+from tsne.kl_divergence import kl_divergence_exact, kl_divergence_approx_bh, \
+    kl_divergence_approx_fft
 from tsne.tsne import TSNE
+
 
 FILE_DIR = dirname(abspath(__file__))
 DATA_DIR = join(FILE_DIR, 'data')
@@ -65,7 +68,7 @@ def get_mnist(n_samples=None):
     return x, y
 
 
-def get_mouse_60k():
+def get_mouse_60k(n_samples=None):
     with open(join(DATA_DIR, 'sc-mouse-60k-1k.pkl'), 'rb') as f:
         x = pickle.load(f)
     x = x.astype(np.float32).toarray()
@@ -73,45 +76,64 @@ def get_mouse_60k():
     with open(join(DATA_DIR, 'sc-mouse-60k-1k-y.txt'), 'rb') as f:
         y = np.array(json.load(f), dtype=int)
 
+    if n_samples is not None:
+        indices = np.random.choice(list(range(x.shape[0])), n_samples, replace=False)
+        x, y = x[indices], y[indices]
+
     return x, y
 
 
-def tmp():
-    from tsne.tsne import TSNE
-
-    iris = datasets.load_iris()
-    x = iris['data']
-    y = iris['target']
+def check_error_approx():
+    x, y = get_mouse_60k(1500)
 
     tsne = TSNE(
-        perplexity=30, learning_rate=100, early_exaggeration=12,
+        perplexity=20, learning_rate=100, early_exaggeration=12,
         n_jobs=4, theta=0.5, initialization='pca', metric='euclidean',
-        n_components=2, n_iter=750, early_exaggeration_iter=250, neighbors='exact',
-        negative_gradient_method='bh', min_num_intervals=10, ints_in_interval=2,
+        n_components=2, n_iter=750, early_exaggeration_iter=250,
+        neighbors='exact', negative_gradient_method='bh',
+        min_num_intervals=10, ints_in_interval=2,
         late_exaggeration_iter=0, late_exaggeration=4, callbacks=ErrorLogger(),
     )
-    embedding = tsne.fit(x)
+    embedding = tsne.get_initial_embedding_for(x, initialization='random')
+
+    errors = ErrorApproximations(embedding.P)
+    logger = ErrorLogger()
+    embedding.optimize(
+        250, exaggeration=12, callbacks=[errors, logger],
+        callbacks_every_iters=5, inplace=True,
+    )
+    embedding.optimize(
+        750, exaggeration=None, callbacks=[errors, logger],
+        callbacks_every_iters=5, inplace=True,
+    )
+    errors.report()
+
     plot(embedding, y)
 
+    x = list(range(len(errors.exact_errors)))
+    plt.semilogy(x, errors.exact_errors, label='Exact')
+    plt.semilogy(x, errors.bh_errors, label='BH')
+    plt.semilogy(x, errors.fft_errors, label='FFT')
+    plt.legend()
+    plt.show()
 
-def run():
+
+def run(perplexity=30, learning_rate=100, n_jobs=4):
     x, y = get_mouse_60k()
 
     angle = 0.5
-    perplexity = 30
     ee = 12
-    lr = 100
-    threads = 4
     metric = 'euclidean'
 
     print(x.shape)
 
     start = time.time()
     tsne = TSNE(
-        perplexity=perplexity, learning_rate=lr, early_exaggeration=ee,
-        n_jobs=threads, theta=angle, initialization='random', metric=metric,
-        n_components=2, n_iter=750, early_exaggeration_iter=250, neighbors='approx',
-        negative_gradient_method='fft', min_num_intervals=10, ints_in_interval=2,
+        perplexity=perplexity, learning_rate=learning_rate, early_exaggeration=ee,
+        n_jobs=n_jobs, theta=angle, initialization='random', metric=metric,
+        n_components=2, n_iter=750, early_exaggeration_iter=250,
+        neighbors='approx', negative_gradient_method='fft',
+        min_num_intervals=10, ints_in_interval=1,
         late_exaggeration_iter=0, late_exaggeration=2., callbacks=ErrorLogger(),
     )
     # x = PCA(n_components=50).fit_transform(x)
@@ -138,8 +160,8 @@ def run():
     init = PCA(n_components=2).fit_transform(x)
     start = time.time()
     embedding = MulticoreTSNE(
-        early_exaggeration=ee, learning_rate=lr, perplexity=perplexity,
-        n_jobs=threads, cheat_metric=False, angle=angle, init=init,
+        early_exaggeration=ee, learning_rate=learning_rate, perplexity=perplexity,
+        n_jobs=n_jobs, cheat_metric=False, angle=angle, init=init,
         metric=metric, verbose=True
     ).fit_transform(x)
     print('-' * 80)
@@ -150,7 +172,7 @@ def run():
 
     start = time.time()
     embedding = SKLTSNE(
-        early_exaggeration=ee, learning_rate=lr, angle=angle,
+        early_exaggeration=ee, learning_rate=learning_rate, angle=angle,
         perplexity=perplexity, init='pca', metric=metric,
     ).fit_transform(x)
     print('-' * 80)
