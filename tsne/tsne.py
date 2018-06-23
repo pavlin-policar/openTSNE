@@ -37,6 +37,19 @@ def _handle_nice_params(optim_params: dict) -> None:
     optim_params['callbacks'] = _check_callbacks(optim_params['callbacks'])
     optim_params['use_callbacks'] = optim_params['callbacks'] is not None
 
+    # Handle negative gradient method
+    negative_gradient_method = optim_params['negative_gradient_method']
+    if callable(negative_gradient_method):
+        negative_gradient_method = negative_gradient_method
+    elif negative_gradient_method in {'bh', 'BH', 'barnes-hut'}:
+        negative_gradient_method = kl_divergence_bh
+    elif negative_gradient_method in {'fft', 'FFT', 'interpolation'}:
+        negative_gradient_method = kl_divergence_fft
+    else:
+        raise ValueError('Unrecognized gradient method. Please choose one of '
+                         'the supported methods or provide a valid callback.')
+    optim_params['negative_gradient_method'] = negative_gradient_method
+
 
 class OptimizationInterrupt(InterruptedError):
     def __init__(self, error: float, final_embedding: np.ndarray) -> None:
@@ -426,20 +439,9 @@ class TSNE:
         # degrees_of_freedom = n_components - 1 comes from [3]_.
         degrees_of_freedom = max(self.n_components - 1, 1)
 
-        # Determine which method will be used for optimization
-        if callable(self.negative_gradient_method):
-            negative_gradient_method = self.negative_gradient_method
-        elif self.negative_gradient_method in {'bh', 'BH', 'barnes-hut'}:
-            negative_gradient_method = kl_divergence_bh
-        elif self.negative_gradient_method in {'fft', 'FFT', 'interpolation'}:
-            negative_gradient_method = kl_divergence_fft
-        else:
-            raise ValueError('Unrecognized gradient method. Please choose one of '
-                             'the supported methods or provide a valid callback.')
-
         gradient_descent_params = {
             'dof': degrees_of_freedom,
-            'negative_gradient_method': negative_gradient_method,
+            'negative_gradient_method': self.negative_gradient_method,
             'learning_rate': self.learning_rate,
             # By default, use the momentum used in unexaggerated phase
             'momentum': self.final_momentum,
