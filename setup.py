@@ -15,7 +15,7 @@ extensions = [
               extra_link_args=['-fopenmp', '-lfftw3', '-O3'],
               include_dirs=[np.get_include()],
               ),
-    Extension('tsne._kl_divergence', ['tsne/_kl_divergence.pyx'],
+    Extension('tsne.kl_divergence', ['tsne/kl_divergence.pyx'],
               extra_compile_args=['-fopenmp', '-O3'],
               extra_link_args=['-fopenmp', '-O3'],
               include_dirs=[np.get_include()],
