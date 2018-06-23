@@ -534,6 +534,7 @@ def joint_probabilities_nn(neighbors, distances, perplexity, symmetrize=True,
     # Compute asymmetric pairwise input similarities
     conditional_P = _tsne.compute_gaussian_perplexity(
         distances, perplexity, num_threads=n_jobs)
+    conditional_P = np.asarray(conditional_P)
 
     P = csr_matrix((conditional_P.ravel(), neighbors.ravel(),
                     range(0, n_samples * k_neighbors + 1, k_neighbors)),

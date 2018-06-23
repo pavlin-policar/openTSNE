@@ -45,7 +45,7 @@ cdef extern from 'math.h':
     double INFINITY
 
 
-cpdef np.ndarray[np.float64_t, ndim=2] compute_gaussian_perplexity(
+cpdef double[:, ::1] compute_gaussian_perplexity(
     double[:, :] distances,
     double desired_perplexity,
     double perplexity_tol=1e-8,
@@ -55,7 +55,7 @@ cpdef np.ndarray[np.float64_t, ndim=2] compute_gaussian_perplexity(
     cdef:
         Py_ssize_t n_new_points = distances.shape[0]
         Py_ssize_t n_existing_points = distances.shape[1]
-        double[:, :] P = np.zeros_like(distances)
+        double[:, ::1] P = np.zeros_like(distances, dtype=float, order='C')
         double[:] beta = np.ones(n_new_points)
 
         Py_ssize_t i, j, iteration
@@ -100,7 +100,7 @@ cpdef np.ndarray[np.float64_t, ndim=2] compute_gaussian_perplexity(
         for j in range(n_existing_points):
             P[i, j] /= sum_Pi
 
-    return np.asarray(P, dtype=np.float64)
+    return P
 
 
 cpdef tuple estimate_positive_gradient_nn(
@@ -110,7 +110,7 @@ cpdef tuple estimate_positive_gradient_nn(
     double[:, ::1] embedding,
     double[:, ::1] reference_embedding,
     double[:, ::1] gradient,
-    double dof,
+    double dof=1,
     Py_ssize_t num_threads=1,
     bint should_eval_error=False,
 ):
