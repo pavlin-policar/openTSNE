@@ -9,15 +9,18 @@ import fire
 import matplotlib.pyplot as plt
 import numpy as np
 from MulticoreTSNE import MulticoreTSNE
-from sklearn import datasets
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE as SKLTSNE
 from sklearn.model_selection import train_test_split
 
-from tsne.callbacks import ErrorLogger, VerifyExaggerationError, ErrorApproximations
-from tsne.kl_divergence import kl_divergence_exact, kl_divergence_approx_bh, \
-    kl_divergence_approx_fft
-from tsne.tsne import TSNE
+from tsne.affinity import NxGraphAffinities
+from tsne.callbacks import ErrorLogger, ErrorApproximations
+from tsne.tsne import TSNE, TSNEEmbedding
+
+try:
+    import networkx as nx
+except ImportError:
+    nx = None
 
 
 FILE_DIR = dirname(abspath(__file__))
@@ -68,6 +71,34 @@ def get_mnist(n_samples=None):
     return x, y
 
 
+def get_fashion_mnist(n_samples=None):
+    def load_mnist(path, kind='train'):
+        """Load MNIST data from `path`"""
+        labels_path = os.path.join(path, '%s-labels-idx1-ubyte.gz' % kind)
+        images_path = os.path.join(path, '%s-images-idx3-ubyte.gz' % kind)
+
+        with gzip.open(labels_path, 'rb') as lbpath:
+            labels = np.frombuffer(lbpath.read(), dtype=np.uint8, offset=8)
+
+        with gzip.open(images_path, 'rb') as imgpath:
+            images = np.frombuffer(imgpath.read(), dtype=np.uint8,
+                                   offset=16).reshape(len(labels), 784)
+
+        return images, labels
+
+    x_train, y_train = load_mnist(join(DATA_DIR, 'fmnist'), kind='train')
+    x_test, y_test = load_mnist(join(DATA_DIR, 'fmnist'), kind='t10k')
+
+    x = np.vstack((x_train, x_test))
+    y = np.hstack((y_train, y_test))
+
+    if n_samples is not None:
+        indices = np.random.choice(list(range(x.shape[0])), n_samples, replace=False)
+        x, y = x[indices], y[indices]
+
+    return x, y
+
+
 def get_mouse_60k(n_samples=None):
     with open(join(DATA_DIR, 'sc-mouse-60k-1k.pkl'), 'rb') as f:
         x = pickle.load(f)
@@ -94,9 +125,9 @@ def check_error_approx():
         min_num_intervals=10, ints_in_interval=2,
         late_exaggeration_iter=0, late_exaggeration=4, callbacks=ErrorLogger(),
     )
-    embedding = tsne.get_initial_embedding_for(x, initialization='random')
+    embedding = tsne.prepare_initial(x, initialization='random')
 
-    errors = ErrorApproximations(embedding.P)
+    errors = ErrorApproximations(embedding.affinities.P)
     logger = ErrorLogger()
     embedding.optimize(
         250, exaggeration=12, callbacks=[errors, logger],
@@ -120,6 +151,7 @@ def check_error_approx():
 
 def run(perplexity=30, learning_rate=100, n_jobs=4):
     x, y = get_mouse_60k()
+    # x, y = get_fashion_mnist()
 
     angle = 0.5
     ee = 12
@@ -142,13 +174,14 @@ def run(perplexity=30, learning_rate=100, n_jobs=4):
     print('tsne', time.time() - start)
     plt.title('tsne')
     plot(embedding, y)
+    return
 
     x = np.ascontiguousarray(x.astype(np.float64))
     from fitsne import FItSNE
     start = time.time()
     embedding = FItSNE(
         x, 2, perplexity=perplexity, stop_lying_iter=250, ann_not_vptree=True,
-        early_exag_coeff=ee, nthreads=threads, theta=angle,
+        early_exag_coeff=ee, nthreads=n_jobs, theta=angle,
     )
     print('-' * 80)
     print('fft interp %.4f' % (time.time() - start))
@@ -183,36 +216,56 @@ def run(perplexity=30, learning_rate=100, n_jobs=4):
 
 
 def transform(n_jobs=4, grad='bh', neighbors='approx'):
+    # iris = datasets.load_iris()
+    # x, y = iris['data'], iris['target']
     x, y = get_mnist(20000)
 
     x_train, x_test, y_train, y_test = train_test_split(
         x, y, test_size=0.33, random_state=42)
 
     tsne = TSNE(
-        n_components=1, perplexity=30, learning_rate=100, early_exaggeration=12,
-        n_jobs=n_jobs, theta=0.5, initialization='pca', metric='euclidean',
+        n_components=2, perplexity=30, learning_rate=100, early_exaggeration=12,
+        n_jobs=n_jobs, theta=0.5, initialization='random', metric='euclidean',
         n_iter=750, early_exaggeration_iter=250, neighbors=neighbors,
         negative_gradient_method=grad, min_num_intervals=10, ints_in_interval=2,
-        late_exaggeration_iter=0, late_exaggeration=4,
+        late_exaggeration_iter=0, late_exaggeration=4, callbacks=[ErrorLogger()],
     )
     start = time.time()
     embedding = tsne.fit(x_train)
     print('tsne train', time.time() - start)
 
     plt.subplot(121)
-    plot1d(embedding, y_train, show=False, ms=3)
+    plot(embedding, y_train, show=False, ms=3)
 
     start = time.time()
-    partial_embedding = embedding.get_partial_embedding_for(
-        x_test, perplexity=10, initialization='random')
-    partial_embedding.optimize(200, exaggeration=2, inplace=True, momentum=0.1)
+    partial_embedding = embedding.transform(x_test, perplexity=20)
+    # partial_embedding = embedding.get_partial_embedding_for(
+    #     x_test, perplexity=10, initialization='random')
+    # partial_embedding.optimize(200, exaggeration=2, inplace=True, momentum=0.1)
     print('tsne transform', time.time() - start)
 
     plt.subplot(122)
-    plot1d(embedding, y_train, show=False, ms=3, alpha=0.25)
+    plot(embedding, y_train, show=False, ms=3, alpha=0.25)
     plt.gca().set_color_cycle(None)
-    plot1d(partial_embedding, y_test, show=False, ms=3, alpha=0.8)
+    plot(partial_embedding, y_test, show=False, ms=3, alpha=0.8)
 
+    plt.show()
+
+
+def run_graph():
+    graph = nx.read_edgelist(join(DATA_DIR, 'dolphins.edges'))
+    affinities = NxGraphAffinities(graph)
+
+    tsne = TSNE()
+    y_coords = tsne.generate_initial_coordinates(affinities.P, initialization='random')
+    embedding = TSNEEmbedding(
+        y_coords, affinities,
+        {'callbacks': None, 'negative_gradient_method': 'bh', 'dof': 1,
+         'momentum': 0, 'learning_rate': 100})
+
+    embedding.optimize(1000)
+
+    plt.plot(embedding[:, 0], embedding[:, 1], 'o')
     plt.show()
 
 
