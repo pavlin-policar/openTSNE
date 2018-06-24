@@ -115,12 +115,6 @@ class PartialTSNEEmbedding(np.ndarray):
 
         return embedding
 
-    def finalize(self):
-        """Free up memory after optimization is complete."""
-        del self.perplexity
-        del self.P
-        del self.gradient_descent_params
-
 
 class TSNEEmbedding(np.ndarray):
     def __new__(cls, embedding, perplexity, knn_index, P, gradient_descent_params):
@@ -271,13 +265,6 @@ class TSNEEmbedding(np.ndarray):
                 embedding[i] = np.average(self[neighbors[i]], axis=0, weights=distances[i])
 
         return embedding
-
-    def finalize(self):
-        """Free up memory after optimization is complete."""
-        del self.perplexity
-        del self.knn_index
-        del self.P
-        del self.gradient_descent_params
 
 
 class TSNE:
