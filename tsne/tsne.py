@@ -487,20 +487,15 @@ class TSNE:
 
         """
         methods = {'exact': KDTree, 'approx': NNDescent}
-        if callable(self.neighbors_method):
-            assert isinstance(KNNIndex), \
-                'The nearest neighbor algorithm you provided does not ' \
-                'inherit the `KNNIndex` class!'
-            knn_index_cls = self.neighbors_method
+        if isinstance(self.neighbors_method, KNNIndex):
+            knn_index = self.neighbors_method
 
         elif self.neighbors_method not in methods:
             raise ValueError('Unrecognized nearest neighbor algorithm `%s`. '
                              'Please choose one of the supported methods or '
                              'provide a valid `KNNIndex` instance.')
         else:
-            knn_index_cls = methods[self.neighbors_method]
-
-        knn_index = knn_index_cls(metric=self.metric, n_jobs=self.n_jobs)
+            knn_index = methods[self.neighbors_method](metric=self.metric, n_jobs=self.n_jobs)
 
         knn_index.build(X)
         neighbors, distances = knn_index.query_train(X, k=k_neighbors)
