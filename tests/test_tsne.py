@@ -132,7 +132,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         params = {'n_iter': 50, param_name: param_value}
 
         tsne = TSNE()
-        embedding = tsne.get_initial_embedding_for(self.x)
+        embedding = tsne.prepare_initial(self.x)
         embedding.optimize(**params, inplace=True)
 
         self.assertEqual(1, gradient_descent.call_count)
@@ -204,7 +204,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         # `optimize` requires us to specify the `n_iter`
         params = {'n_iter': 50, param_name: param_value}
 
-        partial_embedding = embedding.get_partial_embedding_for(self.x_test)
+        partial_embedding = embedding.prepare_partial(self.x_test)
         partial_embedding.optimize(**params, inplace=True)
 
         self.assertEqual(1, gradient_descent.call_count)
@@ -219,7 +219,7 @@ class TestTSNEInplaceOptimization(unittest.TestCase):
         cls.x_test = np.random.randn(25, 4)
 
     def test_embedding_inplace_optimization(self):
-        embedding1 = self.tsne.get_initial_embedding_for(self.x)
+        embedding1 = self.tsne.prepare_initial(self.x)
 
         embedding2 = embedding1.optimize(n_iter=5, inplace=True)
         embedding3 = embedding2.optimize(n_iter=5, inplace=True)
@@ -228,7 +228,7 @@ class TestTSNEInplaceOptimization(unittest.TestCase):
         self.assertIs(embedding2.base, embedding3.base)
 
     def test_embedding_not_inplace_optimization(self):
-        embedding1 = self.tsne.get_initial_embedding_for(self.x)
+        embedding1 = self.tsne.prepare_initial(self.x)
 
         embedding2 = embedding1.optimize(n_iter=5, inplace=False)
         embedding3 = embedding2.optimize(n_iter=5, inplace=False)
@@ -239,10 +239,10 @@ class TestTSNEInplaceOptimization(unittest.TestCase):
 
     def test_partial_embedding_inplace_optimization(self):
         # Prepare reference embedding
-        embedding = self.tsne.get_initial_embedding_for(self.x)
+        embedding = self.tsne.prepare_initial(self.x)
         embedding.optimize(10, inplace=True)
 
-        partial_embedding1 = embedding.get_partial_embedding_for(self.x_test)
+        partial_embedding1 = embedding.prepare_partial(self.x_test)
         partial_embedding2 = partial_embedding1.optimize(5, inplace=True)
         partial_embedding3 = partial_embedding2.optimize(5, inplace=True)
 
@@ -251,10 +251,10 @@ class TestTSNEInplaceOptimization(unittest.TestCase):
 
     def test_partial_embedding_not_inplace_optimization(self):
         # Prepare reference embedding
-        embedding = self.tsne.get_initial_embedding_for(self.x)
+        embedding = self.tsne.prepare_initial(self.x)
         embedding.optimize(10, inplace=True)
 
-        partial_embedding1 = embedding.get_partial_embedding_for(self.x_test)
+        partial_embedding1 = embedding.prepare_partial(self.x_test)
         partial_embedding2 = partial_embedding1.optimize(5, inplace=False)
         partial_embedding3 = partial_embedding2.optimize(5, inplace=False)
 
@@ -298,7 +298,7 @@ class TestTSNECallbackParams(unittest.TestCase):
         callback2.assert_called_once()
 
     def test_can_pass_callbacks_to_embedding_optimize(self):
-        embedding = self.tsne.get_initial_embedding_for(self.x)
+        embedding = self.tsne.prepare_initial(self.x)
 
         # We don't the callback to be iterable
         callback = MagicMock()
@@ -314,7 +314,7 @@ class TestTSNECallbackParams(unittest.TestCase):
         callback.assert_called_once()
 
     def test_can_pass_callbacks_to_embedding_transform(self):
-        embedding = self.tsne.get_initial_embedding_for(self.x)
+        embedding = self.tsne.prepare_initial(self.x)
 
         # We don't the callback to be iterable
         callback = MagicMock()
@@ -332,14 +332,14 @@ class TestTSNECallbackParams(unittest.TestCase):
         callback.assert_called_once()
 
     def test_can_pass_callbacks_to_partial_embedding_optimize(self):
-        embedding = self.tsne.get_initial_embedding_for(self.x)
+        embedding = self.tsne.prepare_initial(self.x)
 
         # We don't the callback to be iterable
         callback = MagicMock()
         del callback.__iter__
 
         # Should be able to pass a single callback
-        partial_embedding = embedding.get_partial_embedding_for(self.x_test)
+        partial_embedding = embedding.prepare_partial(self.x_test)
         partial_embedding.optimize(1, callbacks=callback, callbacks_every_iters=1)
         callback.assert_called_once()
 

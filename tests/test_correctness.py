@@ -15,7 +15,7 @@ class TestTSNECorrectness(unittest.TestCase):
         cls.x = np.random.randn(100, 4)
 
     def test_error_exaggeration_correction(self):
-        embedding = self.tsne.get_initial_embedding_for(self.x)
+        embedding = self.tsne.prepare_initial(self.x)
 
         # The callback raises if the KL divergence does not match the true one
         embedding.optimize(

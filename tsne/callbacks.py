@@ -39,13 +39,13 @@ class VerifyExaggerationError:
     def __init__(self, embedding: TSNEEmbedding) -> None:
         self.embedding = embedding
         # Keep a copy of the unexaggerated affinity matrix
-        self.P = self.embedding.P.copy()
+        self.P = self.embedding.affinities.P.copy()
 
     def __call__(self, iteration: int, corrected_error: float, embedding: TSNEEmbedding):
         params = self.embedding.gradient_descent_params
         method = params['negative_gradient_method']
 
-        if np.sum(embedding.P) <= 1:
+        if np.sum(embedding.affinities.P) <= 1:
             log.warning('Are you sure you are testing an exaggerated P matrix?')
 
         if method == 'fft':

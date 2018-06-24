@@ -55,7 +55,7 @@ If we want finer control of the optimization process, we can run individual opti
 
 ```python
 tsne = TSNE()
-embedding = tsne.get_initial_embedding_for(x)
+embedding = tsne.prepare_initial(x)
 embedding.optimize(n_iter=250, exaggeration=12, momentum=0.5)
 embedding.optimize(n_iter=750, momentum=0.8)
 ```

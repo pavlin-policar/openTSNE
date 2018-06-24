@@ -7,6 +7,7 @@ from scipy.sparse import csr_matrix
 from sklearn.decomposition import PCA
 
 from tsne import _tsne
+from tsne.affinity import Affinities, NearestNeighborAffinities
 from tsne.nearest_neighbors import KNNIndex, KDTree, NNDescent
 from tsne.quad_tree import QuadTree
 
@@ -70,11 +71,10 @@ class PartialTSNEEmbedding(np.ndarray):
 
     """
 
-    def __new__(cls, embedding, reference_embedding, perplexity, P, gradient_descent_params):
+    def __new__(cls, embedding, reference_embedding, P, gradient_descent_params):
         obj = np.asarray(embedding, dtype=np.float64, order='C').view(PartialTSNEEmbedding)
 
         obj.reference_embedding = reference_embedding
-        obj.perplexity = perplexity
         obj.P = P
         obj.gradient_descent_params = gradient_descent_params
 
@@ -89,8 +89,7 @@ class PartialTSNEEmbedding(np.ndarray):
             embedding = self
         else:
             embedding = PartialTSNEEmbedding(
-                np.copy(self), self.reference_embedding, self.perplexity, self.P,
-                self.gradient_descent_params,
+                np.copy(self), self.reference_embedding, self.P, self.gradient_descent_params,
             )
 
         # If optimization parameters were passed to this funciton, prefer those
@@ -117,12 +116,10 @@ class PartialTSNEEmbedding(np.ndarray):
 
 
 class TSNEEmbedding(np.ndarray):
-    def __new__(cls, embedding, perplexity, knn_index, P, gradient_descent_params):
+    def __new__(cls, embedding, affinities, gradient_descent_params):
         obj = np.asarray(embedding, dtype=np.float64, order='C').view(TSNEEmbedding)
 
-        obj.perplexity = perplexity  # type: float
-        obj.knn_index = knn_index  # type: KNNIndex
-        obj.P = P  # type: csr_matrix
+        obj.affinities = affinities  # type: Affinities
         obj.gradient_descent_params = gradient_descent_params  # type: dict
 
         obj.kl_divergence = None
@@ -135,8 +132,8 @@ class TSNEEmbedding(np.ndarray):
         if inplace:
             embedding = self
         else:
-            embedding = TSNEEmbedding(np.copy(self), self.perplexity, self.knn_index,
-                                      self.P, self.gradient_descent_params)
+            embedding = TSNEEmbedding(np.copy(self), self.affinities,
+                                      self.gradient_descent_params)
 
         # If optimization parameters were passed to this funciton, prefer those
         # over the defaults specified in the TSNE object
@@ -147,7 +144,7 @@ class TSNEEmbedding(np.ndarray):
 
         try:
             error, embedding = gradient_descent(
-                embedding=embedding, P=self.P, **optim_params)
+                embedding=embedding, P=self.affinities.P, **optim_params)
 
         except OptimizationInterrupt as ex:
             log.info('Optimization was interrupted with callback.')
@@ -163,7 +160,7 @@ class TSNEEmbedding(np.ndarray):
                   early_exaggeration=2, early_exaggeration_iter=100,
                   initial_momentum=0.2, n_iter=300, final_momentum=0.4,
                   **gradient_descent_params):
-        embedding = self.get_partial_embedding_for(
+        embedding = self.prepare_partial(
             X, perplexity=perplexity, initialization=initialization)
 
         optim_params = dict(gradient_descent_params)
@@ -189,7 +186,7 @@ class TSNEEmbedding(np.ndarray):
 
         return embedding
 
-    def get_partial_embedding_for(self, X, initialization='weighted', perplexity=None):
+    def prepare_partial(self, X, initialization='weighted', perplexity=None):
         """Get the initial positions of some new data to be fitted w.r.t. the
         existing embedding.
 
@@ -204,39 +201,20 @@ class TSNEEmbedding(np.ndarray):
         PartialTSNEEmbedding
 
         """
-        n_samples = X.shape[0]
-        n_reference_samples = self.shape[0]
-
-        # The perplexity is limited by the number of points in the existing
-        # embedding
-        perplexity = perplexity or self.perplexity
-        if n_reference_samples - 1 < 3 * perplexity:
-            perplexity = (n_reference_samples - 1) / 3
-            log.warning('Perplexity value is too high. Using perplexity %.2f' % perplexity)
-
-        # Compute the nearest neighbors of the new points to the points in the
-        # existing embedding
-        k_neighbors = min(n_samples - 1, int(3 * perplexity))
-        neighbors, distances = self.knn_index.query(X, k_neighbors)
-
-        # Compute the probabilities of the existing points appearing close to
-        # the new points
-        n_jobs = self.gradient_descent_params['n_jobs']
-        P = joint_probabilities_nn(
-            neighbors, distances, perplexity, symmetrize=False,
-            n_reference_samples=n_reference_samples, n_jobs=n_jobs,
+        P, neighbors, distances = self.affinities.to_new(
+            X, return_distances=True, perplexity=perplexity,
         )
 
-        embedding = self.__get_initial_partial_embedding(
+        embedding = self.__generate_partial_coordinates(
             X, initialization, neighbors, distances,
         )
 
         return PartialTSNEEmbedding(
-            embedding, reference_embedding=self, perplexity=perplexity, P=P,
+            embedding, reference_embedding=self, P=P,
             gradient_descent_params=self.gradient_descent_params,
         )
 
-    def __get_initial_partial_embedding(self, X, initialization, neighbors, distances):
+    def __generate_partial_coordinates(self, X, initialization, neighbors, distances):
         n_samples = X.shape[0]
         n_components = self.shape[1]
 
@@ -311,7 +289,7 @@ class TSNE:
         TSNEEmbedding
 
         """
-        embedding = self.get_initial_embedding_for(X)
+        embedding = self.prepare_initial(X)
 
         try:
             # Early exaggeration with lower momentum to allow points to find more
@@ -341,8 +319,8 @@ class TSNE:
 
         return embedding
 
-    def get_initial_embedding_for(self, X, initialization=None):
-        """Get an initial embedding for the data set.
+    def prepare_initial(self, X, initialization=None):
+        """Prepare the initial embedding which can be optimized in steps.
 
         Parameters
         ----------
@@ -354,70 +332,20 @@ class TSNE:
         TSNEEmbedding
 
         """
-        initialization = initialization or self.initialization
+        # Get some initial coordinates for the embedding
+        y_coords = self.generate_initial_coordinates(X, initialization=initialization)
 
-        # If initial positions are given in an array, use a copy of that
-        if isinstance(initialization, np.ndarray):
-            assert initialization.shape[0] == X.shape[0], \
-                'The provided initialization contains a different number of ' \
-                'samples (%d) than the data provided (%d).' % (
-                    initialization.shape[0], X.shape[0])
-            embedding = np.array(initialization)
-
-        # Initialize the embedding using a PCA projection into the desired
-        # number of components
-        elif initialization == 'pca':
-            pca = PCA(n_components=self.n_components)
-            embedding = pca.fit_transform(X)
-
-        # Random initialization with isotropic normal distribution
-        elif initialization == 'random':
-            embedding = np.random.normal(0, 1e-2, (X.shape[0], self.n_components))
-
-        else:
-            raise ValueError('Unrecognized initialization scheme')
-
-        return TSNEEmbedding(embedding, **self.__get_optimization_params(X))
-
-    def __get_optimization_params(self, X):
-        """Compute and determine all the parameters needed for optimization.
-
-        Parameters
-        ----------
-        X : np.ndarray
-
-        Returns
-        -------
-        dict
-            All the parameters needed to construct a tSNE embedding object,
-            without the actual embedding itself.
-
-        """
-        n_samples = X.shape[0]
-
-        # Check for valid perplexity value
-        if n_samples - 1 < 3 * self.perplexity:
-            perplexity = (n_samples - 1) / 3
-            log.warning('Perplexity value is too high. Using perplexity %.2f' % perplexity)
-        else:
-            perplexity = self.perplexity
-
-        k_neighbors = min(n_samples - 1, int(3 * perplexity))
-        start = time.time()
-        knn_index, neighbors, distances = self.__get_nearest_neighbors(X, k_neighbors)
-        print('NN search', time.time() - start)
-
-        start = time.time()
-        # Compute the symmetric joint probabilities of points being neighbors
-        P = joint_probabilities_nn(neighbors, distances, perplexity, n_jobs=self.n_jobs)
-        print('joint probabilities', time.time() - start)
-
-        # Degrees of freedom of the Student's t-distribution. The suggestion
-        # degrees_of_freedom = n_components - 1 comes from [3]_.
-        degrees_of_freedom = max(self.n_components - 1, 1)
+        # Compute the affinities for the input data
+        affinities = NearestNeighborAffinities(
+            X, self.perplexity, method=self.neighbors_method,
+            metric=self.metric, n_jobs=self.n_jobs,
+        )
 
         gradient_descent_params = {
-            'dof': degrees_of_freedom,
+            # Degrees of freedom of the Student's t-distribution. The
+            # suggestion degrees_of_freedom = n_components - 1 comes from [3]_.
+            'dof':  max(self.n_components - 1, 1),
+
             'negative_gradient_method': self.negative_gradient_method,
             'learning_rate': self.learning_rate,
             # By default, use the momentum used in unexaggerated phase
@@ -436,105 +364,43 @@ class TSNE:
             'callbacks_every_iters': self.callbacks_every_iters,
         }
 
-        return {'perplexity': perplexity,
-                'knn_index': knn_index,
-                'P': P,
-                'gradient_descent_params': gradient_descent_params}
+        return TSNEEmbedding(y_coords, affinities, gradient_descent_params)
 
-    def __get_nearest_neighbors(self, X, k_neighbors):
-        """Compute the nearest neighbors for a given dataset.
-
-        Note that the perplexity value must be valid. This is not checked here.
+    def generate_initial_coordinates(self, X, initialization=None):
+        """Get initial coordinates for the new embedding for the data set.
 
         Parameters
         ----------
         X : np.ndarray
-            The reference data against which to search for neighbors.
-        k_neighbors: int
+        initialization : Optional[Union[np.ndarray, str]]
 
-        Return
-        ------
-        KNNIndex
-            A nearest neighbor index.
+        Returns
+        -------
         np.ndarray
-            The indices of the k nearest neighbors.
-        np.ndarray
-            The distances of the k nearest neighbors, corresponding to the
-            indices. See above.
 
         """
-        methods = {'exact': KDTree, 'approx': NNDescent}
-        if isinstance(self.neighbors_method, KNNIndex):
-            knn_index = self.neighbors_method
+        initialization = initialization or self.initialization
 
-        elif self.neighbors_method not in methods:
-            raise ValueError('Unrecognized nearest neighbor algorithm `%s`. '
-                             'Please choose one of the supported methods or '
-                             'provide a valid `KNNIndex` instance.')
+        # If initial positions are given in an array, use a copy of that
+        if isinstance(initialization, np.ndarray):
+            assert initialization.shape[0] == X.shape[0], \
+                'The provided initialization contains a different number of ' \
+                'samples (%d) than the data provided (%d).' % (
+                    initialization.shape[0], X.shape[0])
+            return np.array(initialization)
+
+        # Initialize the embedding using a PCA projection into the desired
+        # number of components
+        elif initialization == 'pca':
+            pca = PCA(n_components=self.n_components)
+            return pca.fit_transform(X)
+
+        # Random initialization with isotropic normal distribution
+        elif initialization == 'random':
+            return np.random.normal(0, 1e-2, (X.shape[0], self.n_components))
+
         else:
-            knn_index = methods[self.neighbors_method](metric=self.metric, n_jobs=self.n_jobs)
-
-        knn_index.build(X)
-        neighbors, distances = knn_index.query_train(X, k=k_neighbors)
-
-        return knn_index, neighbors, distances
-
-
-def joint_probabilities_nn(neighbors, distances, perplexity, symmetrize=True,
-                           n_reference_samples=None, n_jobs=1):
-    """Compute the conditional probability matrix P_{j|i}.
-
-    This method computes an approximation to P using the nearest neighbors.
-
-    Parameters
-    ----------
-    neighbors : np.ndarray
-        A `n_samples * k_neighbors` matrix containing the indices to each
-        points' nearest neighbors in descending order.
-    distances : np.ndarray
-        A `n_samples * k_neighbors` matrix containing the distances to the
-        neighbors at indices defined in the neighbors parameter.
-    perplexity : double
-        The desired perplexity of the probability distribution.
-    symmetrize : bool
-        Whether to symmetrize the probability matrix or not. Symmetrizing is
-        used for typical t-SNE, but does not make sense when embedding new data
-        into an existing embedding.
-    n_reference_samples : int
-        The number of samples in the existing (reference) embedding. Needed to
-        properly construct the sparse P matrix.
-    n_jobs : int
-        Number of threads.
-
-    Returns
-    -------
-    csr_matrix
-        A `n_samples * n_reference_samples` matrix containing the probabilities
-        that a new sample would appear as a neighbor of a reference point.
-
-    """
-    n_samples, k_neighbors = distances.shape
-
-    if n_reference_samples is None:
-        n_reference_samples = n_samples
-
-    # Compute asymmetric pairwise input similarities
-    conditional_P = _tsne.compute_gaussian_perplexity(
-        distances, perplexity, num_threads=n_jobs)
-    conditional_P = np.asarray(conditional_P)
-
-    P = csr_matrix((conditional_P.ravel(), neighbors.ravel(),
-                    range(0, n_samples * k_neighbors + 1, k_neighbors)),
-                   shape=(n_samples, n_reference_samples))
-
-    # Symmetrize the probability matrix
-    if symmetrize:
-        P = (P + P.T) / 2
-
-    # Convert weights to probabilities using pair-wise normalization scheme
-    P /= np.sum(P)
-
-    return P
+            raise ValueError('Unrecognized initialization scheme')
 
 
 def kl_divergence_bh(embedding, P, dof, bh_params, reference_embedding=None,
