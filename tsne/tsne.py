@@ -79,9 +79,6 @@ class PartialTSNEEmbedding(np.ndarray):
         obj.gradient_descent_params = gradient_descent_params
 
         obj.kl_divergence = None
-        # TODO: The pBIC is probably meaningless in this setting and should be
-        # computed on the full embedding
-        obj.pBIC = None
 
         return obj
 
@@ -114,10 +111,7 @@ class PartialTSNEEmbedding(np.ndarray):
                 raise ex
             error, embedding = ex.error, ex.final_embedding
 
-        # Optimization done - time to compute error metrics
-        n_samples = embedding.shape[0]
         embedding.kl_divergence = error
-        embedding.pBIC = 2 * error + np.log(n_samples) * self.perplexity / n_samples
 
         return embedding
 
@@ -138,7 +132,6 @@ class TSNEEmbedding(np.ndarray):
         obj.gradient_descent_params = gradient_descent_params  # type: dict
 
         obj.kl_divergence = None
-        obj.pBIC = None
 
         return obj
 
@@ -168,10 +161,7 @@ class TSNEEmbedding(np.ndarray):
                 raise ex
             error, embedding = ex.error, ex.final_embedding
 
-        # Optimization done - time to compute error metrics
-        n_samples = embedding.shape[0]
         embedding.kl_divergence = error
-        embedding.pBIC = 2 * error + np.log(n_samples) * self.perplexity / n_samples
 
         return embedding
 
