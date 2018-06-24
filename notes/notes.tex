@@ -52,4 +52,27 @@ KL(P \mid \mid Q) &= \sum_{ij} p_{ij} \log \frac{p_{ij}}{q_{ij}}
 
 The first term is computed by the gradient method (since it only knows about the scaled $P$), the second term can easily be computed post-optimization, allowing us to get the correct KL divergence.
 
+\section{Transform}
+
+\subsection{Direct optimization}
+
+\subsection{General framework of cost functions}
+\cite{bunte2012general}
+
+\subsection{MDS interpolation}
+MDS Interpolation~\cite{bae2010dimension}. A similar approach might be able to be applied to tSNE. In essence, they run MDS on a sample of points. Then for each new point, we compute the k-nearest neighbors and optimize the stress function w.r.t. only those points. In their paper, they derive equations that can be used for efficient optimization via majorization.
+
+\subsection{Kernel tSNE}
+\cite{gisbrecht2012out} claim to outperform direct mapping tSNE using a direct kernel mapping. This paper is not very useful. The graph is misleading and the table at the end is informative, but run only on small datasets. Their subsequent paper is much better and throughout.
+
+In \cite{gisbrecht2015parametric}, kernel tSNE is described in more detail and parameters are chosen in a more principled manner.
+
+Describes how to integrate class labels into embedding using Fischer information.
+
+The issue of kernel tSNE is that we have to compute the inverse of the interaction matrix K. We can use P as the interaction matrix, and P is sparse, but the inverse of that is very dense, and for any reasonably sized data set, this is unfeasable.
+
+
+\bibliography{references}
+\bibliographystyle{apalike}
+
 \end{document}
