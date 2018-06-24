@@ -94,14 +94,6 @@ class NearestNeighborAffinities(Affinities):
         return perplexity
 
 
-class GraphAffinities(Affinities):
-    def __init__(self, data, use_directed=True, use_weights=True):
-        super().__init__()
-
-    def to_new(self, data):
-        pass
-
-
 def joint_probabilities_nn(neighbors, distances, perplexity, symmetrize=True,
                            n_reference_samples=None, n_jobs=1):
     """Compute the conditional probability matrix P_{j|i}.
@@ -157,3 +149,11 @@ def joint_probabilities_nn(neighbors, distances, perplexity, symmetrize=True,
     P /= np.sum(P)
 
     return P
+
+
+class GraphAffinities(Affinities):
+    def __init__(self, data, use_directed=True, use_weights=True):
+        super().__init__()
+
+    def to_new(self, data):
+        pass

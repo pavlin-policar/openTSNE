@@ -1,15 +1,13 @@
 import logging
-import time
 from collections import Iterable
 
 import numpy as np
 from scipy.sparse import csr_matrix
 from sklearn.decomposition import PCA
+from tsne.quad_tree import QuadTree
 
 from tsne import _tsne
 from tsne.affinity import Affinities, NearestNeighborAffinities
-from tsne.nearest_neighbors import KNNIndex, KDTree, NNDescent
-from tsne.quad_tree import QuadTree
 
 EPSILON = np.finfo(np.float64).eps
 
