@@ -22,20 +22,191 @@
 \date{}
 \maketitle
 
-\section{Fast KL Divergence}
+\section{tSNE}
+
+tSNE was presented in \cite{maaten2008visualizing} and aims to preserve local structure of high dimensional spaces $X$ with some low dimensional embedding $Y$. First for each point $i$, we find its nearest nearest neighbours and compute the probability of this point $p_j$ based on the PDF of a Gaussian centred on the point $i$:
+
+\begin{equation}\label{eq:sne_pij}
+p_{j \mid i} = \frac{\exp{\left (- || \mathbf{x}_i - \mathbf{x}_j ||^2 / 2\sigma_i^2 \right )}}{\sum_{k \neq i}\exp{\left (- || \mathbf{x}_i - \mathbf{x}_k ||^2 / 2\sigma_i^2 \right )}}
+\end{equation}
+
+where $\sigma_i$ is the bandwidth of the Gaussian density. These bandwidths are controlled by the ``perplexity'' parameter. Perplexity can be thought of as a continuous analogue to the number $k$-nearest neighbours:
+
+\begin{equation}
+Perp(P_i) = 2^{H(P_i)}
+\end{equation}
+
+where $H(P_i)$ is the Shannon entropy of the distribution $P_i$.
+
+tSNE actually doesn't use Equation~\ref{eq:sne_pij} directly, but symmetrizes this conditional probability, so the actual $p_{ij}$s used by tSNE are
+
+\begin{equation}
+p_{ij} = \frac{p_{j\mid i} + p_{i \mid j}}{2}
+\end{equation}
+
+In their experiments, van der Maaten et al. found that this doesn't affect embedding quality and simplifies the gradient expression.
+
+Similarly, we represent the embedding $Y$ as a probability distribution. In the original SNE paper \cite{hinton2003stochastic}, a Gaussian was used, however this often led to the crowding problem, where all the points were clumped into a single ball in a single point in space. tSNE, as the name would suggest, uses a Student-t distribution, therefore the probability density of $Y$ is
+
+\begin{equation}
+q_{ij} = \frac{\left ( 1 + || \mathbf{y}_i - \mathbf{y}_j ||^2 \right )^{-1}}{\sum_{k \neq l}\left ( 1 + || \mathbf{y}_k - \mathbf{y}_l ||^2 \right )^{-1}}
+\end{equation}
+
+We now have two probability distributions over the local point affinities. Now we'd like some way to match these two distributions, so the local structure of $X$ is reflected in $Y$. A natural way of doing this is to use Kullback-Leibler divergence (from here on referred to as the KL divergence), which is defined as
+
+\begin{equation}
+KL(P \mid \mid Q) = \sum_{ij} p_{ij} \log \frac{p_{ij}}{q_{ij}}
+\end{equation}
+
+Our goal is to minimize this error $C$, so we can take the derivative and obtain
+
+\begin{equation}
+\frac{\partial C}{\partial \mathbf{y}_i} = 4 \sum_{j \neq i} \left ( p_{ij} - q_{ij} \right ) \left ( \mathbf{y}_i - \mathbf{y}_j \right ) \left ( 1 + || \mathbf{y}_i - \mathbf{y}_j || ^2 \right )^{-1}
+\end{equation}
+
+This is tSNE in essence. In practice various tricks are used to speed up convergence e.g. using a momentum term helps a lot. The embedding $Y$ is typically initialized using an isotropic Gaussian with small variance (e.g. 0.01). Often times, PCA is used for initialization. This can sometimes be problematic if the PCA embedding provides very scattered embeddings (sometimes most points are clumped to one side with very long stretched out tails). In these cases, using a random initialization produces better embeddings.
+
+\section{Performance improvements}
+It quickly became apparent that tSNE, while nice, was infeasible to run for larger data sets, because of its quadratic time complexity $\mathcal{O}(n^2)$ (due to the normalization term in $q_{ij}$).
+
+For convenience, we will write the gradient in a different form seen in many papers, that makes the attractive and repulsive forces clearer.
+
+\begin{align}
+\frac{\partial C}{\partial \mathbf{y}_i} &= 4 \sum_{j \neq i} \left ( p_{ij} - q_{ij} \right ) \left ( \mathbf{y}_i - \mathbf{y}_j \right ) \left ( 1 + || \mathbf{y}_i - \mathbf{y}_j || ^2 \right )^{-1}
+\intertext{Notice that the right most term is just the unnormalized $q_{ij}$}
+&= 4 \sum_{j \neq i} \left ( p_{ij} - q_{ij} \right ) \left ( \mathbf{y}_i - \mathbf{y}_j \right ) \left ( 1 + || \mathbf{y}_i - \mathbf{y}_j || ^2 \right )^{-1} \frac{Z}{Z}
+\intertext{Where $Z$ is the normalization term of $Q$: $Z = \sum_{k \neq l}\left ( 1 + || \mathbf{y}_k - \mathbf{y}_l ||^2 \right )^{-1}$}
+&= 4 \sum_{j \neq i} \left ( p_{ij} - q_{ij} \right ) q_{ij} Z \left ( \mathbf{y}_i - \mathbf{y}_j \right ) \\
+&= 4 \left (\sum_{j \neq i} p_{ij} q_{ij} Z \left ( \mathbf{y}_i - \mathbf{y}_j \right ) -\sum_{j \neq i} q_{ij}^2 Z \left ( \mathbf{y}_i - \mathbf{y}_j \right ) \right ) \\
+\intertext{which can in turn be throught of as attractive and repulsive forces}
+&= 4 \left ( F_{\text{attr}} + F_{\text{rep}} \right )
+\end{align}
+
+\subsection{Landmark points}
+In fact, van der Maaten and Hinton provide a solution to this in their original paper: instead of visualizing all the points, embed only a sample of carefully chosen landmark points. The points must be carefully chosen because a random subset may not properly describe the manifold. First, we construct the k-neighbourhood graph on all the points. Next, they approximate the $P$ of the landmark points using random walks across the neighbourhood graph. Then, we proceed with tSNE on the landmark points.
+
+\subsection{Approximating P}
+
+An observation made in \cite{van2014accelerating} was that since we use a Gaussian kernel for $P$, points further than 3 standard deviations from the mean have almost zero probabilities, and as such, do not affect the KL divergence term. Therefore, no harm would come if we simply ignored these terms. In practice, this means that we only compute the $p_{ij}$ terms for $\left \lfloor 3u \right \rfloor$ neighbours, where $u$ is the perplexity.
+
+In \cite{van2014accelerating}, exact nearest neighbours are used. These can be efficiently computed in $\mathcal{O}(n \log n)$ using tree structures, thus reducing the complexity from $\mathcal{O}(n^2)$ needed for pairwise distances.
+
+The preferred exact nearest neighbour method are vantage point trees (also referred to as VP trees). \cite{yianilos1993data} presented VP trees and compared their performance to another popular tree based nearest neighbour search method -- KD trees. VP trees were shown to require far fewer queries when dealing with high dimensions, as tSNE often does.\cite{van2014accelerating} also provide a comparison with dual-trees, where VP trees, again, perform favourably.
+
+More recently, it was shown in \cite{linderman2017efficient} that approximate nearest neighbours perform just as well. Approximate nearest neighbour algorithms are often orders of magnitude faster than exact nearest neighbour search, allowing us to scale this step to much larger data than before.
+
+\subsection{Barnes-Hut}
+
+Having drastically improved the complexity of $F_\text{attr}$, we are still left with quadratic $\mathcal{O}(n^2)$ complexity for $F_\text{rep}$, required by the normalization term $Z$.
+
+\cite{van2014accelerating} notice that computing $F_\text{rep}$ can be posed as an N-body simulation problem. This problem has been addressed physics simulation community and can be efficiently solved in $\mathcal{O}(n \log n)$ time using Barnes-Hut trees. The main idea behind this approximation is that clusters of points far away for the current point $i$ will have similar contribution, therefore we can summarize entire regions of space (denoted cells in the following) by computing the center of mass of the region $\mathbf{y}_{\text{cell}}$, computing the interaction between $i$ and $\mathbf{y}_{\text{cell}}$ and adding this interaction up $N_{\text{cell}}$ times, where $N_{\text{cell}}$ is the number of points in the given region, given they are far enough from our query point $i$. The space is split into square regions and represented by a space splitting tree (a quad-tree in 2D and an oct-tree in 3D) which can be built in linear time.
+
+The ``far enough'' is determined by a parameter $\theta$, which controls how accurate our estimations are. If the following relation holds, then the cell is summarized
+
+\begin{equation}
+\frac{r_\text{cell}}{|| \mathbf{y}_i - \mathbf{y}_{\text{cell}} || ^2} < \theta
+\end{equation}
+
+where $r_\text{cell}$ represents the length of the diagonal of the cell. Larger values of $\theta$ produce more accurate estimates. Setting $\theta$ to 0 computes all the pairwise interactions as the condition can never be met. Scikit-learn recommends values between 0.2 and 0.8, as anything above and below that quickly result in long computation time and large error,  respectively.
+
+It is worth noting that this approach scales fairly well for 1, 2 and 3 dimensions, but further than that, the complexity becomes prohibitively expensive. This is not really an issue, since we humans can only perceive 3 dimensions, and most visualizations are 2D.
+
+\subsection{FFT Accelerated Interpolation}
+
+We can write an equivalent expression for the repulsive forces
+
+\begin{align}
+F_\text{rep} &= \sum_{j \neq i} q_{ij}^2 Z \left ( \mathbf{y}_i - \mathbf{y}_j \right )
+\intertext{Plugging in the expressions for $q_{ij}$ and $Z$}
+&= \sum_{j \neq i} \frac{\left ( 1 + || \mathbf{y}_i - \mathbf{y}_j ||^2 \right )^{-2}}{\sum_{k \neq l}\left ( 1 + || \mathbf{y}_k - \mathbf{y}_l ||^2 \right )^{-2}} \frac{\left ( \mathbf{y}_i - \mathbf{y}_j \right )}{\sum_{k \neq l}\left ( 1 + || \mathbf{y}_k - \mathbf{y}_l ||^2 \right )} \\
+\intertext{Putting the top and bottom terms together}
+&= \left ( \sum_{j \neq i} \frac{\mathbf{y}_i - \mathbf{y}_j}{\left ( 1 + || \mathbf{y}_i - \mathbf{y}_j ||^2 \right )^{2}} \right ) 
+\bigg/
+\left( \sum_{k \neq l} \frac{1 + || \mathbf{y}_k - \mathbf{y}_l ||^2}{\left ( 1 + || \mathbf{y}_k - \mathbf{y}_l ||^2 \right )^{2}} \right) \\
+&= \left ( \sum_{j \neq i} \frac{\mathbf{y}_i - \mathbf{y}_j}{\left ( 1 + || \mathbf{y}_i - \mathbf{y}_j ||^2 \right )^{2}} \right )
+\bigg/
+\left( \sum_{k \neq l} \frac{1}{\left ( 1 + || \mathbf{y}_k - \mathbf{y}_l ||^2 \right )} \right)
+\end{align}
+
+We can also write an expression for each term of $\mathbf{y}_i$ individually:
+\begin{equation}
+F_{\text{rep}, i}(m) = \left ( \sum_{j \neq i} \frac{\mathbf{y}_i(m) - \mathbf{y}_j(m)}{\left ( 1 + || \mathbf{y}_i - \mathbf{y}_j ||^2 \right )^{2}} \right )
+\bigg/
+\left( \sum_{k \neq l} \frac{1}{\left ( 1 + || \mathbf{y}_k - \mathbf{y}_l ||^2 \right )} \right)
+\end{equation}
+
+where $\mathbf{y}_i(m)$ denotes the $m^{\text{th}}$ component of $\mathbf{y}$ i.e. $m \in \{1, 2\}$ in the 2D case.
+
+\cite{linderman2017efficient} make the acute observation that the repulsive forces $F_\text{rep}$ can be written as $s + 2$ sums of the form
+
+\begin{equation}
+\phi(\mathbf{y}_i) = \sum_j K (\mathbf{y}_i, \mathbf{y}_j) q_{ij}
+\end{equation}
+
+where $K(y, z)$ is either the Cauchy kernel or the squared Cauchy kernel and $s$ is the dimensionality of $Y$
+
+\begin{equation}
+K_1(y, z) = \frac{1}{\left( 1 + || \mathbf{y} - \mathbf{z} ||^2 \right)}, \quad\text{or}\quad K_2(y, z) = \frac{1}{ \left( 1 + || \mathbf{y} - \mathbf{z} ||^2 \right) ^2}
+\end{equation}
+
+To make the sums concrete, consider the 2D case:
+
+\begin{align}
+\phi_{1, i} &= \sum_{j \neq i} \frac{1}{\left( 1 + || \mathbf{y}_j - \mathbf{y}_i ||^2 \right)} \notag \\
+\phi_{2, i} &= \sum_{j \neq i} \frac{\mathbf{y}_j(1)}{\left( 1 + || \mathbf{y}_j - \mathbf{y}_i ||^2 \right)^2} \notag \\
+\phi_{3, i} &= \sum_{j \neq i} \frac{\mathbf{y}_j(2)}{\left( 1 + || \mathbf{y}_j - \mathbf{y}_i ||^2 \right)^2} \notag \\
+\phi_{4, i} &= \sum_{j \neq i} \frac{1}{\left( 1 + || \mathbf{y}_j - \mathbf{y}_i ||^2 \right)^2} \notag
+\end{align}
+
+the the repulsive forces can be expressed in terms of these 4 sums as follows:
+
+\begin{align}
+F_{\text{rep}, i}(1) &= \left ( \sum_{j \neq i} \frac{\mathbf{y}_i(1) - \mathbf{y}_j(1)}{\left ( 1 + || \mathbf{y}_i - \mathbf{y}_j ||^2 \right )^{2}} \right )
+\bigg/
+\left( \sum_{k \neq l} \frac{1}{\left ( 1 + || \mathbf{y}_k - \mathbf{y}_l ||^2 \right )} \right) \notag \\
+&= (\phi_{2, i} - \mathbf{y}_{i}(1)\phi_{4, i}) / Z, \\
+F_{\text{rep}, i}(2) &= \left ( \sum_{j \neq i} \frac{\mathbf{y}_i(2) - \mathbf{y}_j(2)}{\left ( 1 + || \mathbf{y}_i - \mathbf{y}_j ||^2 \right )^{2}} \right )
+\bigg/
+\left( \sum_{k \neq l} \frac{1}{\left ( 1 + || \mathbf{y}_k - \mathbf{y}_l ||^2 \right )} \right) \notag \\
+&= (\phi_{3, i} - \mathbf{y}_{i}(2)\phi_{4, i}) / Z,
+\end{align}
+
+where
+
+\begin{align}
+Z &= \sum_j \phi_{1, j}
+\end{align}
+
+The key idea in this approach is that since we have smooth kernels $K_1$ and $K_2$, we can approximate them using polynomial interpolation. Of course, the choice of interpolants is entirely up to us, but we we evaluate our kernel functions at these points and interpolate our true data using these. To make things computationally efficient, we can set the interpolants to be equispaced points on the space spanned by the data.
+
+This is very convenient, because the kernels in question are all translation invariant and when we evaluate them at the interpolants, then the kernel matrix $K$ will be Toeplitz. This means that it is enough to evaluate the Kernel for the left-most point in space in 1D. In 2d, our $K$ is actually a 3D tensor, but is again, Toeplitz.
+
+Linear algebra tells us we can embed any Toeplitz matrix into a circulant matrix. This is desirable, because now we can perform matrix-vector multiplication in the frequency domain in linear time, with the slowest part being the FFT and IFFT transforms in $\mathcal{O}(n \log n)$ time.
+
+Finally, having evaluated the repulsive forces at the interpolants, we just need to interpolate the forces on our true data. This can be done in linear time $\mathcal{O}(n)$.
+
+Doing this, we have successfully made the overall complexity independent of $N$, and have shifted the brunt of the work onto the number of chosen interpolation points, so the time complexity will rely heavily on that. In practice, we split the input space into equally sized intervals, and then have 3 interpolation points in each interval. While we could increase the number of interpolation points, it is preferable to increase the number of intervals (due to the Runge phenomenon in interpolation). Increasing the number of interpolation points also increases the accuracy of the approximation, but comes at a computation cost.
+
+Like the Barnes-Hut variant, this method becomes very inefficient for higher dimensions, as the number of interpolation points needed scales exponentially with $d$. In practice, this isn't an issue because most often, we want to inspect 2D embeddings.
+
+\section{Implementation details}
+
+\subsection{Fast KL Divergence}
 
 During computation of negative gradients, we do not know the value of the normalization term $Z$ during intermediate steps. Therefore, in order to compute the KL divergence of the embedding, we would need at least two passes over the data points, first to compute the unnormalized $q_{ij}$s, and secondly to normalize them and compute the KL divergence. By rewriting the KL divergence in terms of unnormalized $q_{ij}$s, we can compute the entire error with a single pass over the data points by accumulating the $\sum_{ij} p_{ij}$ and $\sum_{ij}q_{ij}$ in the first pass.
 
-\begin{align*}
+\begin{align}
 KL(P \mid \mid Q) &= \sum_{ij} p_{ij} \log \frac{p_{ij}}{q_{ij}} \\
 &= \sum_{ij} p_{ij} \log \left ( p_{ij} \frac{Z}{\hat{q}_{ij}} \right )
 \intertext{where $\hat{q}_{ij}$ denotes the unnormalized values $q_{ij}$}
 &= \sum_{ij} p_{ij} \log \frac{p_{ij}}{\hat{q}_{ij}} + \sum_{ij} p_{ij} \log Z
-\end{align*}
+\end{align}
 
 Therefore the first term requires a single pass over all $i, j$s and the second term can be computed in constant time if we accumulate the sums of $P$ and $Q$.
 
-\section{KL Divergence with exaggeration}
+This is already included in most software packages e.g. scikit-learn.
+
+\subsection{KL Divergence with exaggeration}
 
 The implemented optimization methods don't have a notion of exaggeration, they simply take an affinity matrix $P$ containing the probabilities of points $j$ appearing close to $i$. Exaggeration is used to scale $P$ by some constant factor $\alpha$ (in fact this means that $p_{ij}$s are not proper probabilities) to help separate clusters in the beginning of the optimization. These methods also compute the KL divergence during optimization (for efficiency), and as such, the error is incorrect because we don't account for the scaling $\alpha$.
 
@@ -52,6 +223,10 @@ KL(P \mid \mid Q) &= \sum_{ij} p_{ij} \log \frac{p_{ij}}{q_{ij}}
 
 The first term is computed by the gradient method (since it only knows about the scaled $P$), the second term can easily be computed post-optimization, allowing us to get the correct KL divergence.
 
+\subsection{Single Kernel in interpolation}
+
+%% TODO
+
 \section{Transform}
 
 \subsection{Direct optimization}
@@ -60,7 +235,7 @@ The first term is computed by the gradient method (since it only knows about the
 \cite{bunte2012general}
 
 \subsection{MDS interpolation}
-MDS Interpolation~\cite{bae2010dimension}. A similar approach might be able to be applied to tSNE. In essence, they run MDS on a sample of points. Then for each new point, we compute the k-nearest neighbors and optimize the stress function w.r.t. only those points. In their paper, they derive equations that can be used for efficient optimization via majorization.
+MDS Interpolation~\cite{bae2010dimension}. A similar approach might be able to be applied to tSNE. In essence, they run MDS on a sample of points. Then for each new point, we compute the k-nearest neighbours and optimize the stress function w.r.t. only those points. In their paper, they derive equations that can be used for efficient optimization via majorization.
 
 \subsection{Kernel tSNE}
 \cite{gisbrecht2012out} claim to outperform direct mapping tSNE using a direct kernel mapping. This paper is not very useful. The graph is misleading and the table at the end is informative, but run only on small datasets. Their subsequent paper is much better and throughout.
