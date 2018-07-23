@@ -1,3 +1,4 @@
+import setuptools
 from setuptools import setup
 from distutils.extension import Extension
 from Cython.Build import cythonize
@@ -27,5 +28,8 @@ setup(
     description='',
     author='Pavlin Poličar',
     author_email='pavlin.g.p@gmail.com',
+    version='0.1.1',
+    url='https://github.com/pavlin-policar/tSNE',
+    packages=setuptools.find_packages(),
     ext_modules=cythonize(extensions),
 )
