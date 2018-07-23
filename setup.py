@@ -1,27 +1,35 @@
-import setuptools
-from setuptools import setup
-from distutils.extension import Extension
-from Cython.Build import cythonize
-import numpy as np
+import os
 
+import numpy as np
+import setuptools
+from setuptools import setup, Extension
+
+USE_CYTHON = os.environ.get('USE_CYTHON', False)
+ext = 'pyx' if USE_CYTHON else 'c'
 
 extensions = [
-    Extension('tsne.quad_tree', ['tsne/quad_tree.pyx'],
+    Extension('tsne.quad_tree', ['tsne/quad_tree.%s' % ext],
               extra_compile_args=['-fopenmp', '-O3'],
               extra_link_args=['-fopenmp', '-O3'],
               include_dirs=[np.get_include()],
               ),
-    Extension('tsne._tsne', ['tsne/_tsne.pyx'],
+    Extension('tsne._tsne', ['tsne/_tsne.%s' % ext],
               extra_compile_args=['-fopenmp', '-lfftw3', '-O3'],
               extra_link_args=['-fopenmp', '-lfftw3', '-O3'],
               include_dirs=[np.get_include()],
               ),
-    Extension('tsne.kl_divergence', ['tsne/kl_divergence.pyx'],
+    Extension('tsne.kl_divergence', ['tsne/kl_divergence.%s' % ext],
               extra_compile_args=['-fopenmp', '-O3'],
               extra_link_args=['-fopenmp', '-O3'],
               include_dirs=[np.get_include()],
               ),
 ]
+
+if USE_CYTHON:
+    from Cython.Build import cythonize
+    extensions = cythonize(extensions)
+
+print(extensions)
 
 setup(
     name='t-SNE',
@@ -31,5 +39,5 @@ setup(
     version='0.1.1',
     url='https://github.com/pavlin-policar/tSNE',
     packages=setuptools.find_packages(),
-    ext_modules=cythonize(extensions),
+    ext_modules=extensions,
 )
