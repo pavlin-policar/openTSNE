@@ -753,8 +753,6 @@ cdef double[:, ::1] compute_kernel_tilde_2d(
 
         Py_ssize_t i, j
 
-    x_tilde = np.empty(n_interpolation_points_1d)
-    y_tilde = np.empty(n_interpolation_points_1d)
     x_tilde[0] = coord_min + coord_spacing / 2
     y_tilde[0] = coord_min + coord_spacing / 2
     for i in range(1, n_interpolation_points_1d):
