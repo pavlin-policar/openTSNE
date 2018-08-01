@@ -5,8 +5,8 @@ from functools import partial
 import numpy as np
 from scipy.sparse import csr_matrix
 
-from tsne import kl_divergence
-from tsne.tsne import TSNEEmbedding
+from fastTSNE import kl_divergence
+from fastTSNE.tsne import TSNEEmbedding
 
 log = logging.getLogger(__name__)
 
