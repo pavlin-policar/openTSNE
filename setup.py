@@ -36,7 +36,7 @@ setup(
     description='',
     author='Pavlin Poličar',
     author_email='pavlin.g.p@gmail.com',
-    version='0.1.4',
+    version='0.1.6',
     url='https://github.com/pavlin-policar/tSNE',
     packages=setuptools.find_packages(),
     ext_modules=extensions,

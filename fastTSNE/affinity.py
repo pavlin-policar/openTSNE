@@ -3,8 +3,8 @@ import logging
 import numpy as np
 from scipy.sparse import csr_matrix
 
-from fastTSNE import _tsne
-from fastTSNE.nearest_neighbors import KDTree, NNDescent, KNNIndex
+import _tsne
+from .nearest_neighbors import KDTree, NNDescent, KNNIndex
 
 try:
     import networkx as nx

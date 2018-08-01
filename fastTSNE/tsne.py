@@ -4,10 +4,10 @@ from collections import Iterable
 import numpy as np
 from scipy.sparse import csr_matrix
 from sklearn.decomposition import PCA
-from fastTSNE.quad_tree import QuadTree
+from .quad_tree import QuadTree
 
-from fastTSNE import _tsne
-from fastTSNE.affinity import Affinities, NearestNeighborAffinities
+import _tsne
+from .affinity import Affinities, NearestNeighborAffinities
 
 EPSILON = np.finfo(np.float64).eps
 
