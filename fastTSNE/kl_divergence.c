@@ -18,12 +18,12 @@
         "include_dirs": [
             "/usr/lib/python3.6/site-packages/numpy/core/include"
         ],
-        "name": "tsne.kl_divergence",
+        "name": "fastTSNE.kl_divergence",
         "sources": [
-            "tsne/kl_divergence.pyx"
+            "fastTSNE/kl_divergence.pyx"
         ]
     },
-    "module_name": "tsne.kl_divergence"
+    "module_name": "fastTSNE.kl_divergence"
 }
 END: Cython Metadata */
 
@@ -586,8 +586,8 @@ static CYTHON_INLINE float __PYX_NAN() {
   #endif
 #endif
 
-#define __PYX_HAVE__tsne__kl_divergence
-#define __PYX_HAVE_API__tsne__kl_divergence
+#define __PYX_HAVE__fastTSNE__kl_divergence
+#define __PYX_HAVE_API__fastTSNE__kl_divergence
 /* Early includes */
 #include <string.h>
 #include <stdio.h>
@@ -822,11 +822,11 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "tsne/kl_divergence.pyx",
+  "fastTSNE/kl_divergence.pyx",
   "__init__.pxd",
   "stringsource",
   "type.pxd",
-  "tsne/quad_tree.pxd",
+  "fastTSNE/quad_tree.pxd",
 };
 /* MemviewSliceStruct.proto */
 struct __pyx_memoryview_obj;
@@ -1151,7 +1151,7 @@ static CYTHON_INLINE __pyx_t_double_complex __pyx_t_double_complex_from_parts(do
 
 
 /*--- Type declarations ---*/
-struct __pyx_obj_4tsne_9quad_tree_QuadTree;
+struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree;
 struct __pyx_array_obj;
 struct __pyx_MemviewEnum_obj;
 struct __pyx_memoryview_obj;
@@ -1192,9 +1192,9 @@ typedef npy_clongdouble __pyx_t_5numpy_clongdouble_t;
  * cdef inline object PyArray_MultiIterNew1(a):
  */
 typedef npy_cdouble __pyx_t_5numpy_complex_t;
-struct __pyx_t_4tsne_9quad_tree_Node;
-typedef struct __pyx_t_4tsne_9quad_tree_Node __pyx_t_4tsne_9quad_tree_Node;
-struct __pyx_opt_args_4tsne_9quad_tree_is_duplicate;
+struct __pyx_t_8fastTSNE_9quad_tree_Node;
+typedef struct __pyx_t_8fastTSNE_9quad_tree_Node __pyx_t_8fastTSNE_9quad_tree_Node;
+struct __pyx_opt_args_8fastTSNE_9quad_tree_is_duplicate;
 
 /* "quad_tree.pxd":9
  * cdef double EPSILON = np.finfo(np.float64).eps
@@ -1203,12 +1203,12 @@ struct __pyx_opt_args_4tsne_9quad_tree_is_duplicate;
  *     Py_ssize_t n_dims
  *     double *center
  */
-struct __pyx_t_4tsne_9quad_tree_Node {
+struct __pyx_t_8fastTSNE_9quad_tree_Node {
   Py_ssize_t n_dims;
   double *center;
   double length;
   int is_leaf;
-  __pyx_t_4tsne_9quad_tree_Node *children;
+  __pyx_t_8fastTSNE_9quad_tree_Node *children;
   double *center_of_mass;
   Py_ssize_t num_points;
 };
@@ -1220,17 +1220,17 @@ struct __pyx_t_4tsne_9quad_tree_Node {
  * 
  * 
  */
-struct __pyx_opt_args_4tsne_9quad_tree_is_duplicate {
+struct __pyx_opt_args_8fastTSNE_9quad_tree_is_duplicate {
   int __pyx_n;
   double duplicate_eps;
 };
-struct __pyx_opt_args_4tsne_5_tsne_compute_gaussian_perplexity;
-struct __pyx_opt_args_4tsne_5_tsne_estimate_positive_gradient_nn;
-struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_bh;
-struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_fft_1d;
-struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_fft_1d_with_reference;
-struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_fft_2d;
-struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_fft_2d_with_reference;
+struct __pyx_opt_args_8fastTSNE_5_tsne_compute_gaussian_perplexity;
+struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_positive_gradient_nn;
+struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_bh;
+struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d;
+struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_reference;
+struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d;
+struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_reference;
 
 /* "_tsne.pxd":10
  * 
@@ -1239,7 +1239,7 @@ struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_fft_2d_with_refere
  *     double[:, :] distances,
  *     double desired_perplexity,
  */
-struct __pyx_opt_args_4tsne_5_tsne_compute_gaussian_perplexity {
+struct __pyx_opt_args_8fastTSNE_5_tsne_compute_gaussian_perplexity {
   int __pyx_n;
   double perplexity_tol;
   Py_ssize_t max_iter;
@@ -1253,7 +1253,7 @@ struct __pyx_opt_args_4tsne_5_tsne_compute_gaussian_perplexity {
  *     int[:] indices,
  *     int[:] indptr,
  */
-struct __pyx_opt_args_4tsne_5_tsne_estimate_positive_gradient_nn {
+struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_positive_gradient_nn {
   int __pyx_n;
   double dof;
   Py_ssize_t num_threads;
@@ -1267,7 +1267,7 @@ struct __pyx_opt_args_4tsne_5_tsne_estimate_positive_gradient_nn {
  *     QuadTree tree,
  *     double[:, ::1] embedding,
  */
-struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_bh {
+struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_bh {
   int __pyx_n;
   double theta;
   double dof;
@@ -1281,7 +1281,7 @@ struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_bh {
  *     double[::1] embedding,
  *     double[::1] gradient,
  */
-struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_fft_1d {
+struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d {
   int __pyx_n;
   Py_ssize_t n_interpolation_points;
   Py_ssize_t min_num_intervals;
@@ -1295,7 +1295,7 @@ struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_fft_1d {
  *     double[::1] embedding,
  *     double[::1] reference_embedding,
  */
-struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_fft_1d_with_reference {
+struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_reference {
   int __pyx_n;
   Py_ssize_t n_interpolation_points;
   Py_ssize_t min_num_intervals;
@@ -1309,7 +1309,7 @@ struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_fft_1d_with_refere
  *     double[:, ::1] embedding,
  *     double[:, ::1] gradient,
  */
-struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_fft_2d {
+struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d {
   int __pyx_n;
   Py_ssize_t n_interpolation_points;
   Py_ssize_t min_num_intervals;
@@ -1323,35 +1323,35 @@ struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_fft_2d {
  *     double[:, ::1] embedding,
  *     double[:, ::1] reference_embedding,
  */
-struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_fft_2d_with_reference {
+struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_reference {
   int __pyx_n;
   Py_ssize_t n_interpolation_points;
   Py_ssize_t min_num_intervals;
   double ints_in_interval;
 };
-struct __pyx_opt_args_4tsne_13kl_divergence_kl_divergence_approx_bh;
-struct __pyx_opt_args_4tsne_13kl_divergence_kl_divergence_approx_fft;
+struct __pyx_opt_args_8fastTSNE_13kl_divergence_kl_divergence_approx_bh;
+struct __pyx_opt_args_8fastTSNE_13kl_divergence_kl_divergence_approx_fft;
 
-/* "tsne/kl_divergence.pyx":61
+/* "fastTSNE/kl_divergence.pyx":61
  * 
  * 
  * cpdef double kl_divergence_approx_bh(             # <<<<<<<<<<<<<<
  *     int[:] indices,
  *     int[:] indptr,
  */
-struct __pyx_opt_args_4tsne_13kl_divergence_kl_divergence_approx_bh {
+struct __pyx_opt_args_8fastTSNE_13kl_divergence_kl_divergence_approx_bh {
   int __pyx_n;
   double theta;
 };
 
-/* "tsne/kl_divergence.pyx":91
+/* "fastTSNE/kl_divergence.pyx":91
  * 
  * 
  * cpdef double kl_divergence_approx_fft(             # <<<<<<<<<<<<<<
  *     int[:] indices,
  *     int[:] indptr,
  */
-struct __pyx_opt_args_4tsne_13kl_divergence_kl_divergence_approx_fft {
+struct __pyx_opt_args_8fastTSNE_13kl_divergence_kl_divergence_approx_fft {
   int __pyx_n;
   Py_ssize_t n_interpolation_points;
   Py_ssize_t min_num_intervals;
@@ -1365,10 +1365,10 @@ struct __pyx_opt_args_4tsne_13kl_divergence_kl_divergence_approx_fft {
  *     cdef Node root
  *     cpdef void add_points(self, double[:, ::1] points)
  */
-struct __pyx_obj_4tsne_9quad_tree_QuadTree {
+struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree {
   PyObject_HEAD
-  struct __pyx_vtabstruct_4tsne_9quad_tree_QuadTree *__pyx_vtab;
-  __pyx_t_4tsne_9quad_tree_Node root;
+  struct __pyx_vtabstruct_8fastTSNE_9quad_tree_QuadTree *__pyx_vtab;
+  __pyx_t_8fastTSNE_9quad_tree_Node root;
 };
 
 
@@ -1458,11 +1458,11 @@ struct __pyx_memoryviewslice_obj {
  *     cpdef void add_points(self, double[:, ::1] points)
  */
 
-struct __pyx_vtabstruct_4tsne_9quad_tree_QuadTree {
-  void (*add_points)(struct __pyx_obj_4tsne_9quad_tree_QuadTree *, __Pyx_memviewslice, int __pyx_skip_dispatch);
-  void (*add_point)(struct __pyx_obj_4tsne_9quad_tree_QuadTree *, __Pyx_memviewslice, int __pyx_skip_dispatch);
+struct __pyx_vtabstruct_8fastTSNE_9quad_tree_QuadTree {
+  void (*add_points)(struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *, __Pyx_memviewslice, int __pyx_skip_dispatch);
+  void (*add_point)(struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *, __Pyx_memviewslice, int __pyx_skip_dispatch);
 };
-static struct __pyx_vtabstruct_4tsne_9quad_tree_QuadTree *__pyx_vtabptr_4tsne_9quad_tree_QuadTree;
+static struct __pyx_vtabstruct_8fastTSNE_9quad_tree_QuadTree *__pyx_vtabptr_8fastTSNE_9quad_tree_QuadTree;
 
 
 /* "View.MemoryView":104
@@ -2465,22 +2465,22 @@ static PyTypeObject *__pyx_ptype_5numpy_ndarray = 0;
 static PyTypeObject *__pyx_ptype_5numpy_ufunc = 0;
 static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *, char *, char *, int *); /*proto*/
 
-/* Module declarations from 'tsne.quad_tree' */
-static PyTypeObject *__pyx_ptype_4tsne_9quad_tree_QuadTree = 0;
-static double *__pyx_vp_4tsne_9quad_tree_EPSILON = 0;
-#define __pyx_v_4tsne_9quad_tree_EPSILON (*__pyx_vp_4tsne_9quad_tree_EPSILON)
+/* Module declarations from 'fastTSNE.quad_tree' */
+static PyTypeObject *__pyx_ptype_8fastTSNE_9quad_tree_QuadTree = 0;
+static double *__pyx_vp_8fastTSNE_9quad_tree_EPSILON = 0;
+#define __pyx_v_8fastTSNE_9quad_tree_EPSILON (*__pyx_vp_8fastTSNE_9quad_tree_EPSILON)
 
-/* Module declarations from 'tsne._tsne' */
-static double (*__pyx_f_4tsne_5_tsne_estimate_negative_gradient_bh)(struct __pyx_obj_4tsne_9quad_tree_QuadTree *, __Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch, struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_bh *__pyx_optional_args); /*proto*/
-static double (*__pyx_f_4tsne_5_tsne_estimate_negative_gradient_fft_1d)(__Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch, struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_fft_1d *__pyx_optional_args); /*proto*/
-static double (*__pyx_f_4tsne_5_tsne_estimate_negative_gradient_fft_2d)(__Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch, struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_fft_2d *__pyx_optional_args); /*proto*/
+/* Module declarations from 'fastTSNE._tsne' */
+static double (*__pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_bh)(struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *, __Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch, struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_bh *__pyx_optional_args); /*proto*/
+static double (*__pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d)(__Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch, struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d *__pyx_optional_args); /*proto*/
+static double (*__pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d)(__Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch, struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d *__pyx_optional_args); /*proto*/
 
-/* Module declarations from 'tsne.kl_divergence' */
+/* Module declarations from 'fastTSNE.kl_divergence' */
 static PyTypeObject *__pyx_array_type = 0;
 static PyTypeObject *__pyx_MemviewEnum_type = 0;
 static PyTypeObject *__pyx_memoryview_type = 0;
 static PyTypeObject *__pyx_memoryviewslice_type = 0;
-static double __pyx_v_4tsne_13kl_divergence_EPSILON;
+static double __pyx_v_8fastTSNE_13kl_divergence_EPSILON;
 static PyObject *generic = 0;
 static PyObject *strided = 0;
 static PyObject *indirect = 0;
@@ -2488,10 +2488,10 @@ static PyObject *contiguous = 0;
 static PyObject *indirect_contiguous = 0;
 static int __pyx_memoryview_thread_locks_used;
 static PyThread_type_lock __pyx_memoryview_thread_locks[8];
-static PyObject *__pyx_f_4tsne_13kl_divergence_sqeuclidean(__Pyx_memviewslice, __Pyx_memviewslice); /*proto*/
-static double __pyx_f_4tsne_13kl_divergence_kl_divergence_exact(__Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch); /*proto*/
-static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_bh(__Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch, struct __pyx_opt_args_4tsne_13kl_divergence_kl_divergence_approx_bh *__pyx_optional_args); /*proto*/
-static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch, struct __pyx_opt_args_4tsne_13kl_divergence_kl_divergence_approx_fft *__pyx_optional_args); /*proto*/
+static PyObject *__pyx_f_8fastTSNE_13kl_divergence_sqeuclidean(__Pyx_memviewslice, __Pyx_memviewslice); /*proto*/
+static double __pyx_f_8fastTSNE_13kl_divergence_kl_divergence_exact(__Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch); /*proto*/
+static double __pyx_f_8fastTSNE_13kl_divergence_kl_divergence_approx_bh(__Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch, struct __pyx_opt_args_8fastTSNE_13kl_divergence_kl_divergence_approx_bh *__pyx_optional_args); /*proto*/
+static double __pyx_f_8fastTSNE_13kl_divergence_kl_divergence_approx_fft(__Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch, struct __pyx_opt_args_8fastTSNE_13kl_divergence_kl_divergence_approx_fft *__pyx_optional_args); /*proto*/
 static struct __pyx_array_obj *__pyx_array_new(PyObject *, Py_ssize_t, char *, char *, char *); /*proto*/
 static void *__pyx_align_pointer(void *, size_t); /*proto*/
 static PyObject *__pyx_memoryview_new(PyObject *, int, int, __Pyx_TypeInfo *); /*proto*/
@@ -2527,11 +2527,11 @@ static void __pyx_memoryview__slice_assign_scalar(char *, Py_ssize_t *, Py_ssize
 static PyObject *__pyx_unpickle_Enum__set_state(struct __pyx_MemviewEnum_obj *, PyObject *); /*proto*/
 static __Pyx_TypeInfo __Pyx_TypeInfo_double = { "double", NULL, sizeof(double), { 0 }, 0, 'R', 0, 0 };
 static __Pyx_TypeInfo __Pyx_TypeInfo_int = { "int", NULL, sizeof(int), { 0 }, 0, IS_UNSIGNED(int) ? 'U' : 'I', IS_UNSIGNED(int), 0 };
-#define __Pyx_MODULE_NAME "tsne.kl_divergence"
-extern int __pyx_module_is_main_tsne__kl_divergence;
-int __pyx_module_is_main_tsne__kl_divergence = 0;
+#define __Pyx_MODULE_NAME "fastTSNE.kl_divergence"
+extern int __pyx_module_is_main_fastTSNE__kl_divergence;
+int __pyx_module_is_main_fastTSNE__kl_divergence = 0;
 
-/* Implementation of 'tsne.kl_divergence' */
+/* Implementation of 'fastTSNE.kl_divergence' */
 static PyObject *__pyx_builtin_range;
 static PyObject *__pyx_builtin_ValueError;
 static PyObject *__pyx_builtin_RuntimeError;
@@ -2772,9 +2772,9 @@ static PyObject *__pyx_kp_s_unable_to_allocate_shape_and_str;
 static PyObject *__pyx_kp_u_unknown_dtype_code_in_numpy_pxd;
 static PyObject *__pyx_n_s_unpack;
 static PyObject *__pyx_n_s_update;
-static PyObject *__pyx_pf_4tsne_13kl_divergence_kl_divergence_exact(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_P, __Pyx_memviewslice __pyx_v_embedding); /* proto */
-static PyObject *__pyx_pf_4tsne_13kl_divergence_2kl_divergence_approx_bh(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_indices, __Pyx_memviewslice __pyx_v_indptr, __Pyx_memviewslice __pyx_v_P_data, __Pyx_memviewslice __pyx_v_embedding, double __pyx_v_theta); /* proto */
-static PyObject *__pyx_pf_4tsne_13kl_divergence_4kl_divergence_approx_fft(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_indices, __Pyx_memviewslice __pyx_v_indptr, __Pyx_memviewslice __pyx_v_P_data, __Pyx_memviewslice __pyx_v_embedding, Py_ssize_t __pyx_v_n_interpolation_points, Py_ssize_t __pyx_v_min_num_intervals, double __pyx_v_ints_in_interval); /* proto */
+static PyObject *__pyx_pf_8fastTSNE_13kl_divergence_kl_divergence_exact(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_P, __Pyx_memviewslice __pyx_v_embedding); /* proto */
+static PyObject *__pyx_pf_8fastTSNE_13kl_divergence_2kl_divergence_approx_bh(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_indices, __Pyx_memviewslice __pyx_v_indptr, __Pyx_memviewslice __pyx_v_P_data, __Pyx_memviewslice __pyx_v_embedding, double __pyx_v_theta); /* proto */
+static PyObject *__pyx_pf_8fastTSNE_13kl_divergence_4kl_divergence_approx_fft(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_indices, __Pyx_memviewslice __pyx_v_indptr, __Pyx_memviewslice __pyx_v_P_data, __Pyx_memviewslice __pyx_v_embedding, Py_ssize_t __pyx_v_n_interpolation_points, Py_ssize_t __pyx_v_min_num_intervals, double __pyx_v_ints_in_interval); /* proto */
 static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
@@ -2866,7 +2866,7 @@ static PyObject *__pyx_tuple__37;
 static PyObject *__pyx_codeobj__31;
 /* Late includes */
 
-/* "tsne/kl_divergence.pyx":25
+/* "fastTSNE/kl_divergence.pyx":25
  * 
  * 
  * cdef sqeuclidean(double[:] x, double[:] y):             # <<<<<<<<<<<<<<
@@ -2874,7 +2874,7 @@ static PyObject *__pyx_codeobj__31;
  *         Py_ssize_t n_dims = x.shape[0]
  */
 
-static PyObject *__pyx_f_4tsne_13kl_divergence_sqeuclidean(__Pyx_memviewslice __pyx_v_x, __Pyx_memviewslice __pyx_v_y) {
+static PyObject *__pyx_f_8fastTSNE_13kl_divergence_sqeuclidean(__Pyx_memviewslice __pyx_v_x, __Pyx_memviewslice __pyx_v_y) {
   Py_ssize_t __pyx_v_n_dims;
   double __pyx_v_result;
   Py_ssize_t __pyx_v_i;
@@ -2890,7 +2890,7 @@ static PyObject *__pyx_f_4tsne_13kl_divergence_sqeuclidean(__Pyx_memviewslice __
   __Pyx_RefNannySetupContext("sqeuclidean", 0);
   __Pyx_TraceCall("sqeuclidean", __pyx_f[0], 25, 0, __PYX_ERR(0, 25, __pyx_L1_error));
 
-  /* "tsne/kl_divergence.pyx":27
+  /* "fastTSNE/kl_divergence.pyx":27
  * cdef sqeuclidean(double[:] x, double[:] y):
  *     cdef:
  *         Py_ssize_t n_dims = x.shape[0]             # <<<<<<<<<<<<<<
@@ -2899,7 +2899,7 @@ static PyObject *__pyx_f_4tsne_13kl_divergence_sqeuclidean(__Pyx_memviewslice __
  */
   __pyx_v_n_dims = (__pyx_v_x.shape[0]);
 
-  /* "tsne/kl_divergence.pyx":28
+  /* "fastTSNE/kl_divergence.pyx":28
  *     cdef:
  *         Py_ssize_t n_dims = x.shape[0]
  *         double result = 0             # <<<<<<<<<<<<<<
@@ -2908,7 +2908,7 @@ static PyObject *__pyx_f_4tsne_13kl_divergence_sqeuclidean(__Pyx_memviewslice __
  */
   __pyx_v_result = 0.0;
 
-  /* "tsne/kl_divergence.pyx":31
+  /* "fastTSNE/kl_divergence.pyx":31
  *         Py_ssize_t i
  * 
  *     for i in range(n_dims):             # <<<<<<<<<<<<<<
@@ -2920,7 +2920,7 @@ static PyObject *__pyx_f_4tsne_13kl_divergence_sqeuclidean(__Pyx_memviewslice __
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "tsne/kl_divergence.pyx":32
+    /* "fastTSNE/kl_divergence.pyx":32
  * 
  *     for i in range(n_dims):
  *         result += (x[i] - y[i]) ** 2             # <<<<<<<<<<<<<<
@@ -2932,7 +2932,7 @@ static PyObject *__pyx_f_4tsne_13kl_divergence_sqeuclidean(__Pyx_memviewslice __
     __pyx_v_result = (__pyx_v_result + pow(((*((double *) ( /* dim=0 */ (__pyx_v_x.data + __pyx_t_4 * __pyx_v_x.strides[0]) ))) - (*((double *) ( /* dim=0 */ (__pyx_v_y.data + __pyx_t_5 * __pyx_v_y.strides[0]) )))), 2.0));
   }
 
-  /* "tsne/kl_divergence.pyx":34
+  /* "fastTSNE/kl_divergence.pyx":34
  *         result += (x[i] - y[i]) ** 2
  * 
  *     return result             # <<<<<<<<<<<<<<
@@ -2946,7 +2946,7 @@ static PyObject *__pyx_f_4tsne_13kl_divergence_sqeuclidean(__Pyx_memviewslice __
   __pyx_t_6 = 0;
   goto __pyx_L0;
 
-  /* "tsne/kl_divergence.pyx":25
+  /* "fastTSNE/kl_divergence.pyx":25
  * 
  * 
  * cdef sqeuclidean(double[:] x, double[:] y):             # <<<<<<<<<<<<<<
@@ -2957,7 +2957,7 @@ static PyObject *__pyx_f_4tsne_13kl_divergence_sqeuclidean(__Pyx_memviewslice __
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_AddTraceback("tsne.kl_divergence.sqeuclidean", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("fastTSNE.kl_divergence.sqeuclidean", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -2966,7 +2966,7 @@ static PyObject *__pyx_f_4tsne_13kl_divergence_sqeuclidean(__Pyx_memviewslice __
   return __pyx_r;
 }
 
-/* "tsne/kl_divergence.pyx":37
+/* "fastTSNE/kl_divergence.pyx":37
  * 
  * 
  * cpdef double kl_divergence_exact(double[:, ::1] P, double[:, ::1] embedding):             # <<<<<<<<<<<<<<
@@ -2974,8 +2974,8 @@ static PyObject *__pyx_f_4tsne_13kl_divergence_sqeuclidean(__Pyx_memviewslice __
  *     cdef:
  */
 
-static PyObject *__pyx_pw_4tsne_13kl_divergence_1kl_divergence_exact(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static double __pyx_f_4tsne_13kl_divergence_kl_divergence_exact(__Pyx_memviewslice __pyx_v_P, __Pyx_memviewslice __pyx_v_embedding, CYTHON_UNUSED int __pyx_skip_dispatch) {
+static PyObject *__pyx_pw_8fastTSNE_13kl_divergence_1kl_divergence_exact(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static double __pyx_f_8fastTSNE_13kl_divergence_kl_divergence_exact(__Pyx_memviewslice __pyx_v_P, __Pyx_memviewslice __pyx_v_embedding, CYTHON_UNUSED int __pyx_skip_dispatch) {
   Py_ssize_t __pyx_v_n_samples;
   Py_ssize_t __pyx_v_i;
   Py_ssize_t __pyx_v_j;
@@ -3004,7 +3004,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_exact(__Pyx_memviewsli
   __Pyx_RefNannySetupContext("kl_divergence_exact", 0);
   __Pyx_TraceCall("kl_divergence_exact", __pyx_f[0], 37, 0, __PYX_ERR(0, 37, __pyx_L1_error));
 
-  /* "tsne/kl_divergence.pyx":40
+  /* "fastTSNE/kl_divergence.pyx":40
  *     """Compute the exact KL divergence."""
  *     cdef:
  *         Py_ssize_t n_samples = embedding.shape[0]             # <<<<<<<<<<<<<<
@@ -3013,7 +3013,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_exact(__Pyx_memviewsli
  */
   __pyx_v_n_samples = (__pyx_v_embedding.shape[0]);
 
-  /* "tsne/kl_divergence.pyx":43
+  /* "fastTSNE/kl_divergence.pyx":43
  *         Py_ssize_t i, j
  * 
  *         double sum_P = 0, sum_Q = 0, p_ij, q_ij             # <<<<<<<<<<<<<<
@@ -3023,7 +3023,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_exact(__Pyx_memviewsli
   __pyx_v_sum_P = 0.0;
   __pyx_v_sum_Q = 0.0;
 
-  /* "tsne/kl_divergence.pyx":44
+  /* "fastTSNE/kl_divergence.pyx":44
  * 
  *         double sum_P = 0, sum_Q = 0, p_ij, q_ij
  *         double kl_divergence = 0             # <<<<<<<<<<<<<<
@@ -3032,7 +3032,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_exact(__Pyx_memviewsli
  */
   __pyx_v_kl_divergence = 0.0;
 
-  /* "tsne/kl_divergence.pyx":46
+  /* "fastTSNE/kl_divergence.pyx":46
  *         double kl_divergence = 0
  * 
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -3044,7 +3044,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_exact(__Pyx_memviewsli
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "tsne/kl_divergence.pyx":47
+    /* "fastTSNE/kl_divergence.pyx":47
  * 
  *     for i in range(n_samples):
  *         for j in range(n_samples):             # <<<<<<<<<<<<<<
@@ -3056,7 +3056,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_exact(__Pyx_memviewsli
     for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
       __pyx_v_j = __pyx_t_6;
 
-      /* "tsne/kl_divergence.pyx":48
+      /* "fastTSNE/kl_divergence.pyx":48
  *     for i in range(n_samples):
  *         for j in range(n_samples):
  *             if i != j:             # <<<<<<<<<<<<<<
@@ -3066,7 +3066,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_exact(__Pyx_memviewsli
       __pyx_t_7 = ((__pyx_v_i != __pyx_v_j) != 0);
       if (__pyx_t_7) {
 
-        /* "tsne/kl_divergence.pyx":49
+        /* "fastTSNE/kl_divergence.pyx":49
  *         for j in range(n_samples):
  *             if i != j:
  *                 p_ij = P[i, j]             # <<<<<<<<<<<<<<
@@ -3077,7 +3077,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_exact(__Pyx_memviewsli
         __pyx_t_9 = __pyx_v_j;
         __pyx_v_p_ij = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_P.data + __pyx_t_8 * __pyx_v_P.strides[0]) )) + __pyx_t_9)) )));
 
-        /* "tsne/kl_divergence.pyx":50
+        /* "fastTSNE/kl_divergence.pyx":50
  *             if i != j:
  *                 p_ij = P[i, j]
  *                 q_ij = 1 / (1 + sqeuclidean(embedding[i], embedding[j]))             # <<<<<<<<<<<<<<
@@ -3124,7 +3124,7 @@ __pyx_t_11.shape[0] = __pyx_v_embedding.shape[1];
 __pyx_t_11.strides[0] = __pyx_v_embedding.strides[1];
     __pyx_t_11.suboffsets[0] = -1;
 
-__pyx_t_12 = __pyx_f_4tsne_13kl_divergence_sqeuclidean(__pyx_t_10, __pyx_t_11); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 50, __pyx_L1_error)
+__pyx_t_12 = __pyx_f_8fastTSNE_13kl_divergence_sqeuclidean(__pyx_t_10, __pyx_t_11); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 50, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_12);
         __PYX_XDEC_MEMVIEW(&__pyx_t_10, 1);
         __pyx_t_10.memview = NULL;
@@ -3142,7 +3142,7 @@ __pyx_t_12 = __pyx_f_4tsne_13kl_divergence_sqeuclidean(__pyx_t_10, __pyx_t_11); 
         __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
         __pyx_v_q_ij = __pyx_t_14;
 
-        /* "tsne/kl_divergence.pyx":51
+        /* "fastTSNE/kl_divergence.pyx":51
  *                 p_ij = P[i, j]
  *                 q_ij = 1 / (1 + sqeuclidean(embedding[i], embedding[j]))
  *                 sum_Q += q_ij             # <<<<<<<<<<<<<<
@@ -3151,7 +3151,7 @@ __pyx_t_12 = __pyx_f_4tsne_13kl_divergence_sqeuclidean(__pyx_t_10, __pyx_t_11); 
  */
         __pyx_v_sum_Q = (__pyx_v_sum_Q + __pyx_v_q_ij);
 
-        /* "tsne/kl_divergence.pyx":52
+        /* "fastTSNE/kl_divergence.pyx":52
  *                 q_ij = 1 / (1 + sqeuclidean(embedding[i], embedding[j]))
  *                 sum_Q += q_ij
  *                 sum_P += p_ij             # <<<<<<<<<<<<<<
@@ -3160,7 +3160,7 @@ __pyx_t_12 = __pyx_f_4tsne_13kl_divergence_sqeuclidean(__pyx_t_10, __pyx_t_11); 
  */
         __pyx_v_sum_P = (__pyx_v_sum_P + __pyx_v_p_ij);
 
-        /* "tsne/kl_divergence.pyx":53
+        /* "fastTSNE/kl_divergence.pyx":53
  *                 sum_Q += q_ij
  *                 sum_P += p_ij
  *                 if p_ij > 0:             # <<<<<<<<<<<<<<
@@ -3170,16 +3170,16 @@ __pyx_t_12 = __pyx_f_4tsne_13kl_divergence_sqeuclidean(__pyx_t_10, __pyx_t_11); 
         __pyx_t_7 = ((__pyx_v_p_ij > 0.0) != 0);
         if (__pyx_t_7) {
 
-          /* "tsne/kl_divergence.pyx":54
+          /* "fastTSNE/kl_divergence.pyx":54
  *                 sum_P += p_ij
  *                 if p_ij > 0:
  *                     kl_divergence += p_ij * log(p_ij / (q_ij + EPSILON))             # <<<<<<<<<<<<<<
  * 
  *     kl_divergence += sum_P * log(sum_Q + EPSILON)
  */
-          __pyx_v_kl_divergence = (__pyx_v_kl_divergence + (__pyx_v_p_ij * log((__pyx_v_p_ij / (__pyx_v_q_ij + __pyx_v_4tsne_13kl_divergence_EPSILON)))));
+          __pyx_v_kl_divergence = (__pyx_v_kl_divergence + (__pyx_v_p_ij * log((__pyx_v_p_ij / (__pyx_v_q_ij + __pyx_v_8fastTSNE_13kl_divergence_EPSILON)))));
 
-          /* "tsne/kl_divergence.pyx":53
+          /* "fastTSNE/kl_divergence.pyx":53
  *                 sum_Q += q_ij
  *                 sum_P += p_ij
  *                 if p_ij > 0:             # <<<<<<<<<<<<<<
@@ -3188,7 +3188,7 @@ __pyx_t_12 = __pyx_f_4tsne_13kl_divergence_sqeuclidean(__pyx_t_10, __pyx_t_11); 
  */
         }
 
-        /* "tsne/kl_divergence.pyx":48
+        /* "fastTSNE/kl_divergence.pyx":48
  *     for i in range(n_samples):
  *         for j in range(n_samples):
  *             if i != j:             # <<<<<<<<<<<<<<
@@ -3199,16 +3199,16 @@ __pyx_t_12 = __pyx_f_4tsne_13kl_divergence_sqeuclidean(__pyx_t_10, __pyx_t_11); 
     }
   }
 
-  /* "tsne/kl_divergence.pyx":56
+  /* "fastTSNE/kl_divergence.pyx":56
  *                     kl_divergence += p_ij * log(p_ij / (q_ij + EPSILON))
  * 
  *     kl_divergence += sum_P * log(sum_Q + EPSILON)             # <<<<<<<<<<<<<<
  * 
  *     return kl_divergence
  */
-  __pyx_v_kl_divergence = (__pyx_v_kl_divergence + (__pyx_v_sum_P * log((__pyx_v_sum_Q + __pyx_v_4tsne_13kl_divergence_EPSILON))));
+  __pyx_v_kl_divergence = (__pyx_v_kl_divergence + (__pyx_v_sum_P * log((__pyx_v_sum_Q + __pyx_v_8fastTSNE_13kl_divergence_EPSILON))));
 
-  /* "tsne/kl_divergence.pyx":58
+  /* "fastTSNE/kl_divergence.pyx":58
  *     kl_divergence += sum_P * log(sum_Q + EPSILON)
  * 
  *     return kl_divergence             # <<<<<<<<<<<<<<
@@ -3218,7 +3218,7 @@ __pyx_t_12 = __pyx_f_4tsne_13kl_divergence_sqeuclidean(__pyx_t_10, __pyx_t_11); 
   __pyx_r = __pyx_v_kl_divergence;
   goto __pyx_L0;
 
-  /* "tsne/kl_divergence.pyx":37
+  /* "fastTSNE/kl_divergence.pyx":37
  * 
  * 
  * cpdef double kl_divergence_exact(double[:, ::1] P, double[:, ::1] embedding):             # <<<<<<<<<<<<<<
@@ -3232,7 +3232,7 @@ __pyx_t_12 = __pyx_f_4tsne_13kl_divergence_sqeuclidean(__pyx_t_10, __pyx_t_11); 
   __PYX_XDEC_MEMVIEW(&__pyx_t_11, 1);
   __Pyx_XDECREF(__pyx_t_12);
   __Pyx_XDECREF(__pyx_t_13);
-  __Pyx_WriteUnraisable("tsne.kl_divergence.kl_divergence_exact", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __Pyx_WriteUnraisable("fastTSNE.kl_divergence.kl_divergence_exact", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
   __pyx_r = 0;
   __pyx_L0:;
   __Pyx_TraceReturn(Py_None, 0);
@@ -3241,9 +3241,9 @@ __pyx_t_12 = __pyx_f_4tsne_13kl_divergence_sqeuclidean(__pyx_t_10, __pyx_t_11); 
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4tsne_13kl_divergence_1kl_divergence_exact(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_4tsne_13kl_divergence_kl_divergence_exact[] = "Compute the exact KL divergence.";
-static PyObject *__pyx_pw_4tsne_13kl_divergence_1kl_divergence_exact(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8fastTSNE_13kl_divergence_1kl_divergence_exact(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_8fastTSNE_13kl_divergence_kl_divergence_exact[] = "Compute the exact KL divergence.";
+static PyObject *__pyx_pw_8fastTSNE_13kl_divergence_1kl_divergence_exact(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   __Pyx_memviewslice __pyx_v_P = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_embedding = { 0, 0, { 0 }, { 0 }, { 0 } };
   PyObject *__pyx_r = 0;
@@ -3291,18 +3291,18 @@ static PyObject *__pyx_pw_4tsne_13kl_divergence_1kl_divergence_exact(PyObject *_
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("kl_divergence_exact", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 37, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("tsne.kl_divergence.kl_divergence_exact", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("fastTSNE.kl_divergence.kl_divergence_exact", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4tsne_13kl_divergence_kl_divergence_exact(__pyx_self, __pyx_v_P, __pyx_v_embedding);
+  __pyx_r = __pyx_pf_8fastTSNE_13kl_divergence_kl_divergence_exact(__pyx_self, __pyx_v_P, __pyx_v_embedding);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4tsne_13kl_divergence_kl_divergence_exact(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_P, __Pyx_memviewslice __pyx_v_embedding) {
+static PyObject *__pyx_pf_8fastTSNE_13kl_divergence_kl_divergence_exact(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_P, __Pyx_memviewslice __pyx_v_embedding) {
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -3310,7 +3310,7 @@ static PyObject *__pyx_pf_4tsne_13kl_divergence_kl_divergence_exact(CYTHON_UNUSE
   __Pyx_RefNannySetupContext("kl_divergence_exact", 0);
   __Pyx_TraceCall("kl_divergence_exact (wrapper)", __pyx_f[0], 37, 0, __PYX_ERR(0, 37, __pyx_L1_error));
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_f_4tsne_13kl_divergence_kl_divergence_exact(__pyx_v_P, __pyx_v_embedding, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 37, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_f_8fastTSNE_13kl_divergence_kl_divergence_exact(__pyx_v_P, __pyx_v_embedding, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 37, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -3319,7 +3319,7 @@ static PyObject *__pyx_pf_4tsne_13kl_divergence_kl_divergence_exact(CYTHON_UNUSE
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("tsne.kl_divergence.kl_divergence_exact", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("fastTSNE.kl_divergence.kl_divergence_exact", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __PYX_XDEC_MEMVIEW(&__pyx_v_P, 1);
@@ -3330,7 +3330,7 @@ static PyObject *__pyx_pf_4tsne_13kl_divergence_kl_divergence_exact(CYTHON_UNUSE
   return __pyx_r;
 }
 
-/* "tsne/kl_divergence.pyx":61
+/* "fastTSNE/kl_divergence.pyx":61
  * 
  * 
  * cpdef double kl_divergence_approx_bh(             # <<<<<<<<<<<<<<
@@ -3338,11 +3338,11 @@ static PyObject *__pyx_pf_4tsne_13kl_divergence_kl_divergence_exact(CYTHON_UNUSE
  *     int[:] indptr,
  */
 
-static PyObject *__pyx_pw_4tsne_13kl_divergence_3kl_divergence_approx_bh(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_bh(__Pyx_memviewslice __pyx_v_indices, __Pyx_memviewslice __pyx_v_indptr, __Pyx_memviewslice __pyx_v_P_data, __Pyx_memviewslice __pyx_v_embedding, CYTHON_UNUSED int __pyx_skip_dispatch, struct __pyx_opt_args_4tsne_13kl_divergence_kl_divergence_approx_bh *__pyx_optional_args) {
+static PyObject *__pyx_pw_8fastTSNE_13kl_divergence_3kl_divergence_approx_bh(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static double __pyx_f_8fastTSNE_13kl_divergence_kl_divergence_approx_bh(__Pyx_memviewslice __pyx_v_indices, __Pyx_memviewslice __pyx_v_indptr, __Pyx_memviewslice __pyx_v_P_data, __Pyx_memviewslice __pyx_v_embedding, CYTHON_UNUSED int __pyx_skip_dispatch, struct __pyx_opt_args_8fastTSNE_13kl_divergence_kl_divergence_approx_bh *__pyx_optional_args) {
   double __pyx_v_theta = ((double)0.5);
   CYTHON_UNUSED Py_ssize_t __pyx_v_n_samples;
-  struct __pyx_obj_4tsne_9quad_tree_QuadTree *__pyx_v_tree = 0;
+  struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *__pyx_v_tree = 0;
   __Pyx_memviewslice __pyx_v_gradient = { 0, 0, { 0 }, { 0 }, { 0 } };
   double __pyx_v_sum_P;
   double __pyx_v_sum_Q;
@@ -3356,7 +3356,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_bh(__Pyx_memvie
   PyObject *__pyx_t_4 = NULL;
   __Pyx_memviewslice __pyx_t_5 = { 0, 0, { 0 }, { 0 }, { 0 } };
   double __pyx_t_6;
-  struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_bh __pyx_t_7;
+  struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_bh __pyx_t_7;
   PyObject *__pyx_t_8 = NULL;
   PyObject *__pyx_t_9 = NULL;
   PyObject *__pyx_t_10 = NULL;
@@ -3371,7 +3371,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_bh(__Pyx_memvie
     }
   }
 
-  /* "tsne/kl_divergence.pyx":70
+  /* "fastTSNE/kl_divergence.pyx":70
  *     """Compute the KL divergence using the Barnes-Hut approximation."""
  *     cdef:
  *         Py_ssize_t n_samples = embedding.shape[0]             # <<<<<<<<<<<<<<
@@ -3380,7 +3380,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_bh(__Pyx_memvie
  */
   __pyx_v_n_samples = (__pyx_v_embedding.shape[0]);
 
-  /* "tsne/kl_divergence.pyx":73
+  /* "fastTSNE/kl_divergence.pyx":73
  *         Py_ssize_t i, j
  * 
  *         QuadTree tree = QuadTree(embedding)             # <<<<<<<<<<<<<<
@@ -3389,13 +3389,13 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_bh(__Pyx_memvie
  */
   __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_embedding, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_4tsne_9quad_tree_QuadTree), __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 73, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_8fastTSNE_9quad_tree_QuadTree), __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v_tree = ((struct __pyx_obj_4tsne_9quad_tree_QuadTree *)__pyx_t_2);
+  __pyx_v_tree = ((struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "tsne/kl_divergence.pyx":76
+  /* "fastTSNE/kl_divergence.pyx":76
  *         # We don't actually care about the gradient, so don't waste time
  *         # initializing memory
  *         double[:, ::1] gradient = np.empty_like(embedding, dtype=float)             # <<<<<<<<<<<<<<
@@ -3428,7 +3428,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_bh(__Pyx_memvie
   __pyx_t_5.memview = NULL;
   __pyx_t_5.data = NULL;
 
-  /* "tsne/kl_divergence.pyx":78
+  /* "fastTSNE/kl_divergence.pyx":78
  *         double[:, ::1] gradient = np.empty_like(embedding, dtype=float)
  * 
  *         double sum_P = 0, sum_Q = 0             # <<<<<<<<<<<<<<
@@ -3438,7 +3438,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_bh(__Pyx_memvie
   __pyx_v_sum_P = 0.0;
   __pyx_v_sum_Q = 0.0;
 
-  /* "tsne/kl_divergence.pyx":79
+  /* "fastTSNE/kl_divergence.pyx":79
  * 
  *         double sum_P = 0, sum_Q = 0
  *         double kl_divergence = 0             # <<<<<<<<<<<<<<
@@ -3447,7 +3447,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_bh(__Pyx_memvie
  */
   __pyx_v_kl_divergence = 0.0;
 
-  /* "tsne/kl_divergence.pyx":81
+  /* "fastTSNE/kl_divergence.pyx":81
  *         double kl_divergence = 0
  * 
  *     sum_Q = estimate_negative_gradient_bh(tree, embedding, gradient, theta)             # <<<<<<<<<<<<<<
@@ -3456,10 +3456,10 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_bh(__Pyx_memvie
  */
   __pyx_t_7.__pyx_n = 1;
   __pyx_t_7.theta = __pyx_v_theta;
-  __pyx_t_6 = __pyx_f_4tsne_5_tsne_estimate_negative_gradient_bh(__pyx_v_tree, __pyx_v_embedding, __pyx_v_gradient, 0, &__pyx_t_7); 
+  __pyx_t_6 = __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_bh(__pyx_v_tree, __pyx_v_embedding, __pyx_v_gradient, 0, &__pyx_t_7); 
   __pyx_v_sum_Q = __pyx_t_6;
 
-  /* "tsne/kl_divergence.pyx":82
+  /* "fastTSNE/kl_divergence.pyx":82
  * 
  *     sum_Q = estimate_negative_gradient_bh(tree, embedding, gradient, theta)
  *     sum_P, kl_divergence = estimate_positive_gradient_nn(             # <<<<<<<<<<<<<<
@@ -3469,7 +3469,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_bh(__Pyx_memvie
   __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_estimate_positive_gradient_nn); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 82, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
 
-  /* "tsne/kl_divergence.pyx":83
+  /* "fastTSNE/kl_divergence.pyx":83
  *     sum_Q = estimate_negative_gradient_bh(tree, embedding, gradient, theta)
  *     sum_P, kl_divergence = estimate_positive_gradient_nn(
  *         indices, indptr, P_data, embedding, embedding, gradient, should_eval_error=True)             # <<<<<<<<<<<<<<
@@ -3489,7 +3489,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_bh(__Pyx_memvie
   __pyx_t_10 = __pyx_memoryview_fromslice(__pyx_v_gradient, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 83, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_10);
 
-  /* "tsne/kl_divergence.pyx":82
+  /* "fastTSNE/kl_divergence.pyx":82
  * 
  *     sum_Q = estimate_negative_gradient_bh(tree, embedding, gradient, theta)
  *     sum_P, kl_divergence = estimate_positive_gradient_nn(             # <<<<<<<<<<<<<<
@@ -3517,7 +3517,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_bh(__Pyx_memvie
   __pyx_t_9 = 0;
   __pyx_t_10 = 0;
 
-  /* "tsne/kl_divergence.pyx":83
+  /* "fastTSNE/kl_divergence.pyx":83
  *     sum_Q = estimate_negative_gradient_bh(tree, embedding, gradient, theta)
  *     sum_P, kl_divergence = estimate_positive_gradient_nn(
  *         indices, indptr, P_data, embedding, embedding, gradient, should_eval_error=True)             # <<<<<<<<<<<<<<
@@ -3528,7 +3528,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_bh(__Pyx_memvie
   __Pyx_GOTREF(__pyx_t_10);
   if (PyDict_SetItem(__pyx_t_10, __pyx_n_s_should_eval_error, Py_True) < 0) __PYX_ERR(0, 83, __pyx_L1_error)
 
-  /* "tsne/kl_divergence.pyx":82
+  /* "fastTSNE/kl_divergence.pyx":82
  * 
  *     sum_Q = estimate_negative_gradient_bh(tree, embedding, gradient, theta)
  *     sum_P, kl_divergence = estimate_positive_gradient_nn(             # <<<<<<<<<<<<<<
@@ -3593,16 +3593,16 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_bh(__Pyx_memvie
   __pyx_v_sum_P = __pyx_t_6;
   __pyx_v_kl_divergence = __pyx_t_13;
 
-  /* "tsne/kl_divergence.pyx":85
+  /* "fastTSNE/kl_divergence.pyx":85
  *         indices, indptr, P_data, embedding, embedding, gradient, should_eval_error=True)
  * 
  *     kl_divergence += sum_P * log(sum_Q + EPSILON)             # <<<<<<<<<<<<<<
  * 
  *     return kl_divergence
  */
-  __pyx_v_kl_divergence = (__pyx_v_kl_divergence + (__pyx_v_sum_P * log((__pyx_v_sum_Q + __pyx_v_4tsne_13kl_divergence_EPSILON))));
+  __pyx_v_kl_divergence = (__pyx_v_kl_divergence + (__pyx_v_sum_P * log((__pyx_v_sum_Q + __pyx_v_8fastTSNE_13kl_divergence_EPSILON))));
 
-  /* "tsne/kl_divergence.pyx":87
+  /* "fastTSNE/kl_divergence.pyx":87
  *     kl_divergence += sum_P * log(sum_Q + EPSILON)
  * 
  *     return kl_divergence             # <<<<<<<<<<<<<<
@@ -3612,7 +3612,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_bh(__Pyx_memvie
   __pyx_r = __pyx_v_kl_divergence;
   goto __pyx_L0;
 
-  /* "tsne/kl_divergence.pyx":61
+  /* "fastTSNE/kl_divergence.pyx":61
  * 
  * 
  * cpdef double kl_divergence_approx_bh(             # <<<<<<<<<<<<<<
@@ -3631,7 +3631,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_bh(__Pyx_memvie
   __Pyx_XDECREF(__pyx_t_9);
   __Pyx_XDECREF(__pyx_t_10);
   __Pyx_XDECREF(__pyx_t_11);
-  __Pyx_WriteUnraisable("tsne.kl_divergence.kl_divergence_approx_bh", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __Pyx_WriteUnraisable("fastTSNE.kl_divergence.kl_divergence_approx_bh", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
   __pyx_r = 0;
   __pyx_L0:;
   __Pyx_XDECREF((PyObject *)__pyx_v_tree);
@@ -3642,9 +3642,9 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_bh(__Pyx_memvie
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4tsne_13kl_divergence_3kl_divergence_approx_bh(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_4tsne_13kl_divergence_2kl_divergence_approx_bh[] = "Compute the KL divergence using the Barnes-Hut approximation.";
-static PyObject *__pyx_pw_4tsne_13kl_divergence_3kl_divergence_approx_bh(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8fastTSNE_13kl_divergence_3kl_divergence_approx_bh(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_8fastTSNE_13kl_divergence_2kl_divergence_approx_bh[] = "Compute the KL divergence using the Barnes-Hut approximation.";
+static PyObject *__pyx_pw_8fastTSNE_13kl_divergence_3kl_divergence_approx_bh(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   __Pyx_memviewslice __pyx_v_indices = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_indptr = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_P_data = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -3732,30 +3732,30 @@ static PyObject *__pyx_pw_4tsne_13kl_divergence_3kl_divergence_approx_bh(PyObjec
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("kl_divergence_approx_bh", 0, 4, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 61, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("tsne.kl_divergence.kl_divergence_approx_bh", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("fastTSNE.kl_divergence.kl_divergence_approx_bh", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4tsne_13kl_divergence_2kl_divergence_approx_bh(__pyx_self, __pyx_v_indices, __pyx_v_indptr, __pyx_v_P_data, __pyx_v_embedding, __pyx_v_theta);
+  __pyx_r = __pyx_pf_8fastTSNE_13kl_divergence_2kl_divergence_approx_bh(__pyx_self, __pyx_v_indices, __pyx_v_indptr, __pyx_v_P_data, __pyx_v_embedding, __pyx_v_theta);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4tsne_13kl_divergence_2kl_divergence_approx_bh(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_indices, __Pyx_memviewslice __pyx_v_indptr, __Pyx_memviewslice __pyx_v_P_data, __Pyx_memviewslice __pyx_v_embedding, double __pyx_v_theta) {
+static PyObject *__pyx_pf_8fastTSNE_13kl_divergence_2kl_divergence_approx_bh(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_indices, __Pyx_memviewslice __pyx_v_indptr, __Pyx_memviewslice __pyx_v_P_data, __Pyx_memviewslice __pyx_v_embedding, double __pyx_v_theta) {
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
-  struct __pyx_opt_args_4tsne_13kl_divergence_kl_divergence_approx_bh __pyx_t_2;
+  struct __pyx_opt_args_8fastTSNE_13kl_divergence_kl_divergence_approx_bh __pyx_t_2;
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("kl_divergence_approx_bh", 0);
   __Pyx_TraceCall("kl_divergence_approx_bh (wrapper)", __pyx_f[0], 61, 0, __PYX_ERR(0, 61, __pyx_L1_error));
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_2.__pyx_n = 1;
   __pyx_t_2.theta = __pyx_v_theta;
-  __pyx_t_1 = __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_bh(__pyx_v_indices, __pyx_v_indptr, __pyx_v_P_data, __pyx_v_embedding, 0, &__pyx_t_2); 
+  __pyx_t_1 = __pyx_f_8fastTSNE_13kl_divergence_kl_divergence_approx_bh(__pyx_v_indices, __pyx_v_indptr, __pyx_v_P_data, __pyx_v_embedding, 0, &__pyx_t_2); 
   __pyx_t_3 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 61, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_r = __pyx_t_3;
@@ -3765,7 +3765,7 @@ static PyObject *__pyx_pf_4tsne_13kl_divergence_2kl_divergence_approx_bh(CYTHON_
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_AddTraceback("tsne.kl_divergence.kl_divergence_approx_bh", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("fastTSNE.kl_divergence.kl_divergence_approx_bh", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __PYX_XDEC_MEMVIEW(&__pyx_v_indices, 1);
@@ -3778,7 +3778,7 @@ static PyObject *__pyx_pf_4tsne_13kl_divergence_2kl_divergence_approx_bh(CYTHON_
   return __pyx_r;
 }
 
-/* "tsne/kl_divergence.pyx":91
+/* "fastTSNE/kl_divergence.pyx":91
  * 
  * 
  * cpdef double kl_divergence_approx_fft(             # <<<<<<<<<<<<<<
@@ -3786,8 +3786,8 @@ static PyObject *__pyx_pf_4tsne_13kl_divergence_2kl_divergence_approx_bh(CYTHON_
  *     int[:] indptr,
  */
 
-static PyObject *__pyx_pw_4tsne_13kl_divergence_5kl_divergence_approx_fft(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memviewslice __pyx_v_indices, __Pyx_memviewslice __pyx_v_indptr, __Pyx_memviewslice __pyx_v_P_data, __Pyx_memviewslice __pyx_v_embedding, CYTHON_UNUSED int __pyx_skip_dispatch, struct __pyx_opt_args_4tsne_13kl_divergence_kl_divergence_approx_fft *__pyx_optional_args) {
+static PyObject *__pyx_pw_8fastTSNE_13kl_divergence_5kl_divergence_approx_fft(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static double __pyx_f_8fastTSNE_13kl_divergence_kl_divergence_approx_fft(__Pyx_memviewslice __pyx_v_indices, __Pyx_memviewslice __pyx_v_indptr, __Pyx_memviewslice __pyx_v_P_data, __Pyx_memviewslice __pyx_v_embedding, CYTHON_UNUSED int __pyx_skip_dispatch, struct __pyx_opt_args_8fastTSNE_13kl_divergence_kl_divergence_approx_fft *__pyx_optional_args) {
   Py_ssize_t __pyx_v_n_interpolation_points = ((Py_ssize_t)3);
   Py_ssize_t __pyx_v_min_num_intervals = ((Py_ssize_t)10);
   double __pyx_v_ints_in_interval = ((double)1.0);
@@ -3808,8 +3808,8 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
   __Pyx_memviewslice __pyx_t_6 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_t_7 = { 0, 0, { 0 }, { 0 }, { 0 } };
   double __pyx_t_8;
-  struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_fft_1d __pyx_t_9;
-  struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_fft_2d __pyx_t_10;
+  struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d __pyx_t_9;
+  struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d __pyx_t_10;
   PyObject *__pyx_t_11 = NULL;
   PyObject *__pyx_t_12 = NULL;
   PyObject *__pyx_t_13 = NULL;
@@ -3830,7 +3830,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
     }
   }
 
-  /* "tsne/kl_divergence.pyx":102
+  /* "fastTSNE/kl_divergence.pyx":102
  *     """Compute the KL divergence using the interpolation based approximation."""
  *     cdef:
  *         Py_ssize_t n_samples = embedding.shape[0]             # <<<<<<<<<<<<<<
@@ -3839,7 +3839,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
  */
   __pyx_v_n_samples = (__pyx_v_embedding.shape[0]);
 
-  /* "tsne/kl_divergence.pyx":103
+  /* "fastTSNE/kl_divergence.pyx":103
  *     cdef:
  *         Py_ssize_t n_samples = embedding.shape[0]
  *         Py_ssize_t n_dims = embedding.shape[1]             # <<<<<<<<<<<<<<
@@ -3848,7 +3848,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
  */
   __pyx_v_n_dims = (__pyx_v_embedding.shape[1]);
 
-  /* "tsne/kl_divergence.pyx":108
+  /* "fastTSNE/kl_divergence.pyx":108
  *         # We don't actually care about the gradient, so don't waste time
  *         # initializing memory
  *         double[:, ::1] gradient = np.empty_like(embedding, dtype=float)             # <<<<<<<<<<<<<<
@@ -3881,7 +3881,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
   __pyx_t_5.memview = NULL;
   __pyx_t_5.data = NULL;
 
-  /* "tsne/kl_divergence.pyx":110
+  /* "fastTSNE/kl_divergence.pyx":110
  *         double[:, ::1] gradient = np.empty_like(embedding, dtype=float)
  * 
  *         double sum_P = 0, sum_Q = 0             # <<<<<<<<<<<<<<
@@ -3891,7 +3891,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
   __pyx_v_sum_P = 0.0;
   __pyx_v_sum_Q = 0.0;
 
-  /* "tsne/kl_divergence.pyx":111
+  /* "fastTSNE/kl_divergence.pyx":111
  * 
  *         double sum_P = 0, sum_Q = 0
  *         double kl_divergence = 0             # <<<<<<<<<<<<<<
@@ -3900,7 +3900,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
  */
   __pyx_v_kl_divergence = 0.0;
 
-  /* "tsne/kl_divergence.pyx":114
+  /* "fastTSNE/kl_divergence.pyx":114
  * 
  * 
  *     if n_dims == 1:             # <<<<<<<<<<<<<<
@@ -3910,7 +3910,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
   switch (__pyx_v_n_dims) {
     case 1:
 
-    /* "tsne/kl_divergence.pyx":116
+    /* "fastTSNE/kl_divergence.pyx":116
  *     if n_dims == 1:
  *         sum_Q = estimate_negative_gradient_fft_1d(
  *             embedding.ravel(), gradient.ravel(), n_interpolation_points,             # <<<<<<<<<<<<<<
@@ -3968,7 +3968,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
     __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_4, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 116, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-    /* "tsne/kl_divergence.pyx":115
+    /* "fastTSNE/kl_divergence.pyx":115
  * 
  *     if n_dims == 1:
  *         sum_Q = estimate_negative_gradient_fft_1d(             # <<<<<<<<<<<<<<
@@ -3979,7 +3979,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
     __pyx_t_9.n_interpolation_points = __pyx_v_n_interpolation_points;
     __pyx_t_9.min_num_intervals = __pyx_v_min_num_intervals;
     __pyx_t_9.ints_in_interval = __pyx_v_ints_in_interval;
-    __pyx_t_8 = __pyx_f_4tsne_5_tsne_estimate_negative_gradient_fft_1d(__pyx_t_6, __pyx_t_7, 0, &__pyx_t_9); 
+    __pyx_t_8 = __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__pyx_t_6, __pyx_t_7, 0, &__pyx_t_9); 
     __PYX_XDEC_MEMVIEW(&__pyx_t_6, 1);
     __pyx_t_6.memview = NULL;
     __pyx_t_6.data = NULL;
@@ -3988,7 +3988,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
     __pyx_t_7.data = NULL;
     __pyx_v_sum_Q = __pyx_t_8;
 
-    /* "tsne/kl_divergence.pyx":114
+    /* "fastTSNE/kl_divergence.pyx":114
  * 
  * 
  *     if n_dims == 1:             # <<<<<<<<<<<<<<
@@ -3997,7 +3997,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
  */
     break;
 
-    /* "tsne/kl_divergence.pyx":119
+    /* "fastTSNE/kl_divergence.pyx":119
  *             min_num_intervals, ints_in_interval,
  *         )
  *     elif n_dims == 2:             # <<<<<<<<<<<<<<
@@ -4006,7 +4006,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
  */
     case 2:
 
-    /* "tsne/kl_divergence.pyx":120
+    /* "fastTSNE/kl_divergence.pyx":120
  *         )
  *     elif n_dims == 2:
  *         sum_Q = estimate_negative_gradient_fft_2d(             # <<<<<<<<<<<<<<
@@ -4017,10 +4017,10 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
     __pyx_t_10.n_interpolation_points = __pyx_v_n_interpolation_points;
     __pyx_t_10.min_num_intervals = __pyx_v_min_num_intervals;
     __pyx_t_10.ints_in_interval = __pyx_v_ints_in_interval;
-    __pyx_t_8 = __pyx_f_4tsne_5_tsne_estimate_negative_gradient_fft_2d(__pyx_v_embedding, __pyx_v_gradient, 0, &__pyx_t_10); 
+    __pyx_t_8 = __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__pyx_v_embedding, __pyx_v_gradient, 0, &__pyx_t_10); 
     __pyx_v_sum_Q = __pyx_t_8;
 
-    /* "tsne/kl_divergence.pyx":119
+    /* "fastTSNE/kl_divergence.pyx":119
  *             min_num_intervals, ints_in_interval,
  *         )
  *     elif n_dims == 2:             # <<<<<<<<<<<<<<
@@ -4030,7 +4030,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
     break;
     default:
 
-    /* "tsne/kl_divergence.pyx":125
+    /* "fastTSNE/kl_divergence.pyx":125
  *         )
  *     else:
  *         return -1             # <<<<<<<<<<<<<<
@@ -4042,7 +4042,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
     break;
   }
 
-  /* "tsne/kl_divergence.pyx":127
+  /* "fastTSNE/kl_divergence.pyx":127
  *         return -1
  * 
  *     sum_P, kl_divergence = estimate_positive_gradient_nn(             # <<<<<<<<<<<<<<
@@ -4052,7 +4052,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
   __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_estimate_positive_gradient_nn); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 127, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
 
-  /* "tsne/kl_divergence.pyx":128
+  /* "fastTSNE/kl_divergence.pyx":128
  * 
  *     sum_P, kl_divergence = estimate_positive_gradient_nn(
  *         indices, indptr, P_data, embedding, embedding, gradient, should_eval_error=True)             # <<<<<<<<<<<<<<
@@ -4072,7 +4072,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
   __pyx_t_13 = __pyx_memoryview_fromslice(__pyx_v_gradient, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 128, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_13);
 
-  /* "tsne/kl_divergence.pyx":127
+  /* "fastTSNE/kl_divergence.pyx":127
  *         return -1
  * 
  *     sum_P, kl_divergence = estimate_positive_gradient_nn(             # <<<<<<<<<<<<<<
@@ -4100,7 +4100,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
   __pyx_t_12 = 0;
   __pyx_t_13 = 0;
 
-  /* "tsne/kl_divergence.pyx":128
+  /* "fastTSNE/kl_divergence.pyx":128
  * 
  *     sum_P, kl_divergence = estimate_positive_gradient_nn(
  *         indices, indptr, P_data, embedding, embedding, gradient, should_eval_error=True)             # <<<<<<<<<<<<<<
@@ -4111,7 +4111,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
   __Pyx_GOTREF(__pyx_t_13);
   if (PyDict_SetItem(__pyx_t_13, __pyx_n_s_should_eval_error, Py_True) < 0) __PYX_ERR(0, 128, __pyx_L1_error)
 
-  /* "tsne/kl_divergence.pyx":127
+  /* "fastTSNE/kl_divergence.pyx":127
  *         return -1
  * 
  *     sum_P, kl_divergence = estimate_positive_gradient_nn(             # <<<<<<<<<<<<<<
@@ -4176,16 +4176,16 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
   __pyx_v_sum_P = __pyx_t_8;
   __pyx_v_kl_divergence = __pyx_t_16;
 
-  /* "tsne/kl_divergence.pyx":130
+  /* "fastTSNE/kl_divergence.pyx":130
  *         indices, indptr, P_data, embedding, embedding, gradient, should_eval_error=True)
  * 
  *     kl_divergence += sum_P * log(sum_Q + EPSILON)             # <<<<<<<<<<<<<<
  * 
  *     return kl_divergence
  */
-  __pyx_v_kl_divergence = (__pyx_v_kl_divergence + (__pyx_v_sum_P * log((__pyx_v_sum_Q + __pyx_v_4tsne_13kl_divergence_EPSILON))));
+  __pyx_v_kl_divergence = (__pyx_v_kl_divergence + (__pyx_v_sum_P * log((__pyx_v_sum_Q + __pyx_v_8fastTSNE_13kl_divergence_EPSILON))));
 
-  /* "tsne/kl_divergence.pyx":132
+  /* "fastTSNE/kl_divergence.pyx":132
  *     kl_divergence += sum_P * log(sum_Q + EPSILON)
  * 
  *     return kl_divergence             # <<<<<<<<<<<<<<
@@ -4193,7 +4193,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
   __pyx_r = __pyx_v_kl_divergence;
   goto __pyx_L0;
 
-  /* "tsne/kl_divergence.pyx":91
+  /* "fastTSNE/kl_divergence.pyx":91
  * 
  * 
  * cpdef double kl_divergence_approx_fft(             # <<<<<<<<<<<<<<
@@ -4214,7 +4214,7 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
   __Pyx_XDECREF(__pyx_t_12);
   __Pyx_XDECREF(__pyx_t_13);
   __Pyx_XDECREF(__pyx_t_14);
-  __Pyx_WriteUnraisable("tsne.kl_divergence.kl_divergence_approx_fft", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __Pyx_WriteUnraisable("fastTSNE.kl_divergence.kl_divergence_approx_fft", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
   __pyx_r = 0;
   __pyx_L0:;
   __PYX_XDEC_MEMVIEW(&__pyx_v_gradient, 1);
@@ -4224,9 +4224,9 @@ static double __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__Pyx_memvi
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4tsne_13kl_divergence_5kl_divergence_approx_fft(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_4tsne_13kl_divergence_4kl_divergence_approx_fft[] = "Compute the KL divergence using the interpolation based approximation.";
-static PyObject *__pyx_pw_4tsne_13kl_divergence_5kl_divergence_approx_fft(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8fastTSNE_13kl_divergence_5kl_divergence_approx_fft(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_8fastTSNE_13kl_divergence_4kl_divergence_approx_fft[] = "Compute the KL divergence using the interpolation based approximation.";
+static PyObject *__pyx_pw_8fastTSNE_13kl_divergence_5kl_divergence_approx_fft(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   __Pyx_memviewslice __pyx_v_indices = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_indptr = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_P_data = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -4346,23 +4346,23 @@ static PyObject *__pyx_pw_4tsne_13kl_divergence_5kl_divergence_approx_fft(PyObje
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("kl_divergence_approx_fft", 0, 4, 7, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 91, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("tsne.kl_divergence.kl_divergence_approx_fft", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("fastTSNE.kl_divergence.kl_divergence_approx_fft", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4tsne_13kl_divergence_4kl_divergence_approx_fft(__pyx_self, __pyx_v_indices, __pyx_v_indptr, __pyx_v_P_data, __pyx_v_embedding, __pyx_v_n_interpolation_points, __pyx_v_min_num_intervals, __pyx_v_ints_in_interval);
+  __pyx_r = __pyx_pf_8fastTSNE_13kl_divergence_4kl_divergence_approx_fft(__pyx_self, __pyx_v_indices, __pyx_v_indptr, __pyx_v_P_data, __pyx_v_embedding, __pyx_v_n_interpolation_points, __pyx_v_min_num_intervals, __pyx_v_ints_in_interval);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4tsne_13kl_divergence_4kl_divergence_approx_fft(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_indices, __Pyx_memviewslice __pyx_v_indptr, __Pyx_memviewslice __pyx_v_P_data, __Pyx_memviewslice __pyx_v_embedding, Py_ssize_t __pyx_v_n_interpolation_points, Py_ssize_t __pyx_v_min_num_intervals, double __pyx_v_ints_in_interval) {
+static PyObject *__pyx_pf_8fastTSNE_13kl_divergence_4kl_divergence_approx_fft(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_indices, __Pyx_memviewslice __pyx_v_indptr, __Pyx_memviewslice __pyx_v_P_data, __Pyx_memviewslice __pyx_v_embedding, Py_ssize_t __pyx_v_n_interpolation_points, Py_ssize_t __pyx_v_min_num_intervals, double __pyx_v_ints_in_interval) {
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
-  struct __pyx_opt_args_4tsne_13kl_divergence_kl_divergence_approx_fft __pyx_t_2;
+  struct __pyx_opt_args_8fastTSNE_13kl_divergence_kl_divergence_approx_fft __pyx_t_2;
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("kl_divergence_approx_fft", 0);
   __Pyx_TraceCall("kl_divergence_approx_fft (wrapper)", __pyx_f[0], 91, 0, __PYX_ERR(0, 91, __pyx_L1_error));
@@ -4371,7 +4371,7 @@ static PyObject *__pyx_pf_4tsne_13kl_divergence_4kl_divergence_approx_fft(CYTHON
   __pyx_t_2.n_interpolation_points = __pyx_v_n_interpolation_points;
   __pyx_t_2.min_num_intervals = __pyx_v_min_num_intervals;
   __pyx_t_2.ints_in_interval = __pyx_v_ints_in_interval;
-  __pyx_t_1 = __pyx_f_4tsne_13kl_divergence_kl_divergence_approx_fft(__pyx_v_indices, __pyx_v_indptr, __pyx_v_P_data, __pyx_v_embedding, 0, &__pyx_t_2); 
+  __pyx_t_1 = __pyx_f_8fastTSNE_13kl_divergence_kl_divergence_approx_fft(__pyx_v_indices, __pyx_v_indptr, __pyx_v_P_data, __pyx_v_embedding, 0, &__pyx_t_2); 
   __pyx_t_3 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 91, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_r = __pyx_t_3;
@@ -4381,7 +4381,7 @@ static PyObject *__pyx_pf_4tsne_13kl_divergence_4kl_divergence_approx_fft(CYTHON
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_AddTraceback("tsne.kl_divergence.kl_divergence_approx_fft", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("fastTSNE.kl_divergence.kl_divergence_approx_fft", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __PYX_XDEC_MEMVIEW(&__pyx_v_indices, 1);
@@ -20285,7 +20285,7 @@ static PyBufferProcs __pyx_tp_as_buffer_array = {
 
 static PyTypeObject __pyx_type___pyx_array = {
   PyVarObject_HEAD_INIT(0, 0)
-  "tsne.kl_divergence.array", /*tp_name*/
+  "fastTSNE.kl_divergence.array", /*tp_name*/
   sizeof(struct __pyx_array_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_array, /*tp_dealloc*/
@@ -20393,7 +20393,7 @@ static PyMethodDef __pyx_methods_Enum[] = {
 
 static PyTypeObject __pyx_type___pyx_MemviewEnum = {
   PyVarObject_HEAD_INIT(0, 0)
-  "tsne.kl_divergence.Enum", /*tp_name*/
+  "fastTSNE.kl_divergence.Enum", /*tp_name*/
   sizeof(struct __pyx_MemviewEnum_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_Enum, /*tp_dealloc*/
@@ -20643,7 +20643,7 @@ static PyBufferProcs __pyx_tp_as_buffer_memoryview = {
 
 static PyTypeObject __pyx_type___pyx_memoryview = {
   PyVarObject_HEAD_INIT(0, 0)
-  "tsne.kl_divergence.memoryview", /*tp_name*/
+  "fastTSNE.kl_divergence.memoryview", /*tp_name*/
   sizeof(struct __pyx_memoryview_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_memoryview, /*tp_dealloc*/
@@ -20770,7 +20770,7 @@ static struct PyGetSetDef __pyx_getsets__memoryviewslice[] = {
 
 static PyTypeObject __pyx_type___pyx_memoryviewslice = {
   PyVarObject_HEAD_INIT(0, 0)
-  "tsne.kl_divergence._memoryviewslice", /*tp_name*/
+  "fastTSNE.kl_divergence._memoryviewslice", /*tp_name*/
   sizeof(struct __pyx_memoryviewslice_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc__memoryviewslice, /*tp_dealloc*/
@@ -20835,9 +20835,9 @@ static PyTypeObject __pyx_type___pyx_memoryviewslice = {
 };
 
 static PyMethodDef __pyx_methods[] = {
-  {"kl_divergence_exact", (PyCFunction)__pyx_pw_4tsne_13kl_divergence_1kl_divergence_exact, METH_VARARGS|METH_KEYWORDS, __pyx_doc_4tsne_13kl_divergence_kl_divergence_exact},
-  {"kl_divergence_approx_bh", (PyCFunction)__pyx_pw_4tsne_13kl_divergence_3kl_divergence_approx_bh, METH_VARARGS|METH_KEYWORDS, __pyx_doc_4tsne_13kl_divergence_2kl_divergence_approx_bh},
-  {"kl_divergence_approx_fft", (PyCFunction)__pyx_pw_4tsne_13kl_divergence_5kl_divergence_approx_fft, METH_VARARGS|METH_KEYWORDS, __pyx_doc_4tsne_13kl_divergence_4kl_divergence_approx_fft},
+  {"kl_divergence_exact", (PyCFunction)__pyx_pw_8fastTSNE_13kl_divergence_1kl_divergence_exact, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8fastTSNE_13kl_divergence_kl_divergence_exact},
+  {"kl_divergence_approx_bh", (PyCFunction)__pyx_pw_8fastTSNE_13kl_divergence_3kl_divergence_approx_bh, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8fastTSNE_13kl_divergence_2kl_divergence_approx_bh},
+  {"kl_divergence_approx_fft", (PyCFunction)__pyx_pw_8fastTSNE_13kl_divergence_5kl_divergence_approx_fft, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8fastTSNE_13kl_divergence_4kl_divergence_approx_fft},
   {0, 0, 0, 0}
 };
 
@@ -21523,8 +21523,8 @@ static int __Pyx_modinit_type_import_code(void) {
   __pyx_ptype_5numpy_broadcast = __Pyx_ImportType("numpy", "broadcast", sizeof(PyArrayMultiIterObject), 0); if (unlikely(!__pyx_ptype_5numpy_broadcast)) __PYX_ERR(1, 190, __pyx_L1_error)
   __pyx_ptype_5numpy_ndarray = __Pyx_ImportType("numpy", "ndarray", sizeof(PyArrayObject), 0); if (unlikely(!__pyx_ptype_5numpy_ndarray)) __PYX_ERR(1, 199, __pyx_L1_error)
   __pyx_ptype_5numpy_ufunc = __Pyx_ImportType("numpy", "ufunc", sizeof(PyUFuncObject), 0); if (unlikely(!__pyx_ptype_5numpy_ufunc)) __PYX_ERR(1, 872, __pyx_L1_error)
-  __pyx_ptype_4tsne_9quad_tree_QuadTree = __Pyx_ImportType("tsne.quad_tree", "QuadTree", sizeof(struct __pyx_obj_4tsne_9quad_tree_QuadTree), 1); if (unlikely(!__pyx_ptype_4tsne_9quad_tree_QuadTree)) __PYX_ERR(4, 24, __pyx_L1_error)
-  __pyx_vtabptr_4tsne_9quad_tree_QuadTree = (struct __pyx_vtabstruct_4tsne_9quad_tree_QuadTree*)__Pyx_GetVtable(__pyx_ptype_4tsne_9quad_tree_QuadTree->tp_dict); if (unlikely(!__pyx_vtabptr_4tsne_9quad_tree_QuadTree)) __PYX_ERR(4, 24, __pyx_L1_error)
+  __pyx_ptype_8fastTSNE_9quad_tree_QuadTree = __Pyx_ImportType("fastTSNE.quad_tree", "QuadTree", sizeof(struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree), 1); if (unlikely(!__pyx_ptype_8fastTSNE_9quad_tree_QuadTree)) __PYX_ERR(4, 24, __pyx_L1_error)
+  __pyx_vtabptr_8fastTSNE_9quad_tree_QuadTree = (struct __pyx_vtabstruct_8fastTSNE_9quad_tree_QuadTree*)__Pyx_GetVtable(__pyx_ptype_8fastTSNE_9quad_tree_QuadTree->tp_dict); if (unlikely(!__pyx_vtabptr_8fastTSNE_9quad_tree_QuadTree)) __PYX_ERR(4, 24, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -21537,8 +21537,8 @@ static int __Pyx_modinit_variable_import_code(void) {
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__Pyx_modinit_variable_import_code", 0);
   /*--- Variable import code ---*/
-  __pyx_t_1 = __Pyx_ImportModule("tsne.quad_tree"); if (!__pyx_t_1) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_1, "EPSILON", (void **)&__pyx_vp_4tsne_9quad_tree_EPSILON, "double") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportModule("fastTSNE.quad_tree"); if (!__pyx_t_1) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "EPSILON", (void **)&__pyx_vp_8fastTSNE_9quad_tree_EPSILON, "double") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_RefNannyFinishContext();
   return 0;
@@ -21553,10 +21553,10 @@ static int __Pyx_modinit_function_import_code(void) {
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__Pyx_modinit_function_import_code", 0);
   /*--- Function import code ---*/
-  __pyx_t_1 = __Pyx_ImportModule("tsne._tsne"); if (!__pyx_t_1) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportFunction(__pyx_t_1, "estimate_negative_gradient_bh", (void (**)(void))&__pyx_f_4tsne_5_tsne_estimate_negative_gradient_bh, "double (struct __pyx_obj_4tsne_9quad_tree_QuadTree *, __Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch, struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_bh *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportFunction(__pyx_t_1, "estimate_negative_gradient_fft_1d", (void (**)(void))&__pyx_f_4tsne_5_tsne_estimate_negative_gradient_fft_1d, "double (__Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch, struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_fft_1d *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportFunction(__pyx_t_1, "estimate_negative_gradient_fft_2d", (void (**)(void))&__pyx_f_4tsne_5_tsne_estimate_negative_gradient_fft_2d, "double (__Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch, struct __pyx_opt_args_4tsne_5_tsne_estimate_negative_gradient_fft_2d *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportModule("fastTSNE._tsne"); if (!__pyx_t_1) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_1, "estimate_negative_gradient_bh", (void (**)(void))&__pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_bh, "double (struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *, __Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch, struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_bh *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_1, "estimate_negative_gradient_fft_1d", (void (**)(void))&__pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d, "double (__Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch, struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_1, "estimate_negative_gradient_fft_2d", (void (**)(void))&__pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d, "double (__Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch, struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_RefNannyFinishContext();
   return 0;
@@ -21716,14 +21716,14 @@ if (!__Pyx_RefNanny) {
   #if PY_MAJOR_VERSION < 3 && (__PYX_DEFAULT_STRING_ENCODING_IS_ASCII || __PYX_DEFAULT_STRING_ENCODING_IS_DEFAULT)
   if (__Pyx_init_sys_getdefaultencoding_params() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
-  if (__pyx_module_is_main_tsne__kl_divergence) {
+  if (__pyx_module_is_main_fastTSNE__kl_divergence) {
     if (PyObject_SetAttrString(__pyx_m, "__name__", __pyx_n_s_main) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   }
   #if PY_MAJOR_VERSION >= 3
   {
     PyObject *modules = PyImport_GetModuleDict(); if (unlikely(!modules)) __PYX_ERR(0, 1, __pyx_L1_error)
-    if (!PyDict_GetItemString(modules, "tsne.kl_divergence")) {
-      if (unlikely(PyDict_SetItemString(modules, "tsne.kl_divergence", __pyx_m) < 0)) __PYX_ERR(0, 1, __pyx_L1_error)
+    if (!PyDict_GetItemString(modules, "fastTSNE.kl_divergence")) {
+      if (unlikely(PyDict_SetItemString(modules, "fastTSNE.kl_divergence", __pyx_m) < 0)) __PYX_ERR(0, 1, __pyx_L1_error)
     }
   }
   #endif
@@ -21745,7 +21745,7 @@ if (!__Pyx_RefNanny) {
   #endif
   __Pyx_TraceCall("__Pyx_PyMODINIT_FUNC PyInit_kl_divergence(void)", __pyx_f[0], 1, 0, __PYX_ERR(0, 1, __pyx_L1_error));
 
-  /* "tsne/kl_divergence.pyx":8
+  /* "fastTSNE/kl_divergence.pyx":8
  * # cython: warn.undeclared=True
  * cimport numpy as np
  * import numpy as np             # <<<<<<<<<<<<<<
@@ -21757,7 +21757,7 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) __PYX_ERR(0, 8, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "tsne/kl_divergence.pyx":16
+  /* "fastTSNE/kl_divergence.pyx":16
  * )
  * # This returns a tuple, and can't be called from C
  * from ._tsne import estimate_positive_gradient_nn             # <<<<<<<<<<<<<<
@@ -21778,7 +21778,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "tsne/kl_divergence.pyx":19
+  /* "fastTSNE/kl_divergence.pyx":19
  * 
  * 
  * cdef double EPSILON = np.finfo(np.float64).eps             # <<<<<<<<<<<<<<
@@ -21804,9 +21804,9 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_4 = __pyx_PyFloat_AsDouble(__pyx_t_3); if (unlikely((__pyx_t_4 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 19, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_v_4tsne_13kl_divergence_EPSILON = __pyx_t_4;
+  __pyx_v_8fastTSNE_13kl_divergence_EPSILON = __pyx_t_4;
 
-  /* "tsne/kl_divergence.pyx":1
+  /* "fastTSNE/kl_divergence.pyx":1
  * # cython: profile=True             # <<<<<<<<<<<<<<
  * # cython: boundscheck=False
  * # cython: wraparound=False
@@ -21979,11 +21979,11 @@ if (!__Pyx_RefNanny) {
   __Pyx_XDECREF(__pyx_t_3);
   if (__pyx_m) {
     if (__pyx_d) {
-      __Pyx_AddTraceback("init tsne.kl_divergence", 0, __pyx_lineno, __pyx_filename);
+      __Pyx_AddTraceback("init fastTSNE.kl_divergence", 0, __pyx_lineno, __pyx_filename);
     }
     Py_DECREF(__pyx_m); __pyx_m = 0;
   } else if (!PyErr_Occurred()) {
-    PyErr_SetString(PyExc_ImportError, "init tsne.kl_divergence");
+    PyErr_SetString(PyExc_ImportError, "init fastTSNE.kl_divergence");
   }
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();

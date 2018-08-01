@@ -15,12 +15,12 @@
         "include_dirs": [
             "/usr/lib/python3.6/site-packages/numpy/core/include"
         ],
-        "name": "tsne.quad_tree",
+        "name": "fastTSNE.quad_tree",
         "sources": [
-            "tsne/quad_tree.pyx"
+            "fastTSNE/quad_tree.pyx"
         ]
     },
-    "module_name": "tsne.quad_tree"
+    "module_name": "fastTSNE.quad_tree"
 }
 END: Cython Metadata */
 
@@ -583,8 +583,8 @@ static CYTHON_INLINE float __PYX_NAN() {
   #endif
 #endif
 
-#define __PYX_HAVE__tsne__quad_tree
-#define __PYX_HAVE_API__tsne__quad_tree
+#define __PYX_HAVE__fastTSNE__quad_tree
+#define __PYX_HAVE_API__fastTSNE__quad_tree
 /* Early includes */
 #include "math.h"
 #include "pythread.h"
@@ -795,7 +795,7 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "tsne/quad_tree.pyx",
+  "fastTSNE/quad_tree.pyx",
   "stringsource",
 };
 /* MemviewSliceStruct.proto */
@@ -908,55 +908,55 @@ typedef struct {
 
 
 /*--- Type declarations ---*/
-struct __pyx_obj_4tsne_9quad_tree_QuadTree;
+struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree;
 struct __pyx_array_obj;
 struct __pyx_MemviewEnum_obj;
 struct __pyx_memoryview_obj;
 struct __pyx_memoryviewslice_obj;
-struct __pyx_t_4tsne_9quad_tree_Node;
-typedef struct __pyx_t_4tsne_9quad_tree_Node __pyx_t_4tsne_9quad_tree_Node;
-struct __pyx_opt_args_4tsne_9quad_tree_is_duplicate;
+struct __pyx_t_8fastTSNE_9quad_tree_Node;
+typedef struct __pyx_t_8fastTSNE_9quad_tree_Node __pyx_t_8fastTSNE_9quad_tree_Node;
+struct __pyx_opt_args_8fastTSNE_9quad_tree_is_duplicate;
 
-/* "tsne/quad_tree.pxd":9
+/* "fastTSNE/quad_tree.pxd":9
  * cdef double EPSILON = np.finfo(np.float64).eps
  * 
  * ctypedef struct Node:             # <<<<<<<<<<<<<<
  *     Py_ssize_t n_dims
  *     double *center
  */
-struct __pyx_t_4tsne_9quad_tree_Node {
+struct __pyx_t_8fastTSNE_9quad_tree_Node {
   Py_ssize_t n_dims;
   double *center;
   double length;
   int is_leaf;
-  __pyx_t_4tsne_9quad_tree_Node *children;
+  __pyx_t_8fastTSNE_9quad_tree_Node *children;
   double *center_of_mass;
   Py_ssize_t num_points;
 };
 
-/* "tsne/quad_tree.pxd":21
+/* "fastTSNE/quad_tree.pxd":21
  * 
  * 
  * cdef bint is_duplicate(Node * node, double * point, double duplicate_eps=*) nogil             # <<<<<<<<<<<<<<
  * 
  * 
  */
-struct __pyx_opt_args_4tsne_9quad_tree_is_duplicate {
+struct __pyx_opt_args_8fastTSNE_9quad_tree_is_duplicate {
   int __pyx_n;
   double duplicate_eps;
 };
 
-/* "tsne/quad_tree.pxd":24
+/* "fastTSNE/quad_tree.pxd":24
  * 
  * 
  * cdef class QuadTree:             # <<<<<<<<<<<<<<
  *     cdef Node root
  *     cpdef void add_points(self, double[:, ::1] points)
  */
-struct __pyx_obj_4tsne_9quad_tree_QuadTree {
+struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree {
   PyObject_HEAD
-  struct __pyx_vtabstruct_4tsne_9quad_tree_QuadTree *__pyx_vtab;
-  __pyx_t_4tsne_9quad_tree_Node root;
+  struct __pyx_vtabstruct_8fastTSNE_9quad_tree_QuadTree *__pyx_vtab;
+  __pyx_t_8fastTSNE_9quad_tree_Node root;
 };
 
 
@@ -1038,7 +1038,7 @@ struct __pyx_memoryviewslice_obj {
 
 
 
-/* "tsne/quad_tree.pyx":147
+/* "fastTSNE/quad_tree.pyx":147
  * 
  * 
  * cdef class QuadTree:             # <<<<<<<<<<<<<<
@@ -1046,11 +1046,11 @@ struct __pyx_memoryviewslice_obj {
  *         cdef:
  */
 
-struct __pyx_vtabstruct_4tsne_9quad_tree_QuadTree {
-  void (*add_points)(struct __pyx_obj_4tsne_9quad_tree_QuadTree *, __Pyx_memviewslice, int __pyx_skip_dispatch);
-  void (*add_point)(struct __pyx_obj_4tsne_9quad_tree_QuadTree *, __Pyx_memviewslice, int __pyx_skip_dispatch);
+struct __pyx_vtabstruct_8fastTSNE_9quad_tree_QuadTree {
+  void (*add_points)(struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *, __Pyx_memviewslice, int __pyx_skip_dispatch);
+  void (*add_point)(struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *, __Pyx_memviewslice, int __pyx_skip_dispatch);
 };
-static struct __pyx_vtabstruct_4tsne_9quad_tree_QuadTree *__pyx_vtabptr_4tsne_9quad_tree_QuadTree;
+static struct __pyx_vtabstruct_8fastTSNE_9quad_tree_QuadTree *__pyx_vtabptr_8fastTSNE_9quad_tree_QuadTree;
 
 
 /* "View.MemoryView":104
@@ -1864,8 +1864,8 @@ static int __Pyx_ExportFunction(const char *name, void (*f)(void), const char *s
 /* InitStrings.proto */
 static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
-static void __pyx_f_4tsne_9quad_tree_8QuadTree_add_points(struct __pyx_obj_4tsne_9quad_tree_QuadTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_points, int __pyx_skip_dispatch); /* proto*/
-static void __pyx_f_4tsne_9quad_tree_8QuadTree_add_point(struct __pyx_obj_4tsne_9quad_tree_QuadTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_point, int __pyx_skip_dispatch); /* proto*/
+static void __pyx_f_8fastTSNE_9quad_tree_8QuadTree_add_points(struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_points, int __pyx_skip_dispatch); /* proto*/
+static void __pyx_f_8fastTSNE_9quad_tree_8QuadTree_add_point(struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_point, int __pyx_skip_dispatch); /* proto*/
 static PyObject *__pyx_array_get_memview(struct __pyx_array_obj *__pyx_v_self); /* proto*/
 static char *__pyx_memoryview_get_item_pointer(struct __pyx_memoryview_obj *__pyx_v_self, PyObject *__pyx_v_index); /* proto*/
 static PyObject *__pyx_memoryview_is_slice(struct __pyx_memoryview_obj *__pyx_v_self, PyObject *__pyx_v_obj); /* proto*/
@@ -1879,13 +1879,13 @@ static PyObject *__pyx_memoryviewslice_assign_item_from_object(struct __pyx_memo
 
 /* Module declarations from 'cpython.mem' */
 
-/* Module declarations from 'tsne.quad_tree' */
-static PyTypeObject *__pyx_ptype_4tsne_9quad_tree_QuadTree = 0;
+/* Module declarations from 'fastTSNE.quad_tree' */
+static PyTypeObject *__pyx_ptype_8fastTSNE_9quad_tree_QuadTree = 0;
 static PyTypeObject *__pyx_array_type = 0;
 static PyTypeObject *__pyx_MemviewEnum_type = 0;
 static PyTypeObject *__pyx_memoryview_type = 0;
 static PyTypeObject *__pyx_memoryviewslice_type = 0;
-static double __pyx_v_4tsne_9quad_tree_EPSILON;
+static double __pyx_v_8fastTSNE_9quad_tree_EPSILON;
 static PyObject *generic = 0;
 static PyObject *strided = 0;
 static PyObject *indirect = 0;
@@ -1893,13 +1893,13 @@ static PyObject *contiguous = 0;
 static PyObject *indirect_contiguous = 0;
 static int __pyx_memoryview_thread_locks_used;
 static PyThread_type_lock __pyx_memoryview_thread_locks[8];
-static CYTHON_INLINE int __pyx_f_4tsne_9quad_tree_is_duplicate(__pyx_t_4tsne_9quad_tree_Node *, double *, struct __pyx_opt_args_4tsne_9quad_tree_is_duplicate *__pyx_optional_args); /*proto*/
-static void __pyx_f_4tsne_9quad_tree_init_node(__pyx_t_4tsne_9quad_tree_Node *, Py_ssize_t, double *, double); /*proto*/
-static Py_ssize_t __pyx_f_4tsne_9quad_tree_get_child_idx_for(__pyx_t_4tsne_9quad_tree_Node *, double *); /*proto*/
-static CYTHON_INLINE void __pyx_f_4tsne_9quad_tree_update_center_of_mass(__pyx_t_4tsne_9quad_tree_Node *, double *); /*proto*/
-static void __pyx_f_4tsne_9quad_tree_add_point_to(__pyx_t_4tsne_9quad_tree_Node *, double *); /*proto*/
-static void __pyx_f_4tsne_9quad_tree_split_node(__pyx_t_4tsne_9quad_tree_Node *); /*proto*/
-static void __pyx_f_4tsne_9quad_tree_delete_node(__pyx_t_4tsne_9quad_tree_Node *); /*proto*/
+static CYTHON_INLINE int __pyx_f_8fastTSNE_9quad_tree_is_duplicate(__pyx_t_8fastTSNE_9quad_tree_Node *, double *, struct __pyx_opt_args_8fastTSNE_9quad_tree_is_duplicate *__pyx_optional_args); /*proto*/
+static void __pyx_f_8fastTSNE_9quad_tree_init_node(__pyx_t_8fastTSNE_9quad_tree_Node *, Py_ssize_t, double *, double); /*proto*/
+static Py_ssize_t __pyx_f_8fastTSNE_9quad_tree_get_child_idx_for(__pyx_t_8fastTSNE_9quad_tree_Node *, double *); /*proto*/
+static CYTHON_INLINE void __pyx_f_8fastTSNE_9quad_tree_update_center_of_mass(__pyx_t_8fastTSNE_9quad_tree_Node *, double *); /*proto*/
+static void __pyx_f_8fastTSNE_9quad_tree_add_point_to(__pyx_t_8fastTSNE_9quad_tree_Node *, double *); /*proto*/
+static void __pyx_f_8fastTSNE_9quad_tree_split_node(__pyx_t_8fastTSNE_9quad_tree_Node *); /*proto*/
+static void __pyx_f_8fastTSNE_9quad_tree_delete_node(__pyx_t_8fastTSNE_9quad_tree_Node *); /*proto*/
 static struct __pyx_array_obj *__pyx_array_new(PyObject *, Py_ssize_t, char *, char *, char *); /*proto*/
 static void *__pyx_align_pointer(void *, size_t); /*proto*/
 static PyObject *__pyx_memoryview_new(PyObject *, int, int, __Pyx_TypeInfo *); /*proto*/
@@ -1934,11 +1934,11 @@ static void __pyx_memoryview_slice_assign_scalar(__Pyx_memviewslice *, int, size
 static void __pyx_memoryview__slice_assign_scalar(char *, Py_ssize_t *, Py_ssize_t *, int, size_t, void *); /*proto*/
 static PyObject *__pyx_unpickle_Enum__set_state(struct __pyx_MemviewEnum_obj *, PyObject *); /*proto*/
 static __Pyx_TypeInfo __Pyx_TypeInfo_double = { "double", NULL, sizeof(double), { 0 }, 0, 'R', 0, 0 };
-#define __Pyx_MODULE_NAME "tsne.quad_tree"
-extern int __pyx_module_is_main_tsne__quad_tree;
-int __pyx_module_is_main_tsne__quad_tree = 0;
+#define __Pyx_MODULE_NAME "fastTSNE.quad_tree"
+extern int __pyx_module_is_main_fastTSNE__quad_tree;
+int __pyx_module_is_main_fastTSNE__quad_tree = 0;
 
-/* Implementation of 'tsne.quad_tree' */
+/* Implementation of 'fastTSNE.quad_tree' */
 static PyObject *__pyx_builtin_MemoryError;
 static PyObject *__pyx_builtin_range;
 static PyObject *__pyx_builtin_TypeError;
@@ -2142,12 +2142,12 @@ static PyObject *__pyx_kp_s_unable_to_allocate_shape_and_str;
 static PyObject *__pyx_n_s_unpack;
 static PyObject *__pyx_n_s_update;
 static PyObject *__pyx_n_s_zeros;
-static int __pyx_pf_4tsne_9quad_tree_8QuadTree___init__(struct __pyx_obj_4tsne_9quad_tree_QuadTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_data); /* proto */
-static PyObject *__pyx_pf_4tsne_9quad_tree_8QuadTree_2add_points(struct __pyx_obj_4tsne_9quad_tree_QuadTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_points); /* proto */
-static PyObject *__pyx_pf_4tsne_9quad_tree_8QuadTree_4add_point(struct __pyx_obj_4tsne_9quad_tree_QuadTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_point); /* proto */
-static void __pyx_pf_4tsne_9quad_tree_8QuadTree_6__dealloc__(struct __pyx_obj_4tsne_9quad_tree_QuadTree *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_4tsne_9quad_tree_8QuadTree_8__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_4tsne_9quad_tree_QuadTree *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_4tsne_9quad_tree_8QuadTree_10__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_4tsne_9quad_tree_QuadTree *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
+static int __pyx_pf_8fastTSNE_9quad_tree_8QuadTree___init__(struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_data); /* proto */
+static PyObject *__pyx_pf_8fastTSNE_9quad_tree_8QuadTree_2add_points(struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_points); /* proto */
+static PyObject *__pyx_pf_8fastTSNE_9quad_tree_8QuadTree_4add_point(struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_point); /* proto */
+static void __pyx_pf_8fastTSNE_9quad_tree_8QuadTree_6__dealloc__(struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8fastTSNE_9quad_tree_8QuadTree_8__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8fastTSNE_9quad_tree_8QuadTree_10__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(struct __pyx_array_obj *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_array___pyx_pf_15View_dot_MemoryView_5array_4__dealloc__(struct __pyx_array_obj *__pyx_v_self); /* proto */
@@ -2190,7 +2190,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_16_memoryviewslice_4base___get__
 static PyObject *__pyx_pf___pyx_memoryviewslice___reduce_cython__(CYTHON_UNUSED struct __pyx_memoryviewslice_obj *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf___pyx_memoryviewslice_2__setstate_cython__(CYTHON_UNUSED struct __pyx_memoryviewslice_obj *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
 static PyObject *__pyx_pf_15View_dot_MemoryView___pyx_unpickle_Enum(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v___pyx_type, long __pyx_v___pyx_checksum, PyObject *__pyx_v___pyx_state); /* proto */
-static PyObject *__pyx_tp_new_4tsne_9quad_tree_QuadTree(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
+static PyObject *__pyx_tp_new_8fastTSNE_9quad_tree_QuadTree(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_array(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_Enum(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_memoryview(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
@@ -2231,7 +2231,7 @@ static PyObject *__pyx_tuple__30;
 static PyObject *__pyx_codeobj__24;
 /* Late includes */
 
-/* "tsne/quad_tree.pyx":44
+/* "fastTSNE/quad_tree.pyx":44
  * 
  * 
  * cdef void init_node(Node * node, Py_ssize_t n_dim, double * center, double length):             # <<<<<<<<<<<<<<
@@ -2239,7 +2239,7 @@ static PyObject *__pyx_codeobj__24;
  *     node.center = <double *>PyMem_Malloc(node.n_dims * sizeof(double))
  */
 
-static void __pyx_f_4tsne_9quad_tree_init_node(__pyx_t_4tsne_9quad_tree_Node *__pyx_v_node, Py_ssize_t __pyx_v_n_dim, double *__pyx_v_center, double __pyx_v_length) {
+static void __pyx_f_8fastTSNE_9quad_tree_init_node(__pyx_t_8fastTSNE_9quad_tree_Node *__pyx_v_node, Py_ssize_t __pyx_v_n_dim, double *__pyx_v_center, double __pyx_v_length) {
   Py_ssize_t __pyx_v_i;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -2251,7 +2251,7 @@ static void __pyx_f_4tsne_9quad_tree_init_node(__pyx_t_4tsne_9quad_tree_Node *__
   __Pyx_RefNannySetupContext("init_node", 0);
   __Pyx_TraceCall("init_node", __pyx_f[0], 44, 0, __PYX_ERR(0, 44, __pyx_L1_error));
 
-  /* "tsne/quad_tree.pyx":45
+  /* "fastTSNE/quad_tree.pyx":45
  * 
  * cdef void init_node(Node * node, Py_ssize_t n_dim, double * center, double length):
  *     node.n_dims = n_dim             # <<<<<<<<<<<<<<
@@ -2260,7 +2260,7 @@ static void __pyx_f_4tsne_9quad_tree_init_node(__pyx_t_4tsne_9quad_tree_Node *__
  */
   __pyx_v_node->n_dims = __pyx_v_n_dim;
 
-  /* "tsne/quad_tree.pyx":46
+  /* "fastTSNE/quad_tree.pyx":46
  * cdef void init_node(Node * node, Py_ssize_t n_dim, double * center, double length):
  *     node.n_dims = n_dim
  *     node.center = <double *>PyMem_Malloc(node.n_dims * sizeof(double))             # <<<<<<<<<<<<<<
@@ -2269,7 +2269,7 @@ static void __pyx_f_4tsne_9quad_tree_init_node(__pyx_t_4tsne_9quad_tree_Node *__
  */
   __pyx_v_node->center = ((double *)PyMem_Malloc((__pyx_v_node->n_dims * (sizeof(double)))));
 
-  /* "tsne/quad_tree.pyx":47
+  /* "fastTSNE/quad_tree.pyx":47
  *     node.n_dims = n_dim
  *     node.center = <double *>PyMem_Malloc(node.n_dims * sizeof(double))
  *     node.center_of_mass = <double *>PyMem_Malloc(node.n_dims * sizeof(double))             # <<<<<<<<<<<<<<
@@ -2278,7 +2278,7 @@ static void __pyx_f_4tsne_9quad_tree_init_node(__pyx_t_4tsne_9quad_tree_Node *__
  */
   __pyx_v_node->center_of_mass = ((double *)PyMem_Malloc((__pyx_v_node->n_dims * (sizeof(double)))));
 
-  /* "tsne/quad_tree.pyx":48
+  /* "fastTSNE/quad_tree.pyx":48
  *     node.center = <double *>PyMem_Malloc(node.n_dims * sizeof(double))
  *     node.center_of_mass = <double *>PyMem_Malloc(node.n_dims * sizeof(double))
  *     if not node.center or not node.center_of_mass:             # <<<<<<<<<<<<<<
@@ -2296,7 +2296,7 @@ static void __pyx_f_4tsne_9quad_tree_init_node(__pyx_t_4tsne_9quad_tree_Node *__
   __pyx_L4_bool_binop_done:;
   if (unlikely(__pyx_t_1)) {
 
-    /* "tsne/quad_tree.pyx":49
+    /* "fastTSNE/quad_tree.pyx":49
  *     node.center_of_mass = <double *>PyMem_Malloc(node.n_dims * sizeof(double))
  *     if not node.center or not node.center_of_mass:
  *         raise MemoryError()             # <<<<<<<<<<<<<<
@@ -2305,7 +2305,7 @@ static void __pyx_f_4tsne_9quad_tree_init_node(__pyx_t_4tsne_9quad_tree_Node *__
  */
     PyErr_NoMemory(); __PYX_ERR(0, 49, __pyx_L1_error)
 
-    /* "tsne/quad_tree.pyx":48
+    /* "fastTSNE/quad_tree.pyx":48
  *     node.center = <double *>PyMem_Malloc(node.n_dims * sizeof(double))
  *     node.center_of_mass = <double *>PyMem_Malloc(node.n_dims * sizeof(double))
  *     if not node.center or not node.center_of_mass:             # <<<<<<<<<<<<<<
@@ -2314,7 +2314,7 @@ static void __pyx_f_4tsne_9quad_tree_init_node(__pyx_t_4tsne_9quad_tree_Node *__
  */
   }
 
-  /* "tsne/quad_tree.pyx":52
+  /* "fastTSNE/quad_tree.pyx":52
  * 
  *     cdef Py_ssize_t i
  *     for i in range(node.n_dims):             # <<<<<<<<<<<<<<
@@ -2326,7 +2326,7 @@ static void __pyx_f_4tsne_9quad_tree_init_node(__pyx_t_4tsne_9quad_tree_Node *__
   for (__pyx_t_5 = 0; __pyx_t_5 < __pyx_t_4; __pyx_t_5+=1) {
     __pyx_v_i = __pyx_t_5;
 
-    /* "tsne/quad_tree.pyx":53
+    /* "fastTSNE/quad_tree.pyx":53
  *     cdef Py_ssize_t i
  *     for i in range(node.n_dims):
  *         node.center[i] = center[i]             # <<<<<<<<<<<<<<
@@ -2335,7 +2335,7 @@ static void __pyx_f_4tsne_9quad_tree_init_node(__pyx_t_4tsne_9quad_tree_Node *__
  */
     (__pyx_v_node->center[__pyx_v_i]) = (__pyx_v_center[__pyx_v_i]);
 
-    /* "tsne/quad_tree.pyx":54
+    /* "fastTSNE/quad_tree.pyx":54
  *     for i in range(node.n_dims):
  *         node.center[i] = center[i]
  *         node.center_of_mass[i] = 0             # <<<<<<<<<<<<<<
@@ -2345,7 +2345,7 @@ static void __pyx_f_4tsne_9quad_tree_init_node(__pyx_t_4tsne_9quad_tree_Node *__
     (__pyx_v_node->center_of_mass[__pyx_v_i]) = 0.0;
   }
 
-  /* "tsne/quad_tree.pyx":56
+  /* "fastTSNE/quad_tree.pyx":56
  *         node.center_of_mass[i] = 0
  * 
  *     node.length = length             # <<<<<<<<<<<<<<
@@ -2354,7 +2354,7 @@ static void __pyx_f_4tsne_9quad_tree_init_node(__pyx_t_4tsne_9quad_tree_Node *__
  */
   __pyx_v_node->length = __pyx_v_length;
 
-  /* "tsne/quad_tree.pyx":58
+  /* "fastTSNE/quad_tree.pyx":58
  *     node.length = length
  * 
  *     node.is_leaf = True             # <<<<<<<<<<<<<<
@@ -2363,7 +2363,7 @@ static void __pyx_f_4tsne_9quad_tree_init_node(__pyx_t_4tsne_9quad_tree_Node *__
  */
   __pyx_v_node->is_leaf = 1;
 
-  /* "tsne/quad_tree.pyx":59
+  /* "fastTSNE/quad_tree.pyx":59
  * 
  *     node.is_leaf = True
  *     node.num_points = 0             # <<<<<<<<<<<<<<
@@ -2372,7 +2372,7 @@ static void __pyx_f_4tsne_9quad_tree_init_node(__pyx_t_4tsne_9quad_tree_Node *__
  */
   __pyx_v_node->num_points = 0;
 
-  /* "tsne/quad_tree.pyx":44
+  /* "fastTSNE/quad_tree.pyx":44
  * 
  * 
  * cdef void init_node(Node * node, Py_ssize_t n_dim, double * center, double length):             # <<<<<<<<<<<<<<
@@ -2383,13 +2383,13 @@ static void __pyx_f_4tsne_9quad_tree_init_node(__pyx_t_4tsne_9quad_tree_Node *__
   /* function exit code */
   goto __pyx_L0;
   __pyx_L1_error:;
-  __Pyx_WriteUnraisable("tsne.quad_tree.init_node", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __Pyx_WriteUnraisable("fastTSNE.quad_tree.init_node", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
   __pyx_L0:;
   __Pyx_TraceReturn(Py_None, 0);
   __Pyx_RefNannyFinishContext();
 }
 
-/* "tsne/quad_tree.pyx":62
+/* "fastTSNE/quad_tree.pyx":62
  * 
  * 
  * cdef Py_ssize_t get_child_idx_for(Node * node, double * point) nogil:             # <<<<<<<<<<<<<<
@@ -2397,7 +2397,7 @@ static void __pyx_f_4tsne_9quad_tree_init_node(__pyx_t_4tsne_9quad_tree_Node *__
  * 
  */
 
-static Py_ssize_t __pyx_f_4tsne_9quad_tree_get_child_idx_for(__pyx_t_4tsne_9quad_tree_Node *__pyx_v_node, double *__pyx_v_point) {
+static Py_ssize_t __pyx_f_8fastTSNE_9quad_tree_get_child_idx_for(__pyx_t_8fastTSNE_9quad_tree_Node *__pyx_v_node, double *__pyx_v_point) {
   Py_ssize_t __pyx_v_idx;
   Py_ssize_t __pyx_v_d;
   Py_ssize_t __pyx_r;
@@ -2407,7 +2407,7 @@ static Py_ssize_t __pyx_f_4tsne_9quad_tree_get_child_idx_for(__pyx_t_4tsne_9quad
   Py_ssize_t __pyx_t_3;
   __Pyx_TraceCall("get_child_idx_for", __pyx_f[0], 62, 1, __PYX_ERR(0, 62, __pyx_L1_error));
 
-  /* "tsne/quad_tree.pyx":63
+  /* "fastTSNE/quad_tree.pyx":63
  * 
  * cdef Py_ssize_t get_child_idx_for(Node * node, double * point) nogil:
  *     cdef Py_ssize_t idx = 0, d             # <<<<<<<<<<<<<<
@@ -2416,7 +2416,7 @@ static Py_ssize_t __pyx_f_4tsne_9quad_tree_get_child_idx_for(__pyx_t_4tsne_9quad
  */
   __pyx_v_idx = 0;
 
-  /* "tsne/quad_tree.pyx":65
+  /* "fastTSNE/quad_tree.pyx":65
  *     cdef Py_ssize_t idx = 0, d
  * 
  *     for d in range(node.n_dims):             # <<<<<<<<<<<<<<
@@ -2428,7 +2428,7 @@ static Py_ssize_t __pyx_f_4tsne_9quad_tree_get_child_idx_for(__pyx_t_4tsne_9quad
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_d = __pyx_t_3;
 
-    /* "tsne/quad_tree.pyx":66
+    /* "fastTSNE/quad_tree.pyx":66
  * 
  *     for d in range(node.n_dims):
  *         idx |= (point[d] > node.center[d]) << d             # <<<<<<<<<<<<<<
@@ -2438,7 +2438,7 @@ static Py_ssize_t __pyx_f_4tsne_9quad_tree_get_child_idx_for(__pyx_t_4tsne_9quad
     __pyx_v_idx = (__pyx_v_idx | (((__pyx_v_point[__pyx_v_d]) > (__pyx_v_node->center[__pyx_v_d])) << __pyx_v_d));
   }
 
-  /* "tsne/quad_tree.pyx":68
+  /* "fastTSNE/quad_tree.pyx":68
  *         idx |= (point[d] > node.center[d]) << d
  * 
  *     return idx             # <<<<<<<<<<<<<<
@@ -2448,7 +2448,7 @@ static Py_ssize_t __pyx_f_4tsne_9quad_tree_get_child_idx_for(__pyx_t_4tsne_9quad
   __pyx_r = __pyx_v_idx;
   goto __pyx_L0;
 
-  /* "tsne/quad_tree.pyx":62
+  /* "fastTSNE/quad_tree.pyx":62
  * 
  * 
  * cdef Py_ssize_t get_child_idx_for(Node * node, double * point) nogil:             # <<<<<<<<<<<<<<
@@ -2458,14 +2458,14 @@ static Py_ssize_t __pyx_f_4tsne_9quad_tree_get_child_idx_for(__pyx_t_4tsne_9quad
 
   /* function exit code */
   __pyx_L1_error:;
-  __Pyx_WriteUnraisable("tsne.quad_tree.get_child_idx_for", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 1);
+  __Pyx_WriteUnraisable("fastTSNE.quad_tree.get_child_idx_for", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 1);
   __pyx_r = 0;
   __pyx_L0:;
   __Pyx_TraceReturn(Py_None, 1);
   return __pyx_r;
 }
 
-/* "tsne/quad_tree.pyx":71
+/* "fastTSNE/quad_tree.pyx":71
  * 
  * 
  * cdef inline void update_center_of_mass(Node * node, double * point) nogil:             # <<<<<<<<<<<<<<
@@ -2473,7 +2473,7 @@ static Py_ssize_t __pyx_f_4tsne_9quad_tree_get_child_idx_for(__pyx_t_4tsne_9quad
  *     for d in range(node.n_dims):
  */
 
-static CYTHON_INLINE void __pyx_f_4tsne_9quad_tree_update_center_of_mass(__pyx_t_4tsne_9quad_tree_Node *__pyx_v_node, double *__pyx_v_point) {
+static CYTHON_INLINE void __pyx_f_8fastTSNE_9quad_tree_update_center_of_mass(__pyx_t_8fastTSNE_9quad_tree_Node *__pyx_v_node, double *__pyx_v_point) {
   Py_ssize_t __pyx_v_d;
   __Pyx_TraceDeclarations
   Py_ssize_t __pyx_t_1;
@@ -2481,7 +2481,7 @@ static CYTHON_INLINE void __pyx_f_4tsne_9quad_tree_update_center_of_mass(__pyx_t
   Py_ssize_t __pyx_t_3;
   __Pyx_TraceCall("update_center_of_mass", __pyx_f[0], 71, 1, __PYX_ERR(0, 71, __pyx_L1_error));
 
-  /* "tsne/quad_tree.pyx":73
+  /* "fastTSNE/quad_tree.pyx":73
  * cdef inline void update_center_of_mass(Node * node, double * point) nogil:
  *     cdef Py_ssize_t d
  *     for d in range(node.n_dims):             # <<<<<<<<<<<<<<
@@ -2493,7 +2493,7 @@ static CYTHON_INLINE void __pyx_f_4tsne_9quad_tree_update_center_of_mass(__pyx_t
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_d = __pyx_t_3;
 
-    /* "tsne/quad_tree.pyx":74
+    /* "fastTSNE/quad_tree.pyx":74
  *     cdef Py_ssize_t d
  *     for d in range(node.n_dims):
  *         node.center_of_mass[d] = (node.center_of_mass[d] * node.num_points + point[d]) \             # <<<<<<<<<<<<<<
@@ -2503,7 +2503,7 @@ static CYTHON_INLINE void __pyx_f_4tsne_9quad_tree_update_center_of_mass(__pyx_t
     (__pyx_v_node->center_of_mass[__pyx_v_d]) = ((((__pyx_v_node->center_of_mass[__pyx_v_d]) * __pyx_v_node->num_points) + (__pyx_v_point[__pyx_v_d])) / (__pyx_v_node->num_points + 1));
   }
 
-  /* "tsne/quad_tree.pyx":76
+  /* "fastTSNE/quad_tree.pyx":76
  *         node.center_of_mass[d] = (node.center_of_mass[d] * node.num_points + point[d]) \
  *             / (node.num_points + 1)
  *     node.num_points += 1             # <<<<<<<<<<<<<<
@@ -2512,7 +2512,7 @@ static CYTHON_INLINE void __pyx_f_4tsne_9quad_tree_update_center_of_mass(__pyx_t
  */
   __pyx_v_node->num_points = (__pyx_v_node->num_points + 1);
 
-  /* "tsne/quad_tree.pyx":71
+  /* "fastTSNE/quad_tree.pyx":71
  * 
  * 
  * cdef inline void update_center_of_mass(Node * node, double * point) nogil:             # <<<<<<<<<<<<<<
@@ -2523,12 +2523,12 @@ static CYTHON_INLINE void __pyx_f_4tsne_9quad_tree_update_center_of_mass(__pyx_t
   /* function exit code */
   goto __pyx_L0;
   __pyx_L1_error:;
-  __Pyx_WriteUnraisable("tsne.quad_tree.update_center_of_mass", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 1);
+  __Pyx_WriteUnraisable("fastTSNE.quad_tree.update_center_of_mass", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 1);
   __pyx_L0:;
   __Pyx_TraceReturn(Py_None, 1);
 }
 
-/* "tsne/quad_tree.pyx":79
+/* "fastTSNE/quad_tree.pyx":79
  * 
  * 
  * cdef void add_point_to(Node * node, double * point):             # <<<<<<<<<<<<<<
@@ -2536,7 +2536,7 @@ static CYTHON_INLINE void __pyx_f_4tsne_9quad_tree_update_center_of_mass(__pyx_t
  *     if node.is_leaf and node.num_points == 0 or is_duplicate(node, point):
  */
 
-static void __pyx_f_4tsne_9quad_tree_add_point_to(__pyx_t_4tsne_9quad_tree_Node *__pyx_v_node, double *__pyx_v_point) {
+static void __pyx_f_8fastTSNE_9quad_tree_add_point_to(__pyx_t_8fastTSNE_9quad_tree_Node *__pyx_v_node, double *__pyx_v_point) {
   Py_ssize_t __pyx_v_child_index;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -2545,7 +2545,7 @@ static void __pyx_f_4tsne_9quad_tree_add_point_to(__pyx_t_4tsne_9quad_tree_Node 
   __Pyx_RefNannySetupContext("add_point_to", 0);
   __Pyx_TraceCall("add_point_to", __pyx_f[0], 79, 0, __PYX_ERR(0, 79, __pyx_L1_error));
 
-  /* "tsne/quad_tree.pyx":81
+  /* "fastTSNE/quad_tree.pyx":81
  * cdef void add_point_to(Node * node, double * point):
  *     # If the node is a leaf node and empty, we're done
  *     if node.is_leaf and node.num_points == 0 or is_duplicate(node, point):             # <<<<<<<<<<<<<<
@@ -2564,21 +2564,21 @@ static void __pyx_f_4tsne_9quad_tree_add_point_to(__pyx_t_4tsne_9quad_tree_Node 
     goto __pyx_L4_bool_binop_done;
   }
   __pyx_L5_next_or:;
-  __pyx_t_2 = (__pyx_f_4tsne_9quad_tree_is_duplicate(__pyx_v_node, __pyx_v_point, NULL) != 0);
+  __pyx_t_2 = (__pyx_f_8fastTSNE_9quad_tree_is_duplicate(__pyx_v_node, __pyx_v_point, NULL) != 0);
   __pyx_t_1 = __pyx_t_2;
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "tsne/quad_tree.pyx":82
+    /* "fastTSNE/quad_tree.pyx":82
  *     # If the node is a leaf node and empty, we're done
  *     if node.is_leaf and node.num_points == 0 or is_duplicate(node, point):
  *         update_center_of_mass(node, point)             # <<<<<<<<<<<<<<
  *         return
  * 
  */
-    __pyx_f_4tsne_9quad_tree_update_center_of_mass(__pyx_v_node, __pyx_v_point);
+    __pyx_f_8fastTSNE_9quad_tree_update_center_of_mass(__pyx_v_node, __pyx_v_point);
 
-    /* "tsne/quad_tree.pyx":83
+    /* "fastTSNE/quad_tree.pyx":83
  *     if node.is_leaf and node.num_points == 0 or is_duplicate(node, point):
  *         update_center_of_mass(node, point)
  *         return             # <<<<<<<<<<<<<<
@@ -2587,7 +2587,7 @@ static void __pyx_f_4tsne_9quad_tree_add_point_to(__pyx_t_4tsne_9quad_tree_Node 
  */
     goto __pyx_L0;
 
-    /* "tsne/quad_tree.pyx":81
+    /* "fastTSNE/quad_tree.pyx":81
  * cdef void add_point_to(Node * node, double * point):
  *     # If the node is a leaf node and empty, we're done
  *     if node.is_leaf and node.num_points == 0 or is_duplicate(node, point):             # <<<<<<<<<<<<<<
@@ -2596,7 +2596,7 @@ static void __pyx_f_4tsne_9quad_tree_add_point_to(__pyx_t_4tsne_9quad_tree_Node 
  */
   }
 
-  /* "tsne/quad_tree.pyx":89
+  /* "fastTSNE/quad_tree.pyx":89
  *     cdef Py_ssize_t child_index
  * 
  *     if node.is_leaf:             # <<<<<<<<<<<<<<
@@ -2606,34 +2606,34 @@ static void __pyx_f_4tsne_9quad_tree_add_point_to(__pyx_t_4tsne_9quad_tree_Node 
   __pyx_t_1 = (__pyx_v_node->is_leaf != 0);
   if (__pyx_t_1) {
 
-    /* "tsne/quad_tree.pyx":90
+    /* "fastTSNE/quad_tree.pyx":90
  * 
  *     if node.is_leaf:
  *         split_node(node)             # <<<<<<<<<<<<<<
  *         child_index = get_child_idx_for(node, node.center_of_mass)
  *         update_center_of_mass(&node.children[child_index], node.center_of_mass)
  */
-    __pyx_f_4tsne_9quad_tree_split_node(__pyx_v_node);
+    __pyx_f_8fastTSNE_9quad_tree_split_node(__pyx_v_node);
 
-    /* "tsne/quad_tree.pyx":91
+    /* "fastTSNE/quad_tree.pyx":91
  *     if node.is_leaf:
  *         split_node(node)
  *         child_index = get_child_idx_for(node, node.center_of_mass)             # <<<<<<<<<<<<<<
  *         update_center_of_mass(&node.children[child_index], node.center_of_mass)
  * 
  */
-    __pyx_v_child_index = __pyx_f_4tsne_9quad_tree_get_child_idx_for(__pyx_v_node, __pyx_v_node->center_of_mass);
+    __pyx_v_child_index = __pyx_f_8fastTSNE_9quad_tree_get_child_idx_for(__pyx_v_node, __pyx_v_node->center_of_mass);
 
-    /* "tsne/quad_tree.pyx":92
+    /* "fastTSNE/quad_tree.pyx":92
  *         split_node(node)
  *         child_index = get_child_idx_for(node, node.center_of_mass)
  *         update_center_of_mass(&node.children[child_index], node.center_of_mass)             # <<<<<<<<<<<<<<
  * 
  *     update_center_of_mass(node, point)
  */
-    __pyx_f_4tsne_9quad_tree_update_center_of_mass((&(__pyx_v_node->children[__pyx_v_child_index])), __pyx_v_node->center_of_mass);
+    __pyx_f_8fastTSNE_9quad_tree_update_center_of_mass((&(__pyx_v_node->children[__pyx_v_child_index])), __pyx_v_node->center_of_mass);
 
-    /* "tsne/quad_tree.pyx":89
+    /* "fastTSNE/quad_tree.pyx":89
  *     cdef Py_ssize_t child_index
  * 
  *     if node.is_leaf:             # <<<<<<<<<<<<<<
@@ -2642,34 +2642,34 @@ static void __pyx_f_4tsne_9quad_tree_add_point_to(__pyx_t_4tsne_9quad_tree_Node 
  */
   }
 
-  /* "tsne/quad_tree.pyx":94
+  /* "fastTSNE/quad_tree.pyx":94
  *         update_center_of_mass(&node.children[child_index], node.center_of_mass)
  * 
  *     update_center_of_mass(node, point)             # <<<<<<<<<<<<<<
  * 
  *     # Finally, once the node is properly split, insert the new point into the
  */
-  __pyx_f_4tsne_9quad_tree_update_center_of_mass(__pyx_v_node, __pyx_v_point);
+  __pyx_f_8fastTSNE_9quad_tree_update_center_of_mass(__pyx_v_node, __pyx_v_point);
 
-  /* "tsne/quad_tree.pyx":98
+  /* "fastTSNE/quad_tree.pyx":98
  *     # Finally, once the node is properly split, insert the new point into the
  *     # corresponding child
  *     child_index = get_child_idx_for(node, point)             # <<<<<<<<<<<<<<
  *     add_point_to(&node.children[child_index], point)
  * 
  */
-  __pyx_v_child_index = __pyx_f_4tsne_9quad_tree_get_child_idx_for(__pyx_v_node, __pyx_v_point);
+  __pyx_v_child_index = __pyx_f_8fastTSNE_9quad_tree_get_child_idx_for(__pyx_v_node, __pyx_v_point);
 
-  /* "tsne/quad_tree.pyx":99
+  /* "fastTSNE/quad_tree.pyx":99
  *     # corresponding child
  *     child_index = get_child_idx_for(node, point)
  *     add_point_to(&node.children[child_index], point)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_f_4tsne_9quad_tree_add_point_to((&(__pyx_v_node->children[__pyx_v_child_index])), __pyx_v_point);
+  __pyx_f_8fastTSNE_9quad_tree_add_point_to((&(__pyx_v_node->children[__pyx_v_child_index])), __pyx_v_point);
 
-  /* "tsne/quad_tree.pyx":79
+  /* "fastTSNE/quad_tree.pyx":79
  * 
  * 
  * cdef void add_point_to(Node * node, double * point):             # <<<<<<<<<<<<<<
@@ -2680,13 +2680,13 @@ static void __pyx_f_4tsne_9quad_tree_add_point_to(__pyx_t_4tsne_9quad_tree_Node 
   /* function exit code */
   goto __pyx_L0;
   __pyx_L1_error:;
-  __Pyx_WriteUnraisable("tsne.quad_tree.add_point_to", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __Pyx_WriteUnraisable("fastTSNE.quad_tree.add_point_to", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
   __pyx_L0:;
   __Pyx_TraceReturn(Py_None, 0);
   __Pyx_RefNannyFinishContext();
 }
 
-/* "tsne/quad_tree.pyx":102
+/* "fastTSNE/quad_tree.pyx":102
  * 
  * 
  * cdef void split_node(Node * node):             # <<<<<<<<<<<<<<
@@ -2694,7 +2694,7 @@ static void __pyx_f_4tsne_9quad_tree_add_point_to(__pyx_t_4tsne_9quad_tree_Node 
  *     cdef Py_ssize_t num_children = 1 << node.n_dims
  */
 
-static void __pyx_f_4tsne_9quad_tree_split_node(__pyx_t_4tsne_9quad_tree_Node *__pyx_v_node) {
+static void __pyx_f_8fastTSNE_9quad_tree_split_node(__pyx_t_8fastTSNE_9quad_tree_Node *__pyx_v_node) {
   double __pyx_v_new_length;
   Py_ssize_t __pyx_v_num_children;
   Py_ssize_t __pyx_v_i;
@@ -2712,7 +2712,7 @@ static void __pyx_f_4tsne_9quad_tree_split_node(__pyx_t_4tsne_9quad_tree_Node *_
   __Pyx_RefNannySetupContext("split_node", 0);
   __Pyx_TraceCall("split_node", __pyx_f[0], 102, 0, __PYX_ERR(0, 102, __pyx_L1_error));
 
-  /* "tsne/quad_tree.pyx":103
+  /* "fastTSNE/quad_tree.pyx":103
  * 
  * cdef void split_node(Node * node):
  *     cdef double new_length = node.length / 2             # <<<<<<<<<<<<<<
@@ -2721,7 +2721,7 @@ static void __pyx_f_4tsne_9quad_tree_split_node(__pyx_t_4tsne_9quad_tree_Node *_
  */
   __pyx_v_new_length = (__pyx_v_node->length / 2.0);
 
-  /* "tsne/quad_tree.pyx":104
+  /* "fastTSNE/quad_tree.pyx":104
  * cdef void split_node(Node * node):
  *     cdef double new_length = node.length / 2
  *     cdef Py_ssize_t num_children = 1 << node.n_dims             # <<<<<<<<<<<<<<
@@ -2730,7 +2730,7 @@ static void __pyx_f_4tsne_9quad_tree_split_node(__pyx_t_4tsne_9quad_tree_Node *_
  */
   __pyx_v_num_children = (1 << __pyx_v_node->n_dims);
 
-  /* "tsne/quad_tree.pyx":106
+  /* "fastTSNE/quad_tree.pyx":106
  *     cdef Py_ssize_t num_children = 1 << node.n_dims
  * 
  *     node.is_leaf = False             # <<<<<<<<<<<<<<
@@ -2739,16 +2739,16 @@ static void __pyx_f_4tsne_9quad_tree_split_node(__pyx_t_4tsne_9quad_tree_Node *_
  */
   __pyx_v_node->is_leaf = 0;
 
-  /* "tsne/quad_tree.pyx":107
+  /* "fastTSNE/quad_tree.pyx":107
  * 
  *     node.is_leaf = False
  *     node.children = <Node *>PyMem_Malloc(num_children * sizeof(Node))             # <<<<<<<<<<<<<<
  *     if not node.children:
  *         raise MemoryError()
  */
-  __pyx_v_node->children = ((__pyx_t_4tsne_9quad_tree_Node *)PyMem_Malloc((__pyx_v_num_children * (sizeof(__pyx_t_4tsne_9quad_tree_Node)))));
+  __pyx_v_node->children = ((__pyx_t_8fastTSNE_9quad_tree_Node *)PyMem_Malloc((__pyx_v_num_children * (sizeof(__pyx_t_8fastTSNE_9quad_tree_Node)))));
 
-  /* "tsne/quad_tree.pyx":108
+  /* "fastTSNE/quad_tree.pyx":108
  *     node.is_leaf = False
  *     node.children = <Node *>PyMem_Malloc(num_children * sizeof(Node))
  *     if not node.children:             # <<<<<<<<<<<<<<
@@ -2758,7 +2758,7 @@ static void __pyx_f_4tsne_9quad_tree_split_node(__pyx_t_4tsne_9quad_tree_Node *_
   __pyx_t_1 = ((!(__pyx_v_node->children != 0)) != 0);
   if (unlikely(__pyx_t_1)) {
 
-    /* "tsne/quad_tree.pyx":109
+    /* "fastTSNE/quad_tree.pyx":109
  *     node.children = <Node *>PyMem_Malloc(num_children * sizeof(Node))
  *     if not node.children:
  *         raise MemoryError()             # <<<<<<<<<<<<<<
@@ -2767,7 +2767,7 @@ static void __pyx_f_4tsne_9quad_tree_split_node(__pyx_t_4tsne_9quad_tree_Node *_
  */
     PyErr_NoMemory(); __PYX_ERR(0, 109, __pyx_L1_error)
 
-    /* "tsne/quad_tree.pyx":108
+    /* "fastTSNE/quad_tree.pyx":108
  *     node.is_leaf = False
  *     node.children = <Node *>PyMem_Malloc(num_children * sizeof(Node))
  *     if not node.children:             # <<<<<<<<<<<<<<
@@ -2776,7 +2776,7 @@ static void __pyx_f_4tsne_9quad_tree_split_node(__pyx_t_4tsne_9quad_tree_Node *_
  */
   }
 
-  /* "tsne/quad_tree.pyx":112
+  /* "fastTSNE/quad_tree.pyx":112
  * 
  *     cdef Py_ssize_t i, d
  *     cdef double * new_center = <double *>PyMem_Malloc(node.n_dims * sizeof(double))             # <<<<<<<<<<<<<<
@@ -2785,7 +2785,7 @@ static void __pyx_f_4tsne_9quad_tree_split_node(__pyx_t_4tsne_9quad_tree_Node *_
  */
   __pyx_v_new_center = ((double *)PyMem_Malloc((__pyx_v_node->n_dims * (sizeof(double)))));
 
-  /* "tsne/quad_tree.pyx":113
+  /* "fastTSNE/quad_tree.pyx":113
  *     cdef Py_ssize_t i, d
  *     cdef double * new_center = <double *>PyMem_Malloc(node.n_dims * sizeof(double))
  *     if not new_center:             # <<<<<<<<<<<<<<
@@ -2795,7 +2795,7 @@ static void __pyx_f_4tsne_9quad_tree_split_node(__pyx_t_4tsne_9quad_tree_Node *_
   __pyx_t_1 = ((!(__pyx_v_new_center != 0)) != 0);
   if (unlikely(__pyx_t_1)) {
 
-    /* "tsne/quad_tree.pyx":114
+    /* "fastTSNE/quad_tree.pyx":114
  *     cdef double * new_center = <double *>PyMem_Malloc(node.n_dims * sizeof(double))
  *     if not new_center:
  *         raise MemoryError()             # <<<<<<<<<<<<<<
@@ -2804,7 +2804,7 @@ static void __pyx_f_4tsne_9quad_tree_split_node(__pyx_t_4tsne_9quad_tree_Node *_
  */
     PyErr_NoMemory(); __PYX_ERR(0, 114, __pyx_L1_error)
 
-    /* "tsne/quad_tree.pyx":113
+    /* "fastTSNE/quad_tree.pyx":113
  *     cdef Py_ssize_t i, d
  *     cdef double * new_center = <double *>PyMem_Malloc(node.n_dims * sizeof(double))
  *     if not new_center:             # <<<<<<<<<<<<<<
@@ -2813,7 +2813,7 @@ static void __pyx_f_4tsne_9quad_tree_split_node(__pyx_t_4tsne_9quad_tree_Node *_
  */
   }
 
-  /* "tsne/quad_tree.pyx":116
+  /* "fastTSNE/quad_tree.pyx":116
  *         raise MemoryError()
  * 
  *     for i in range(num_children):             # <<<<<<<<<<<<<<
@@ -2825,7 +2825,7 @@ static void __pyx_f_4tsne_9quad_tree_split_node(__pyx_t_4tsne_9quad_tree_Node *_
   for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_3; __pyx_t_4+=1) {
     __pyx_v_i = __pyx_t_4;
 
-    /* "tsne/quad_tree.pyx":117
+    /* "fastTSNE/quad_tree.pyx":117
  * 
  *     for i in range(num_children):
  *         for d in range(node.n_dims):             # <<<<<<<<<<<<<<
@@ -2837,7 +2837,7 @@ static void __pyx_f_4tsne_9quad_tree_split_node(__pyx_t_4tsne_9quad_tree_Node *_
     for (__pyx_t_7 = 0; __pyx_t_7 < __pyx_t_6; __pyx_t_7+=1) {
       __pyx_v_d = __pyx_t_7;
 
-      /* "tsne/quad_tree.pyx":118
+      /* "fastTSNE/quad_tree.pyx":118
  *     for i in range(num_children):
  *         for d in range(node.n_dims):
  *             if i & (1 << d):             # <<<<<<<<<<<<<<
@@ -2847,7 +2847,7 @@ static void __pyx_f_4tsne_9quad_tree_split_node(__pyx_t_4tsne_9quad_tree_Node *_
       __pyx_t_1 = ((__pyx_v_i & (1 << __pyx_v_d)) != 0);
       if (__pyx_t_1) {
 
-        /* "tsne/quad_tree.pyx":119
+        /* "fastTSNE/quad_tree.pyx":119
  *         for d in range(node.n_dims):
  *             if i & (1 << d):
  *                 new_center[d] = node.center[d] + new_length / 2             # <<<<<<<<<<<<<<
@@ -2856,7 +2856,7 @@ static void __pyx_f_4tsne_9quad_tree_split_node(__pyx_t_4tsne_9quad_tree_Node *_
  */
         (__pyx_v_new_center[__pyx_v_d]) = ((__pyx_v_node->center[__pyx_v_d]) + (__pyx_v_new_length / 2.0));
 
-        /* "tsne/quad_tree.pyx":118
+        /* "fastTSNE/quad_tree.pyx":118
  *     for i in range(num_children):
  *         for d in range(node.n_dims):
  *             if i & (1 << d):             # <<<<<<<<<<<<<<
@@ -2866,7 +2866,7 @@ static void __pyx_f_4tsne_9quad_tree_split_node(__pyx_t_4tsne_9quad_tree_Node *_
         goto __pyx_L9;
       }
 
-      /* "tsne/quad_tree.pyx":121
+      /* "fastTSNE/quad_tree.pyx":121
  *                 new_center[d] = node.center[d] + new_length / 2
  *             else:
  *                 new_center[d] = node.center[d] - new_length / 2             # <<<<<<<<<<<<<<
@@ -2879,17 +2879,17 @@ static void __pyx_f_4tsne_9quad_tree_split_node(__pyx_t_4tsne_9quad_tree_Node *_
       __pyx_L9:;
     }
 
-    /* "tsne/quad_tree.pyx":122
+    /* "fastTSNE/quad_tree.pyx":122
  *             else:
  *                 new_center[d] = node.center[d] - new_length / 2
  *         init_node(&node.children[i], node.n_dims, new_center, new_length)             # <<<<<<<<<<<<<<
  * 
  *     PyMem_Free(new_center)
  */
-    __pyx_f_4tsne_9quad_tree_init_node((&(__pyx_v_node->children[__pyx_v_i])), __pyx_v_node->n_dims, __pyx_v_new_center, __pyx_v_new_length);
+    __pyx_f_8fastTSNE_9quad_tree_init_node((&(__pyx_v_node->children[__pyx_v_i])), __pyx_v_node->n_dims, __pyx_v_new_center, __pyx_v_new_length);
   }
 
-  /* "tsne/quad_tree.pyx":124
+  /* "fastTSNE/quad_tree.pyx":124
  *         init_node(&node.children[i], node.n_dims, new_center, new_length)
  * 
  *     PyMem_Free(new_center)             # <<<<<<<<<<<<<<
@@ -2898,7 +2898,7 @@ static void __pyx_f_4tsne_9quad_tree_split_node(__pyx_t_4tsne_9quad_tree_Node *_
  */
   PyMem_Free(__pyx_v_new_center);
 
-  /* "tsne/quad_tree.pyx":102
+  /* "fastTSNE/quad_tree.pyx":102
  * 
  * 
  * cdef void split_node(Node * node):             # <<<<<<<<<<<<<<
@@ -2909,13 +2909,13 @@ static void __pyx_f_4tsne_9quad_tree_split_node(__pyx_t_4tsne_9quad_tree_Node *_
   /* function exit code */
   goto __pyx_L0;
   __pyx_L1_error:;
-  __Pyx_WriteUnraisable("tsne.quad_tree.split_node", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __Pyx_WriteUnraisable("fastTSNE.quad_tree.split_node", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
   __pyx_L0:;
   __Pyx_TraceReturn(Py_None, 0);
   __Pyx_RefNannyFinishContext();
 }
 
-/* "tsne/quad_tree.pyx":127
+/* "fastTSNE/quad_tree.pyx":127
  * 
  * 
  * cdef inline bint is_duplicate(Node * node, double * point, double duplicate_eps=1e-6) nogil:             # <<<<<<<<<<<<<<
@@ -2923,7 +2923,7 @@ static void __pyx_f_4tsne_9quad_tree_split_node(__pyx_t_4tsne_9quad_tree_Node *_
  *     for d in range(node.n_dims):
  */
 
-static CYTHON_INLINE int __pyx_f_4tsne_9quad_tree_is_duplicate(__pyx_t_4tsne_9quad_tree_Node *__pyx_v_node, double *__pyx_v_point, struct __pyx_opt_args_4tsne_9quad_tree_is_duplicate *__pyx_optional_args) {
+static CYTHON_INLINE int __pyx_f_8fastTSNE_9quad_tree_is_duplicate(__pyx_t_8fastTSNE_9quad_tree_Node *__pyx_v_node, double *__pyx_v_point, struct __pyx_opt_args_8fastTSNE_9quad_tree_is_duplicate *__pyx_optional_args) {
   double __pyx_v_duplicate_eps = ((double)1e-6);
   Py_ssize_t __pyx_v_d;
   int __pyx_r;
@@ -2939,7 +2939,7 @@ static CYTHON_INLINE int __pyx_f_4tsne_9quad_tree_is_duplicate(__pyx_t_4tsne_9qu
     }
   }
 
-  /* "tsne/quad_tree.pyx":129
+  /* "fastTSNE/quad_tree.pyx":129
  * cdef inline bint is_duplicate(Node * node, double * point, double duplicate_eps=1e-6) nogil:
  *     cdef Py_ssize_t d
  *     for d in range(node.n_dims):             # <<<<<<<<<<<<<<
@@ -2951,7 +2951,7 @@ static CYTHON_INLINE int __pyx_f_4tsne_9quad_tree_is_duplicate(__pyx_t_4tsne_9qu
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_d = __pyx_t_3;
 
-    /* "tsne/quad_tree.pyx":130
+    /* "fastTSNE/quad_tree.pyx":130
  *     cdef Py_ssize_t d
  *     for d in range(node.n_dims):
  *         if fabs(node.center_of_mass[d] - point[d]) >= duplicate_eps:             # <<<<<<<<<<<<<<
@@ -2961,7 +2961,7 @@ static CYTHON_INLINE int __pyx_f_4tsne_9quad_tree_is_duplicate(__pyx_t_4tsne_9qu
     __pyx_t_4 = ((fabs(((__pyx_v_node->center_of_mass[__pyx_v_d]) - (__pyx_v_point[__pyx_v_d]))) >= __pyx_v_duplicate_eps) != 0);
     if (__pyx_t_4) {
 
-      /* "tsne/quad_tree.pyx":131
+      /* "fastTSNE/quad_tree.pyx":131
  *     for d in range(node.n_dims):
  *         if fabs(node.center_of_mass[d] - point[d]) >= duplicate_eps:
  *             return False             # <<<<<<<<<<<<<<
@@ -2971,7 +2971,7 @@ static CYTHON_INLINE int __pyx_f_4tsne_9quad_tree_is_duplicate(__pyx_t_4tsne_9qu
       __pyx_r = 0;
       goto __pyx_L0;
 
-      /* "tsne/quad_tree.pyx":130
+      /* "fastTSNE/quad_tree.pyx":130
  *     cdef Py_ssize_t d
  *     for d in range(node.n_dims):
  *         if fabs(node.center_of_mass[d] - point[d]) >= duplicate_eps:             # <<<<<<<<<<<<<<
@@ -2981,7 +2981,7 @@ static CYTHON_INLINE int __pyx_f_4tsne_9quad_tree_is_duplicate(__pyx_t_4tsne_9qu
     }
   }
 
-  /* "tsne/quad_tree.pyx":132
+  /* "fastTSNE/quad_tree.pyx":132
  *         if fabs(node.center_of_mass[d] - point[d]) >= duplicate_eps:
  *             return False
  *     return True             # <<<<<<<<<<<<<<
@@ -2991,7 +2991,7 @@ static CYTHON_INLINE int __pyx_f_4tsne_9quad_tree_is_duplicate(__pyx_t_4tsne_9qu
   __pyx_r = 1;
   goto __pyx_L0;
 
-  /* "tsne/quad_tree.pyx":127
+  /* "fastTSNE/quad_tree.pyx":127
  * 
  * 
  * cdef inline bint is_duplicate(Node * node, double * point, double duplicate_eps=1e-6) nogil:             # <<<<<<<<<<<<<<
@@ -3001,14 +3001,14 @@ static CYTHON_INLINE int __pyx_f_4tsne_9quad_tree_is_duplicate(__pyx_t_4tsne_9qu
 
   /* function exit code */
   __pyx_L1_error:;
-  __Pyx_WriteUnraisable("tsne.quad_tree.is_duplicate", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 1);
+  __Pyx_WriteUnraisable("fastTSNE.quad_tree.is_duplicate", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 1);
   __pyx_r = 0;
   __pyx_L0:;
   __Pyx_TraceReturn(Py_None, 1);
   return __pyx_r;
 }
 
-/* "tsne/quad_tree.pyx":135
+/* "fastTSNE/quad_tree.pyx":135
  * 
  * 
  * cdef void delete_node(Node * node):             # <<<<<<<<<<<<<<
@@ -3016,7 +3016,7 @@ static CYTHON_INLINE int __pyx_f_4tsne_9quad_tree_is_duplicate(__pyx_t_4tsne_9qu
  *     PyMem_Free(node.center_of_mass)
  */
 
-static void __pyx_f_4tsne_9quad_tree_delete_node(__pyx_t_4tsne_9quad_tree_Node *__pyx_v_node) {
+static void __pyx_f_8fastTSNE_9quad_tree_delete_node(__pyx_t_8fastTSNE_9quad_tree_Node *__pyx_v_node) {
   Py_ssize_t __pyx_v_i;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -3027,7 +3027,7 @@ static void __pyx_f_4tsne_9quad_tree_delete_node(__pyx_t_4tsne_9quad_tree_Node *
   __Pyx_RefNannySetupContext("delete_node", 0);
   __Pyx_TraceCall("delete_node", __pyx_f[0], 135, 0, __PYX_ERR(0, 135, __pyx_L1_error));
 
-  /* "tsne/quad_tree.pyx":136
+  /* "fastTSNE/quad_tree.pyx":136
  * 
  * cdef void delete_node(Node * node):
  *     PyMem_Free(node.center)             # <<<<<<<<<<<<<<
@@ -3036,7 +3036,7 @@ static void __pyx_f_4tsne_9quad_tree_delete_node(__pyx_t_4tsne_9quad_tree_Node *
  */
   PyMem_Free(__pyx_v_node->center);
 
-  /* "tsne/quad_tree.pyx":137
+  /* "fastTSNE/quad_tree.pyx":137
  * cdef void delete_node(Node * node):
  *     PyMem_Free(node.center)
  *     PyMem_Free(node.center_of_mass)             # <<<<<<<<<<<<<<
@@ -3045,7 +3045,7 @@ static void __pyx_f_4tsne_9quad_tree_delete_node(__pyx_t_4tsne_9quad_tree_Node *
  */
   PyMem_Free(__pyx_v_node->center_of_mass);
 
-  /* "tsne/quad_tree.pyx":138
+  /* "fastTSNE/quad_tree.pyx":138
  *     PyMem_Free(node.center)
  *     PyMem_Free(node.center_of_mass)
  *     if node.is_leaf:             # <<<<<<<<<<<<<<
@@ -3055,7 +3055,7 @@ static void __pyx_f_4tsne_9quad_tree_delete_node(__pyx_t_4tsne_9quad_tree_Node *
   __pyx_t_1 = (__pyx_v_node->is_leaf != 0);
   if (__pyx_t_1) {
 
-    /* "tsne/quad_tree.pyx":139
+    /* "fastTSNE/quad_tree.pyx":139
  *     PyMem_Free(node.center_of_mass)
  *     if node.is_leaf:
  *         return             # <<<<<<<<<<<<<<
@@ -3064,7 +3064,7 @@ static void __pyx_f_4tsne_9quad_tree_delete_node(__pyx_t_4tsne_9quad_tree_Node *
  */
     goto __pyx_L0;
 
-    /* "tsne/quad_tree.pyx":138
+    /* "fastTSNE/quad_tree.pyx":138
  *     PyMem_Free(node.center)
  *     PyMem_Free(node.center_of_mass)
  *     if node.is_leaf:             # <<<<<<<<<<<<<<
@@ -3073,7 +3073,7 @@ static void __pyx_f_4tsne_9quad_tree_delete_node(__pyx_t_4tsne_9quad_tree_Node *
  */
   }
 
-  /* "tsne/quad_tree.pyx":142
+  /* "fastTSNE/quad_tree.pyx":142
  * 
  *     cdef Py_ssize_t i
  *     for i in range(1 << node.n_dims):             # <<<<<<<<<<<<<<
@@ -3085,17 +3085,17 @@ static void __pyx_f_4tsne_9quad_tree_delete_node(__pyx_t_4tsne_9quad_tree_Node *
   for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_3; __pyx_t_4+=1) {
     __pyx_v_i = __pyx_t_4;
 
-    /* "tsne/quad_tree.pyx":143
+    /* "fastTSNE/quad_tree.pyx":143
  *     cdef Py_ssize_t i
  *     for i in range(1 << node.n_dims):
  *         delete_node(&node.children[i])             # <<<<<<<<<<<<<<
  *     PyMem_Free(node.children)
  * 
  */
-    __pyx_f_4tsne_9quad_tree_delete_node((&(__pyx_v_node->children[__pyx_v_i])));
+    __pyx_f_8fastTSNE_9quad_tree_delete_node((&(__pyx_v_node->children[__pyx_v_i])));
   }
 
-  /* "tsne/quad_tree.pyx":144
+  /* "fastTSNE/quad_tree.pyx":144
  *     for i in range(1 << node.n_dims):
  *         delete_node(&node.children[i])
  *     PyMem_Free(node.children)             # <<<<<<<<<<<<<<
@@ -3104,7 +3104,7 @@ static void __pyx_f_4tsne_9quad_tree_delete_node(__pyx_t_4tsne_9quad_tree_Node *
  */
   PyMem_Free(__pyx_v_node->children);
 
-  /* "tsne/quad_tree.pyx":135
+  /* "fastTSNE/quad_tree.pyx":135
  * 
  * 
  * cdef void delete_node(Node * node):             # <<<<<<<<<<<<<<
@@ -3115,13 +3115,13 @@ static void __pyx_f_4tsne_9quad_tree_delete_node(__pyx_t_4tsne_9quad_tree_Node *
   /* function exit code */
   goto __pyx_L0;
   __pyx_L1_error:;
-  __Pyx_WriteUnraisable("tsne.quad_tree.delete_node", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __Pyx_WriteUnraisable("fastTSNE.quad_tree.delete_node", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
   __pyx_L0:;
   __Pyx_TraceReturn(Py_None, 0);
   __Pyx_RefNannyFinishContext();
 }
 
-/* "tsne/quad_tree.pyx":148
+/* "fastTSNE/quad_tree.pyx":148
  * 
  * cdef class QuadTree:
  *     def __init__(self, double[:, ::1] data):             # <<<<<<<<<<<<<<
@@ -3130,8 +3130,8 @@ static void __pyx_f_4tsne_9quad_tree_delete_node(__pyx_t_4tsne_9quad_tree_Node *
  */
 
 /* Python wrapper */
-static int __pyx_pw_4tsne_9quad_tree_8QuadTree_1__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static int __pyx_pw_4tsne_9quad_tree_8QuadTree_1__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static int __pyx_pw_8fastTSNE_9quad_tree_8QuadTree_1__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static int __pyx_pw_8fastTSNE_9quad_tree_8QuadTree_1__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   __Pyx_memviewslice __pyx_v_data = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_r;
   __Pyx_RefNannyDeclarations
@@ -3168,18 +3168,18 @@ static int __pyx_pw_4tsne_9quad_tree_8QuadTree_1__init__(PyObject *__pyx_v_self,
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("__init__", 1, 1, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 148, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("tsne.quad_tree.QuadTree.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("fastTSNE.quad_tree.QuadTree.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return -1;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4tsne_9quad_tree_8QuadTree___init__(((struct __pyx_obj_4tsne_9quad_tree_QuadTree *)__pyx_v_self), __pyx_v_data);
+  __pyx_r = __pyx_pf_8fastTSNE_9quad_tree_8QuadTree___init__(((struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *)__pyx_v_self), __pyx_v_data);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static int __pyx_pf_4tsne_9quad_tree_8QuadTree___init__(struct __pyx_obj_4tsne_9quad_tree_QuadTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_data) {
+static int __pyx_pf_8fastTSNE_9quad_tree_8QuadTree___init__(struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_data) {
   Py_ssize_t __pyx_v_n_dim;
   __Pyx_memviewslice __pyx_v_x_min = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_x_max = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -3206,12 +3206,12 @@ static int __pyx_pf_4tsne_9quad_tree_8QuadTree___init__(struct __pyx_obj_4tsne_9
   int __pyx_t_15;
   Py_ssize_t __pyx_t_16;
   Py_ssize_t __pyx_t_17;
-  __pyx_t_4tsne_9quad_tree_Node __pyx_t_18;
+  __pyx_t_8fastTSNE_9quad_tree_Node __pyx_t_18;
   Py_ssize_t __pyx_t_19;
   __Pyx_RefNannySetupContext("__init__", 0);
   __Pyx_TraceCall("__init__", __pyx_f[0], 148, 0, __PYX_ERR(0, 148, __pyx_L1_error));
 
-  /* "tsne/quad_tree.pyx":150
+  /* "fastTSNE/quad_tree.pyx":150
  *     def __init__(self, double[:, ::1] data):
  *         cdef:
  *             Py_ssize_t n_dim = data.shape[1]             # <<<<<<<<<<<<<<
@@ -3220,7 +3220,7 @@ static int __pyx_pf_4tsne_9quad_tree_8QuadTree___init__(struct __pyx_obj_4tsne_9
  */
   __pyx_v_n_dim = (__pyx_v_data.shape[1]);
 
-  /* "tsne/quad_tree.pyx":151
+  /* "fastTSNE/quad_tree.pyx":151
  *         cdef:
  *             Py_ssize_t n_dim = data.shape[1]
  *             double[:] x_min = np.min(data, axis=0)             # <<<<<<<<<<<<<<
@@ -3253,7 +3253,7 @@ static int __pyx_pf_4tsne_9quad_tree_8QuadTree___init__(struct __pyx_obj_4tsne_9
   __pyx_t_5.memview = NULL;
   __pyx_t_5.data = NULL;
 
-  /* "tsne/quad_tree.pyx":152
+  /* "fastTSNE/quad_tree.pyx":152
  *             Py_ssize_t n_dim = data.shape[1]
  *             double[:] x_min = np.min(data, axis=0)
  *             double[:] x_max = np.max(data, axis=0)             # <<<<<<<<<<<<<<
@@ -3286,7 +3286,7 @@ static int __pyx_pf_4tsne_9quad_tree_8QuadTree___init__(struct __pyx_obj_4tsne_9
   __pyx_t_5.memview = NULL;
   __pyx_t_5.data = NULL;
 
-  /* "tsne/quad_tree.pyx":154
+  /* "fastTSNE/quad_tree.pyx":154
  *             double[:] x_max = np.max(data, axis=0)
  * 
  *             double[:] center = np.zeros(n_dim)             # <<<<<<<<<<<<<<
@@ -3352,7 +3352,7 @@ static int __pyx_pf_4tsne_9quad_tree_8QuadTree___init__(struct __pyx_obj_4tsne_9
   __pyx_t_5.memview = NULL;
   __pyx_t_5.data = NULL;
 
-  /* "tsne/quad_tree.pyx":155
+  /* "fastTSNE/quad_tree.pyx":155
  * 
  *             double[:] center = np.zeros(n_dim)
  *             double length = 0             # <<<<<<<<<<<<<<
@@ -3361,7 +3361,7 @@ static int __pyx_pf_4tsne_9quad_tree_8QuadTree___init__(struct __pyx_obj_4tsne_9
  */
   __pyx_v_length = 0.0;
 
-  /* "tsne/quad_tree.pyx":158
+  /* "fastTSNE/quad_tree.pyx":158
  *             Py_ssize_t d
  * 
  *         for d in range(n_dim):             # <<<<<<<<<<<<<<
@@ -3373,7 +3373,7 @@ static int __pyx_pf_4tsne_9quad_tree_8QuadTree___init__(struct __pyx_obj_4tsne_9
   for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
     __pyx_v_d = __pyx_t_9;
 
-    /* "tsne/quad_tree.pyx":159
+    /* "fastTSNE/quad_tree.pyx":159
  * 
  *         for d in range(n_dim):
  *             center[d] = (x_max[d] + x_min[d]) / 2             # <<<<<<<<<<<<<<
@@ -3385,7 +3385,7 @@ static int __pyx_pf_4tsne_9quad_tree_8QuadTree___init__(struct __pyx_obj_4tsne_9
     __pyx_t_12 = __pyx_v_d;
     *((double *) ( /* dim=0 */ (__pyx_v_center.data + __pyx_t_12 * __pyx_v_center.strides[0]) )) = (((*((double *) ( /* dim=0 */ (__pyx_v_x_max.data + __pyx_t_10 * __pyx_v_x_max.strides[0]) ))) + (*((double *) ( /* dim=0 */ (__pyx_v_x_min.data + __pyx_t_11 * __pyx_v_x_min.strides[0]) )))) / 2.0);
 
-    /* "tsne/quad_tree.pyx":160
+    /* "fastTSNE/quad_tree.pyx":160
  *         for d in range(n_dim):
  *             center[d] = (x_max[d] + x_min[d]) / 2
  *             if x_max[d] - x_min[d] > length:             # <<<<<<<<<<<<<<
@@ -3397,7 +3397,7 @@ static int __pyx_pf_4tsne_9quad_tree_8QuadTree___init__(struct __pyx_obj_4tsne_9
     __pyx_t_15 = ((((*((double *) ( /* dim=0 */ (__pyx_v_x_max.data + __pyx_t_13 * __pyx_v_x_max.strides[0]) ))) - (*((double *) ( /* dim=0 */ (__pyx_v_x_min.data + __pyx_t_14 * __pyx_v_x_min.strides[0]) )))) > __pyx_v_length) != 0);
     if (__pyx_t_15) {
 
-      /* "tsne/quad_tree.pyx":161
+      /* "fastTSNE/quad_tree.pyx":161
  *             center[d] = (x_max[d] + x_min[d]) / 2
  *             if x_max[d] - x_min[d] > length:
  *                 length = x_max[d] - x_min[d]             # <<<<<<<<<<<<<<
@@ -3408,7 +3408,7 @@ static int __pyx_pf_4tsne_9quad_tree_8QuadTree___init__(struct __pyx_obj_4tsne_9
       __pyx_t_17 = __pyx_v_d;
       __pyx_v_length = ((*((double *) ( /* dim=0 */ (__pyx_v_x_max.data + __pyx_t_16 * __pyx_v_x_max.strides[0]) ))) - (*((double *) ( /* dim=0 */ (__pyx_v_x_min.data + __pyx_t_17 * __pyx_v_x_min.strides[0]) ))));
 
-      /* "tsne/quad_tree.pyx":160
+      /* "fastTSNE/quad_tree.pyx":160
  *         for d in range(n_dim):
  *             center[d] = (x_max[d] + x_min[d]) / 2
  *             if x_max[d] - x_min[d] > length:             # <<<<<<<<<<<<<<
@@ -3418,7 +3418,7 @@ static int __pyx_pf_4tsne_9quad_tree_8QuadTree___init__(struct __pyx_obj_4tsne_9
     }
   }
 
-  /* "tsne/quad_tree.pyx":163
+  /* "fastTSNE/quad_tree.pyx":163
  *                 length = x_max[d] - x_min[d]
  * 
  *         self.root = Node()             # <<<<<<<<<<<<<<
@@ -3427,7 +3427,7 @@ static int __pyx_pf_4tsne_9quad_tree_8QuadTree___init__(struct __pyx_obj_4tsne_9
  */
   __pyx_v_self->root = __pyx_t_18;
 
-  /* "tsne/quad_tree.pyx":164
+  /* "fastTSNE/quad_tree.pyx":164
  * 
  *         self.root = Node()
  *         init_node(&self.root, n_dim, &center[0], length)             # <<<<<<<<<<<<<<
@@ -3435,18 +3435,18 @@ static int __pyx_pf_4tsne_9quad_tree_8QuadTree___init__(struct __pyx_obj_4tsne_9
  * 
  */
   __pyx_t_19 = 0;
-  __pyx_f_4tsne_9quad_tree_init_node((&__pyx_v_self->root), __pyx_v_n_dim, (&(*((double *) ( /* dim=0 */ (__pyx_v_center.data + __pyx_t_19 * __pyx_v_center.strides[0]) )))), __pyx_v_length);
+  __pyx_f_8fastTSNE_9quad_tree_init_node((&__pyx_v_self->root), __pyx_v_n_dim, (&(*((double *) ( /* dim=0 */ (__pyx_v_center.data + __pyx_t_19 * __pyx_v_center.strides[0]) )))), __pyx_v_length);
 
-  /* "tsne/quad_tree.pyx":165
+  /* "fastTSNE/quad_tree.pyx":165
  *         self.root = Node()
  *         init_node(&self.root, n_dim, &center[0], length)
  *         self.add_points(data)             # <<<<<<<<<<<<<<
  * 
  *     cpdef void add_points(self, double[:, ::1] points):
  */
-  ((struct __pyx_vtabstruct_4tsne_9quad_tree_QuadTree *)__pyx_v_self->__pyx_vtab)->add_points(__pyx_v_self, __pyx_v_data, 0);
+  ((struct __pyx_vtabstruct_8fastTSNE_9quad_tree_QuadTree *)__pyx_v_self->__pyx_vtab)->add_points(__pyx_v_self, __pyx_v_data, 0);
 
-  /* "tsne/quad_tree.pyx":148
+  /* "fastTSNE/quad_tree.pyx":148
  * 
  * cdef class QuadTree:
  *     def __init__(self, double[:, ::1] data):             # <<<<<<<<<<<<<<
@@ -3464,7 +3464,7 @@ static int __pyx_pf_4tsne_9quad_tree_8QuadTree___init__(struct __pyx_obj_4tsne_9
   __Pyx_XDECREF(__pyx_t_4);
   __PYX_XDEC_MEMVIEW(&__pyx_t_5, 1);
   __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_AddTraceback("tsne.quad_tree.QuadTree.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("fastTSNE.quad_tree.QuadTree.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = -1;
   __pyx_L0:;
   __PYX_XDEC_MEMVIEW(&__pyx_v_x_min, 1);
@@ -3476,7 +3476,7 @@ static int __pyx_pf_4tsne_9quad_tree_8QuadTree___init__(struct __pyx_obj_4tsne_9
   return __pyx_r;
 }
 
-/* "tsne/quad_tree.pyx":167
+/* "fastTSNE/quad_tree.pyx":167
  *         self.add_points(data)
  * 
  *     cpdef void add_points(self, double[:, ::1] points):             # <<<<<<<<<<<<<<
@@ -3484,8 +3484,8 @@ static int __pyx_pf_4tsne_9quad_tree_8QuadTree___init__(struct __pyx_obj_4tsne_9
  *         for i in range(points.shape[0]):
  */
 
-static PyObject *__pyx_pw_4tsne_9quad_tree_8QuadTree_3add_points(PyObject *__pyx_v_self, PyObject *__pyx_arg_points); /*proto*/
-static void __pyx_f_4tsne_9quad_tree_8QuadTree_add_points(struct __pyx_obj_4tsne_9quad_tree_QuadTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_points, int __pyx_skip_dispatch) {
+static PyObject *__pyx_pw_8fastTSNE_9quad_tree_8QuadTree_3add_points(PyObject *__pyx_v_self, PyObject *__pyx_arg_points); /*proto*/
+static void __pyx_f_8fastTSNE_9quad_tree_8QuadTree_add_points(struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_points, int __pyx_skip_dispatch) {
   Py_ssize_t __pyx_v_i;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -3508,7 +3508,7 @@ static void __pyx_f_4tsne_9quad_tree_8QuadTree_add_points(struct __pyx_obj_4tsne
   else if (unlikely(Py_TYPE(((PyObject *)__pyx_v_self))->tp_dictoffset != 0)) {
     __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_add_points); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 167, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)__pyx_pw_4tsne_9quad_tree_8QuadTree_3add_points)) {
+    if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)__pyx_pw_8fastTSNE_9quad_tree_8QuadTree_3add_points)) {
       if (unlikely(!__pyx_v_points.memview)) { __Pyx_RaiseUnboundLocalError("points"); __PYX_ERR(0, 167, __pyx_L1_error) }
       __pyx_t_3 = __pyx_memoryview_fromslice(__pyx_v_points, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 167, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
@@ -3566,7 +3566,7 @@ static void __pyx_f_4tsne_9quad_tree_8QuadTree_add_points(struct __pyx_obj_4tsne
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "tsne/quad_tree.pyx":169
+  /* "fastTSNE/quad_tree.pyx":169
  *     cpdef void add_points(self, double[:, ::1] points):
  *         cdef Py_ssize_t i
  *         for i in range(points.shape[0]):             # <<<<<<<<<<<<<<
@@ -3578,7 +3578,7 @@ static void __pyx_f_4tsne_9quad_tree_8QuadTree_add_points(struct __pyx_obj_4tsne
   for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
     __pyx_v_i = __pyx_t_9;
 
-    /* "tsne/quad_tree.pyx":170
+    /* "fastTSNE/quad_tree.pyx":170
  *         cdef Py_ssize_t i
  *         for i in range(points.shape[0]):
  *             add_point_to(&self.root, &points[i, 0])             # <<<<<<<<<<<<<<
@@ -3587,10 +3587,10 @@ static void __pyx_f_4tsne_9quad_tree_8QuadTree_add_points(struct __pyx_obj_4tsne
  */
     __pyx_t_10 = __pyx_v_i;
     __pyx_t_11 = 0;
-    __pyx_f_4tsne_9quad_tree_add_point_to((&__pyx_v_self->root), (&(*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_points.data + __pyx_t_10 * __pyx_v_points.strides[0]) )) + __pyx_t_11)) )))));
+    __pyx_f_8fastTSNE_9quad_tree_add_point_to((&__pyx_v_self->root), (&(*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_points.data + __pyx_t_10 * __pyx_v_points.strides[0]) )) + __pyx_t_11)) )))));
   }
 
-  /* "tsne/quad_tree.pyx":167
+  /* "fastTSNE/quad_tree.pyx":167
  *         self.add_points(data)
  * 
  *     cpdef void add_points(self, double[:, ::1] points):             # <<<<<<<<<<<<<<
@@ -3607,15 +3607,15 @@ static void __pyx_f_4tsne_9quad_tree_8QuadTree_add_points(struct __pyx_obj_4tsne
   __Pyx_XDECREF(__pyx_t_4);
   __Pyx_XDECREF(__pyx_t_5);
   __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_WriteUnraisable("tsne.quad_tree.QuadTree.add_points", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __Pyx_WriteUnraisable("fastTSNE.quad_tree.QuadTree.add_points", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
   __pyx_L0:;
   __Pyx_TraceReturn(Py_None, 0);
   __Pyx_RefNannyFinishContext();
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4tsne_9quad_tree_8QuadTree_3add_points(PyObject *__pyx_v_self, PyObject *__pyx_arg_points); /*proto*/
-static PyObject *__pyx_pw_4tsne_9quad_tree_8QuadTree_3add_points(PyObject *__pyx_v_self, PyObject *__pyx_arg_points) {
+static PyObject *__pyx_pw_8fastTSNE_9quad_tree_8QuadTree_3add_points(PyObject *__pyx_v_self, PyObject *__pyx_arg_points); /*proto*/
+static PyObject *__pyx_pw_8fastTSNE_9quad_tree_8QuadTree_3add_points(PyObject *__pyx_v_self, PyObject *__pyx_arg_points) {
   __Pyx_memviewslice __pyx_v_points = { 0, 0, { 0 }, { 0 }, { 0 } };
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -3625,18 +3625,18 @@ static PyObject *__pyx_pw_4tsne_9quad_tree_8QuadTree_3add_points(PyObject *__pyx
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
-  __Pyx_AddTraceback("tsne.quad_tree.QuadTree.add_points", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("fastTSNE.quad_tree.QuadTree.add_points", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4tsne_9quad_tree_8QuadTree_2add_points(((struct __pyx_obj_4tsne_9quad_tree_QuadTree *)__pyx_v_self), __pyx_v_points);
+  __pyx_r = __pyx_pf_8fastTSNE_9quad_tree_8QuadTree_2add_points(((struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *)__pyx_v_self), __pyx_v_points);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4tsne_9quad_tree_8QuadTree_2add_points(struct __pyx_obj_4tsne_9quad_tree_QuadTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_points) {
+static PyObject *__pyx_pf_8fastTSNE_9quad_tree_8QuadTree_2add_points(struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_points) {
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -3645,7 +3645,7 @@ static PyObject *__pyx_pf_4tsne_9quad_tree_8QuadTree_2add_points(struct __pyx_ob
   __Pyx_TraceCall("add_points (wrapper)", __pyx_f[0], 167, 0, __PYX_ERR(0, 167, __pyx_L1_error));
   __Pyx_XDECREF(__pyx_r);
   if (unlikely(!__pyx_v_points.memview)) { __Pyx_RaiseUnboundLocalError("points"); __PYX_ERR(0, 167, __pyx_L1_error) }
-  __pyx_t_1 = __Pyx_void_to_None(__pyx_f_4tsne_9quad_tree_8QuadTree_add_points(__pyx_v_self, __pyx_v_points, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 167, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_void_to_None(__pyx_f_8fastTSNE_9quad_tree_8QuadTree_add_points(__pyx_v_self, __pyx_v_points, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 167, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -3654,7 +3654,7 @@ static PyObject *__pyx_pf_4tsne_9quad_tree_8QuadTree_2add_points(struct __pyx_ob
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("tsne.quad_tree.QuadTree.add_points", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("fastTSNE.quad_tree.QuadTree.add_points", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __PYX_XDEC_MEMVIEW(&__pyx_v_points, 1);
@@ -3664,7 +3664,7 @@ static PyObject *__pyx_pf_4tsne_9quad_tree_8QuadTree_2add_points(struct __pyx_ob
   return __pyx_r;
 }
 
-/* "tsne/quad_tree.pyx":172
+/* "fastTSNE/quad_tree.pyx":172
  *             add_point_to(&self.root, &points[i, 0])
  * 
  *     cpdef void add_point(self, double[::1] point):             # <<<<<<<<<<<<<<
@@ -3672,8 +3672,8 @@ static PyObject *__pyx_pf_4tsne_9quad_tree_8QuadTree_2add_points(struct __pyx_ob
  * 
  */
 
-static PyObject *__pyx_pw_4tsne_9quad_tree_8QuadTree_5add_point(PyObject *__pyx_v_self, PyObject *__pyx_arg_point); /*proto*/
-static void __pyx_f_4tsne_9quad_tree_8QuadTree_add_point(struct __pyx_obj_4tsne_9quad_tree_QuadTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_point, int __pyx_skip_dispatch) {
+static PyObject *__pyx_pw_8fastTSNE_9quad_tree_8QuadTree_5add_point(PyObject *__pyx_v_self, PyObject *__pyx_arg_point); /*proto*/
+static void __pyx_f_8fastTSNE_9quad_tree_8QuadTree_add_point(struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_point, int __pyx_skip_dispatch) {
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -3691,7 +3691,7 @@ static void __pyx_f_4tsne_9quad_tree_8QuadTree_add_point(struct __pyx_obj_4tsne_
   else if (unlikely(Py_TYPE(((PyObject *)__pyx_v_self))->tp_dictoffset != 0)) {
     __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_add_point); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 172, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)__pyx_pw_4tsne_9quad_tree_8QuadTree_5add_point)) {
+    if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)__pyx_pw_8fastTSNE_9quad_tree_8QuadTree_5add_point)) {
       if (unlikely(!__pyx_v_point.memview)) { __Pyx_RaiseUnboundLocalError("point"); __PYX_ERR(0, 172, __pyx_L1_error) }
       __pyx_t_3 = __pyx_memoryview_fromslice(__pyx_v_point, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 172, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
@@ -3749,7 +3749,7 @@ static void __pyx_f_4tsne_9quad_tree_8QuadTree_add_point(struct __pyx_obj_4tsne_
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "tsne/quad_tree.pyx":173
+  /* "fastTSNE/quad_tree.pyx":173
  * 
  *     cpdef void add_point(self, double[::1] point):
  *         add_point_to(&self.root, &point[0])             # <<<<<<<<<<<<<<
@@ -3757,9 +3757,9 @@ static void __pyx_f_4tsne_9quad_tree_8QuadTree_add_point(struct __pyx_obj_4tsne_
  *     def __dealloc__(self):
  */
   __pyx_t_7 = 0;
-  __pyx_f_4tsne_9quad_tree_add_point_to((&__pyx_v_self->root), (&(*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_point.data) + __pyx_t_7)) )))));
+  __pyx_f_8fastTSNE_9quad_tree_add_point_to((&__pyx_v_self->root), (&(*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_point.data) + __pyx_t_7)) )))));
 
-  /* "tsne/quad_tree.pyx":172
+  /* "fastTSNE/quad_tree.pyx":172
  *             add_point_to(&self.root, &points[i, 0])
  * 
  *     cpdef void add_point(self, double[::1] point):             # <<<<<<<<<<<<<<
@@ -3776,15 +3776,15 @@ static void __pyx_f_4tsne_9quad_tree_8QuadTree_add_point(struct __pyx_obj_4tsne_
   __Pyx_XDECREF(__pyx_t_4);
   __Pyx_XDECREF(__pyx_t_5);
   __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_WriteUnraisable("tsne.quad_tree.QuadTree.add_point", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __Pyx_WriteUnraisable("fastTSNE.quad_tree.QuadTree.add_point", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
   __pyx_L0:;
   __Pyx_TraceReturn(Py_None, 0);
   __Pyx_RefNannyFinishContext();
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4tsne_9quad_tree_8QuadTree_5add_point(PyObject *__pyx_v_self, PyObject *__pyx_arg_point); /*proto*/
-static PyObject *__pyx_pw_4tsne_9quad_tree_8QuadTree_5add_point(PyObject *__pyx_v_self, PyObject *__pyx_arg_point) {
+static PyObject *__pyx_pw_8fastTSNE_9quad_tree_8QuadTree_5add_point(PyObject *__pyx_v_self, PyObject *__pyx_arg_point); /*proto*/
+static PyObject *__pyx_pw_8fastTSNE_9quad_tree_8QuadTree_5add_point(PyObject *__pyx_v_self, PyObject *__pyx_arg_point) {
   __Pyx_memviewslice __pyx_v_point = { 0, 0, { 0 }, { 0 }, { 0 } };
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -3794,18 +3794,18 @@ static PyObject *__pyx_pw_4tsne_9quad_tree_8QuadTree_5add_point(PyObject *__pyx_
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
-  __Pyx_AddTraceback("tsne.quad_tree.QuadTree.add_point", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("fastTSNE.quad_tree.QuadTree.add_point", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4tsne_9quad_tree_8QuadTree_4add_point(((struct __pyx_obj_4tsne_9quad_tree_QuadTree *)__pyx_v_self), __pyx_v_point);
+  __pyx_r = __pyx_pf_8fastTSNE_9quad_tree_8QuadTree_4add_point(((struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *)__pyx_v_self), __pyx_v_point);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4tsne_9quad_tree_8QuadTree_4add_point(struct __pyx_obj_4tsne_9quad_tree_QuadTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_point) {
+static PyObject *__pyx_pf_8fastTSNE_9quad_tree_8QuadTree_4add_point(struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_point) {
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -3814,7 +3814,7 @@ static PyObject *__pyx_pf_4tsne_9quad_tree_8QuadTree_4add_point(struct __pyx_obj
   __Pyx_TraceCall("add_point (wrapper)", __pyx_f[0], 172, 0, __PYX_ERR(0, 172, __pyx_L1_error));
   __Pyx_XDECREF(__pyx_r);
   if (unlikely(!__pyx_v_point.memview)) { __Pyx_RaiseUnboundLocalError("point"); __PYX_ERR(0, 172, __pyx_L1_error) }
-  __pyx_t_1 = __Pyx_void_to_None(__pyx_f_4tsne_9quad_tree_8QuadTree_add_point(__pyx_v_self, __pyx_v_point, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 172, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_void_to_None(__pyx_f_8fastTSNE_9quad_tree_8QuadTree_add_point(__pyx_v_self, __pyx_v_point, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 172, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -3823,7 +3823,7 @@ static PyObject *__pyx_pf_4tsne_9quad_tree_8QuadTree_4add_point(struct __pyx_obj
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("tsne.quad_tree.QuadTree.add_point", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("fastTSNE.quad_tree.QuadTree.add_point", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __PYX_XDEC_MEMVIEW(&__pyx_v_point, 1);
@@ -3833,7 +3833,7 @@ static PyObject *__pyx_pf_4tsne_9quad_tree_8QuadTree_4add_point(struct __pyx_obj
   return __pyx_r;
 }
 
-/* "tsne/quad_tree.pyx":175
+/* "fastTSNE/quad_tree.pyx":175
  *         add_point_to(&self.root, &point[0])
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -3841,30 +3841,30 @@ static PyObject *__pyx_pf_4tsne_9quad_tree_8QuadTree_4add_point(struct __pyx_obj
  */
 
 /* Python wrapper */
-static void __pyx_pw_4tsne_9quad_tree_8QuadTree_7__dealloc__(PyObject *__pyx_v_self); /*proto*/
-static void __pyx_pw_4tsne_9quad_tree_8QuadTree_7__dealloc__(PyObject *__pyx_v_self) {
+static void __pyx_pw_8fastTSNE_9quad_tree_8QuadTree_7__dealloc__(PyObject *__pyx_v_self); /*proto*/
+static void __pyx_pw_8fastTSNE_9quad_tree_8QuadTree_7__dealloc__(PyObject *__pyx_v_self) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__dealloc__ (wrapper)", 0);
-  __pyx_pf_4tsne_9quad_tree_8QuadTree_6__dealloc__(((struct __pyx_obj_4tsne_9quad_tree_QuadTree *)__pyx_v_self));
+  __pyx_pf_8fastTSNE_9quad_tree_8QuadTree_6__dealloc__(((struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
 }
 
-static void __pyx_pf_4tsne_9quad_tree_8QuadTree_6__dealloc__(struct __pyx_obj_4tsne_9quad_tree_QuadTree *__pyx_v_self) {
+static void __pyx_pf_8fastTSNE_9quad_tree_8QuadTree_6__dealloc__(struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *__pyx_v_self) {
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__dealloc__", 0);
   __Pyx_TraceCall("__dealloc__", __pyx_f[0], 175, 0, __PYX_ERR(0, 175, __pyx_L1_error));
 
-  /* "tsne/quad_tree.pyx":176
+  /* "fastTSNE/quad_tree.pyx":176
  * 
  *     def __dealloc__(self):
  *         delete_node(&self.root)             # <<<<<<<<<<<<<<
  */
-  __pyx_f_4tsne_9quad_tree_delete_node((&__pyx_v_self->root));
+  __pyx_f_8fastTSNE_9quad_tree_delete_node((&__pyx_v_self->root));
 
-  /* "tsne/quad_tree.pyx":175
+  /* "fastTSNE/quad_tree.pyx":175
  *         add_point_to(&self.root, &point[0])
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -3874,7 +3874,7 @@ static void __pyx_pf_4tsne_9quad_tree_8QuadTree_6__dealloc__(struct __pyx_obj_4t
   /* function exit code */
   goto __pyx_L0;
   __pyx_L1_error:;
-  __Pyx_WriteUnraisable("tsne.quad_tree.QuadTree.__dealloc__", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __Pyx_WriteUnraisable("fastTSNE.quad_tree.QuadTree.__dealloc__", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
   __pyx_L0:;
   __Pyx_TraceReturn(Py_None, 0);
   __Pyx_RefNannyFinishContext();
@@ -3887,19 +3887,19 @@ static void __pyx_pf_4tsne_9quad_tree_8QuadTree_6__dealloc__(struct __pyx_obj_4t
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4tsne_9quad_tree_8QuadTree_9__reduce_cython__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_4tsne_9quad_tree_8QuadTree_9__reduce_cython__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_8fastTSNE_9quad_tree_8QuadTree_9__reduce_cython__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_8fastTSNE_9quad_tree_8QuadTree_9__reduce_cython__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__reduce_cython__ (wrapper)", 0);
-  __pyx_r = __pyx_pf_4tsne_9quad_tree_8QuadTree_8__reduce_cython__(((struct __pyx_obj_4tsne_9quad_tree_QuadTree *)__pyx_v_self));
+  __pyx_r = __pyx_pf_8fastTSNE_9quad_tree_8QuadTree_8__reduce_cython__(((struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4tsne_9quad_tree_8QuadTree_8__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_4tsne_9quad_tree_QuadTree *__pyx_v_self) {
+static PyObject *__pyx_pf_8fastTSNE_9quad_tree_8QuadTree_8__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -3928,7 +3928,7 @@ static PyObject *__pyx_pf_4tsne_9quad_tree_8QuadTree_8__reduce_cython__(CYTHON_U
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("tsne.quad_tree.QuadTree.__reduce_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("fastTSNE.quad_tree.QuadTree.__reduce_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_TraceReturn(__pyx_r, 0);
@@ -3944,19 +3944,19 @@ static PyObject *__pyx_pf_4tsne_9quad_tree_8QuadTree_8__reduce_cython__(CYTHON_U
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4tsne_9quad_tree_8QuadTree_11__setstate_cython__(PyObject *__pyx_v_self, PyObject *__pyx_v___pyx_state); /*proto*/
-static PyObject *__pyx_pw_4tsne_9quad_tree_8QuadTree_11__setstate_cython__(PyObject *__pyx_v_self, PyObject *__pyx_v___pyx_state) {
+static PyObject *__pyx_pw_8fastTSNE_9quad_tree_8QuadTree_11__setstate_cython__(PyObject *__pyx_v_self, PyObject *__pyx_v___pyx_state); /*proto*/
+static PyObject *__pyx_pw_8fastTSNE_9quad_tree_8QuadTree_11__setstate_cython__(PyObject *__pyx_v_self, PyObject *__pyx_v___pyx_state) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__setstate_cython__ (wrapper)", 0);
-  __pyx_r = __pyx_pf_4tsne_9quad_tree_8QuadTree_10__setstate_cython__(((struct __pyx_obj_4tsne_9quad_tree_QuadTree *)__pyx_v_self), ((PyObject *)__pyx_v___pyx_state));
+  __pyx_r = __pyx_pf_8fastTSNE_9quad_tree_8QuadTree_10__setstate_cython__(((struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *)__pyx_v_self), ((PyObject *)__pyx_v___pyx_state));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4tsne_9quad_tree_8QuadTree_10__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_4tsne_9quad_tree_QuadTree *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state) {
+static PyObject *__pyx_pf_8fastTSNE_9quad_tree_8QuadTree_10__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state) {
   PyObject *__pyx_r = NULL;
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
@@ -3985,7 +3985,7 @@ static PyObject *__pyx_pf_4tsne_9quad_tree_8QuadTree_10__setstate_cython__(CYTHO
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("tsne.quad_tree.QuadTree.__setstate_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("fastTSNE.quad_tree.QuadTree.__setstate_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_TraceReturn(__pyx_r, 0);
@@ -17243,10 +17243,10 @@ static PyObject *__pyx_unpickle_Enum__set_state(struct __pyx_MemviewEnum_obj *__
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
-static struct __pyx_vtabstruct_4tsne_9quad_tree_QuadTree __pyx_vtable_4tsne_9quad_tree_QuadTree;
+static struct __pyx_vtabstruct_8fastTSNE_9quad_tree_QuadTree __pyx_vtable_8fastTSNE_9quad_tree_QuadTree;
 
-static PyObject *__pyx_tp_new_4tsne_9quad_tree_QuadTree(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
-  struct __pyx_obj_4tsne_9quad_tree_QuadTree *p;
+static PyObject *__pyx_tp_new_8fastTSNE_9quad_tree_QuadTree(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
+  struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *p;
   PyObject *o;
   if (likely((t->tp_flags & Py_TPFLAGS_IS_ABSTRACT) == 0)) {
     o = (*t->tp_alloc)(t, 0);
@@ -17254,12 +17254,12 @@ static PyObject *__pyx_tp_new_4tsne_9quad_tree_QuadTree(PyTypeObject *t, CYTHON_
     o = (PyObject *) PyBaseObject_Type.tp_new(t, __pyx_empty_tuple, 0);
   }
   if (unlikely(!o)) return 0;
-  p = ((struct __pyx_obj_4tsne_9quad_tree_QuadTree *)o);
-  p->__pyx_vtab = __pyx_vtabptr_4tsne_9quad_tree_QuadTree;
+  p = ((struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *)o);
+  p->__pyx_vtab = __pyx_vtabptr_8fastTSNE_9quad_tree_QuadTree;
   return o;
 }
 
-static void __pyx_tp_dealloc_4tsne_9quad_tree_QuadTree(PyObject *o) {
+static void __pyx_tp_dealloc_8fastTSNE_9quad_tree_QuadTree(PyObject *o) {
   #if CYTHON_USE_TP_FINALIZE
   if (unlikely(PyType_HasFeature(Py_TYPE(o), Py_TPFLAGS_HAVE_FINALIZE) && Py_TYPE(o)->tp_finalize) && (!PyType_IS_GC(Py_TYPE(o)) || !_PyGC_FINALIZED(o))) {
     if (PyObject_CallFinalizerFromDealloc(o)) return;
@@ -17269,27 +17269,27 @@ static void __pyx_tp_dealloc_4tsne_9quad_tree_QuadTree(PyObject *o) {
     PyObject *etype, *eval, *etb;
     PyErr_Fetch(&etype, &eval, &etb);
     ++Py_REFCNT(o);
-    __pyx_pw_4tsne_9quad_tree_8QuadTree_7__dealloc__(o);
+    __pyx_pw_8fastTSNE_9quad_tree_8QuadTree_7__dealloc__(o);
     --Py_REFCNT(o);
     PyErr_Restore(etype, eval, etb);
   }
   (*Py_TYPE(o)->tp_free)(o);
 }
 
-static PyMethodDef __pyx_methods_4tsne_9quad_tree_QuadTree[] = {
-  {"add_points", (PyCFunction)__pyx_pw_4tsne_9quad_tree_8QuadTree_3add_points, METH_O, 0},
-  {"add_point", (PyCFunction)__pyx_pw_4tsne_9quad_tree_8QuadTree_5add_point, METH_O, 0},
-  {"__reduce_cython__", (PyCFunction)__pyx_pw_4tsne_9quad_tree_8QuadTree_9__reduce_cython__, METH_NOARGS, 0},
-  {"__setstate_cython__", (PyCFunction)__pyx_pw_4tsne_9quad_tree_8QuadTree_11__setstate_cython__, METH_O, 0},
+static PyMethodDef __pyx_methods_8fastTSNE_9quad_tree_QuadTree[] = {
+  {"add_points", (PyCFunction)__pyx_pw_8fastTSNE_9quad_tree_8QuadTree_3add_points, METH_O, 0},
+  {"add_point", (PyCFunction)__pyx_pw_8fastTSNE_9quad_tree_8QuadTree_5add_point, METH_O, 0},
+  {"__reduce_cython__", (PyCFunction)__pyx_pw_8fastTSNE_9quad_tree_8QuadTree_9__reduce_cython__, METH_NOARGS, 0},
+  {"__setstate_cython__", (PyCFunction)__pyx_pw_8fastTSNE_9quad_tree_8QuadTree_11__setstate_cython__, METH_O, 0},
   {0, 0, 0, 0}
 };
 
-static PyTypeObject __pyx_type_4tsne_9quad_tree_QuadTree = {
+static PyTypeObject __pyx_type_8fastTSNE_9quad_tree_QuadTree = {
   PyVarObject_HEAD_INIT(0, 0)
-  "tsne.quad_tree.QuadTree", /*tp_name*/
-  sizeof(struct __pyx_obj_4tsne_9quad_tree_QuadTree), /*tp_basicsize*/
+  "fastTSNE.quad_tree.QuadTree", /*tp_name*/
+  sizeof(struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree), /*tp_basicsize*/
   0, /*tp_itemsize*/
-  __pyx_tp_dealloc_4tsne_9quad_tree_QuadTree, /*tp_dealloc*/
+  __pyx_tp_dealloc_8fastTSNE_9quad_tree_QuadTree, /*tp_dealloc*/
   0, /*tp_print*/
   0, /*tp_getattr*/
   0, /*tp_setattr*/
@@ -17317,7 +17317,7 @@ static PyTypeObject __pyx_type_4tsne_9quad_tree_QuadTree = {
   0, /*tp_weaklistoffset*/
   0, /*tp_iter*/
   0, /*tp_iternext*/
-  __pyx_methods_4tsne_9quad_tree_QuadTree, /*tp_methods*/
+  __pyx_methods_8fastTSNE_9quad_tree_QuadTree, /*tp_methods*/
   0, /*tp_members*/
   0, /*tp_getset*/
   0, /*tp_base*/
@@ -17325,9 +17325,9 @@ static PyTypeObject __pyx_type_4tsne_9quad_tree_QuadTree = {
   0, /*tp_descr_get*/
   0, /*tp_descr_set*/
   0, /*tp_dictoffset*/
-  __pyx_pw_4tsne_9quad_tree_8QuadTree_1__init__, /*tp_init*/
+  __pyx_pw_8fastTSNE_9quad_tree_8QuadTree_1__init__, /*tp_init*/
   0, /*tp_alloc*/
-  __pyx_tp_new_4tsne_9quad_tree_QuadTree, /*tp_new*/
+  __pyx_tp_new_8fastTSNE_9quad_tree_QuadTree, /*tp_new*/
   0, /*tp_free*/
   0, /*tp_is_gc*/
   0, /*tp_bases*/
@@ -17464,7 +17464,7 @@ static PyBufferProcs __pyx_tp_as_buffer_array = {
 
 static PyTypeObject __pyx_type___pyx_array = {
   PyVarObject_HEAD_INIT(0, 0)
-  "tsne.quad_tree.array", /*tp_name*/
+  "fastTSNE.quad_tree.array", /*tp_name*/
   sizeof(struct __pyx_array_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_array, /*tp_dealloc*/
@@ -17572,7 +17572,7 @@ static PyMethodDef __pyx_methods_Enum[] = {
 
 static PyTypeObject __pyx_type___pyx_MemviewEnum = {
   PyVarObject_HEAD_INIT(0, 0)
-  "tsne.quad_tree.Enum", /*tp_name*/
+  "fastTSNE.quad_tree.Enum", /*tp_name*/
   sizeof(struct __pyx_MemviewEnum_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_Enum, /*tp_dealloc*/
@@ -17822,7 +17822,7 @@ static PyBufferProcs __pyx_tp_as_buffer_memoryview = {
 
 static PyTypeObject __pyx_type___pyx_memoryview = {
   PyVarObject_HEAD_INIT(0, 0)
-  "tsne.quad_tree.memoryview", /*tp_name*/
+  "fastTSNE.quad_tree.memoryview", /*tp_name*/
   sizeof(struct __pyx_memoryview_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_memoryview, /*tp_dealloc*/
@@ -17949,7 +17949,7 @@ static struct PyGetSetDef __pyx_getsets__memoryviewslice[] = {
 
 static PyTypeObject __pyx_type___pyx_memoryviewslice = {
   PyVarObject_HEAD_INIT(0, 0)
-  "tsne.quad_tree._memoryviewslice", /*tp_name*/
+  "fastTSNE.quad_tree._memoryviewslice", /*tp_name*/
   sizeof(struct __pyx_memoryviewslice_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc__memoryviewslice, /*tp_dealloc*/
@@ -18519,7 +18519,7 @@ static int __Pyx_modinit_variable_export_code(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_modinit_variable_export_code", 0);
   /*--- Variable export code ---*/
-  if (__Pyx_ExportVoidPtr(__pyx_n_s_EPSILON, (void *)&__pyx_v_4tsne_9quad_tree_EPSILON, "double") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportVoidPtr(__pyx_n_s_EPSILON, (void *)&__pyx_v_8fastTSNE_9quad_tree_EPSILON, "double") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -18531,7 +18531,7 @@ static int __Pyx_modinit_function_export_code(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_modinit_function_export_code", 0);
   /*--- Function export code ---*/
-  if (__Pyx_ExportFunction("is_duplicate", (void (*)(void))__pyx_f_4tsne_9quad_tree_is_duplicate, "int (__pyx_t_4tsne_9quad_tree_Node *, double *, struct __pyx_opt_args_4tsne_9quad_tree_is_duplicate *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportFunction("is_duplicate", (void (*)(void))__pyx_f_8fastTSNE_9quad_tree_is_duplicate, "int (__pyx_t_8fastTSNE_9quad_tree_Node *, double *, struct __pyx_opt_args_8fastTSNE_9quad_tree_is_duplicate *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -18543,18 +18543,18 @@ static int __Pyx_modinit_type_init_code(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_init_code", 0);
   /*--- Type init code ---*/
-  __pyx_vtabptr_4tsne_9quad_tree_QuadTree = &__pyx_vtable_4tsne_9quad_tree_QuadTree;
-  __pyx_vtable_4tsne_9quad_tree_QuadTree.add_points = (void (*)(struct __pyx_obj_4tsne_9quad_tree_QuadTree *, __Pyx_memviewslice, int __pyx_skip_dispatch))__pyx_f_4tsne_9quad_tree_8QuadTree_add_points;
-  __pyx_vtable_4tsne_9quad_tree_QuadTree.add_point = (void (*)(struct __pyx_obj_4tsne_9quad_tree_QuadTree *, __Pyx_memviewslice, int __pyx_skip_dispatch))__pyx_f_4tsne_9quad_tree_8QuadTree_add_point;
-  if (PyType_Ready(&__pyx_type_4tsne_9quad_tree_QuadTree) < 0) __PYX_ERR(0, 147, __pyx_L1_error)
-  __pyx_type_4tsne_9quad_tree_QuadTree.tp_print = 0;
-  if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_4tsne_9quad_tree_QuadTree.tp_dictoffset && __pyx_type_4tsne_9quad_tree_QuadTree.tp_getattro == PyObject_GenericGetAttr)) {
-    __pyx_type_4tsne_9quad_tree_QuadTree.tp_getattro = __Pyx_PyObject_GenericGetAttr;
+  __pyx_vtabptr_8fastTSNE_9quad_tree_QuadTree = &__pyx_vtable_8fastTSNE_9quad_tree_QuadTree;
+  __pyx_vtable_8fastTSNE_9quad_tree_QuadTree.add_points = (void (*)(struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *, __Pyx_memviewslice, int __pyx_skip_dispatch))__pyx_f_8fastTSNE_9quad_tree_8QuadTree_add_points;
+  __pyx_vtable_8fastTSNE_9quad_tree_QuadTree.add_point = (void (*)(struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *, __Pyx_memviewslice, int __pyx_skip_dispatch))__pyx_f_8fastTSNE_9quad_tree_8QuadTree_add_point;
+  if (PyType_Ready(&__pyx_type_8fastTSNE_9quad_tree_QuadTree) < 0) __PYX_ERR(0, 147, __pyx_L1_error)
+  __pyx_type_8fastTSNE_9quad_tree_QuadTree.tp_print = 0;
+  if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_8fastTSNE_9quad_tree_QuadTree.tp_dictoffset && __pyx_type_8fastTSNE_9quad_tree_QuadTree.tp_getattro == PyObject_GenericGetAttr)) {
+    __pyx_type_8fastTSNE_9quad_tree_QuadTree.tp_getattro = __Pyx_PyObject_GenericGetAttr;
   }
-  if (__Pyx_SetVtable(__pyx_type_4tsne_9quad_tree_QuadTree.tp_dict, __pyx_vtabptr_4tsne_9quad_tree_QuadTree) < 0) __PYX_ERR(0, 147, __pyx_L1_error)
-  if (PyObject_SetAttrString(__pyx_m, "QuadTree", (PyObject *)&__pyx_type_4tsne_9quad_tree_QuadTree) < 0) __PYX_ERR(0, 147, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_4tsne_9quad_tree_QuadTree) < 0) __PYX_ERR(0, 147, __pyx_L1_error)
-  __pyx_ptype_4tsne_9quad_tree_QuadTree = &__pyx_type_4tsne_9quad_tree_QuadTree;
+  if (__Pyx_SetVtable(__pyx_type_8fastTSNE_9quad_tree_QuadTree.tp_dict, __pyx_vtabptr_8fastTSNE_9quad_tree_QuadTree) < 0) __PYX_ERR(0, 147, __pyx_L1_error)
+  if (PyObject_SetAttrString(__pyx_m, "QuadTree", (PyObject *)&__pyx_type_8fastTSNE_9quad_tree_QuadTree) < 0) __PYX_ERR(0, 147, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_8fastTSNE_9quad_tree_QuadTree) < 0) __PYX_ERR(0, 147, __pyx_L1_error)
+  __pyx_ptype_8fastTSNE_9quad_tree_QuadTree = &__pyx_type_8fastTSNE_9quad_tree_QuadTree;
   __pyx_vtabptr_array = &__pyx_vtable_array;
   __pyx_vtable_array.get_memview = (PyObject *(*)(struct __pyx_array_obj *))__pyx_array_get_memview;
   if (PyType_Ready(&__pyx_type___pyx_array) < 0) __PYX_ERR(1, 104, __pyx_L1_error)
@@ -18776,14 +18776,14 @@ if (!__Pyx_RefNanny) {
   #if PY_MAJOR_VERSION < 3 && (__PYX_DEFAULT_STRING_ENCODING_IS_ASCII || __PYX_DEFAULT_STRING_ENCODING_IS_DEFAULT)
   if (__Pyx_init_sys_getdefaultencoding_params() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
-  if (__pyx_module_is_main_tsne__quad_tree) {
+  if (__pyx_module_is_main_fastTSNE__quad_tree) {
     if (PyObject_SetAttrString(__pyx_m, "__name__", __pyx_n_s_main) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   }
   #if PY_MAJOR_VERSION >= 3
   {
     PyObject *modules = PyImport_GetModuleDict(); if (unlikely(!modules)) __PYX_ERR(0, 1, __pyx_L1_error)
-    if (!PyDict_GetItemString(modules, "tsne.quad_tree")) {
-      if (unlikely(PyDict_SetItemString(modules, "tsne.quad_tree", __pyx_m) < 0)) __PYX_ERR(0, 1, __pyx_L1_error)
+    if (!PyDict_GetItemString(modules, "fastTSNE.quad_tree")) {
+      if (unlikely(PyDict_SetItemString(modules, "fastTSNE.quad_tree", __pyx_m) < 0)) __PYX_ERR(0, 1, __pyx_L1_error)
     }
   }
   #endif
@@ -18805,7 +18805,7 @@ if (!__Pyx_RefNanny) {
   #endif
   __Pyx_TraceCall("__Pyx_PyMODINIT_FUNC PyInit_quad_tree(void)", __pyx_f[0], 1, 0, __PYX_ERR(0, 1, __pyx_L1_error));
 
-  /* "tsne/quad_tree.pyx":36
+  /* "fastTSNE/quad_tree.pyx":36
  * 
  * """
  * import numpy as np             # <<<<<<<<<<<<<<
@@ -18817,7 +18817,7 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) __PYX_ERR(0, 36, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "tsne/quad_tree.pyx":1
+  /* "fastTSNE/quad_tree.pyx":1
  * # cython: profile=True             # <<<<<<<<<<<<<<
  * # cython: boundscheck=False
  * # cython: wraparound=False
@@ -18988,11 +18988,11 @@ if (!__Pyx_RefNanny) {
   __Pyx_XDECREF(__pyx_t_1);
   if (__pyx_m) {
     if (__pyx_d) {
-      __Pyx_AddTraceback("init tsne.quad_tree", 0, __pyx_lineno, __pyx_filename);
+      __Pyx_AddTraceback("init fastTSNE.quad_tree", 0, __pyx_lineno, __pyx_filename);
     }
     Py_DECREF(__pyx_m); __pyx_m = 0;
   } else if (!PyErr_Occurred()) {
-    PyErr_SetString(PyExc_ImportError, "init tsne.quad_tree");
+    PyErr_SetString(PyExc_ImportError, "init fastTSNE.quad_tree");
   }
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();

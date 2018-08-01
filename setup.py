@@ -29,14 +29,12 @@ if USE_CYTHON:
     from Cython.Build import cythonize
     extensions = cythonize(extensions)
 
-print(extensions)
-
 setup(
     name='fastTSNE',
     description='',
     author='Pavlin Poličar',
     author_email='pavlin.g.p@gmail.com',
-    version='0.1.6',
+    version='0.1.7',
     url='https://github.com/pavlin-policar/tSNE',
     packages=setuptools.find_packages(),
     ext_modules=extensions,
