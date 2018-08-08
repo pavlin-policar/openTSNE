@@ -6,7 +6,7 @@ from scipy.sparse import csr_matrix
 from sklearn.decomposition import PCA
 from .quad_tree import QuadTree
 
-import _tsne
+from . import _tsne
 from .affinity import Affinities, NearestNeighborAffinities
 
 EPSILON = np.finfo(np.float64).eps

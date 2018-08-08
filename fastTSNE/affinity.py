@@ -3,7 +3,7 @@ import logging
 import numpy as np
 from scipy.sparse import csr_matrix
 
-import _tsne
+from . import _tsne
 from .nearest_neighbors import KDTree, NNDescent, KNNIndex
 
 try:
