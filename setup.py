@@ -34,7 +34,7 @@ setup(
     description='',
     author='Pavlin Poličar',
     author_email='pavlin.g.p@gmail.com',
-    version='0.1.8',
+    version='0.1.9',
     url='https://github.com/pavlin-policar/fastTSNE',
     packages=setuptools.find_packages(),
     ext_modules=extensions,
