@@ -1,5 +1,6 @@
 import logging
 from collections import Iterable
+from typing import Optional
 
 import numpy as np
 from scipy.sparse import csr_matrix
@@ -114,11 +115,12 @@ class PartialTSNEEmbedding(np.ndarray):
 
 
 class TSNEEmbedding(np.ndarray):
-    def __new__(cls, embedding, affinities, gradient_descent_params):
+    def __new__(cls, embedding, affinities, gradient_descent_params, pca_init=None):
         obj = np.asarray(embedding, dtype=np.float64, order='C').view(TSNEEmbedding)
 
         obj.affinities = affinities  # type: Affinities
         obj.gradient_descent_params = gradient_descent_params  # type: dict
+        obj.pca_init = pca_init  # type: Optional[PCA]
 
         obj.kl_divergence = None
 
@@ -226,10 +228,11 @@ class TSNEEmbedding(np.ndarray):
 
         # Initialize the embedding using a PCA projection into the desired
         # number of components
-        # TODO: This is wrong. We'd want to use the PCA model fit on training data
         elif initialization == 'pca':
-            pca = PCA(n_components=n_components)
-            embedding = pca.fit_transform(X)
+            assert self.pca_init is not None, \
+                'The initial embedded was not initialized with `pca`, so ' \
+                'there is no projection model!'
+            embedding = self.pca_init.fit_transform(X)
 
         # Random initialization with isotropic normal distribution
         elif initialization == 'random':
@@ -333,6 +336,12 @@ class TSNE:
         # Get some initial coordinates for the embedding
         y_coords = self.generate_initial_coordinates(X, initialization=initialization)
 
+        # If using PCA init, we need to keep the model to project new data
+        if isinstance(y_coords, tuple):
+            pca_init_model, y_coords = y_coords
+        else:
+            pca_init_model = None
+
         # Compute the affinities for the input data
         affinities = NearestNeighborAffinities(
             X, self.perplexity, method=self.neighbors_method,
@@ -362,7 +371,8 @@ class TSNE:
             'callbacks_every_iters': self.callbacks_every_iters,
         }
 
-        return TSNEEmbedding(y_coords, affinities, gradient_descent_params)
+        return TSNEEmbedding(y_coords, affinities, gradient_descent_params,
+                             pca_init=pca_init_model)
 
     def generate_initial_coordinates(self, X, initialization=None):
         """Get initial coordinates for the new embedding for the data set.
@@ -391,7 +401,7 @@ class TSNE:
         # number of components
         elif initialization == 'pca':
             pca = PCA(n_components=self.n_components)
-            return pca.fit_transform(X)
+            return pca, pca.fit_transform(X)
 
         # Random initialization with isotropic normal distribution
         elif initialization == 'random':
