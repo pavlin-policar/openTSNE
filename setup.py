@@ -34,15 +34,15 @@ setup(
     description='',
     author='Pavlin Poličar',
     author_email='pavlin.g.p@gmail.com',
-    version='0.1.10',
+    version='0.1.11',
     url='https://github.com/pavlin-policar/fastTSNE',
     packages=setuptools.find_packages(),
     ext_modules=extensions,
     install_requires=[
-        'numpy==1.14.4',
-        'pyFFTW==0.10.4',
-        'pynndescent==0.2.0',
-        'scikit-learn==0.19.1',
-        'scipy==1.1.0',
+        'numpy>1.14',
+        'pyFFTW>=0.10,<0.10.99',
+        'pynndescent>=0.2',
+        'scikit-learn>=0.19,<0.19.99',
+        'scipy',
     ]
 )
