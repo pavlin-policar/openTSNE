@@ -9,12 +9,10 @@
         ],
         "extra_compile_args": [
             "-fopenmp",
-            "-lfftw3",
             "-O3"
         ],
         "extra_link_args": [
             "-fopenmp",
-            "-lfftw3",
             "-O3"
         ],
         "include_dirs": [

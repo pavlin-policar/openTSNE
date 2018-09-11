@@ -7,12 +7,8 @@ python:
 cache:
     pip: true
 
-env:
-    - USE_CYTHON=True
-
 install:
-    - pip install Cython
-    - python setup.py install
+    - python setup.py develop
 
 script:
     - python -m unittest tests/*.py
