@@ -1,5 +1,23 @@
 # tSNE
 
+The goal of this project is to have fast implementations of tSNE in one place, without any external C/C++ dependencies. This makes the package very easy to include in other projects.
+
+This package provides two fast implementations of tSNE:
+1. Barnes-hut tsne [2] is inspired by Multicore tSNE and is appropriate for small data sets and has asymptotic complexity O(n log n).
+2. Fit-SNE [3] is inspired by the C++ implementation of Fit-SNE and is appropriate for larger data sets (>10,000 samples). It has asymptotic complexity O(n). The C++ implementation depends on FFTW for fast fourier transforms which must be installed independently. This makes messy for distribution.
+
+We include both these implementations because Barnes-Hut tSNE tends to be much faster for smaller data sets, while Fit-SNE is much faster for larger data sets (>10,000 samples).
+
+tSNE runs in two phases. In the first phase, K nearest neighbors must be found for each sample. We offer exact nearest neighbor search using scikit-learn's nearest neighbors KDTrees and approximate nearest neighbor search using a Python/Numba implementation of nearest neighbor descent. Again, exact search is faster for smaller data sets and approximate search is faster for larger data sets.
+The second phase runs the actual optimization. In each iteration the negative gradient must be computed w.r.t. the embedding. This can be computed using Barnes-Hut space partitioning trees or FFT accelerated interpolation. For more details, see the corresponding papers.
+
+## Benchmarks
+\# TODO
+
+| Method | Dimensions  | fastTSNE | fastTSNE (Intel MKL) | Fit-SNE | MultiCore tSNE | Scikit-learn
+|---|---|---|---|---|---|---|
+| MNIST | 70,000x784
+
 ## Usage
 We provide two modes of usage. One is very familliar to anyone who has ever used scikit-learn via `TSNE.fit`.
 
@@ -34,7 +52,7 @@ Another key difference is that we return a `TSNEEmbedding` instance. This acts a
 We don't log any progress by default, but provide callbacks that can be run at any interval of the optimization process. A simple logger is provided as an example.
 
 ```python
-from tsne.callbacks import ErrorLogger
+from fastTSNE.callbacks import ErrorLogger
 
 tsne = TSNE(callbacks=ErrorLogger(), callbacks_every_iters=50)
 ```
@@ -61,3 +79,16 @@ embedding.optimize(n_iter=750, momentum=0.8)
 ```
 
 Note that all the aspects of optimization can be controlled via the `.optimize` method, see the docs for an extensive list of parameters.
+
+
+## Future work
+
+- Automatically determine which nearest neighbor/gradient method to use depending on the data set size.
+
+## References
+
+[1] Maaten, Laurens van der, and Geoffrey Hinton. "Visualizing data using t-SNE." Journal of machine learning research 9.Nov (2008): 2579-2605.
+
+[2] Van Der Maaten, Laurens. "Accelerating t-SNE using tree-based algorithms." The Journal of Machine Learning Research 15.1 (2014): 3221-3245.
+
+[3] Linderman, George C., et al. "Efficient Algorithms for t-distributed Stochastic Neighborhood Embedding." arXiv preprint arXiv:1712.09005 (2017).
