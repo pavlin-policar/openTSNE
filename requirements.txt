@@ -1,7 +1,0 @@
-Cython==0.28.3
-matplotlib==2.2.2
-numpy==1.14.4
-pyFFTW==0.10.4
-pynndescent==0.2.0
-scikit-learn==0.19.1
-scipy==1.1.0
