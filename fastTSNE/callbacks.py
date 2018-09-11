@@ -11,17 +11,24 @@ from .tsne import TSNEEmbedding
 log = logging.getLogger(__name__)
 
 
-class ErrorLogger:
+class Callback:
+    def optimzation_about_to_start(self):
+        """This is called at the beginning of the optimization procedure."""
+
+    def __call__(self, iteration: int, error: float, embedding: TSNEEmbedding) -> bool:
+        """This is the main method called from the optimization."""
+
+
+class ErrorLogger(Callback):
     def __init__(self):
         self.iter_count = 0
         self.last_log_time = None
 
-    def __call__(self, iteration, error, embedding):
-        # Initialize values in first iteration
-        if iteration == 1:
-            self.iter_count = 0
-            self.last_log_time = time.time()
+    def optimzation_about_to_start(self):
+        self.last_log_time = time.time()
+        self.iter_count = 0
 
+    def __call__(self, iteration, error, embedding):
         now = time.time()
         duration = now - self.last_log_time
         self.last_log_time = now
@@ -33,7 +40,7 @@ class ErrorLogger:
             iteration, error, n_iters, duration))
 
 
-class VerifyExaggerationError:
+class VerifyExaggerationError(Callback):
     """Used to verify that the exaggeration correction implemented in
     `gradient_descent` is correct."""
     def __init__(self, embedding: TSNEEmbedding) -> None:
@@ -66,7 +73,7 @@ class VerifyExaggerationError:
                 corrected_error, true_error, abs(true_error - corrected_error)))
 
 
-class ErrorApproximations:
+class ErrorApproximations(Callback):
     """Check how good the error approximations are. Of course, we use an
     approximation for P so this itself is an approximation."""
     def __init__(self, P: csr_matrix):

@@ -595,12 +595,12 @@ def gradient_descent(embedding, P, dof, n_iter, negative_gradient_method,
     if exaggeration != 1:
         P *= exaggeration
 
+    # Notify the callbacks that the optimization is about to start
+    for callback in callbacks:
+        callback.optimzation_about_to_start()
+
     for iteration in range(n_iter):
-        # We want to report the error to the callback and a final error if
-        # we're at the final iteration
-        should_call_callback = use_callbacks and (
-            (iteration + 1) % callbacks_every_iters == 0 or iteration == 0
-        )
+        should_call_callback = use_callbacks and (iteration + 1) % callbacks_every_iters == 0
         should_eval_error = should_call_callback
 
         error, gradient = negative_gradient_method(
