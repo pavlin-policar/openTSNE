@@ -12,12 +12,17 @@ tSNE runs in two phases. In the first phase, K nearest neighbors must be found f
 The second phase runs the actual optimization. In each iteration the negative gradient must be computed w.r.t. the embedding. This can be computed using Barnes-Hut space partitioning trees or FFT accelerated interpolation. For more details, see the corresponding papers.
 
 ## Benchmarks
-\# TODO
+The numbers are not exact. The benchmarks were run on an Intel i7-7700HQ CPU @ 2.80GHz (up to 3.80GHz) processor.
 
-| Method | Dimensions  | fastTSNE | fastTSNE (Intel MKL) | Fit-SNE | MultiCore tSNE | Scikit-learn
-|---|---|---|---|---|---|---|
-| MNIST | 70,000x784
+FFT benchmarks are run using approximate nearest neigbhor search. Exact search is used for Barnes-Hut.
 
+The typical benchmark to use is the MNIST data set containing 70,000 28x28 images (784 pixels).
+
+| MNIST | Exact NN | Approximate NN | BH gradient | FFT gradient |
+|:---|---:|---:|---:|---:|
+| 4 cores | 2086s | 22s | 243s | 67s |
+
+ 
 ## Usage
 We provide two modes of usage. One is very familliar to anyone who has ever used scikit-learn via `TSNE.fit`.
 
