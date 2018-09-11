@@ -5,10 +5,10 @@ from typing import Optional
 import numpy as np
 from scipy.sparse import csr_matrix
 from sklearn.decomposition import PCA
-from .quad_tree import QuadTree
 
 from . import _tsne
 from .affinity import Affinities, NearestNeighborAffinities
+from .quad_tree import QuadTree
 
 EPSILON = np.finfo(np.float64).eps
 

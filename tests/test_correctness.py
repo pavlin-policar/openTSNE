@@ -2,8 +2,8 @@ import unittest
 
 import numpy as np
 
-from tsne.callbacks import VerifyExaggerationError
-from tsne.tsne import TSNE, TSNEEmbedding
+from fastTSNE.callbacks import VerifyExaggerationError
+from fastTSNE.tsne import TSNE, TSNEEmbedding
 
 np.random.seed(42)
 

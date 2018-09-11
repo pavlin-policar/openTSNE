@@ -75,7 +75,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         'late_exaggeration_iter': [50, 100],
         'late_exaggeration': [None, 2],
     }})
-    @patch('tsne.tsne.gradient_descent')
+    @patch('fastTSNE.tsne.gradient_descent')
     def test_constructor(self, param_name, param_value, gradient_descent):
         # type: (str, Any, MagicMock) -> None
         # Make sure mock still conforms to signature
@@ -122,7 +122,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         'exaggeration': [None, 2, 5],
         'momentum': [0.2, 0.5, 0.8],
     }})
-    @patch('tsne.tsne.gradient_descent')
+    @patch('fastTSNE.tsne.gradient_descent')
     def test_embedding_optimize(self, param_name, param_value, gradient_descent):
         # type: (str, Any, MagicMock) -> None
         # Make sure mock still conforms to signature
@@ -145,7 +145,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         'n_iter': [50, 100],
         'final_momentum': [0.2, 0.5, 0.8],
     }})
-    @patch('tsne.tsne.gradient_descent')
+    @patch('fastTSNE.tsne.gradient_descent')
     def test_embedding_transform(self, param_name, param_value, gradient_descent):
         # type: (str, Any, MagicMock) -> None
         # Make sure mock still conforms to signature
@@ -190,7 +190,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         'exaggeration': [None, 2, 5],
         'momentum': [0.2, 0.5, 0.8],
     }})
-    @patch('tsne.tsne.gradient_descent')
+    @patch('fastTSNE.tsne.gradient_descent')
     def test_partial_embedding_optimize(self, param_name, param_value, gradient_descent):
         # type: (str, Any, MagicMock) -> None
         # Make sure mock still conforms to signature
