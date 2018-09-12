@@ -9,12 +9,19 @@ uns1 = sys.platform.startswith('win32') and sys.version_info[:2] == (2, 7)
 uns2 = sys.maxsize <= 2 ** 32
 if uns1 or uns2:
     import numba
+    __njit_copy = numba.njit
 
-    def __jit_wrapper(*args, **kwargs):
+    def __njit_wrapper(*args, **kwargs):
         kwargs.pop('parallel', None)
-        return numba.jit(*args, **kwargs)
+        return lambda f: f
 
-    numba.jit = __jit_wrapper
+    numba.njit = __njit_wrapper
+
+    import pynndescent
+    pynndescent.pynndescent_.numba.njit = __njit_wrapper
+    pynndescent.distances.numba.njit = __njit_wrapper
+    pynndescent.rp_trees.numba.njit = __njit_wrapper
+    pynndescent.utils.numba.njit = __njit_wrapper
 
 from pynndescent import NNDescent as LibNNDescent
 
