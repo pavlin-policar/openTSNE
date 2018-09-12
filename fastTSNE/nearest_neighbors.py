@@ -11,8 +11,8 @@ if uns1 or uns2:
     import numba
     __njit_copy = numba.njit
 
+    # Ignore njit decorator and run raw Python function
     def __njit_wrapper(*args, **kwargs):
-        kwargs.pop('parallel', None)
         return lambda f: f
 
     numba.njit = __njit_wrapper
