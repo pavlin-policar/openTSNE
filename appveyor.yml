@@ -1,0 +1,18 @@
+# https://packaging.python.org/guides/supporting-windows-using-appveyor/
+
+environment:
+  matrix:
+    - PYTHON: "C:\\Python35"
+    - PYTHON: "C:\\Python35-x64"
+    - PYTHON: "C:\\Python36"
+    - PYTHON: "C:\\Python36-x64"
+
+install:
+  - "%PYTHON%\\python.exe -m pip install wheel numpy scipy"
+  - "%PYTHON%\\python.exe setup.py develop"
+
+build: off
+
+test_script:
+  - "%PYTHON%\\python.exe -m unittest tests.test_correctness"
+  - "%PYTHON%\\python.exe -m unittest tests.test_tsne"
