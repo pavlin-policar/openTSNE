@@ -3,6 +3,7 @@
 
 
 [![Build Status](https://travis-ci.com/pavlin-policar/fastTSNE.svg?branch=master)](https://travis-ci.com/pavlin-policar/fastTSNE)
+[![Build status](https://ci.appveyor.com/api/projects/status/2s1cbbsk8dltte3y?svg=true)](https://ci.appveyor.com/project/pavlin-policar/fasttsne)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ef67c21a74924b548acae5a514bc443d)](https://app.codacy.com/app/pavlin-policar/fastTSNE?utm_source=github.com&utm_medium=referral&utm_content=pavlin-policar/fastTSNE&utm_campaign=Badge_Grade_Dashboard)
 
 The goal of this project is to have fast implementations of tSNE in one place, without any external C/C++ dependencies. This makes the package very easy to include in other projects.
