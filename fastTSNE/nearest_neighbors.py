@@ -1,4 +1,21 @@
+import sys
+
 from sklearn.neighbors import NearestNeighbors
+
+# In case we're running on a 32bit system, we have to properly handle numba's
+# ``parallel`` directive, which throws a ``RuntimeError``. It is important to
+# patch this before importing ``pynndescent`` which heavily relies on numba
+uns1 = sys.platform.startswith('win32') and sys.version_info[:2] == (2, 7)
+uns2 = sys.maxsize <= 2 ** 32
+if uns1 or uns2:
+    import numba
+
+    def __jit_wrapper(*args, **kwargs):
+        kwargs.pop('parallel', None)
+        return numba.jit(*args, **kwargs)
+
+    numba.jit = __jit_wrapper
+
 from pynndescent import NNDescent as LibNNDescent
 
 
