@@ -98,8 +98,8 @@ Note that all the aspects of optimization can be controlled via the `.optimize` 
 
 ## References
 
-[1] Maaten, Laurens van der, and Geoffrey Hinton. "Visualizing data using t-SNE." Journal of machine learning research 9.Nov (2008): 2579-2605.
+1. Maaten, Laurens van der, and Geoffrey Hinton. ["Visualizing data using t-SNE."](http://www.jmlr.org/papers/volume9/vandermaaten08a/vandermaaten08a.pdf) Journal of machine learning research 9.Nov (2008): 2579-2605.
 
-[2] Van Der Maaten, Laurens. "Accelerating t-SNE using tree-based algorithms." The Journal of Machine Learning Research 15.1 (2014): 3221-3245.
+2. Van Der Maaten, Laurens. ["Accelerating t-SNE using tree-based algorithms."](http://www.jmlr.org/papers/volume15/vandermaaten14a/vandermaaten14a.pdf) The Journal of Machine Learning Research 15.1 (2014): 3221-3245.
 
-[3] Linderman, George C., et al. "Efficient Algorithms for t-distributed Stochastic Neighborhood Embedding." arXiv preprint arXiv:1712.09005 (2017).
+3. Linderman, George C., et al. ["Efficient Algorithms for t-distributed Stochastic Neighborhood Embedding."](https://arxiv.org/pdf/1712.09005.pdf) arXiv preprint arXiv:1712.09005 (2017).
