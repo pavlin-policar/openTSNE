@@ -1,7 +1,5 @@
 # tSNE
 
-
-
 [![Build Status](https://travis-ci.com/pavlin-policar/fastTSNE.svg?branch=master)](https://travis-ci.com/pavlin-policar/fastTSNE)
 [![Build status](https://ci.appveyor.com/api/projects/status/2s1cbbsk8dltte3y?svg=true)](https://ci.appveyor.com/project/pavlin-policar/fasttsne)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ef67c21a74924b548acae5a514bc443d)](https://app.codacy.com/app/pavlin-policar/fastTSNE?utm_source=github.com&utm_medium=referral&utm_content=pavlin-policar/fastTSNE&utm_campaign=Badge_Grade_Dashboard)
@@ -30,7 +28,7 @@ The typical benchmark to use is the MNIST data set containing 70,000 28x28 image
 
  
 ## Usage
-We provide two modes of usage. One is very familliar to anyone who has ever used scikit-learn via `TSNE.fit`.
+We provide two modes of usage. One is somewhat familliar to scikit-learn's `TSNE.fit`.
 
 We also provide an advanced interface for much more control of the optimization process, allowing us to interactively tune the embedding.
 
@@ -39,15 +37,15 @@ We also provide an advanced interface for much more control of the optimization 
 Can be used with any numpy arrays. The interface is similar to the one provided by scikit-learn.
 
 ```python
+from fastTSNE import TSNE
 from sklearn import datasets
 
 iris = datasets.load_iris()
-x = iris['data']
-y = iris['target']
+x, y = iris['data'], iris['target']
 
 tsne = TSNE(
 	n_components=2, perplexity=30, learning_rate=100, early_exaggeration=12,
-	n_jobs=4, angle=0.5, initialization='pca', metric='euclidean',
+	n_jobs=4, angle=0.5, initialization='random', metric='euclidean',
 	n_iter=750, early_exaggeration_iter=250, neighbors='exact',
 	negative_gradient_method='bh', min_num_intervals=10,
 	ints_in_inverval=2, late_exaggeration_iter=100, late_exaggeration=4,
@@ -56,9 +54,13 @@ tsne = TSNE(
 embedding = tsne.fit(x)
 ```
 
-There are some key differences from scikit-learn. Scikit-learn offers tSNE optimization in two phases: the early exaggerated and normal regime, and therefore the number of iterations for the normal regime is `n_iter` - `early_exaggeration_iter`. Our interface does not do this but actually runs the number of iterations in the provided regime. This implementation also offers a `late_exaggeration` regime that runs after the normal regime. This is optional and sometimes improves separation of clusters, since the attractive forces are scaled up.
+There are two parameters which greatly impact the runtime:
+1. `neighbors` controls nearest neighbor search. If our data are small, `exact` is the better choice. `exact` uses scikit-learn's KD trees. For larger data, approximate search can be orders of magnitude faster. This is selected with `approx`. Nearest neighbor search is performed only once at the beginning of the optmization, but can dominate runtime on large data sets, therefore this must be properly chosen.
+2. `negative_gradient_method` controls which approximation technique to use to approximate gradients. Gradients are computed at each step of the optimization. Van Der Maaten [2] proposed using the Barnes-Hut tree approximation and this has be the de-facto standard in most tSNE implementations. This can be selected by passing `bh`. Asymptotically, this scales as O(n log n) in the number of points works well for up to 10,000 samples. More recently, Linderman et al. [3] developed another approximation using interpolation which scales linearly in the number of points O(n). This can be selected by passing `fft`. There is a fair bit of overhead to this method, making it substantially slower than Barnes-Hut for small numbers of points, but is very fast for larger data sets.
 
-Another key difference is that we return a `TSNEEmbedding` instance. This acts as a regular numpy array, and can be used as such, but can be used further on for adding new points to the embedding, as described later on. The instance also contains the KL divergence and the pBIC as attributes, as opposed to scikit-learn, which stores these attributes on the TSNE fitter itself. This allows us to reuse the fitter for multiple embeddings while still having access to the embedding error.
+tSNE optimization is typically run in two phases. The first phase is called the *early exaggeration* phase. In this phase, we exaggerate how close similar points should be to allow for better grouping and correct for bad initializations. The second phase runs tSNE optimization with no exaggeration. Theoretically, we could pick and choose these as many times and in whatever way we want. Linderman et al. [3] recently propose running another exaggerated phase after the normal phase so the clusters are more tightly packed.
+
+Our `tsne` object acts as a fitter instance, and returns a `TSNEEmbedding` instance. This acts as a regular numpy array, and can be used as such, but can be further optimized if we see fit or can be used for adding new points to the embedding.
 
 We don't log any progress by default, but provide callbacks that can be run at any interval of the optimization process. A simple logger is provided as an example.
 
@@ -68,13 +70,13 @@ from fastTSNE.callbacks import ErrorLogger
 tsne = TSNE(callbacks=ErrorLogger(), callbacks_every_iters=50)
 ```
 
-In this instance, the callback is a callable object, but any function that accepts the following parameters is valid.
+The callback can be any callable object that accepts the following arguments.
 ```python
 def callback(iteration, error, embedding):
-	...
+    ...
 ```
 
-Callbacks are used to control the optimization i.e. every callback must return a boolean value indicating whether or not to stop the optimization. We return `True` if we want to stop. This is convenient because if we want a logging callback, it is easy to forget the return value, and optimization proceeds as planned.
+Callbacks are used to control the optimization i.e. every callback must return a boolean value indicating whether or not to stop the optimization. If we want to stop the optmimization via callback we simply return `True`.
 
 Additionally, a list of callbacks can also be passed, in which case all the callbacks must agree to continue the optimization, otherwise the process is terminated and the current embedding is returned.
 
@@ -85,8 +87,8 @@ If we want finer control of the optimization process, we can run individual opti
 ```python
 tsne = TSNE()
 embedding = tsne.prepare_initial(x)
-embedding.optimize(n_iter=250, exaggeration=12, momentum=0.5)
-embedding.optimize(n_iter=750, momentum=0.8)
+embedding = embedding.optimize(n_iter=250, exaggeration=12, momentum=0.5)
+embedding = embedding.optimize(n_iter=750, momentum=0.8)
 ```
 
 Note that all the aspects of optimization can be controlled via the `.optimize` method, see the docs for an extensive list of parameters.
