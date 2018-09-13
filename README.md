@@ -30,6 +30,15 @@ The typical benchmark to use is the MNIST data set containing 70,000 28x28 image
 |:---|---:|---:|---:|---:|
 | 4 cores | 2086s | 22s | 243s | 67s |
 
+## Installation
+
+The only prerequisite is `numpy`. This is necessary so we can link against numpy header files in cython.
+
+Once numpy is installed, simply run
+```
+pip install fasttsne
+```
+and you're good to go.
  
 ## Usage
 We provide two modes of usage. One is somewhat familliar to scikit-learn's `TSNE.fit`.
