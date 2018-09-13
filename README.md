@@ -4,6 +4,10 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/2s1cbbsk8dltte3y?svg=true)](https://ci.appveyor.com/project/pavlin-policar/fasttsne)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ef67c21a74924b548acae5a514bc443d)](https://app.codacy.com/app/pavlin-policar/fastTSNE?utm_source=github.com&utm_medium=referral&utm_content=pavlin-policar/fastTSNE&utm_campaign=Badge_Grade_Dashboard)
 
+A visualization of 160,796 single cells from the mouse nervous system [Zeisel 2018] computed in 11 minutes 23 seconds.
+
+![Zeisel 2018 mouse nervous system tSNE embedding](images/zeisel_2018.png)
+
 The goal of this project is to have fast implementations of tSNE in one place, without any external C/C++ dependencies. This makes the package very easy to include in other projects.
 
 This package provides two fast implementations of tSNE:
