@@ -1,4 +1,4 @@
-# tSNE
+# fastTSNE
 
 [![Build Status](https://travis-ci.com/pavlin-policar/fastTSNE.svg?branch=master)](https://travis-ci.com/pavlin-policar/fastTSNE)
 [![Build status](https://ci.appveyor.com/api/projects/status/2s1cbbsk8dltte3y?svg=true)](https://ci.appveyor.com/project/pavlin-policar/fasttsne)
