@@ -17,13 +17,13 @@ if uns1 or uns2:
 
     numba.njit = __njit_wrapper
 
-    import pynndescent
+    from . import pynndescent
     pynndescent.pynndescent_.numba.njit = __njit_wrapper
     pynndescent.distances.numba.njit = __njit_wrapper
     pynndescent.rp_trees.numba.njit = __njit_wrapper
     pynndescent.utils.numba.njit = __njit_wrapper
 
-from pynndescent import NNDescent as LibNNDescent
+from .pynndescent import NNDescent as LibNNDescent
 
 
 class KNNIndex:
