@@ -317,7 +317,7 @@ def prune(graph, prune_level=0, n_neighbors=10):
     reduced_graph = degree_prune(graph, max_degree=max_degree)
     result_graph = lil_matrix((graph.shape[0], graph.shape[0])).tocsr()
 
-    for n in range(n_iters):
+    for _ in range(n_iters):
         mst = minimum_spanning_tree(reduced_graph)
         result_graph = result_graph.maximum(mst)
         reduced_graph -= mst
@@ -435,7 +435,7 @@ class NNDescent(object):
 
     def __init__(self, data,
                  metric='euclidean',
-                 metric_kwds={},
+                 metric_kwds=None,
                  n_neighbors=15,
                  n_trees=8,
                  leaf_size=15,
@@ -451,7 +451,7 @@ class NNDescent(object):
         self.n_trees = n_trees
         self.n_neighbors = n_neighbors
         self.metric = metric
-        self.metric_kwds = metric_kwds
+        self.metric_kwds = metric_kwds or dict()
         self.leaf_size = leaf_size
         self.prune_level = pruning_level
         self.max_candidates = max_candidates
@@ -715,7 +715,7 @@ class PyNNDescentTransformer(BaseEstimator, TransformerMixin):
         iteration of NN-descent. Larger values will result in less accurate
         indexes and less accurate searching. Don't tweak this value unless
         you know what you're doing.
-        
+
     Examples
     --------
     >>> from sklearn.manifold import Isomap
