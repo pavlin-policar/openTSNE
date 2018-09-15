@@ -8,7 +8,7 @@ from os.path import abspath, dirname, join
 import fire
 import matplotlib.pyplot as plt
 import numpy as np
-# from MulticoreTSNE import MulticoreTSNE
+from MulticoreTSNE import MulticoreTSNE
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE as SKLTSNE
 from sklearn.model_selection import train_test_split
