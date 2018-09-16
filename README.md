@@ -4,7 +4,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/2s1cbbsk8dltte3y?svg=true)](https://ci.appveyor.com/project/pavlin-policar/fasttsne)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ef67c21a74924b548acae5a514bc443d)](https://app.codacy.com/app/pavlin-policar/fastTSNE?utm_source=github.com&utm_medium=referral&utm_content=pavlin-policar/fastTSNE&utm_campaign=Badge_Grade_Dashboard)
 
-A visualization of 160,796 single cell trasncriptomes from the mouse nervous system [Zeisel 2018] computed in 11 minutes 23 seconds using FFT accelerated interpolation and approximate nearest neighbors.
+A visualization of 160,796 single cell trasncriptomes from the mouse nervous system [Zeisel 2018] computed in exactly 2 minutes using FFT accelerated interpolation and approximate nearest neighbors.
 
 ![Zeisel 2018 mouse nervous system tSNE embedding](images/zeisel_2018.png)
 
@@ -14,7 +14,7 @@ This package provides two fast implementations of tSNE:
 1. Barnes-hut tsne [2] is inspired by Multicore tSNE and is appropriate for small data sets and has asymptotic complexity O(n log n).
 2. Fit-SNE [3] is inspired by the C++ implementation of Fit-SNE and is appropriate for larger data sets (>10,000 samples). It has asymptotic complexity O(n). The C++ implementation depends on FFTW for fast fourier transforms which must be installed independently. This makes messy for distribution.
 
-We include both these implementations because Barnes-Hut tSNE tends to be much faster for smaller data sets, while Fit-SNE is much faster for larger data sets (>10,000 samples).
+We include both these implementations because Barnes-Hut tSNE tends to be slightly faster for smaller data sets, while Fit-SNE is much faster for larger data sets (>10,000 samples). The difference is typically in the order of seconds, at most minutes, so a safe default is using the FFT approximation.
 
 tSNE runs in two phases. In the first phase, K nearest neighbors must be found for each sample. We offer exact nearest neighbor search using scikit-learn's nearest neighbors KDTrees and approximate nearest neighbor search using a Python/Numba implementation of nearest neighbor descent. Again, exact search is faster for smaller data sets and approximate search is faster for larger data sets.
 The second phase runs the actual optimization. In each iteration the negative gradient must be computed w.r.t. the embedding. This can be computed using Barnes-Hut space partitioning trees or FFT accelerated interpolation. For more details, see the corresponding papers.
@@ -69,7 +69,7 @@ embedding = tsne.fit(x)
 
 There are two parameters which greatly impact the runtime:
 1. `neighbors` controls nearest neighbor search. If our data are small, `exact` is the better choice. `exact` uses scikit-learn's KD trees. For larger data, approximate search can be orders of magnitude faster. This is selected with `approx`. Nearest neighbor search is performed only once at the beginning of the optmization, but can dominate runtime on large data sets, therefore this must be properly chosen.
-2. `negative_gradient_method` controls which approximation technique to use to approximate gradients. Gradients are computed at each step of the optimization. Van Der Maaten [2] proposed using the Barnes-Hut tree approximation and this has be the de-facto standard in most tSNE implementations. This can be selected by passing `bh`. Asymptotically, this scales as O(n log n) in the number of points works well for up to 10,000 samples. More recently, Linderman et al. [3] developed another approximation using interpolation which scales linearly in the number of points O(n). This can be selected by passing `fft`. There is a fair bit of overhead to this method, making it substantially slower than Barnes-Hut for small numbers of points, but is very fast for larger data sets.
+2. `negative_gradient_method` controls which approximation technique to use to approximate gradients. Gradients are computed at each step of the optimization. Van Der Maaten [2] proposed using the Barnes-Hut tree approximation and this has be the de-facto standard in most tSNE implementations. This can be selected by passing `bh`. Asymptotically, this scales as O(n log n) in the number of points works well for up to 10,000 samples. More recently, Linderman et al. [3] developed another approximation using interpolation which scales linearly in the number of points O(n). This can be selected by passing `fft`. There is a bit of overhead to this method, making it slightly slower than Barnes-Hut for small numbers of points, but is very fast for larger data sets. The difference is typically in the order of seconds, at most minutes, so a safe default is using the FFT approximation.
 
 tSNE optimization is typically run in two phases. The first phase is called the *early exaggeration* phase. In this phase, we exaggerate how close similar points should be to allow for better grouping and correct for bad initializations. The second phase runs tSNE optimization with no exaggeration. Theoretically, we could pick and choose these as many times and in whatever way we want. Linderman et al. [3] recently propose running another exaggerated phase after the normal phase so the clusters are more tightly packed.
 
