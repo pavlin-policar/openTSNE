@@ -1,6 +1,5 @@
 import logging
 from collections import Iterable
-from typing import Optional
 
 import numpy as np
 from scipy.sparse import csr_matrix
@@ -373,7 +372,8 @@ class TSNE:
         np.ndarray
 
         """
-        initialization = initialization or self.initialization
+        if initialization is None:
+            initialization = self.initialization
 
         # If initial positions are given in an array, use a copy of that
         if isinstance(initialization, np.ndarray):
@@ -381,13 +381,26 @@ class TSNE:
                 'The provided initialization contains a different number of ' \
                 'samples (%d) than the data provided (%d).' % (
                     initialization.shape[0], X.shape[0])
-            return np.array(initialization)
+            embedding = np.array(initialization)
+
+            variance = np.var(embedding, axis=0)
+            if any(variance > 1e-4):
+                log.warning(
+                    'Variance of embedding is greater than 0.0001. Initial '
+                    'embeddings with high variance may have display poor convergence.')
+
+            return embedding
 
         # Initialize the embedding using a PCA projection into the desired
         # number of components
         elif initialization == 'pca':
             pca = PCA(n_components=self.n_components)
-            return pca.fit_transform(X)
+            embedding = pca.fit_transform(X)
+            # The PCA embedding may have high variance, which leads to poor convergence
+            normalization = np.std(embedding, axis=0) * 100
+            embedding /= normalization
+
+            return embedding
 
         # Random initialization with isotropic normal distribution
         elif initialization == 'random':

@@ -352,5 +352,19 @@ class TestTSNECallbackParams(unittest.TestCase):
 class TSNEInitialization(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.x = np.random.randn(100, 4)
-        cls.x_test = np.random.randn(25, 4)
+        # It would be nice if the initial data were not nicely behaved to test
+        # for low variance
+        cls.x = np.random.normal(100, 50, (25, 4))
+
+    def test_low_variance(self):
+        """Low variance of the initial embedding is very important for the
+        convergence of tSNE."""
+        # Cycle through various initializations
+        initializations = ['random', 'pca']
+        allowed = 1e-3
+
+        for init in initializations:
+            tsne = TSNE(initialization=init, perplexity=2)
+            embedding = tsne.prepare_initial(self.x)
+            np.testing.assert_array_less(np.var(embedding, axis=0), allowed,
+                                         'using the `%s` initialization' % init)
