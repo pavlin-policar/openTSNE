@@ -32,15 +32,16 @@ if USE_CYTHON:
 setup(
     name='fastTSNE',
     description='',
+    license='BSD-3-Clause',
     author='Pavlin Poličar',
     author_email='pavlin.g.p@gmail.com',
-    version='0.2.5',
+    version='0.2.6',
     url='https://github.com/pavlin-policar/fastTSNE',
     packages=setuptools.find_packages(),
     ext_modules=extensions,
     install_requires=[
         'numpy>1.14',
-        'pynndescent>=0.2',
+        'numba>=0.38.1',
         'scikit-learn>=0.19,<0.19.99',
         'scipy',
     ]
