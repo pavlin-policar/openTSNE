@@ -115,12 +115,11 @@ class PartialTSNEEmbedding(np.ndarray):
 
 
 class TSNEEmbedding(np.ndarray):
-    def __new__(cls, embedding, affinities, gradient_descent_params, pca_init=None):
+    def __new__(cls, embedding, affinities, gradient_descent_params):
         obj = np.asarray(embedding, dtype=np.float64, order='C').view(TSNEEmbedding)
 
         obj.affinities = affinities  # type: Affinities
         obj.gradient_descent_params = gradient_descent_params  # type: dict
-        obj.pca_init = pca_init  # type: Optional[PCA]
 
         obj.kl_divergence = None
 
@@ -160,8 +159,7 @@ class TSNEEmbedding(np.ndarray):
                   early_exaggeration=2, early_exaggeration_iter=100,
                   initial_momentum=0.2, n_iter=300, final_momentum=0.4,
                   **gradient_descent_params):
-        embedding = self.prepare_partial(
-            X, perplexity=perplexity, initialization=initialization)
+        embedding = self.prepare_partial(X, perplexity=perplexity, initialization=initialization)
 
         optim_params = dict(gradient_descent_params)
 
@@ -226,14 +224,6 @@ class TSNEEmbedding(np.ndarray):
                     initialization.shape[0], X.shape[0])
             embedding = np.array(initialization)
 
-        # Initialize the embedding using a PCA projection into the desired
-        # number of components
-        elif initialization == 'pca':
-            assert self.pca_init is not None, \
-                'The initial embedded was not initialized with `pca`, so ' \
-                'there is no projection model!'
-            embedding = self.pca_init.fit_transform(X)
-
         # Random initialization with isotropic normal distribution
         elif initialization == 'random':
             embedding = np.random.normal(0, 1e-2, (X.shape[0], n_components))
@@ -242,6 +232,9 @@ class TSNEEmbedding(np.ndarray):
             embedding = np.zeros((n_samples, n_components))
             for i in range(n_samples):
                 embedding[i] = np.average(self[neighbors[i]], axis=0, weights=distances[i])
+
+        else:
+            raise ValueError('Unrecognized initialization scheme `%s`.' % initialization)
 
         return embedding
 
@@ -336,12 +329,6 @@ class TSNE:
         # Get some initial coordinates for the embedding
         y_coords = self.generate_initial_coordinates(X, initialization=initialization)
 
-        # If using PCA init, we need to keep the model to project new data
-        if isinstance(y_coords, tuple):
-            pca_init_model, y_coords = y_coords
-        else:
-            pca_init_model = None
-
         # Compute the affinities for the input data
         affinities = NearestNeighborAffinities(
             X, self.perplexity, method=self.neighbors_method,
@@ -371,8 +358,7 @@ class TSNE:
             'callbacks_every_iters': self.callbacks_every_iters,
         }
 
-        return TSNEEmbedding(y_coords, affinities, gradient_descent_params,
-                             pca_init=pca_init_model)
+        return TSNEEmbedding(y_coords, affinities, gradient_descent_params)
 
     def generate_initial_coordinates(self, X, initialization=None):
         """Get initial coordinates for the new embedding for the data set.
@@ -401,14 +387,14 @@ class TSNE:
         # number of components
         elif initialization == 'pca':
             pca = PCA(n_components=self.n_components)
-            return pca, pca.fit_transform(X)
+            return pca.fit_transform(X)
 
         # Random initialization with isotropic normal distribution
         elif initialization == 'random':
             return np.random.normal(0, 1e-2, (X.shape[0], self.n_components))
 
         else:
-            raise ValueError('Unrecognized initialization scheme')
+            raise ValueError('Unrecognized initialization scheme `%s`.' % initialization)
 
 
 def kl_divergence_bh(embedding, P, dof, bh_params, reference_embedding=None,

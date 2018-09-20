@@ -354,20 +354,3 @@ class TSNEInitialization(unittest.TestCase):
     def setUpClass(cls):
         cls.x = np.random.randn(100, 4)
         cls.x_test = np.random.randn(25, 4)
-
-    def test_unfitted_pca_model(self):
-        """Using PCA initialization in `transform` should fail when the initial
-        embedding was initialized with PCA."""
-        tsne = TSNE(initialization='random')
-        embedding = tsne.fit(self.x)
-        # Transforming using `pca` init on embedding that did not use
-        # `pca` init did not fail
-        with self.assertRaises(AssertionError):
-            embedding.transform(self.x_test, initialization='pca')
-
-    def test_fitted_pca_model(self):
-        """Using PCA initialization in `transform` should work when the initial
-        embedding was initialized with PCA."""
-        tsne = TSNE(initialization='pca')
-        embedding = tsne.fit(self.x)
-        embedding.transform(self.x_test, initialization='pca')
