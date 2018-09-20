@@ -1,4 +1,5 @@
 import logging
+import multiprocessing
 from collections import Iterable
 
 import numpy as np
@@ -48,6 +49,23 @@ def _handle_nice_params(optim_params: dict) -> None:
         raise ValueError('Unrecognized gradient method. Please choose one of '
                          'the supported methods or provide a valid callback.')
     optim_params['negative_gradient_method'] = negative_gradient_method
+
+    # Handle number of jobs
+    n_jobs = optim_params['n_jobs']
+    if n_jobs < 0:
+        n_cores = multiprocessing.cpu_count()
+        # Add negative number of n_jobs to the number of cores, but increment by
+        # one because -1 indicates using all cores, -2 all except one, and so on
+        n_jobs = n_cores + n_jobs + 1
+
+    # If the number of jobs, after this correction is still <= 0, then the user
+    # probably thought they had more cores, so we'll default to 1
+    if n_jobs <= 0:
+        log.warning('`n_jobs` receieved value %d but only %d cores are available. '
+                    'Defaulting to single job.' % (optim_params['n_jobs'], n_cores))
+        n_jobs = 1
+
+    optim_params['n_jobs'] = n_jobs
 
 
 class OptimizationInterrupt(InterruptedError):
