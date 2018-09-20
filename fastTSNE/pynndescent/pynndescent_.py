@@ -451,7 +451,11 @@ class NNDescent(object):
         self.n_trees = n_trees
         self.n_neighbors = n_neighbors
         self.metric = metric
-        self.metric_kwds = metric_kwds or dict()
+
+        if metric_kwds is None:
+            metric_kwds = dict()
+        self.metric_kwds = metric_kwds
+
         self.leaf_size = leaf_size
         self.prune_level = pruning_level
         self.max_candidates = max_candidates
