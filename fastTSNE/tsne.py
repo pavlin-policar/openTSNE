@@ -630,7 +630,7 @@ def gradient_descent(embedding, P, dof, n_iter, negative_gradient_method,
 
         # Correct the KL divergence w.r.t. the exaggeration if needed
         if should_eval_error and exaggeration != 1:
-            error = (error - np.sum(P) * np.log(exaggeration)) / exaggeration
+            error = error / exaggeration - np.log(exaggeration)
 
         if should_call_callback:
             # Continue only if all the callbacks say so
