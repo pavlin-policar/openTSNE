@@ -5,6 +5,7 @@ from collections import Iterable
 import numpy as np
 from scipy.sparse import csr_matrix
 from sklearn.decomposition import PCA
+from sklearn.utils import check_random_state
 
 from . import _tsne
 from .affinity import Affinities, NearestNeighborAffinities
@@ -132,11 +133,12 @@ class PartialTSNEEmbedding(np.ndarray):
 
 
 class TSNEEmbedding(np.ndarray):
-    def __new__(cls, embedding, affinities, gradient_descent_params):
+    def __new__(cls, embedding, affinities, gradient_descent_params, random_state=None):
         obj = np.asarray(embedding, dtype=np.float64, order='C').view(TSNEEmbedding)
 
         obj.affinities = affinities  # type: Affinities
         obj.gradient_descent_params = gradient_descent_params  # type: dict
+        obj.random_state = random_state
 
         obj.kl_divergence = None
 
@@ -243,7 +245,8 @@ class TSNEEmbedding(np.ndarray):
 
         # Random initialization with isotropic normal distribution
         elif initialization == 'random':
-            embedding = np.random.normal(0, 1e-2, (X.shape[0], n_components))
+            random_state = check_random_state(self.random_state)
+            embedding = random_state.normal(0, 1e-2, (X.shape[0], n_components))
 
         elif initialization == 'weighted':
             embedding = np.zeros((n_samples, n_components))
@@ -264,7 +267,7 @@ class TSNE:
                  ints_in_interval=1, initialization='pca', metric='euclidean',
                  initial_momentum=0.5, final_momentum=0.8, n_jobs=1,
                  neighbors='exact', negative_gradient_method='bh',
-                 callbacks=None, callbacks_every_iters=50):
+                 callbacks=None, callbacks_every_iters=50, random_state=None):
         self.n_components = n_components
         self.perplexity = perplexity
         self.learning_rate = learning_rate
@@ -287,6 +290,8 @@ class TSNE:
 
         self.callbacks = callbacks
         self.callbacks_every_iters = callbacks_every_iters
+
+        self.random_state = random_state
 
     def fit(self, X: np.ndarray) -> TSNEEmbedding:
         """Perform t-SNE dimensionality reduction.
@@ -375,7 +380,7 @@ class TSNE:
             'callbacks_every_iters': self.callbacks_every_iters,
         }
 
-        return TSNEEmbedding(y_coords, affinities, gradient_descent_params)
+        return TSNEEmbedding(y_coords, affinities, gradient_descent_params, self.random_state)
 
     def generate_initial_coordinates(self, X, initialization=None):
         """Get initial coordinates for the new embedding for the data set.
@@ -412,7 +417,7 @@ class TSNE:
         # Initialize the embedding using a PCA projection into the desired
         # number of components
         elif initialization == 'pca':
-            pca = PCA(n_components=self.n_components)
+            pca = PCA(n_components=self.n_components, random_state=self.random_state)
             embedding = pca.fit_transform(X)
             # The PCA embedding may have high variance, which leads to poor convergence
             normalization = np.std(embedding, axis=0) * 100
@@ -422,7 +427,8 @@ class TSNE:
 
         # Random initialization with isotropic normal distribution
         elif initialization == 'random':
-            return np.random.normal(0, 1e-2, (X.shape[0], self.n_components))
+            random_state = check_random_state(self.random_state)
+            return random_state.normal(0, 1e-2, (X.shape[0], self.n_components))
 
         else:
             raise ValueError('Unrecognized initialization scheme `%s`.' % initialization)

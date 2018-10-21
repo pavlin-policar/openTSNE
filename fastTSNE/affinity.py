@@ -43,7 +43,7 @@ class Affinities:
 class NearestNeighborAffinities(Affinities):
     """Compute affinities using the nearest neighbors defined by perplexity."""
     def __init__(self, data, perplexity=30, method='approx', metric='euclidean',
-                 symmetrize=True, n_jobs=1):
+                 symmetrize=True, n_jobs=1, random_state=None):
         self.n_samples = data.shape[0]
 
         perplexity = self.check_perplexity(perplexity)
@@ -59,7 +59,7 @@ class NearestNeighborAffinities(Affinities):
                              'Please choose one of the supported methods or '
                              'provide a valid `KNNIndex` instance.')
         else:
-            knn_index = methods[method](metric=metric, n_jobs=n_jobs)
+            knn_index = methods[method](metric=metric, n_jobs=n_jobs, random_state=random_state)
 
         knn_index.build(data)
         neighbors, distances = knn_index.query_train(data, k=k_neighbors)

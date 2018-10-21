@@ -368,3 +368,44 @@ class TSNEInitialization(unittest.TestCase):
             embedding = tsne.prepare_initial(self.x)
             np.testing.assert_array_less(np.var(embedding, axis=0), allowed,
                                          'using the `%s` initialization' % init)
+
+
+class TestRandomState(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # It would be nice if the initial data were not nicely behaved to test
+        # for low variance
+        cls.x = np.random.normal(10000, 50, (25, 4))
+        cls.x_test = np.random.normal(100, 50, (25, 4))
+
+    def test_same_results_on_fixed_random_state_random_init(self):
+        """Results should be exactly the same if we provide a random state."""
+        tsne1 = TSNE(random_state=1, initialization='random')
+        embedding1 = tsne1.fit(self.x)
+
+        tsne2 = TSNE(random_state=1, initialization='random')
+        embedding2 = tsne2.fit(self.x)
+
+        np.testing.assert_array_equal(embedding1, embedding2,
+                                      'Same random state produced different initial embeddings')
+
+    def test_same_results_on_fixed_random_state_pca_init(self):
+        """Results should be exactly the same if we provide a random state."""
+        tsne1 = TSNE(random_state=1, initialization='pca')
+        embedding1 = tsne1.fit(self.x)
+
+        tsne2 = TSNE(random_state=1, initialization='pca')
+        embedding2 = tsne2.fit(self.x)
+
+        np.testing.assert_array_equal(embedding1, embedding2,
+                                      'Same random state produced different initial embeddings')
+
+    def test_same_partial_embedding_on_fixed_random_state(self):
+        tsne = TSNE(random_state=1, initialization='random')
+        embedding = tsne.fit(self.x)
+
+        partial1 = embedding.prepare_partial(self.x_test, initialization='random')
+        partial2 = embedding.prepare_partial(self.x_test, initialization='random')
+
+        np.testing.assert_array_equal(partial1, partial2,
+                                      'Same random state produced different partial embeddings')
