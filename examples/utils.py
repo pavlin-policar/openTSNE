@@ -1,7 +1,6 @@
 from os.path import abspath, dirname, join
 import pickle
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 FILE_DIR = dirname(abspath(__file__))
@@ -25,6 +24,7 @@ def get_zeisel_2018(n_samples: int = None):
     
 def plot(x: np.ndarray, y: np.ndarray, ax=None, draw_legend=True, **kwargs) -> None:
     if ax is None:
+        import matplotlib.pyplot as plt
         _, ax = plt.subplots()
     
     for yi in np.unique(y):
