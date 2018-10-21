@@ -1,6 +1,7 @@
 import sys
 
 from sklearn.neighbors import NearestNeighbors
+from sklearn.utils import check_random_state
 
 # In case we're running on a 32bit system, we have to properly handle numba's
 # ``parallel`` directive, which throws a ``RuntimeError``. It is important to
@@ -27,10 +28,11 @@ from .pynndescent import NNDescent as LibNNDescent
 
 
 class KNNIndex:
-    def __init__(self, metric, n_jobs=1):
+    def __init__(self, metric, n_jobs=1, random_state=None):
         self.index = None
         self.metric = metric
         self.n_jobs = n_jobs
+        self.random_state = random_state
 
     def build(self, data):
         """Build the index so we can query nearest neighbors."""
@@ -60,7 +62,9 @@ class NNDescent(KNNIndex):
     # TODO: Make mapping from sklearn metrics to lib metrics
 
     def build(self, data):
-        self.index = LibNNDescent(data, metric=self.metric, n_neighbors=5)
+        random_state = check_random_state(self.random_state)
+        self.index = LibNNDescent(data, metric=self.metric, n_neighbors=5,
+                                  random_state=random_state)
 
     def query_train(self, data, k):
         search_neighbors = min(data.shape[0] - 1, k + 1)
