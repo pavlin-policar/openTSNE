@@ -13,7 +13,7 @@ DATA_DIR = join(FILE_DIR, 'data')
 def get_zeisel_2018(n_samples: int = None):
     with gzip.open(join(DATA_DIR, 'zeisel_2018.pkl.gz'), 'rb') as f:
         data = pickle.load(f)
-    
+
     # Extract log normalized counts and cell type
     x, y = data['log_counts'], data['CellType1']
     x = x.T
@@ -43,13 +43,13 @@ def get_mnist(n_samples: int = None):
         x, y = x[indices], y[indices]
 
     return x, y
-    
-    
+
+
 def plot(x: np.ndarray, y: np.ndarray, ax=None, draw_legend=True, **kwargs) -> None:
     if ax is None:
         import matplotlib.pyplot as plt
         _, ax = plt.subplots()
-    
+
     for yi in np.unique(y):
         mask = y == yi
         ax.plot(x[mask, 0], x[mask, 1], 'o', label=str(yi),
@@ -59,7 +59,7 @@ def plot(x: np.ndarray, y: np.ndarray, ax=None, draw_legend=True, **kwargs) -> N
     ax.set_xticks([]), ax.set_yticks([])
     # Hide box border around figure
     ax.axis('off')
-    
+
     if draw_legend:
         legend = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         # Make the legend markers bigger, so we can see what's what
