@@ -32,7 +32,13 @@ The typical benchmark to use is the MNIST data set containing 70,000 28x28 image
 
 ## Installation
 
-The only prerequisite is `numpy`. This is necessary so we can link against numpy header files in cython.
+fastTSNE can be installed using `conda` from conda-forge with
+
+```
+conda install --channel conda-forge fasttsne
+```
+
+fastTSNE can also be installed using pip. The only prerequisite is `numpy`. This is necessary so we can link against numpy header files in cython.
 
 Once numpy is installed, simply run
 ```
@@ -106,10 +112,6 @@ embedding = embedding.optimize(n_iter=750, momentum=0.8)
 
 Note that all the aspects of optimization can be controlled via the `.optimize` method, see the docs for an extensive list of parameters.
 
-
-## Future work
-
-- Automatically determine which nearest neighbor/gradient method to use depending on the data set size.
 
 ## References
 
