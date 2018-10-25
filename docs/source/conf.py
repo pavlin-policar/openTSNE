@@ -20,8 +20,8 @@ sys.path.insert(0, os.path.abspath('fastTSNE'))
 # -- Project information -----------------------------------------------------
 
 project = 'fastTSNE'
-copyright = '2018, Pavlin Poličar'
-author = 'Pavlin Poličar'
+copyright = u'2018, Pavlin Poličar'
+author = u'Pavlin Poličar'
 
 # The short X.Y version
 version = ''
@@ -136,7 +136,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'fastTSNE.tex', 'fastTSNE Documentation',
-     'Pavlin Poličar', 'manual'),
+     u'Pavlin Poličar', 'manual'),
 ]
 
 
