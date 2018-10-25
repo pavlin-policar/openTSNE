@@ -6,17 +6,17 @@
 
 A visualization of 160,796 single cell transcriptomes from the mouse nervous system [Zeisel 2018] computed in under 2 minutes using FFT accelerated interpolation and approximate nearest neighbors. See basic usage notebook for more details.
 
-![Zeisel 2018 mouse nervous system tSNE embedding](images/zeisel_2018.png)
+![Zeisel 2018 mouse nervous system t-SNE embedding](docs/source/images/zeisel_2018.png)
 
-The goal of this project is to have fast implementations of tSNE in one place, without any external C/C++ dependencies. This makes the package very easy to include in other projects.
+The goal of this project is to have fast implementations of t-SNE in one place, without any external C/C++ dependencies. This makes the package very easy to include in other projects.
 
-This package provides two fast implementations of tSNE:
-1. Barnes-hut tsne [2] is inspired by Multicore tSNE and is appropriate for small data sets and has asymptotic complexity O(n log n).
+This package provides two fast implementations of t-SNE:
+1. Barnes-hut t-SNE [2] is inspired by Multicore t-SNE and is appropriate for small data sets and has asymptotic complexity O(n log n).
 2. Fit-SNE [3] is inspired by the C++ implementation of Fit-SNE and is appropriate for larger data sets (>10,000 samples). It has asymptotic complexity O(n). The C++ implementation depends on FFTW for fast fourier transforms which must be installed independently. This makes messy for distribution.
 
-We include both these implementations because Barnes-Hut tSNE tends to be slightly faster for smaller data sets, while Fit-SNE is much faster for larger data sets (>10,000 samples). The difference is typically in the order of seconds, at most minutes, so a safe default is using the FFT approximation.
+We include both these implementations because Barnes-Hut t-SNE tends to be slightly faster for smaller data sets, while Fit-SNE is much faster for larger data sets (>10,000 samples). The difference is typically in the order of seconds, at most minutes, so a safe default is using the FFT approximation.
 
-tSNE runs in two phases. In the first phase, K nearest neighbors must be found for each sample. We offer exact nearest neighbor search using scikit-learn's nearest neighbors KDTrees and approximate nearest neighbor search using a Python/Numba implementation of nearest neighbor descent. Again, exact search is faster for smaller data sets and approximate search is faster for larger data sets.
+t-SNE runs in two phases. In the first phase, K nearest neighbors must be found for each sample. We offer exact nearest neighbor search using scikit-learn's nearest neighbors KDTrees and approximate nearest neighbor search using a Python/Numba implementation of nearest neighbor descent. Again, exact search is faster for smaller data sets and approximate search is faster for larger data sets.
 The second phase runs the actual optimization. In each iteration the negative gradient must be computed w.r.t. the embedding. This can be computed using Barnes-Hut space partitioning trees or FFT accelerated interpolation. For more details, see the corresponding papers.
 
 ## Benchmarks
@@ -32,7 +32,13 @@ The typical benchmark to use is the MNIST data set containing 70,000 28x28 image
 
 ## Installation
 
-The only prerequisite is `numpy`. This is necessary so we can link against numpy header files in cython.
+fastTSNE can be installed using `conda` from conda-forge with
+
+```
+conda install --channel conda-forge fasttsne
+```
+
+fastTSNE can also be installed using pip. The only prerequisite is `numpy`. This is necessary so we can link against numpy header files in cython.
 
 Once numpy is installed, simply run
 ```
@@ -69,9 +75,9 @@ embedding = tsne.fit(x)
 
 There are two parameters which greatly impact the runtime:
 1. `neighbors` controls nearest neighbor search. If our data are small, `exact` is the better choice. `exact` uses scikit-learn's KD trees. For larger data, approximate search can be orders of magnitude faster. This is selected with `approx`. Nearest neighbor search is performed only once at the beginning of the optmization, but can dominate runtime on large data sets, therefore this must be properly chosen.
-2. `negative_gradient_method` controls which approximation technique to use to approximate gradients. Gradients are computed at each step of the optimization. Van Der Maaten [2] proposed using the Barnes-Hut tree approximation and this has be the de-facto standard in most tSNE implementations. This can be selected by passing `bh`. Asymptotically, this scales as O(n log n) in the number of points works well for up to 10,000 samples. More recently, Linderman et al. [3] developed another approximation using interpolation which scales linearly in the number of points O(n). This can be selected by passing `fft`. There is a bit of overhead to this method, making it slightly slower than Barnes-Hut for small numbers of points, but is very fast for larger data sets. The difference is typically in the order of seconds, at most minutes, so a safe default is using the FFT approximation.
+2. `negative_gradient_method` controls which approximation technique to use to approximate gradients. Gradients are computed at each step of the optimization. Van Der Maaten [2] proposed using the Barnes-Hut tree approximation and this has be the de-facto standard in most t-SNE implementations. This can be selected by passing `bh`. Asymptotically, this scales as O(n log n) in the number of points works well for up to 10,000 samples. More recently, Linderman et al. [3] developed another approximation using interpolation which scales linearly in the number of points O(n). This can be selected by passing `fft`. There is a bit of overhead to this method, making it slightly slower than Barnes-Hut for small numbers of points, but is very fast for larger data sets. The difference is typically in the order of seconds, at most minutes, so a safe default is using the FFT approximation.
 
-tSNE optimization is typically run in two phases. The first phase is called the *early exaggeration* phase. In this phase, we exaggerate how close similar points should be to allow for better grouping and correct for bad initializations. The second phase runs tSNE optimization with no exaggeration. Theoretically, we could pick and choose these as many times and in whatever way we want. Linderman et al. [3] recently propose running another exaggerated phase after the normal phase so the clusters are more tightly packed.
+t-SNE optimization is typically run in two phases. The first phase is called the *early exaggeration* phase. In this phase, we exaggerate how close similar points should be to allow for better grouping and correct for bad initializations. The second phase runs t-SNE optimization with no exaggeration. Theoretically, we could pick and choose these as many times and in whatever way we want. Linderman et al. [3] recently propose running another exaggerated phase after the normal phase so the clusters are more tightly packed.
 
 Our `tsne` object acts as a fitter instance, and returns a `TSNEEmbedding` instance. This acts as a regular numpy array, and can be used as such, but can be further optimized if we see fit or can be used for adding new points to the embedding.
 
@@ -95,7 +101,7 @@ Additionally, a list of callbacks can also be passed, in which case all the call
 
 ### Advanced usage
 
-If we want finer control of the optimization process, we can run individual optimization phases (early/late exaggeration) as desired. A typical run of tSNE in scikit-learn using this interface is implemented as follows:
+If we want finer control of the optimization process, we can run individual optimization phases (early/late exaggeration) as desired. A typical run of t-SNE in scikit-learn using this interface is implemented as follows:
 
 ```python
 tsne = TSNE()
@@ -106,10 +112,6 @@ embedding = embedding.optimize(n_iter=750, momentum=0.8)
 
 Note that all the aspects of optimization can be controlled via the `.optimize` method, see the docs for an extensive list of parameters.
 
-
-## Future work
-
-- Automatically determine which nearest neighbor/gradient method to use depending on the data set size.
 
 ## References
 
