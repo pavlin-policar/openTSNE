@@ -1,14 +1,14 @@
 import os
 import sys
+from setuptools import setup, Extension
 
 import numpy as np
 import setuptools
-from setuptools import setup, Extension
 
 USE_CYTHON = os.environ.get('USE_CYTHON', False)
 ext = 'pyx' if USE_CYTHON else 'c'
 
-IS_WINDOWS = 'win' in sys.platform
+IS_WINDOWS = sys.platform.startswith('win')
 openmp_opt = '/openmp' if IS_WINDOWS else '-fopenmp'
 optim_opt = '/O3' if IS_WINDOWS else '-O3'
 
@@ -32,6 +32,7 @@ extensions = [
 
 if USE_CYTHON:
     from Cython.Build import cythonize
+
     extensions = cythonize(extensions)
 
 setup(
@@ -49,5 +50,5 @@ setup(
         'numba>=0.38.1',
         'scikit-learn>=0.19,<0.19.99',
         'scipy',
-    ]
+    ],
 )
