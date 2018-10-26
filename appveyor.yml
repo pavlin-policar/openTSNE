@@ -2,17 +2,15 @@
 
 environment:
   matrix:
-    - PYTHON: "C:\\Python35"
-    - PYTHON: "C:\\Python35-x64"
     - PYTHON: "C:\\Python36"
     - PYTHON: "C:\\Python36-x64"
 
 install:
-  - "%PYTHON%\\python.exe -m pip install wheel numpy scipy numba pynndescent pytest"
-  - "%PYTHON%\\python.exe -m pip install pytest"
+  - "%PYTHON%\\python.exe -m pip install numpy"
   - "%PYTHON%\\python.exe setup.py develop"
+  - "%PYTHON%\\python.exe -m pip install pytest"
 
 build: off
 
 test_script:
-  - "%PYTHON%\\Scripts\\pytest"
+  - "%PYTHON%\\Scripts\\pytest -v"
