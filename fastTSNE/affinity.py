@@ -4,7 +4,7 @@ import numpy as np
 from scipy.sparse import csr_matrix
 
 from . import _tsne
-from .nearest_neighbors import KDTree, NNDescent, KNNIndex
+from .nearest_neighbors import BallTree, NNDescent, KNNIndex
 
 try:
     import networkx as nx
@@ -50,7 +50,7 @@ class NearestNeighborAffinities(Affinities):
         k_neighbors = min(self.n_samples - 1, int(3 * perplexity))
 
         # Support shortcuts for built-in nearest neighbor methods
-        methods = {'exact': KDTree, 'approx': NNDescent}
+        methods = {'exact': BallTree, 'approx': NNDescent}
         if isinstance(method, KNNIndex):
             knn_index = method
 

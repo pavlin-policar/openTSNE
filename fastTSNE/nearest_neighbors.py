@@ -44,9 +44,9 @@ class KNNIndex:
         """Query the index with new points."""
 
 
-class KDTree(KNNIndex):
+class BallTree(KNNIndex):
     def build(self, data):
-        self.index = NearestNeighbors(algorithm='kd_tree', metric=self.metric, n_jobs=self.n_jobs)
+        self.index = NearestNeighbors(algorithm='ball_tree', metric=self.metric, n_jobs=self.n_jobs)
         self.index.fit(data)
 
     def query_train(self, data, k):
