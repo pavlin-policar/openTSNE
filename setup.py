@@ -2,8 +2,15 @@ import os
 import sys
 from setuptools import setup, Extension
 
-import numpy as np
 import setuptools
+
+try:
+    import numpy
+except ImportError:
+    from subprocess import call
+    call(['pip', 'install', 'numpy'])
+
+import numpy as np
 
 USE_CYTHON = os.environ.get('USE_CYTHON', False)
 ext = 'pyx' if USE_CYTHON else 'c'
