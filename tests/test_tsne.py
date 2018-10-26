@@ -5,6 +5,7 @@ from unittest.mock import patch, MagicMock
 
 import numpy as np
 
+from fastTSNE.nearest_neighbors import VALID_METRICS
 from fastTSNE.tsne import TSNE, kl_divergence_bh, kl_divergence_fft
 
 np.random.seed(42)
@@ -209,6 +210,92 @@ class TestTSNEParameterFlow(unittest.TestCase):
 
         self.assertEqual(1, gradient_descent.call_count)
         check_call_contains_kwargs(gradient_descent.mock_calls[0], params)
+
+    @check_params({'metric': set(VALID_METRICS) - {'mahalanobis'}})
+    @patch('sklearn.neighbors.NearestNeighbors')
+    def test_ball_tree_distances(self, param_name, metric, ball_tree: MagicMock):
+        """Distance metrics should be properly passed down to ball tree"""
+        assert param_name == 'metric'
+        tsne = TSNE(metric=metric, neighbors='exact')
+
+        # We don't care about what happens later, just that the NN method is
+        # properly called
+        ball_tree.side_effect = InterruptedError()
+        try:
+            # Haversine distance only supports two dimensions
+            tsne.prepare_initial(self.x[:, :2])
+        except InterruptedError:
+            pass
+
+        self.assertEqual(ball_tree.call_count, 1)
+        check_call_contains_kwargs(ball_tree.mock_calls[0], {'metric': metric})
+
+    @patch('sklearn.neighbors.NearestNeighbors')
+    def test_ball_tree_mahalanobis_distance(self, ball_tree: MagicMock):
+        """Distance metrics and additional params should be correctly passed down to ball tree"""
+        metric = 'mahalanobis'
+        C = np.cov(self.x)
+
+        tsne = TSNE(metric=metric, metric_params={'V': C}, neighbors='exact')
+
+        # We don't care about what happens later, just that the NN method is
+        # properly called
+        ball_tree.side_effect = InterruptedError()
+        try:
+            tsne.prepare_initial(self.x)
+        except InterruptedError:
+            pass
+
+        self.assertEqual(ball_tree.call_count, 1)
+        check_call_contains_kwargs(ball_tree.mock_calls[0], {'metric': metric})
+
+    @check_params({'metric': set(VALID_METRICS) - {'mahalanobis'}})
+    @patch('fastTSNE.pynndescent.NNDescent')
+    def test_nndescent_distances(self, param_name, metric, nndescent: MagicMock):
+        """Distance metrics should be properly passed down to NN descent"""
+        assert param_name == 'metric'
+        tsne = TSNE(metric=metric, neighbors='approx')
+
+        # We don't care about what happens later, just that the NN method is
+        # properly called
+        nndescent.side_effect = InterruptedError()
+        try:
+            # Haversine distance only supports two dimensions
+            tsne.prepare_initial(self.x[:, :2])
+        except InterruptedError:
+            pass
+
+        self.assertEqual(nndescent.call_count, 1)
+        check_call_contains_kwargs(nndescent.mock_calls[0], {'metric': metric})
+
+    @patch('fastTSNE.pynndescent.NNDescent')
+    def test_nndescent_mahalanobis_distance(self, nndescent: MagicMock):
+        """Distance metrics and additional params should be correctly passed down to NN descent"""
+        metric = 'mahalanobis'
+        C = np.cov(self.x)
+
+        tsne = TSNE(metric=metric, metric_params={'V': C}, neighbors='approx')
+
+        # We don't care about what happens later, just that the NN method is
+        # properly called
+        nndescent.side_effect = InterruptedError()
+        try:
+            tsne.prepare_initial(self.x)
+        except InterruptedError:
+            pass
+
+        self.assertEqual(nndescent.call_count, 1)
+        check_call_contains_kwargs(nndescent.mock_calls[0], {'metric': metric})
+
+    def test_raises_error_on_unrecognized_metric(self):
+        """Unknown distance metric should raise error"""
+        tsne = TSNE(metric='imaginary', neighbors='exact')
+        with self.assertRaises(ValueError):
+            tsne.prepare_initial(self.x)
+
+        tsne = TSNE(metric='imaginary', neighbors='approx')
+        with self.assertRaises(ValueError):
+            tsne.prepare_initial(self.x)
 
 
 class TestTSNEInplaceOptimization(unittest.TestCase):

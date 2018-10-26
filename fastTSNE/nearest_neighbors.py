@@ -1,6 +1,6 @@
 import sys
 
-from sklearn.neighbors import NearestNeighbors
+from sklearn import neighbors
 from sklearn.utils import check_random_state
 
 # In case we're running on a 32bit system, we have to properly handle numba's
@@ -10,6 +10,7 @@ uns1 = sys.platform.startswith('win32') and sys.version_info[:2] == (2, 7)
 uns2 = sys.maxsize <= 2 ** 32
 if uns1 or uns2:
     import numba
+
     __njit_copy = numba.njit
 
     # Ignore njit decorator and run raw Python function
@@ -19,18 +20,26 @@ if uns1 or uns2:
     numba.njit = __njit_wrapper
 
     from . import pynndescent
+
     pynndescent.pynndescent_.numba.njit = __njit_wrapper
     pynndescent.distances.numba.njit = __njit_wrapper
     pynndescent.rp_trees.numba.njit = __njit_wrapper
     pynndescent.utils.numba.njit = __njit_wrapper
 
-from .pynndescent import NNDescent as LibNNDescent
+from . import pynndescent
+
+# To keep things simple and consistent, we'll only support distances that are
+# included in both exact and approximation nearest neighbor search libraries
+__ball_tree_metrics = set(neighbors.BallTree.valid_metrics)
+__nndescent_metrics = set(pynndescent.distances.named_distances)
+VALID_METRICS = sorted(list(__ball_tree_metrics & __nndescent_metrics))
 
 
 class KNNIndex:
-    def __init__(self, metric, n_jobs=1, random_state=None):
+    def __init__(self, metric, metric_params=None, n_jobs=1, random_state=None):
         self.index = None
         self.metric = metric
+        self.metric_params = metric_params
         self.n_jobs = n_jobs
         self.random_state = random_state
 
@@ -44,9 +53,12 @@ class KNNIndex:
         """Query the index with new points."""
 
 
-class KDTree(KNNIndex):
+class BallTree(KNNIndex):
     def build(self, data):
-        self.index = NearestNeighbors(algorithm='kd_tree', metric=self.metric, n_jobs=self.n_jobs)
+        self.index = neighbors.NearestNeighbors(
+            algorithm='ball_tree', metric=self.metric,
+            metric_params=self.metric_params, n_jobs=self.n_jobs,
+        )
         self.index.fit(data)
 
     def query_train(self, data, k):
@@ -59,12 +71,12 @@ class KDTree(KNNIndex):
 
 
 class NNDescent(KNNIndex):
-    # TODO: Make mapping from sklearn metrics to lib metrics
-
     def build(self, data):
         random_state = check_random_state(self.random_state)
-        self.index = LibNNDescent(data, metric=self.metric, n_neighbors=5,
-                                  random_state=random_state)
+        self.index = pynndescent.NNDescent(
+            data, metric=self.metric, metric_kwds=self.metric_params,
+            n_neighbors=5, random_state=random_state,
+        )
 
     def query_train(self, data, k):
         search_neighbors = min(data.shape[0] - 1, k + 1)

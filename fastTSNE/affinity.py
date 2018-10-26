@@ -4,7 +4,7 @@ import numpy as np
 from scipy.sparse import csr_matrix
 
 from . import _tsne
-from .nearest_neighbors import KDTree, NNDescent, KNNIndex
+from .nearest_neighbors import BallTree, NNDescent, KNNIndex, VALID_METRICS
 
 try:
     import networkx as nx
@@ -43,23 +43,27 @@ class Affinities:
 class NearestNeighborAffinities(Affinities):
     """Compute affinities using the nearest neighbors defined by perplexity."""
     def __init__(self, data, perplexity=30, method='approx', metric='euclidean',
-                 symmetrize=True, n_jobs=1, random_state=None):
+                 metric_params=None, symmetrize=True, n_jobs=1, random_state=None):
         self.n_samples = data.shape[0]
 
         perplexity = self.check_perplexity(perplexity)
         k_neighbors = min(self.n_samples - 1, int(3 * perplexity))
 
         # Support shortcuts for built-in nearest neighbor methods
-        methods = {'exact': KDTree, 'approx': NNDescent}
+        methods = {'exact': BallTree, 'approx': NNDescent}
         if isinstance(method, KNNIndex):
             knn_index = method
 
         elif method not in methods:
             raise ValueError('Unrecognized nearest neighbor algorithm `%s`. '
                              'Please choose one of the supported methods or '
-                             'provide a valid `KNNIndex` instance.')
+                             'provide a valid `KNNIndex` instance.' % method)
         else:
-            knn_index = methods[method](metric=metric, n_jobs=n_jobs, random_state=random_state)
+            if metric not in VALID_METRICS:
+                raise ValueError('Unrecognized distance metric `%s`. Please '
+                                 'choose one of the supported methods.' % metric)
+            knn_index = methods[method](metric=metric, metric_params=metric_params,
+                                        n_jobs=n_jobs, random_state=random_state)
 
         knn_index.build(data)
         neighbors, distances = knn_index.query_train(data, k=k_neighbors)

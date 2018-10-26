@@ -524,6 +524,8 @@ class TSNE:
     metric: str
         The metric to be used to compute affinities between points in the
         original space.
+    metric_params: Optional[dict]
+        Additional keyword arguments for the metric function.
     initial_momentum: float
         t-SNE optimization uses momentum for faster convergence. This value
         controls the momentum used during the *early optimization* phase.
@@ -587,8 +589,8 @@ class TSNE:
                  n_iter=750, late_exaggeration_iter=0, late_exaggeration=1.2,
                  theta=0.5, n_interpolation_points=3, min_num_intervals=10,
                  ints_in_interval=1, initialization='pca', metric='euclidean',
-                 initial_momentum=0.5, final_momentum=0.8, n_jobs=1,
-                 neighbors='exact', negative_gradient_method='bh',
+                 metric_params=None, initial_momentum=0.5, final_momentum=0.8,
+                 n_jobs=1, neighbors='exact', negative_gradient_method='bh',
                  callbacks=None, callbacks_every_iters=50, random_state=None):
         self.n_components = n_components
         self.perplexity = perplexity
@@ -604,6 +606,7 @@ class TSNE:
         self.ints_in_interval = ints_in_interval
         self.initialization = initialization
         self.metric = metric
+        self.metric_params = metric_params
         self.initial_momentum = initial_momentum
         self.final_momentum = final_momentum
         self.n_jobs = n_jobs
@@ -693,7 +696,7 @@ class TSNE:
         # Compute the affinities for the input data
         affinities = NearestNeighborAffinities(
             X, self.perplexity, method=self.neighbors_method,
-            metric=self.metric, n_jobs=self.n_jobs,
+            metric=self.metric, metric_params=self.metric_params, n_jobs=self.n_jobs,
         )
 
         gradient_descent_params = {
