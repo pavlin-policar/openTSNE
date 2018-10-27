@@ -208,17 +208,19 @@ This is already included in most software packages e.g. scikit-learn.
 
 \subsection{KL Divergence with exaggeration}
 
-The implemented optimization methods don't have a notion of exaggeration, they simply take an affinity matrix $P$ containing the probabilities of points $j$ appearing close to $i$. Exaggeration is used to scale $P$ by some constant factor $\alpha$ (in fact this means that $p_{ij}$s are not proper probabilities) to help separate clusters in the beginning of the optimization. These methods also compute the KL divergence during optimization (for efficiency), and as such, the error is incorrect because we don't account for the scaling $\alpha$.
+The implemented optimization methods don't have a notion of exaggeration, they simply take an affinity matrix $P$ containing the probabilities of points $j$ appearing close to $i$. Exaggeration is used to scale $P$ by some constant factor $\alpha$ (this means that entries in the affinity matrix $P$ are not proper probabilities) to help separate clusters in the beginning of the optimization. These methods also compute the KL divergence during optimization (for efficiency), and, as such, the error is incorrect because we don't account for the scaling $\alpha$.
 
-This section derives a quick and simple correction for the KL divergence error term so we can get the true error of the embedding even when $P$ is exaggerated.
+This section derives a simple correction for the KL divergence error term so we can get the true error of the embedding even when $P$ is exaggerated.
 
 \begin{align}
 KL(P \mid \mid Q) &= \sum_{ij} p_{ij} \log \frac{p_{ij}}{q_{ij}}
-\intertext{We need to introduce the scaling i.e. exaggeration factor $\alpha$ to every $p_{ij}$ term}
+\intertext{We need to introduce the scaling i.e. exaggeration factor $\alpha$ to every $p_{ij}$ term, so we multiply some terms by $1 = \alpha/\alpha$.}
 &= \sum_{ij} \frac{\alpha}{\alpha}p_{ij} \log \frac{\alpha p_{ij}}{\alpha q_{ij}} \\
 \intertext{Exaggeration means that the $p_{ij}$ terms get multiplied by $\alpha$, so we need to find an expression for the KL divergence that includes only $\alpha p_{ij}$ and $q_{ij}$ and some other factor that will correct for $\alpha$.}
 &= \frac{1}{\alpha} \sum_{ij} \alpha p_{ij} \left ( \log \frac{\alpha p_{ij}}{q_{ij}} - \log \alpha \right ) \\
-&= \frac{1}{\alpha} \left ( \sum_{ij} \alpha p_{ij} \log \frac{\alpha p_{ij}}{q_{ij}} - \sum_{ij} \alpha p_{ij}  \log \alpha \right )
+&= \frac{1}{\alpha} \left ( \sum_{ij} \alpha p_{ij} \log \frac{\alpha p_{ij}}{q_{ij}} \right ) - \frac{1}{\alpha} \left ( \sum_{ij} \alpha p_{ij} \log \alpha \right )
+\intertext{We notice in the first term is exactly the KL divergence where $p_{ij}$s are scaled by $\alpha$. We also notice in the second term that $\sum_{ij} P_{ij} = 1$ and that $\alpha$ cancels out, leaving us with}
+&= \frac{1}{\alpha} \left ( \sum_{ij} \alpha p_{ij} \log \frac{\alpha p_{ij}}{q_{ij}} \right ) - \log \alpha
 \end{align}
 
 The first term is computed by the gradient method (since it only knows about the scaled $P$), the second term can easily be computed post-optimization, allowing us to get the correct KL divergence.
