@@ -22,9 +22,9 @@
 \date{}
 \maketitle
 
-\section{tSNE}
+\section{t-SNE}
 
-tSNE was presented in \cite{maaten2008visualizing} and aims to preserve local structure of high dimensional spaces $X$ with some low dimensional embedding $Y$. First for each point $i$, we find its nearest nearest neighbours and compute the probability of this point $p_j$ based on the PDF of a Gaussian centred on the point $i$:
+t-SNE was presented in \cite{maaten2008visualizing} and aims to preserve local structure of high dimensional spaces $X$ with some low dimensional embedding $Y$. First for each point $i$, we find its nearest nearest neighbours and compute the probability of this point $p_j$ based on the PDF of a Gaussian centred on the point $i$:
 
 \begin{equation}\label{eq:sne_pij}
 p_{j \mid i} = \frac{\exp{\left (- || \mathbf{x}_i - \mathbf{x}_j ||^2 / 2\sigma_i^2 \right )}}{\sum_{k \neq i}\exp{\left (- || \mathbf{x}_i - \mathbf{x}_k ||^2 / 2\sigma_i^2 \right )}}
@@ -38,7 +38,7 @@ Perp(P_i) = 2^{H(P_i)}
 
 where $H(P_i)$ is the Shannon entropy of the distribution $P_i$.
 
-tSNE actually doesn't use Equation~\ref{eq:sne_pij} directly, but symmetrizes this conditional probability, so the actual $p_{ij}$s used by tSNE are
+t-SNE actually doesn't use Equation~\ref{eq:sne_pij} directly, but symmetrizes this conditional probability, so the actual $p_{ij}$s used by t-SNE are
 
 \begin{equation}
 p_{ij} = \frac{p_{j\mid i} + p_{i \mid j}}{2}
@@ -46,7 +46,7 @@ p_{ij} = \frac{p_{j\mid i} + p_{i \mid j}}{2}
 
 In their experiments, van der Maaten et al. found that this doesn't affect embedding quality and simplifies the gradient expression.
 
-Similarly, we represent the embedding $Y$ as a probability distribution. In the original SNE paper \cite{hinton2003stochastic}, a Gaussian was used, however this often led to the crowding problem, where all the points were clumped into a single ball in a single point in space. tSNE, as the name would suggest, uses a Student-t distribution, therefore the probability density of $Y$ is
+Similarly, we represent the embedding $Y$ as a probability distribution. In the original SNE paper \cite{hinton2003stochastic}, a Gaussian was used, however this often led to the crowding problem, where all the points were clumped into a single ball in a single point in space. t-SNE, as the name would suggest, uses a Student-t distribution, therefore the probability density of $Y$ is
 
 \begin{equation}
 q_{ij} = \frac{\left ( 1 + || \mathbf{y}_i - \mathbf{y}_j ||^2 \right )^{-1}}{\sum_{k \neq l}\left ( 1 + || \mathbf{y}_k - \mathbf{y}_l ||^2 \right )^{-1}}
@@ -64,10 +64,10 @@ Our goal is to minimize this error $C$, so we can take the derivative and obtain
 \frac{\partial C}{\partial \mathbf{y}_i} = 4 \sum_{j \neq i} \left ( p_{ij} - q_{ij} \right ) \left ( \mathbf{y}_i - \mathbf{y}_j \right ) \left ( 1 + || \mathbf{y}_i - \mathbf{y}_j || ^2 \right )^{-1}
 \end{equation}
 
-This is tSNE in essence. In practice various tricks are used to speed up convergence e.g. using a momentum term helps a lot. The embedding $Y$ is typically initialized using an isotropic Gaussian with small variance (e.g. 0.01). Often times, PCA is used for initialization. This can sometimes be problematic if the PCA embedding provides very scattered embeddings (sometimes most points are clumped to one side with very long stretched out tails). In these cases, using a random initialization produces better embeddings.
+This is t-SNE in essence. In practice various tricks are used to speed up convergence e.g. using a momentum term helps a lot. The embedding $Y$ is typically initialized using an isotropic Gaussian with small variance (e.g. 0.01). Often times, PCA is used for initialization. This can sometimes be problematic if the PCA embedding provides very scattered embeddings (sometimes most points are clumped to one side with very long stretched out tails). In these cases, using a random initialization produces better embeddings.
 
 \section{Performance improvements}
-It quickly became apparent that tSNE, while nice, was infeasible to run for larger data sets, because of its quadratic time complexity $\mathcal{O}(n^2)$ (due to the normalization term in $q_{ij}$).
+It quickly became apparent that t-SNE, while nice, was infeasible to run for larger data sets, because of its quadratic time complexity $\mathcal{O}(n^2)$ (due to the normalization term in $q_{ij}$).
 
 For convenience, we will write the gradient in a different form seen in many papers, that makes the attractive and repulsive forces clearer.
 
@@ -83,7 +83,7 @@ For convenience, we will write the gradient in a different form seen in many pap
 \end{align}
 
 \subsection{Landmark points}
-In fact, van der Maaten and Hinton provide a solution to this in their original paper: instead of visualizing all the points, embed only a sample of carefully chosen landmark points. The points must be carefully chosen because a random subset may not properly describe the manifold. First, we construct the k-neighbourhood graph on all the points. Next, they approximate the $P$ of the landmark points using random walks across the neighbourhood graph. Then, we proceed with tSNE on the landmark points.
+In fact, van der Maaten and Hinton provide a solution to this in their original paper: instead of visualizing all the points, embed only a sample of carefully chosen landmark points. The points must be carefully chosen because a random subset may not properly describe the manifold. First, we construct the k-neighbourhood graph on all the points. Next, they approximate the $P$ of the landmark points using random walks across the neighbourhood graph. Then, we proceed with t-SNE on the landmark points.
 
 \subsection{Approximating P}
 
@@ -91,7 +91,7 @@ An observation made in \cite{van2014accelerating} was that since we use a Gaussi
 
 In \cite{van2014accelerating}, exact nearest neighbours are used. These can be efficiently computed in $\mathcal{O}(n \log n)$ using tree structures, thus reducing the complexity from $\mathcal{O}(n^2)$ needed for pairwise distances.
 
-The preferred exact nearest neighbour method are vantage point trees (also referred to as VP trees). \cite{yianilos1993data} presented VP trees and compared their performance to another popular tree based nearest neighbour search method -- KD trees. VP trees were shown to require far fewer queries when dealing with high dimensions, as tSNE often does.\cite{van2014accelerating} also provide a comparison with dual-trees, where VP trees, again, perform favourably.
+The preferred exact nearest neighbour method are vantage point trees (also referred to as VP trees). \cite{yianilos1993data} presented VP trees and compared their performance to another popular tree based nearest neighbour search method -- KD trees. VP trees were shown to require far fewer queries when dealing with high dimensions, as t-SNE often does.\cite{van2014accelerating} also provide a comparison with dual-trees, where VP trees, again, perform favourably.
 
 More recently, it was shown in \cite{linderman2017efficient} that approximate nearest neighbours perform just as well. Approximate nearest neighbour algorithms are often orders of magnitude faster than exact nearest neighbour search, allowing us to scale this step to much larger data than before.
 
@@ -235,16 +235,16 @@ The first term is computed by the gradient method (since it only knows about the
 \cite{bunte2012general}
 
 \subsection{MDS interpolation}
-MDS Interpolation~\cite{bae2010dimension}. A similar approach might be able to be applied to tSNE. In essence, they run MDS on a sample of points. Then for each new point, we compute the k-nearest neighbours and optimize the stress function w.r.t. only those points. In their paper, they derive equations that can be used for efficient optimization via majorization.
+MDS Interpolation~\cite{bae2010dimension}. A similar approach might be able to be applied to t-SNE. In essence, they run MDS on a sample of points. Then for each new point, we compute the k-nearest neighbours and optimize the stress function w.r.t. only those points. In their paper, they derive equations that can be used for efficient optimization via majorization.
 
-\subsection{Kernel tSNE}
-\cite{gisbrecht2012out} claim to outperform direct mapping tSNE using a direct kernel mapping. This paper is not very useful. The graph is misleading and the table at the end is informative, but run only on small datasets. Their subsequent paper is much better and throughout.
+\subsection{Kernel t-SNE}
+\cite{gisbrecht2012out} claim to outperform direct mapping t-SNE using a direct kernel mapping. This paper is not very useful. The graph is misleading and the table at the end is informative, but run only on small datasets. Their subsequent paper is much better and throughout.
 
-In \cite{gisbrecht2015parametric}, kernel tSNE is described in more detail and parameters are chosen in a more principled manner.
+In \cite{gisbrecht2015parametric}, kernel t-SNE is described in more detail and parameters are chosen in a more principled manner.
 
 Describes how to integrate class labels into embedding using Fischer information.
 
-The issue of kernel tSNE is that we have to compute the inverse of the interaction matrix K. We can use P as the interaction matrix, and P is sparse, but the inverse of that is very dense, and for any reasonably sized data set, this is unfeasable.
+The issue of kernel t-SNE is that we have to compute the inverse of the interaction matrix K. We can use P as the interaction matrix, and P is sparse, but the inverse of that is very dense, and for any reasonably sized data set, this is unfeasable.
 
 
 \bibliography{references}
