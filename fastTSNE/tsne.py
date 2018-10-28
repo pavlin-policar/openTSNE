@@ -427,16 +427,24 @@ class TSNEEmbedding(np.ndarray):
 
         # If initial positions are given in an array, use a copy of that
         if isinstance(initialization, np.ndarray):
-            assert initialization.shape[0] == X.shape[0], \
-                'The provided initialization contains a different number of ' \
-                'samples (%d) than the data provided (%d).' % (
-                    initialization.shape[0], X.shape[0])
+            if initialization.shape[0] != n_samples:
+                raise ValueError(
+                    'The provided initialization contains a different number'
+                    'of samples (%d) than the data provided (%d).' % (
+                        initialization.shape[0], n_samples)
+                )
+            if initialization.shape[1] != n_components:
+                raise ValueError(
+                    'The provided initialization contains a different number '
+                    'of components (%d) than the embedding (%d).' % (
+                        initialization.shape[1], n_components)
+                )
             embedding = np.array(initialization)
 
         # Random initialization with isotropic normal distribution
         elif initialization == 'random':
             random_state = check_random_state(self.random_state)
-            embedding = random_state.normal(0, 1e-2, (X.shape[0], n_components))
+            embedding = random_state.normal(0, 1e-2, (n_samples, n_components))
 
         elif initialization == 'weighted':
             embedding = np.zeros((n_samples, n_components))
@@ -751,17 +759,27 @@ class TSNE:
 
         # If initial positions are given in an array, use a copy of that
         if isinstance(initialization, np.ndarray):
-            assert initialization.shape[0] == X.shape[0], \
-                'The provided initialization contains a different number of ' \
-                'samples (%d) than the data provided (%d).' % (
-                    initialization.shape[0], X.shape[0])
+            if initialization.shape[0] != X.shape[0]:
+                raise ValueError(
+                    'The provided initialization contains a different number '
+                    'of samples (%d) than the data provided (%d).' % (
+                        initialization.shape[0], X.shape[0])
+                )
+            if initialization.shape[1] != self.n_components:
+                raise ValueError(
+                    'The provided initialization contains a different number '
+                    'of components (%d) than the embedding (%d).' % (
+                        initialization.shape[1], self.n_components)
+                )
+
             embedding = np.array(initialization)
 
             variance = np.var(embedding, axis=0)
             if any(variance > 1e-4):
                 log.warning(
                     'Variance of embedding is greater than 0.0001. Initial '
-                    'embeddings with high variance may have display poor convergence.')
+                    'embeddings with high variance may have display poor convergence.'
+                )
 
             return embedding
 
