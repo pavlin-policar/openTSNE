@@ -4,10 +4,9 @@ from collections import Iterable
 
 import numpy as np
 from scipy.sparse import csr_matrix
-from sklearn.decomposition import PCA
-from sklearn.utils import check_random_state
 
 from . import _tsne
+from . import initialization as initialization_scheme
 from .affinity import Affinities, NearestNeighborAffinities
 from .quad_tree import QuadTree
 
@@ -39,7 +38,7 @@ def _handle_nice_params(optim_params: dict) -> None:
     optim_params['use_callbacks'] = optim_params['callbacks'] is not None
 
     # Handle negative gradient method
-    negative_gradient_method = optim_params['negative_gradient_method']
+    negative_gradient_method = optim_params.pop('negative_gradient_method')
     if callable(negative_gradient_method):
         negative_gradient_method = negative_gradient_method
     elif negative_gradient_method in {'bh', 'BH', 'barnes-hut'}:
@@ -49,7 +48,8 @@ def _handle_nice_params(optim_params: dict) -> None:
     else:
         raise ValueError('Unrecognized gradient method. Please choose one of '
                          'the supported methods or provide a valid callback.')
-    optim_params['negative_gradient_method'] = negative_gradient_method
+    # `gradient_descent` uses the more informative name `objective_function`
+    optim_params['objective_function'] = negative_gradient_method
 
     # Handle number of jobs
     n_jobs = optim_params['n_jobs']
@@ -196,7 +196,7 @@ class TSNEEmbedding(np.ndarray):
 
     """
 
-    def __new__(cls, embedding, affinities, gradient_descent_params, random_state=None):
+    def __new__(cls, embedding, affinities, random_state=None, **gradient_descent_params):
         obj = np.asarray(embedding, dtype=np.float64, order='C').view(TSNEEmbedding)
 
         obj.affinities = affinities  # type: Affinities
@@ -242,8 +242,10 @@ class TSNEEmbedding(np.ndarray):
         if inplace:
             embedding = self
         else:
-            embedding = TSNEEmbedding(np.copy(self), self.affinities,
-                                      self.gradient_descent_params)
+            embedding = TSNEEmbedding(
+                np.copy(self), self.affinities, random_state=self.random_state,
+                **self.gradient_descent_params,
+            )
 
         # If optimization parameters were passed to this funciton, prefer those
         # over the defaults specified in the TSNE object
@@ -254,7 +256,8 @@ class TSNEEmbedding(np.ndarray):
 
         try:
             error, embedding = gradient_descent(
-                embedding=embedding, P=self.affinities.P, **optim_params)
+                embedding=embedding, P=self.affinities.P, **optim_params,
+            )
 
         except OptimizationInterrupt as ex:
             log.info('Optimization was interrupted with callback.')
@@ -266,7 +269,7 @@ class TSNEEmbedding(np.ndarray):
 
         return embedding
 
-    def transform(self, X, perplexity=None, initialization='weighted',
+    def transform(self, X, perplexity=None, initialization='median',
                   early_exaggeration=2, early_exaggeration_iter=100,
                   initial_momentum=0.2, n_iter=300, final_momentum=0.4,
                   **gradient_descent_params):
@@ -445,25 +448,17 @@ class TSNEEmbedding(np.ndarray):
                     'of components (%d) than the embedding (%d).' % (
                         initialization.shape[1], n_components)
                 )
-            embedding = np.array(initialization)
+            return np.array(initialization)
 
         # Random initialization with isotropic normal distribution
         elif initialization == 'random':
-            random_state = check_random_state(self.random_state)
-            embedding = random_state.normal(0, 1e-2, (n_samples, n_components))
-
+            return initialization_scheme.random(n_samples, n_components, self.random_state)
         elif initialization == 'weighted':
-            embedding = np.zeros((n_samples, n_components))
-            for i in range(n_samples):
-                embedding[i] = np.average(self[neighbors[i]], axis=0, weights=distances[i])
-
+            return initialization_scheme.weighted_mean(X, self, neighbors, distances)
         elif initialization == 'median':
-            embedding = np.median(self[neighbors], axis=1)
-
+            return initialization_scheme.median(self, neighbors)
         else:
             raise ValueError('Unrecognized initialization scheme `%s`.' % initialization)
-
-        return embedding
 
 
 class TSNE:
@@ -750,7 +745,7 @@ class TSNE:
             'callbacks_every_iters': self.callbacks_every_iters,
         }
 
-        return TSNEEmbedding(y_coords, affinities, gradient_descent_params, self.random_state)
+        return TSNEEmbedding(y_coords, affinities, self.random_state, **gradient_descent_params)
 
     def generate_initial_coordinates(self, X, initialization=None):
         """Generate initial coordinates for each data point.
@@ -803,22 +798,14 @@ class TSNE:
 
             return embedding
 
-        # Initialize the embedding using a PCA projection into the desired
-        # number of components
         elif initialization == 'pca':
-            pca = PCA(n_components=self.n_components, random_state=self.random_state)
-            embedding = pca.fit_transform(X)
-            # The PCA embedding may have high variance, which leads to poor convergence
-            normalization = np.std(embedding[:, 0]) * 100
-            embedding /= normalization
-
-            return embedding
-
-        # Random initialization with isotropic normal distribution
+            return initialization_scheme.pca(
+                X, self.n_components, scale_down=True, random_state=self.random_state,
+            )
         elif initialization == 'random':
-            random_state = check_random_state(self.random_state)
-            return random_state.normal(0, 1e-2, (X.shape[0], self.n_components))
-
+            return initialization_scheme.random(
+                X.shape[0], self.n_components, random_state=self.random_state,
+            )
         else:
             raise ValueError('Unrecognized initialization scheme `%s`.' % initialization)
 
@@ -895,44 +882,44 @@ def kl_divergence_fft(embedding, P, dof, fft_params, reference_embedding=None,
     return kl_divergence_, gradient
 
 
-def gradient_descent(embedding, P, dof, n_iter, negative_gradient_method,
-                     learning_rate, momentum, exaggeration=None, min_gain=0.01,
-                     min_grad_norm=1e-8, theta=0.5, n_interpolation_points=3,
-                     min_num_intervals=10, ints_in_interval=10,
-                     reference_embedding=None, n_jobs=1, use_callbacks=False,
-                     callbacks=None, callbacks_every_iters=50):
+def gradient_descent(embedding, P, n_iter, objective_function,
+                     learning_rate=100, momentum=0.5, exaggeration=None, dof=1,
+                     min_gain=0.01, min_grad_norm=1e-8, theta=0.5,
+                     n_interpolation_points=3, min_num_intervals=10,
+                     ints_in_interval=1, reference_embedding=None, n_jobs=1,
+                     use_callbacks=False, callbacks=None,
+                     callbacks_every_iters=50):
     """Perform batch gradient descent with momentum and gains.
 
     Parameters
     ----------
-    embedding : np.ndarray
-        The current embedding Y in the desired space.
-    P : csr_matrix
-        Joint probability matrix :math:`P_{ij}`.
-    dof : float
-        Degrees of freedom of the Student's t-distribution.
-    n_iter : int
-        Number of iterations to run the optimization for.
-    negative_gradient_method : Callable[..., Tuple[float, np.ndarray]]
-        The callable takes the embedding as arguments and returns the (or an
-        approximation to) KL divergence of the current embedding and the
-        gradient of the embedding, with which to update the point locations.
-    learning_rate : float
-        The learning rate for t-SNE. Typical values range from 1 to 1000.
-        Setting the learning rate too high will result in the crowding problem
-        where all the points form a ball in the center of the space.
+    embedding: np.ndarray
+        The embedding :math:`Y`.
+    P: csr_matrix
+        Joint probability matrix :math:`P`.
+    n_iter: int
+        The number of iterations to run for.
+    objective_function: Callable[..., Tuple[float, np.ndarray]]
+        A callable that evaluates the error and gradient for the current
+        embedding.
+    learning_rate: float
+        The learning rate for the t-SNE optimization steps. Typical values range
+        from 1 to 1000. Setting the learning rate too low or too high may result
+        in the points forming a "ball". This is also known as the crowding
+        problem.
     momentum : float
-        The momentum generates a weight for previous gradients that decays
-        exponentially.
+        Momentum accounts for gradient directions from previous iterations and
+        resulting in faster convergence.
     exaggeration : float
-        The exaggeration term is used to increase the attractive forces during
-        the first steps of the optimization. This enables points to move more
-        easily through others, helping find their true neighbors quicker.
+        The exaggeration term is used to increase the attractive forces of
+        nearby points.
+    dof: float
+        Degrees of freedom of the Student's t-distribution.
     min_gain : float
         Minimum individual gain for each parameter.
     min_grad_norm : float
         If the gradient norm is below this threshold, the optimization will be
-        stopped. In practice, this almost never happens.
+        stopped.
     theta : float
         This is the trade-off parameter between speed and accuracy of the
         Barnes-Hut approximation of the negative forces. Setting a lower value
@@ -1017,7 +1004,7 @@ def gradient_descent(embedding, P, dof, n_iter, negative_gradient_method,
         should_call_callback = use_callbacks and (iteration + 1) % callbacks_every_iters == 0
         should_eval_error = should_call_callback
 
-        error, gradient = negative_gradient_method(
+        error, gradient = objective_function(
             embedding, P, dof=dof, bh_params=bh_params, fft_params=fft_params,
             reference_embedding=reference_embedding, n_jobs=n_jobs,
             should_eval_error=should_eval_error,
@@ -1058,7 +1045,7 @@ def gradient_descent(embedding, P, dof, n_iter, negative_gradient_method,
     # The error from the loop is the one for the previous, non-updated
     # embedding. We need to return the error for the actual final embedding, so
     # compute that at the end before returning
-    error, _ = negative_gradient_method(
+    error, _ = objective_function(
         embedding, P, dof=dof, bh_params=bh_params, fft_params=fft_params,
         reference_embedding=reference_embedding, n_jobs=n_jobs,
         should_eval_error=True,

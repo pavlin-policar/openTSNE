@@ -234,7 +234,9 @@ class FixedSigmaAffinities(Affinities):
         n_samples = data.shape[0]
         n_reference_samples = self.n_samples
 
-        if k >= n_reference_samples:
+        if k is None:
+            k = self.k
+        elif k >= n_reference_samples:
             raise ValueError('`k` (%d) cannot be larger than the number of '
                              'reference samples (%d).' % (k, self.n_samples))
 
