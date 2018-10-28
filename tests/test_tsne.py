@@ -26,13 +26,32 @@ def check_params(params: dict) -> Callable:
     return _decorator
 
 
-def check_call_contains_kwargs(call: Tuple, params: dict) -> None:
+def check_call_contains_kwargs(
+        call: Tuple,
+        params: dict,
+        param_mapping={},
+) -> None:
     """Check whether a `call` object was called with some params, but also some
     others we don't care about"""
+    _param_mapping = {'negative_gradient_method': 'objective_function',
+                      'early_exaggeration_iter': 'n_iter',
+                      'late_exaggeration_iter': 'n_iter',
+                      'early_exaggeration': 'exaggeration',
+                      'late_exaggeration': 'exaggeration',
+                      'initial_momentum': 'momentum',
+                      'final_momentum': 'momentum'}
+    _param_mapping.update(param_mapping)
+
     name, args, kwargs = call
     for key in params:
+        # If a parameter isn't named the same way in the call
+        if key in _param_mapping:
+            kwargs_key = _param_mapping[key]
+        else:
+            kwargs_key = key
+
         expected_value = params[key]
-        actual_value = kwargs.get(key, None)
+        actual_value = kwargs.get(kwargs_key, None)
         if expected_value != actual_value:
             raise AssertionError(
                 'Mock not called with `%s=%s`. Called with `%s`' %
@@ -83,40 +102,25 @@ class TestTSNEParameterFlow(unittest.TestCase):
         gradient_descent.return_value = (1, MagicMock())
 
         # Early exaggeration training loop
-        if param_name == 'early_exaggeration_iter':
-            check_param_name = 'n_iter'
-            call_idx = 0
-        elif param_name == 'early_exaggeration':
-            check_param_name = 'exaggeration'
-            call_idx = 0
-        elif param_name == 'initial_momentum':
-            check_param_name = 'momentum'
+        if param_name in ('early_exaggeration_iter', 'early_exaggeration', 'initial_momentum'):
             call_idx = 0
         # Main training loop
-        elif param_name == 'n_iter':
-            check_param_name = param_name
+        elif param_name in ('n_iter', 'final_momentum'):
             call_idx = 1
-        elif param_name == 'final_momentum':
-            check_param_name = 'momentum'
-            call_idx = 1
-        # Early exaggeration training loop
-        elif param_name == 'late_exaggeration_iter':
-            check_param_name = 'n_iter'
+        # Late exaggeration training loop
+        elif param_name in ('late_exaggeration_iter', 'late_exaggeration'):
             call_idx = 2
-        elif param_name == 'late_exaggeration':
-            check_param_name = 'exaggeration'
-            call_idx = 2
-
         # If general parameter, should be applied to every call
         else:
-            check_param_name = param_name
             call_idx = 0
 
         TSNE(**{param_name: param_value}).fit(self.x)
 
         self.assertEqual(3, gradient_descent.call_count)
-        check_call_contains_kwargs(gradient_descent.mock_calls[call_idx],
-                                   {check_param_name: param_value})
+        check_call_contains_kwargs(
+            gradient_descent.mock_calls[call_idx],
+            {param_name: param_value},
+        )
 
     @check_params({**grad_descent_params, **{
         'n_iter': [50, 100, 150],
@@ -160,31 +164,21 @@ class TestTSNEParameterFlow(unittest.TestCase):
         embedding.transform(self.x_test, **{param_name: param_value})
 
         # Early exaggeration training loop
-        if param_name == 'early_exaggeration_iter':
-            check_param_name = 'n_iter'
-            call_idx = 0
-        elif param_name == 'early_exaggeration':
-            check_param_name = 'exaggeration'
-            call_idx = 0
-        elif param_name == 'initial_momentum':
-            check_param_name = 'momentum'
+        if param_name in ('early_exaggeration_iter', 'early_exaggeration'):
             call_idx = 0
         # Main training loop
-        elif param_name == 'n_iter':
-            check_param_name = param_name
-            call_idx = 1
-        elif param_name == 'final_momentum':
-            check_param_name = 'momentum'
+        elif param_name in ('n_iter', 'final_momentum'):
             call_idx = 1
 
         # If general parameter, should be applied to every call
         else:
-            check_param_name = param_name
             call_idx = 0
 
         self.assertEqual(2, gradient_descent.call_count)
-        check_call_contains_kwargs(gradient_descent.mock_calls[call_idx],
-                                   {check_param_name: param_value})
+        check_call_contains_kwargs(
+            gradient_descent.mock_calls[call_idx],
+            {param_name: param_value},
+        )
 
     @check_params({**grad_descent_params, **{
         'n_iter': [50, 100, 150],
