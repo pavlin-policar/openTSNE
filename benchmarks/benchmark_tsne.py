@@ -16,13 +16,6 @@ from sklearn.model_selection import train_test_split
 from fastTSNE.callbacks import ErrorLogger, ErrorApproximations
 from fastTSNE.tsne import TSNE, TSNEEmbedding
 
-try:
-    import networkx as nx
-    from fastTSNE.affinity import NxGraphAffinities
-except ImportError:
-    nx = None
-    NxGraphAffinities = None
-
 
 FILE_DIR = dirname(abspath(__file__))
 DATA_DIR = join(FILE_DIR, 'data')
@@ -250,23 +243,6 @@ def transform(n_jobs=4, grad='bh', neighbors='approx'):
     plt.gca().set_color_cycle(None)
     plot(partial_embedding, y_test, show=False, ms=3, alpha=0.8)
 
-    plt.show()
-
-
-def run_graph():
-    graph = nx.read_edgelist(join(DATA_DIR, 'dolphins.edges'))
-    affinities = NxGraphAffinities(graph)
-
-    tsne = TSNE()
-    y_coords = tsne.generate_initial_coordinates(affinities.P, initialization='random')
-    embedding = TSNEEmbedding(
-        y_coords, affinities,
-        {'callbacks': None, 'negative_gradient_method': 'bh', 'dof': 1,
-         'momentum': 0, 'learning_rate': 100})
-
-    embedding.optimize(1000)
-
-    plt.plot(embedding[:, 0], embedding[:, 1], 'o')
     plt.show()
 
 

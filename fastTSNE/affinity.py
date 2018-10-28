@@ -6,11 +6,6 @@ from scipy.sparse import csr_matrix
 from . import _tsne
 from .nearest_neighbors import BallTree, NNDescent, KNNIndex, VALID_METRICS
 
-try:
-    import networkx as nx
-except ImportError:
-    nx = None
-
 log = logging.getLogger(__name__)
 
 
@@ -158,22 +153,3 @@ def joint_probabilities_nn(neighbors, distances, perplexity, symmetrize=True,
     P /= np.sum(P)
 
     return P
-
-
-if nx is not None:
-    class NxGraphAffinities(Affinities):
-        def __init__(self, graph, use_directed=True, use_weights=True):
-            super().__init__()
-
-            xs, ys = list(zip(*graph.edges))
-            xs = np.asarray(xs).astype(int)
-            ys = np.asarray(ys).astype(int)
-            self.P = csr_matrix((np.ones_like(xs), (xs, ys)), dtype=float)
-
-            if not use_directed:
-                self.P += self.P.T
-
-            self.P /= self.P.sum()
-
-        def to_new(self, data):
-            pass
