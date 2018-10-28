@@ -12,21 +12,22 @@ log = logging.getLogger(__name__)
 class Affinities:
     """Compute the affinities among some initial data and new data.
 
-    tSNE takes as input an affinity matrix P, and does not really care about
-    the space in which the original data points lie. This means we are not
-    limited to problems with numeric matrices (although that is the most common
-    use-case) but can also optimize graph layouts.
+    t-SNE takes as input an affinity matrix :math:`P`, and does not really care
+    about anything else about the data. This means we can use t-SNE for any data
+    where we are able to express interactions between samples with an affinity
+    matrix.
 
-    We use perplexity, as defined by Van der Maaten in the original paper as a
-    continuous analogue to the number of neighbor affinities we want to
-    preserve during optimization.
+    Attributes
+    ----------
+    P: array_like
+        The affinity matrix expressing interactions between all data samples.
 
     """
-    def __init__(self, perplexity=30):
-        self.perplexity = perplexity
+
+    def __init__(self):
         self.P = None
 
-    def to_new(self, data, perplexity=None, return_distances=False):
+    def to_new(self, data):
         """Compute the affinities of new data points to the existing ones.
 
         This is especially useful for `transform` where we need the conditional
@@ -36,7 +37,43 @@ class Affinities:
 
 
 class NearestNeighborAffinities(Affinities):
-    """Compute affinities using the nearest neighbors defined by perplexity."""
+    """Compute affinities using the nearest neighbors defined by perplexity.
+
+    Parameters
+    ----------
+    data: np.ndarray
+        The data matrix.
+    perplexity: float
+        Perplexity can be thought of as the continuous :math:`k` number of
+        neighbors to consider for each data point. To avoid confusion, note that
+        perplexity linearly impacts runtime.
+    method: str
+        Specifies the nearest neighbor method to use. Can be either ``exact`` or
+        ``approx``. ``exact`` uses space partitioning binary trees from
+        scikit-learn while ``approx`` makes use of nearest neighbor descent.
+        Note that ``approx`` has a bit of overhead and will be slower on smaller
+        data sets than exact search.
+    metric: str
+        The metric to be used to compute affinities between points in the
+        original space.
+    metric_params: Optional[dict]
+        Additional keyword arguments for the metric function.
+    symmetrize: bool
+        Symmetrize affinity matrix. Standard t-SNE symmetrizes the interactions
+        but when embedding new data, symmetrization is not performed.
+    n_jobs: int
+        The number of jobs to run in parallel. This follows the scikit-learn
+        convention, ``-1`` meaning all processors, ``-2`` meaning all but one
+        processor and so on.
+    random_state: Optional[Union[int, RandomState]]
+        The random state parameter follows the convention used in scikit-learn.
+        If the value is an int, random_state is the seed used by the random
+        number generator. If the value is a RandomState instance, then it will
+        be used as the random number generator. If the value is None, the random
+        number generator is the RandomState instance used by `np.random`.
+
+    """
+
     def __init__(self, data, perplexity=30, method='approx', metric='euclidean',
                  metric_params=None, symmetrize=True, n_jobs=1, random_state=None):
         self.n_samples = data.shape[0]

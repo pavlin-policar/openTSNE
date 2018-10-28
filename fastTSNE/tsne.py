@@ -341,7 +341,7 @@ class TSNEEmbedding(np.ndarray):
 
         return embedding
 
-    def prepare_partial(self, X, initialization='weighted', perplexity=None):
+    def prepare_partial(self, X, initialization='median', perplexity=None):
         """Prepare the partial embedding which can be optimized.
 
         In addition to generating initial coordinates via
@@ -354,12 +354,15 @@ class TSNEEmbedding(np.ndarray):
             The data matrix to be added to the existing embedding.
         initialization: Union[np.ndarray, str]
             The initial point positions to be used in the embedding space. Can
-            be a precomputed numpy array, ``random`` or ``weighted``. In all
-            cases, ``weighted`` should be preferred. It positions each point in
-            the weighted mean position of it's nearest neighbors in the existing
-            embedding. Typically, few optimization steps are needed for good
-            embeddings. ``random`` positions all new points in the center of the
-            embedding and should be used for demonstration only.
+            be a precomputed numpy array, ``random``, ``weighted`` or ``median``.
+            In all cases, ``weighted`` or ``median`` should be preferred. These
+            positions each point at the weighted mean or median position of it's
+            nearest neighbors in the existing embedding. Typically, few
+            optimization steps are needed for good embeddings. ``weighted`` and
+            ``median`` produce very similar results.
+
+            ``random`` positions all new points in the center of the embedding
+            and should be used for demonstration only.
         perplexity: float
             Perplexity can be thought of as the continuous k number of neighbors
             to consider for each data point. To avoid confusion, note that
@@ -372,9 +375,14 @@ class TSNEEmbedding(np.ndarray):
             optimization.
 
         """
-        P, neighbors, distances = self.affinities.to_new(
-            X, return_distances=True, perplexity=perplexity,
-        )
+        P = self.affinities.to_new(X, perplexity=perplexity)
+
+        # Extract neighbor indices and their affinities as a dense matrix from P
+        # so they can be used in weighted initialization schemes
+        P = P.tocsr()
+        k_neighbors = int(P.data.shape[0] / P.shape[0])
+        neighbors = P.indices.copy().reshape((P.shape[0], k_neighbors))
+        distances = P.data.copy().reshape((P.shape[0], k_neighbors))
 
         embedding = self.generate_partial_coordinates(
             X, initialization, neighbors, distances,
@@ -450,6 +458,9 @@ class TSNEEmbedding(np.ndarray):
             embedding = np.zeros((n_samples, n_components))
             for i in range(n_samples):
                 embedding[i] = np.average(self[neighbors[i]], axis=0, weights=distances[i])
+
+        elif initialization == 'median':
+            embedding = np.median(self[neighbors], axis=1)
 
         else:
             raise ValueError('Unrecognized initialization scheme `%s`.' % initialization)
@@ -547,10 +558,10 @@ class TSNE:
         processor and so on.
     neighbors: str
         Specifies the nearest neighbor method to use. Can be either ``exact`` or
-        ``approx``. ``exact`` uses space partitioning KD trees from scikit learn
-        while ``approx`` makes use of nearest neighbor descent. Note that
-        ``approx`` has a bit of overhead and will be slower on smaller data sets
-        than exact search.
+        ``approx``. ``exact`` uses space partitioning binary trees from
+        scikit-learn while ``approx`` makes use of nearest neighbor descent.
+        Note that ``approx`` has a bit of overhead and will be slower on smaller
+        data sets than exact search.
     negative_gradient_method: str
         Specifies the negative gradient approximation method to use. For smaller
         data sets, the Barnes-Hut approximation is appropriate [2]_ and can be
