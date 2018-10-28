@@ -81,26 +81,9 @@ class NearestNeighborAffinities(Affinities):
         perplexity = self.check_perplexity(perplexity)
         k_neighbors = min(self.n_samples - 1, int(3 * perplexity))
 
-        # Support shortcuts for built-in nearest neighbor methods
-        methods = {'exact': BallTree, 'approx': NNDescent}
-        if isinstance(method, KNNIndex):
-            knn_index = method
-
-        elif method not in methods:
-            raise ValueError('Unrecognized nearest neighbor algorithm `%s`. '
-                             'Please choose one of the supported methods or '
-                             'provide a valid `KNNIndex` instance.' % method)
-        else:
-            if metric not in VALID_METRICS:
-                raise ValueError('Unrecognized distance metric `%s`. Please '
-                                 'choose one of the supported methods.' % metric)
-            knn_index = methods[method](metric=metric, metric_params=metric_params,
-                                        n_jobs=n_jobs, random_state=random_state)
-
-        knn_index.build(data)
+        knn_index = build_knn_index(data, method, metric, metric_params, n_jobs, random_state)
         neighbors, distances = knn_index.query_train(data, k=k_neighbors)
 
-        # Store the results on the object
         self.perplexity = perplexity
         self.knn_index = knn_index
         self.P = joint_probabilities_nn(
@@ -133,6 +116,27 @@ class NearestNeighborAffinities(Affinities):
                         (old_perplexity, perplexity))
 
         return perplexity
+
+
+def build_knn_index(data, method, metric, metric_params=None, n_jobs=1, random_state=None):
+    methods = {'exact': BallTree, 'approx': NNDescent}
+    if isinstance(method, KNNIndex):
+        knn_index = method
+
+    elif method not in methods:
+        raise ValueError('Unrecognized nearest neighbor algorithm `%s`. '
+                         'Please choose one of the supported methods or '
+                         'provide a valid `KNNIndex` instance.' % method)
+    else:
+        if metric not in VALID_METRICS:
+            raise ValueError('Unrecognized distance metric `%s`. Please '
+                             'choose one of the supported methods.' % metric)
+        knn_index = methods[method](metric=metric, metric_params=metric_params,
+                                    n_jobs=n_jobs, random_state=random_state)
+
+    knn_index.build(data)
+
+    return knn_index
 
 
 def joint_probabilities_nn(neighbors, distances, perplexity, symmetrize=True,
@@ -186,7 +190,72 @@ def joint_probabilities_nn(neighbors, distances, perplexity, symmetrize=True,
     if symmetrize:
         P = (P + P.T) / 2
 
-    # Convert weights to probabilities using pair-wise normalization scheme
+    # Convert weights to probabilities
     P /= np.sum(P)
 
     return P
+
+
+class FixedSigmaAffinities(Affinities):
+
+    def __init__(self, data, sigma, k=30, method='approx', metric='euclidean',
+                 metric_params=None, symmetrize=True, n_jobs=1, random_state=None):
+        self.n_samples = n_samples = data.shape[0]
+
+        if k >= self.n_samples:
+            raise ValueError('`k` (%d) cannot be larger than N-1 (%d).' % (k, self.n_samples))
+
+        knn_index = build_knn_index(data, method, metric, metric_params, n_jobs, random_state)
+        neighbors, distances = knn_index.query_train(data, k=k)
+
+        self.knn_index = knn_index
+
+        # Compute asymmetric pairwise input similarities
+        conditional_P = np.exp(-distances ** 2 / (2 * sigma ** 2))
+        conditional_P /= np.sum(conditional_P, axis=1)[:, np.newaxis]
+
+        P = csr_matrix((conditional_P.ravel(), neighbors.ravel(),
+                        range(0, n_samples * k + 1, k)),
+                       shape=(n_samples, n_samples))
+
+        # Symmetrize the probability matrix
+        if symmetrize:
+            P = (P + P.T) / 2
+
+        # Convert weights to probabilities
+        P /= np.sum(conditional_P)
+
+        self.sigma = sigma
+        self.k = k
+        self.P = P
+        self.n_jobs = n_jobs
+
+    def to_new(self, data, k=None, sigma=None, return_distances=False):
+        n_samples = data.shape[0]
+        n_reference_samples = self.n_samples
+
+        if k >= n_reference_samples:
+            raise ValueError('`k` (%d) cannot be larger than the number of '
+                             'reference samples (%d).' % (k, self.n_samples))
+
+        if sigma is None:
+            sigma = self.sigma
+
+        # Find nearest neighbors and the distances to the new points
+        neighbors, distances = self.knn_index.query(data, k)
+
+        # Compute asymmetric pairwise input similarities
+        conditional_P = np.exp(-distances ** 2 / (2 * sigma ** 2))
+        conditional_P /= np.sum(conditional_P, axis=1)[:, np.newaxis]
+
+        P = csr_matrix((conditional_P.ravel(), neighbors.ravel(),
+                        range(0, n_samples * k + 1, k)),
+                       shape=(n_samples, n_reference_samples))
+
+        # Convert weights to probabilities
+        P /= np.sum(conditional_P)
+
+        if return_distances:
+            return P, neighbors, distances
+
+        return P

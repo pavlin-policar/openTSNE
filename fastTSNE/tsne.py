@@ -341,7 +341,7 @@ class TSNEEmbedding(np.ndarray):
 
         return embedding
 
-    def prepare_partial(self, X, initialization='median', perplexity=None):
+    def prepare_partial(self, X, initialization='median', **affinity_params):
         """Prepare the partial embedding which can be optimized.
 
         In addition to generating initial coordinates via
@@ -363,10 +363,8 @@ class TSNEEmbedding(np.ndarray):
 
             ``random`` positions all new points in the center of the embedding
             and should be used for demonstration only.
-        perplexity: float
-            Perplexity can be thought of as the continuous k number of neighbors
-            to consider for each data point. To avoid confusion, note that
-            perplexity linearly impacts runtime.
+        **affinity_params: dict
+            Additional params to be passed to the ``Affinity.to_new`` method.
 
         Returns
         -------
@@ -375,7 +373,7 @@ class TSNEEmbedding(np.ndarray):
             optimization.
 
         """
-        P = self.affinities.to_new(X, perplexity=perplexity)
+        P = self.affinities.to_new(X, **affinity_params)
 
         # Extract neighbor indices and their affinities as a dense matrix from P
         # so they can be used in weighted initialization schemes
@@ -685,7 +683,7 @@ class TSNE:
 
         return embedding
 
-    def prepare_initial(self, X, initialization=None):
+    def prepare_initial(self, X, initialization=None, affinities=None):
         """Prepare the initial embedding which can be optimized.
 
         In addition to generating initial coordinates via
@@ -701,6 +699,10 @@ class TSNE:
             must contain the same number of samples as X and must have the
             correct number of components. If the initialization method is not
             specified, the value passed to the constructor will be used.
+        affinities: Optional[Affinities]
+            Affinities for the input data samples. For the typical use of t-SNE
+            this parameter can be ignored since the method will default to
+            perplexity based nearest neighbor affinities.
 
         Returns
         -------
@@ -712,11 +714,18 @@ class TSNE:
         # Get some initial coordinates for the embedding
         y_coords = self.generate_initial_coordinates(X, initialization=initialization)
 
-        # Compute the affinities for the input data
-        affinities = NearestNeighborAffinities(
-            X, self.perplexity, method=self.neighbors_method,
-            metric=self.metric, metric_params=self.metric_params, n_jobs=self.n_jobs,
-        )
+        # If affinities are not given, we'll use the typical perplexity based
+        # nearest neighbor affinities
+        if affinities is None:
+            affinities = NearestNeighborAffinities(
+                X, self.perplexity, method=self.neighbors_method,
+                metric=self.metric, metric_params=self.metric_params, n_jobs=self.n_jobs,
+            )
+        elif not isinstance(affinities, Affinities):
+            raise TypeError(
+                '`affinities` must be an instance of the `%s`. Got an instance '
+                'of `%s` instead' % (Affinities.__name__, affinities.__class__.__name__)
+            )
 
         gradient_descent_params = {
             # Degrees of freedom of the Student's t-distribution. The
