@@ -1128,18 +1128,6 @@ typedef npy_longdouble __pyx_t_5numpy_longdouble_t;
 /* Declarations.proto */
 #if CYTHON_CCOMPLEX
   #ifdef __cplusplus
-    typedef ::std::complex< double > __pyx_t_double_complex;
-  #else
-    typedef double _Complex __pyx_t_double_complex;
-  #endif
-#else
-    typedef struct { double real, imag; } __pyx_t_double_complex;
-#endif
-static CYTHON_INLINE __pyx_t_double_complex __pyx_t_double_complex_from_parts(double, double);
-
-/* Declarations.proto */
-#if CYTHON_CCOMPLEX
-  #ifdef __cplusplus
     typedef ::std::complex< float > __pyx_t_float_complex;
   #else
     typedef float _Complex __pyx_t_float_complex;
@@ -1148,6 +1136,18 @@ static CYTHON_INLINE __pyx_t_double_complex __pyx_t_double_complex_from_parts(do
     typedef struct { float real, imag; } __pyx_t_float_complex;
 #endif
 static CYTHON_INLINE __pyx_t_float_complex __pyx_t_float_complex_from_parts(float, float);
+
+/* Declarations.proto */
+#if CYTHON_CCOMPLEX
+  #ifdef __cplusplus
+    typedef ::std::complex< double > __pyx_t_double_complex;
+  #else
+    typedef double _Complex __pyx_t_double_complex;
+  #endif
+#else
+    typedef struct { double real, imag; } __pyx_t_double_complex;
+#endif
+static CYTHON_INLINE __pyx_t_double_complex __pyx_t_double_complex_from_parts(double, double);
 
 
 /*--- Type declarations ---*/
@@ -2183,66 +2183,6 @@ static int __pyx_slices_overlap(__Pyx_memviewslice *slice1,
 /* Capsule.proto */
 static CYTHON_INLINE PyObject *__pyx_capsule_create(void *p, const char *sig);
 
-/* RealImag.proto */
-#if CYTHON_CCOMPLEX
-  #ifdef __cplusplus
-    #define __Pyx_CREAL(z) ((z).real())
-    #define __Pyx_CIMAG(z) ((z).imag())
-  #else
-    #define __Pyx_CREAL(z) (__real__(z))
-    #define __Pyx_CIMAG(z) (__imag__(z))
-  #endif
-#else
-    #define __Pyx_CREAL(z) ((z).real)
-    #define __Pyx_CIMAG(z) ((z).imag)
-#endif
-#if defined(__cplusplus) && CYTHON_CCOMPLEX\
-        && (defined(_WIN32) || defined(__clang__) || (defined(__GNUC__) && (__GNUC__ >= 5 || __GNUC__ == 4 && __GNUC_MINOR__ >= 4 )) || __cplusplus >= 201103)
-    #define __Pyx_SET_CREAL(z,x) ((z).real(x))
-    #define __Pyx_SET_CIMAG(z,y) ((z).imag(y))
-#else
-    #define __Pyx_SET_CREAL(z,x) __Pyx_CREAL(z) = (x)
-    #define __Pyx_SET_CIMAG(z,y) __Pyx_CIMAG(z) = (y)
-#endif
-
-/* Arithmetic.proto */
-#if CYTHON_CCOMPLEX
-    #define __Pyx_c_eq_double(a, b)   ((a)==(b))
-    #define __Pyx_c_sum_double(a, b)  ((a)+(b))
-    #define __Pyx_c_diff_double(a, b) ((a)-(b))
-    #define __Pyx_c_prod_double(a, b) ((a)*(b))
-    #define __Pyx_c_quot_double(a, b) ((a)/(b))
-    #define __Pyx_c_neg_double(a)     (-(a))
-  #ifdef __cplusplus
-    #define __Pyx_c_is_zero_double(z) ((z)==(double)0)
-    #define __Pyx_c_conj_double(z)    (::std::conj(z))
-    #if 1
-        #define __Pyx_c_abs_double(z)     (::std::abs(z))
-        #define __Pyx_c_pow_double(a, b)  (::std::pow(a, b))
-    #endif
-  #else
-    #define __Pyx_c_is_zero_double(z) ((z)==0)
-    #define __Pyx_c_conj_double(z)    (conj(z))
-    #if 1
-        #define __Pyx_c_abs_double(z)     (cabs(z))
-        #define __Pyx_c_pow_double(a, b)  (cpow(a, b))
-    #endif
- #endif
-#else
-    static CYTHON_INLINE int __Pyx_c_eq_double(__pyx_t_double_complex, __pyx_t_double_complex);
-    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_sum_double(__pyx_t_double_complex, __pyx_t_double_complex);
-    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_diff_double(__pyx_t_double_complex, __pyx_t_double_complex);
-    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_prod_double(__pyx_t_double_complex, __pyx_t_double_complex);
-    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_quot_double(__pyx_t_double_complex, __pyx_t_double_complex);
-    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_neg_double(__pyx_t_double_complex);
-    static CYTHON_INLINE int __Pyx_c_is_zero_double(__pyx_t_double_complex);
-    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_conj_double(__pyx_t_double_complex);
-    #if 1
-        static CYTHON_INLINE double __Pyx_c_abs_double(__pyx_t_double_complex);
-        static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_pow_double(__pyx_t_double_complex, __pyx_t_double_complex);
-    #endif
-#endif
-
 /* IsLittleEndian.proto */
 static CYTHON_INLINE int __Pyx_Is_Little_Endian(void);
 
@@ -2288,23 +2228,33 @@ static CYTHON_INLINE int __pyx_memview_set_double(const char *itemp, PyObject *o
 /* CIntToPy.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value);
 
-/* ToPy.proto */
-#define __pyx_PyComplex_FromComplex(z)\
-        PyComplex_FromDoubles((double)__Pyx_CREAL(z),\
-                              (double)__Pyx_CIMAG(z))
-
-/* FromPy.proto */
-static __pyx_t_double_complex __Pyx_PyComplex_As___pyx_t_double_complex(PyObject*);
-
-/* MemviewDtypeToObject.proto */
-static CYTHON_INLINE PyObject *__pyx_memview_get___pyx_t_double_complex(const char *itemp);
-static CYTHON_INLINE int __pyx_memview_set___pyx_t_double_complex(const char *itemp, PyObject *obj);
-
 /* None.proto */
 static CYTHON_INLINE long __Pyx_pow_long(long, long);
 
 /* None.proto */
 static CYTHON_INLINE Py_ssize_t __Pyx_pow_Py_ssize_t(Py_ssize_t, Py_ssize_t);
+
+/* RealImag.proto */
+#if CYTHON_CCOMPLEX
+  #ifdef __cplusplus
+    #define __Pyx_CREAL(z) ((z).real())
+    #define __Pyx_CIMAG(z) ((z).imag())
+  #else
+    #define __Pyx_CREAL(z) (__real__(z))
+    #define __Pyx_CIMAG(z) (__imag__(z))
+  #endif
+#else
+    #define __Pyx_CREAL(z) ((z).real)
+    #define __Pyx_CIMAG(z) ((z).imag)
+#endif
+#if defined(__cplusplus) && CYTHON_CCOMPLEX\
+        && (defined(_WIN32) || defined(__clang__) || (defined(__GNUC__) && (__GNUC__ >= 5 || __GNUC__ == 4 && __GNUC_MINOR__ >= 4 )) || __cplusplus >= 201103)
+    #define __Pyx_SET_CREAL(z,x) ((z).real(x))
+    #define __Pyx_SET_CIMAG(z,y) ((z).imag(y))
+#else
+    #define __Pyx_SET_CREAL(z,x) __Pyx_CREAL(z) = (x)
+    #define __Pyx_SET_CIMAG(z,y) __Pyx_CIMAG(z) = (y)
+#endif
 
 /* Arithmetic.proto */
 #if CYTHON_CCOMPLEX
@@ -2344,6 +2294,44 @@ static CYTHON_INLINE Py_ssize_t __Pyx_pow_Py_ssize_t(Py_ssize_t, Py_ssize_t);
     #endif
 #endif
 
+/* Arithmetic.proto */
+#if CYTHON_CCOMPLEX
+    #define __Pyx_c_eq_double(a, b)   ((a)==(b))
+    #define __Pyx_c_sum_double(a, b)  ((a)+(b))
+    #define __Pyx_c_diff_double(a, b) ((a)-(b))
+    #define __Pyx_c_prod_double(a, b) ((a)*(b))
+    #define __Pyx_c_quot_double(a, b) ((a)/(b))
+    #define __Pyx_c_neg_double(a)     (-(a))
+  #ifdef __cplusplus
+    #define __Pyx_c_is_zero_double(z) ((z)==(double)0)
+    #define __Pyx_c_conj_double(z)    (::std::conj(z))
+    #if 1
+        #define __Pyx_c_abs_double(z)     (::std::abs(z))
+        #define __Pyx_c_pow_double(a, b)  (::std::pow(a, b))
+    #endif
+  #else
+    #define __Pyx_c_is_zero_double(z) ((z)==0)
+    #define __Pyx_c_conj_double(z)    (conj(z))
+    #if 1
+        #define __Pyx_c_abs_double(z)     (cabs(z))
+        #define __Pyx_c_pow_double(a, b)  (cpow(a, b))
+    #endif
+ #endif
+#else
+    static CYTHON_INLINE int __Pyx_c_eq_double(__pyx_t_double_complex, __pyx_t_double_complex);
+    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_sum_double(__pyx_t_double_complex, __pyx_t_double_complex);
+    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_diff_double(__pyx_t_double_complex, __pyx_t_double_complex);
+    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_prod_double(__pyx_t_double_complex, __pyx_t_double_complex);
+    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_quot_double(__pyx_t_double_complex, __pyx_t_double_complex);
+    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_neg_double(__pyx_t_double_complex);
+    static CYTHON_INLINE int __Pyx_c_is_zero_double(__pyx_t_double_complex);
+    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_conj_double(__pyx_t_double_complex);
+    #if 1
+        static CYTHON_INLINE double __Pyx_c_abs_double(__pyx_t_double_complex);
+        static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_pow_double(__pyx_t_double_complex, __pyx_t_double_complex);
+    #endif
+#endif
+
 /* CIntToPy.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_enum__NPY_TYPES(enum NPY_TYPES value);
 
@@ -2365,12 +2353,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value);
 
 /* CIntFromPy.proto */
 static CYTHON_INLINE char __Pyx_PyInt_As_char(PyObject *);
-
-/* ObjectToMemviewSlice.proto */
-static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dc___pyx_t_double_complex(PyObject *, int writable_flag);
-
-/* ObjectToMemviewSlice.proto */
-static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dsds___pyx_t_double_complex(PyObject *, int writable_flag);
 
 /* CheckBinaryVersion.proto */
 static int __Pyx_check_binary_version(void);
@@ -2450,6 +2432,10 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *, cha
 
 /* Module declarations from 'libc.stdlib' */
 
+/* Module declarations from 'fastTSNE._matrix_mul.matrix_mul' */
+static __Pyx_memviewslice (*__pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_multiply_fft_1d)(__Pyx_memviewslice, __Pyx_memviewslice); /*proto*/
+static __Pyx_memviewslice (*__pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_multiply_fft_2d)(__Pyx_memviewslice, __Pyx_memviewslice); /*proto*/
+
 /* Module declarations from 'fastTSNE._tsne' */
 static PyTypeObject *__pyx_array_type = 0;
 static PyTypeObject *__pyx_MemviewEnum_type = 0;
@@ -2474,9 +2460,7 @@ static void __pyx_f_8fastTSNE_5_tsne__estimate_negative_gradient_single(__pyx_t_
 static CYTHON_INLINE double __pyx_f_8fastTSNE_5_tsne_squared_cauchy_1d(double, double); /*proto*/
 static CYTHON_INLINE double __pyx_f_8fastTSNE_5_tsne_squared_cauchy_2d(double, double, double, double); /*proto*/
 static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_interpolate(__Pyx_memviewslice, __Pyx_memviewslice); /*proto*/
-static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_matrix_multiply_fft_1d(__Pyx_memviewslice, __Pyx_memviewslice); /*proto*/
 static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_1d(Py_ssize_t, double, double); /*proto*/
-static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_matrix_multiply_fft_2d(__Pyx_memviewslice, __Pyx_memviewslice); /*proto*/
 static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_2d(Py_ssize_t, double, double); /*proto*/
 static struct __pyx_array_obj *__pyx_array_new(PyObject *, Py_ssize_t, char *, char *, char *); /*proto*/
 static void *__pyx_align_pointer(void *, size_t); /*proto*/
@@ -2513,7 +2497,6 @@ static void __pyx_memoryview__slice_assign_scalar(char *, Py_ssize_t *, Py_ssize
 static PyObject *__pyx_unpickle_Enum__set_state(struct __pyx_MemviewEnum_obj *, PyObject *); /*proto*/
 static __Pyx_TypeInfo __Pyx_TypeInfo_double = { "double", NULL, sizeof(double), { 0 }, 0, 'R', 0, 0 };
 static __Pyx_TypeInfo __Pyx_TypeInfo_int = { "int", NULL, sizeof(int), { 0 }, 0, IS_UNSIGNED(int) ? 'U' : 'I', IS_UNSIGNED(int), 0 };
-static __Pyx_TypeInfo __Pyx_TypeInfo___pyx_t_double_complex = { "double complex", NULL, sizeof(__pyx_t_double_complex), { 0 }, 0, 'C', 0, 0 };
 #define __Pyx_MODULE_NAME "fastTSNE._tsne"
 extern int __pyx_module_is_main_fastTSNE___tsne;
 int __pyx_module_is_main_fastTSNE___tsne = 0;
@@ -2536,19 +2519,16 @@ static const char __pyx_k_id[] = "id";
 static const char __pyx_k_np[] = "np";
 static const char __pyx_k_dof[] = "dof";
 static const char __pyx_k_eps[] = "eps";
-static const char __pyx_k_fft[] = "fft";
 static const char __pyx_k_new[] = "__new__";
 static const char __pyx_k_obj[] = "obj";
 static const char __pyx_k_base[] = "base";
 static const char __pyx_k_dict[] = "__dict__";
-static const char __pyx_k_ifft[] = "ifft";
 static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_mode[] = "mode";
 static const char __pyx_k_name[] = "name";
 static const char __pyx_k_ndim[] = "ndim";
 static const char __pyx_k_ones[] = "ones";
 static const char __pyx_k_pack[] = "pack";
-static const char __pyx_k_real[] = "real";
 static const char __pyx_k_size[] = "size";
 static const char __pyx_k_step[] = "step";
 static const char __pyx_k_stop[] = "stop";
@@ -2564,7 +2544,6 @@ static const char __pyx_k_flags[] = "flags";
 static const char __pyx_k_numpy[] = "numpy";
 static const char __pyx_k_order[] = "order";
 static const char __pyx_k_range[] = "range";
-static const char __pyx_k_rfft2[] = "rfft2";
 static const char __pyx_k_shape[] = "shape";
 static const char __pyx_k_start[] = "start";
 static const char __pyx_k_theta[] = "theta";
@@ -2574,7 +2553,6 @@ static const char __pyx_k_encode[] = "encode";
 static const char __pyx_k_format[] = "format";
 static const char __pyx_k_import[] = "__import__";
 static const char __pyx_k_indptr[] = "indptr";
-static const char __pyx_k_irfft2[] = "irfft2";
 static const char __pyx_k_name_2[] = "__name__";
 static const char __pyx_k_pickle[] = "pickle";
 static const char __pyx_k_reduce[] = "__reduce__";
@@ -2590,7 +2568,6 @@ static const char __pyx_k_getstate[] = "__getstate__";
 static const char __pyx_k_gradient[] = "gradient";
 static const char __pyx_k_itemsize[] = "itemsize";
 static const char __pyx_k_max_iter[] = "max_iter";
-static const char __pyx_k_multiply[] = "multiply";
 static const char __pyx_k_pyx_type[] = "__pyx_type";
 static const char __pyx_k_setstate[] = "__setstate__";
 static const char __pyx_k_TypeError[] = "TypeError";
@@ -2709,7 +2686,6 @@ static PyObject *__pyx_n_s_encode;
 static PyObject *__pyx_n_s_enumerate;
 static PyObject *__pyx_n_s_eps;
 static PyObject *__pyx_n_s_error;
-static PyObject *__pyx_n_s_fft;
 static PyObject *__pyx_n_s_finfo;
 static PyObject *__pyx_n_s_flags;
 static PyObject *__pyx_n_s_float64;
@@ -2720,12 +2696,10 @@ static PyObject *__pyx_n_s_getstate;
 static PyObject *__pyx_kp_s_got_differing_extents_in_dimensi;
 static PyObject *__pyx_n_s_gradient;
 static PyObject *__pyx_n_s_id;
-static PyObject *__pyx_n_s_ifft;
 static PyObject *__pyx_n_s_import;
 static PyObject *__pyx_n_s_indices;
 static PyObject *__pyx_n_s_indptr;
 static PyObject *__pyx_n_s_ints_in_interval;
-static PyObject *__pyx_n_s_irfft2;
 static PyObject *__pyx_n_s_itemsize;
 static PyObject *__pyx_kp_s_itemsize_0_for_cython_array;
 static PyObject *__pyx_n_s_main;
@@ -2733,7 +2707,6 @@ static PyObject *__pyx_n_s_max_iter;
 static PyObject *__pyx_n_s_memview;
 static PyObject *__pyx_n_s_min_num_intervals;
 static PyObject *__pyx_n_s_mode;
-static PyObject *__pyx_n_s_multiply;
 static PyObject *__pyx_n_s_n_interpolation_points;
 static PyObject *__pyx_n_s_name;
 static PyObject *__pyx_n_s_name_2;
@@ -2762,12 +2735,10 @@ static PyObject *__pyx_n_s_pyx_type;
 static PyObject *__pyx_n_s_pyx_unpickle_Enum;
 static PyObject *__pyx_n_s_pyx_vtable;
 static PyObject *__pyx_n_s_range;
-static PyObject *__pyx_n_s_real;
 static PyObject *__pyx_n_s_reduce;
 static PyObject *__pyx_n_s_reduce_cython;
 static PyObject *__pyx_n_s_reduce_ex;
 static PyObject *__pyx_n_s_reference_embedding;
-static PyObject *__pyx_n_s_rfft2;
 static PyObject *__pyx_n_s_setstate;
 static PyObject *__pyx_n_s_setstate_cython;
 static PyObject *__pyx_n_s_shape;
@@ -2889,7 +2860,7 @@ static PyObject *__pyx_tuple__37;
 static PyObject *__pyx_codeobj__31;
 /* Late includes */
 
-/* "fastTSNE/_tsne.pyx":28
+/* "fastTSNE/_tsne.pyx":30
  * 
  * 
  * cpdef double[:, ::1] compute_gaussian_perplexity(             # <<<<<<<<<<<<<<
@@ -2960,7 +2931,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
   Py_ssize_t __pyx_t_40;
   Py_ssize_t __pyx_t_41;
   __Pyx_RefNannySetupContext("compute_gaussian_perplexity", 0);
-  __Pyx_TraceCall("compute_gaussian_perplexity", __pyx_f[0], 28, 0, __PYX_ERR(0, 28, __pyx_L1_error));
+  __Pyx_TraceCall("compute_gaussian_perplexity", __pyx_f[0], 30, 0, __PYX_ERR(0, 30, __pyx_L1_error));
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
       __pyx_v_perplexity_tol = __pyx_optional_args->perplexity_tol;
@@ -2973,7 +2944,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
     }
   }
 
-  /* "fastTSNE/_tsne.pyx":36
+  /* "fastTSNE/_tsne.pyx":38
  * ):
  *     cdef:
  *         Py_ssize_t n_new_points = distances.shape[0]             # <<<<<<<<<<<<<<
@@ -2982,7 +2953,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
  */
   __pyx_v_n_new_points = (__pyx_v_distances.shape[0]);
 
-  /* "fastTSNE/_tsne.pyx":37
+  /* "fastTSNE/_tsne.pyx":39
  *     cdef:
  *         Py_ssize_t n_new_points = distances.shape[0]
  *         Py_ssize_t n_existing_points = distances.shape[1]             # <<<<<<<<<<<<<<
@@ -2991,53 +2962,53 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
  */
   __pyx_v_n_existing_points = (__pyx_v_distances.shape[1]);
 
-  /* "fastTSNE/_tsne.pyx":38
+  /* "fastTSNE/_tsne.pyx":40
  *         Py_ssize_t n_new_points = distances.shape[0]
  *         Py_ssize_t n_existing_points = distances.shape[1]
  *         double[:, ::1] P = np.zeros_like(distances, dtype=float, order='C')             # <<<<<<<<<<<<<<
  *         double[:] beta = np.ones(n_new_points)
  * 
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 38, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 40, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros_like); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 38, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros_like); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 40, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_distances, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 38, __pyx_L1_error)
+  __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_distances, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 40, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 38, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 40, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 38, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 40, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 38, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_order, __pyx_n_s_C) < 0) __PYX_ERR(0, 38, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 38, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 40, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_order, __pyx_n_s_C) < 0) __PYX_ERR(0, 40, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 40, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_4, PyBUF_WRITABLE); if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 38, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_4, PyBUF_WRITABLE); if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 40, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_P = __pyx_t_5;
   __pyx_t_5.memview = NULL;
   __pyx_t_5.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":39
+  /* "fastTSNE/_tsne.pyx":41
  *         Py_ssize_t n_existing_points = distances.shape[1]
  *         double[:, ::1] P = np.zeros_like(distances, dtype=float, order='C')
  *         double[:] beta = np.ones(n_new_points)             # <<<<<<<<<<<<<<
  * 
  *         Py_ssize_t i, j, iteration
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 41, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_ones); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_ones); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 41, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_new_points); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_new_points); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 41, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
@@ -3050,14 +3021,14 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
     }
   }
   if (!__pyx_t_2) {
-    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 39, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 41, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_GOTREF(__pyx_t_4);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_3)) {
       PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_t_1};
-      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 39, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 41, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -3066,32 +3037,32 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
       PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_t_1};
-      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 39, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 41, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     } else
     #endif
     {
-      __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 39, __pyx_L1_error)
+      __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 41, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_2); __pyx_t_2 = NULL;
       __Pyx_GIVEREF(__pyx_t_1);
       PyTuple_SET_ITEM(__pyx_t_6, 0+1, __pyx_t_1);
       __pyx_t_1 = 0;
-      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_6, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 39, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_6, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 41, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     }
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_t_4, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_t_4, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 41, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_beta = __pyx_t_7;
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":42
+  /* "fastTSNE/_tsne.pyx":44
  * 
  *         Py_ssize_t i, j, iteration
  *         double desired_entropy = log(desired_perplexity)             # <<<<<<<<<<<<<<
@@ -3100,7 +3071,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
  */
   __pyx_v_desired_entropy = log(__pyx_v_desired_perplexity);
 
-  /* "fastTSNE/_tsne.pyx":46
+  /* "fastTSNE/_tsne.pyx":48
  *         double min_beta, max_beta, sum_Pi, entropy, entropy_diff
  * 
  *     if num_threads < 1:             # <<<<<<<<<<<<<<
@@ -3110,7 +3081,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
   __pyx_t_8 = ((__pyx_v_num_threads < 1) != 0);
   if (__pyx_t_8) {
 
-    /* "fastTSNE/_tsne.pyx":47
+    /* "fastTSNE/_tsne.pyx":49
  * 
  *     if num_threads < 1:
  *         num_threads = 1             # <<<<<<<<<<<<<<
@@ -3119,7 +3090,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
  */
     __pyx_v_num_threads = 1;
 
-    /* "fastTSNE/_tsne.pyx":46
+    /* "fastTSNE/_tsne.pyx":48
  *         double min_beta, max_beta, sum_Pi, entropy, entropy_diff
  * 
  *     if num_threads < 1:             # <<<<<<<<<<<<<<
@@ -3128,7 +3099,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
  */
   }
 
-  /* "fastTSNE/_tsne.pyx":49
+  /* "fastTSNE/_tsne.pyx":51
  *         num_threads = 1
  * 
  *     for i in prange(n_new_points, nogil=True, schedule='guided', num_threads=num_threads):             # <<<<<<<<<<<<<<
@@ -3173,7 +3144,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
                             __pyx_v_min_beta = ((double)__PYX_NAN());
                             __pyx_v_sum_Pi = ((double)__PYX_NAN());
 
-                            /* "fastTSNE/_tsne.pyx":50
+                            /* "fastTSNE/_tsne.pyx":52
  * 
  *     for i in prange(n_new_points, nogil=True, schedule='guided', num_threads=num_threads):
  *         min_beta, max_beta = -INFINITY, INFINITY             # <<<<<<<<<<<<<<
@@ -3185,7 +3156,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
                             __pyx_v_min_beta = __pyx_t_12;
                             __pyx_v_max_beta = __pyx_t_13;
 
-                            /* "fastTSNE/_tsne.pyx":52
+                            /* "fastTSNE/_tsne.pyx":54
  *         min_beta, max_beta = -INFINITY, INFINITY
  * 
  *         for iteration in range(max_iter):             # <<<<<<<<<<<<<<
@@ -3197,7 +3168,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
                             for (__pyx_t_16 = 0; __pyx_t_16 < __pyx_t_15; __pyx_t_16+=1) {
                               __pyx_v_iteration = __pyx_t_16;
 
-                              /* "fastTSNE/_tsne.pyx":53
+                              /* "fastTSNE/_tsne.pyx":55
  * 
  *         for iteration in range(max_iter):
  *             sum_Pi, entropy = 0, 0             # <<<<<<<<<<<<<<
@@ -3209,7 +3180,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
                               __pyx_v_sum_Pi = __pyx_t_13;
                               __pyx_v_entropy = __pyx_t_12;
 
-                              /* "fastTSNE/_tsne.pyx":54
+                              /* "fastTSNE/_tsne.pyx":56
  *         for iteration in range(max_iter):
  *             sum_Pi, entropy = 0, 0
  *             for j in range(n_existing_points):             # <<<<<<<<<<<<<<
@@ -3221,7 +3192,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
                               for (__pyx_t_19 = 0; __pyx_t_19 < __pyx_t_18; __pyx_t_19+=1) {
                                 __pyx_v_j = __pyx_t_19;
 
-                                /* "fastTSNE/_tsne.pyx":55
+                                /* "fastTSNE/_tsne.pyx":57
  *             sum_Pi, entropy = 0, 0
  *             for j in range(n_existing_points):
  *                 P[i, j] = exp(-distances[i, j] * beta[i])             # <<<<<<<<<<<<<<
@@ -3235,7 +3206,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
                                 __pyx_t_24 = __pyx_v_j;
                                 *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_P.data + __pyx_t_23 * __pyx_v_P.strides[0]) )) + __pyx_t_24)) )) = exp(((-(*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_distances.data + __pyx_t_20 * __pyx_v_distances.strides[0]) ) + __pyx_t_21 * __pyx_v_distances.strides[1]) )))) * (*((double *) ( /* dim=0 */ (__pyx_v_beta.data + __pyx_t_22 * __pyx_v_beta.strides[0]) )))));
 
-                                /* "fastTSNE/_tsne.pyx":56
+                                /* "fastTSNE/_tsne.pyx":58
  *             for j in range(n_existing_points):
  *                 P[i, j] = exp(-distances[i, j] * beta[i])
  *                 entropy = entropy + distances[i, j] * P[i, j]             # <<<<<<<<<<<<<<
@@ -3248,7 +3219,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
                                 __pyx_t_28 = __pyx_v_j;
                                 __pyx_v_entropy = (__pyx_v_entropy + ((*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_distances.data + __pyx_t_25 * __pyx_v_distances.strides[0]) ) + __pyx_t_26 * __pyx_v_distances.strides[1]) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_P.data + __pyx_t_27 * __pyx_v_P.strides[0]) )) + __pyx_t_28)) )))));
 
-                                /* "fastTSNE/_tsne.pyx":57
+                                /* "fastTSNE/_tsne.pyx":59
  *                 P[i, j] = exp(-distances[i, j] * beta[i])
  *                 entropy = entropy + distances[i, j] * P[i, j]
  *                 sum_Pi = sum_Pi + P[i, j]             # <<<<<<<<<<<<<<
@@ -3260,7 +3231,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
                                 __pyx_v_sum_Pi = (__pyx_v_sum_Pi + (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_P.data + __pyx_t_29 * __pyx_v_P.strides[0]) )) + __pyx_t_30)) ))));
                               }
 
-                              /* "fastTSNE/_tsne.pyx":59
+                              /* "fastTSNE/_tsne.pyx":61
  *                 sum_Pi = sum_Pi + P[i, j]
  * 
  *             sum_Pi = sum_Pi + EPSILON             # <<<<<<<<<<<<<<
@@ -3269,7 +3240,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
  */
                               __pyx_v_sum_Pi = (__pyx_v_sum_Pi + __pyx_v_8fastTSNE_5_tsne_EPSILON);
 
-                              /* "fastTSNE/_tsne.pyx":61
+                              /* "fastTSNE/_tsne.pyx":63
  *             sum_Pi = sum_Pi + EPSILON
  * 
  *             entropy = log(sum_Pi) + beta[i] * entropy / sum_Pi             # <<<<<<<<<<<<<<
@@ -3279,7 +3250,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
                               __pyx_t_31 = __pyx_v_i;
                               __pyx_v_entropy = (log(__pyx_v_sum_Pi) + (((*((double *) ( /* dim=0 */ (__pyx_v_beta.data + __pyx_t_31 * __pyx_v_beta.strides[0]) ))) * __pyx_v_entropy) / __pyx_v_sum_Pi));
 
-                              /* "fastTSNE/_tsne.pyx":62
+                              /* "fastTSNE/_tsne.pyx":64
  * 
  *             entropy = log(sum_Pi) + beta[i] * entropy / sum_Pi
  *             entropy_diff = entropy - desired_entropy             # <<<<<<<<<<<<<<
@@ -3288,7 +3259,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
  */
                               __pyx_v_entropy_diff = (__pyx_v_entropy - __pyx_v_desired_entropy);
 
-                              /* "fastTSNE/_tsne.pyx":64
+                              /* "fastTSNE/_tsne.pyx":66
  *             entropy_diff = entropy - desired_entropy
  * 
  *             if fabs(entropy_diff) <= perplexity_tol:             # <<<<<<<<<<<<<<
@@ -3298,7 +3269,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
                               __pyx_t_8 = ((fabs(__pyx_v_entropy_diff) <= __pyx_v_perplexity_tol) != 0);
                               if (__pyx_t_8) {
 
-                                /* "fastTSNE/_tsne.pyx":65
+                                /* "fastTSNE/_tsne.pyx":67
  * 
  *             if fabs(entropy_diff) <= perplexity_tol:
  *                 break             # <<<<<<<<<<<<<<
@@ -3307,7 +3278,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
  */
                                 goto __pyx_L12_break;
 
-                                /* "fastTSNE/_tsne.pyx":64
+                                /* "fastTSNE/_tsne.pyx":66
  *             entropy_diff = entropy - desired_entropy
  * 
  *             if fabs(entropy_diff) <= perplexity_tol:             # <<<<<<<<<<<<<<
@@ -3316,7 +3287,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
  */
                               }
 
-                              /* "fastTSNE/_tsne.pyx":67
+                              /* "fastTSNE/_tsne.pyx":69
  *                 break
  * 
  *             if entropy_diff > 0:             # <<<<<<<<<<<<<<
@@ -3326,7 +3297,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
                               __pyx_t_8 = ((__pyx_v_entropy_diff > 0.0) != 0);
                               if (__pyx_t_8) {
 
-                                /* "fastTSNE/_tsne.pyx":68
+                                /* "fastTSNE/_tsne.pyx":70
  * 
  *             if entropy_diff > 0:
  *                 min_beta = beta[i]             # <<<<<<<<<<<<<<
@@ -3336,7 +3307,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
                                 __pyx_t_32 = __pyx_v_i;
                                 __pyx_v_min_beta = (*((double *) ( /* dim=0 */ (__pyx_v_beta.data + __pyx_t_32 * __pyx_v_beta.strides[0]) )));
 
-                                /* "fastTSNE/_tsne.pyx":69
+                                /* "fastTSNE/_tsne.pyx":71
  *             if entropy_diff > 0:
  *                 min_beta = beta[i]
  *                 if isinf(max_beta):             # <<<<<<<<<<<<<<
@@ -3346,7 +3317,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
                                 __pyx_t_8 = (isinf(__pyx_v_max_beta) != 0);
                                 if (__pyx_t_8) {
 
-                                  /* "fastTSNE/_tsne.pyx":70
+                                  /* "fastTSNE/_tsne.pyx":72
  *                 min_beta = beta[i]
  *                 if isinf(max_beta):
  *                     beta[i] *= 2             # <<<<<<<<<<<<<<
@@ -3356,7 +3327,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
                                   __pyx_t_33 = __pyx_v_i;
                                   *((double *) ( /* dim=0 */ (__pyx_v_beta.data + __pyx_t_33 * __pyx_v_beta.strides[0]) )) *= 2.0;
 
-                                  /* "fastTSNE/_tsne.pyx":69
+                                  /* "fastTSNE/_tsne.pyx":71
  *             if entropy_diff > 0:
  *                 min_beta = beta[i]
  *                 if isinf(max_beta):             # <<<<<<<<<<<<<<
@@ -3366,7 +3337,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
                                   goto __pyx_L17;
                                 }
 
-                                /* "fastTSNE/_tsne.pyx":72
+                                /* "fastTSNE/_tsne.pyx":74
  *                     beta[i] *= 2
  *                 else:
  *                     beta[i] = (beta[i] + max_beta) / 2             # <<<<<<<<<<<<<<
@@ -3380,7 +3351,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
                                 }
                                 __pyx_L17:;
 
-                                /* "fastTSNE/_tsne.pyx":67
+                                /* "fastTSNE/_tsne.pyx":69
  *                 break
  * 
  *             if entropy_diff > 0:             # <<<<<<<<<<<<<<
@@ -3390,7 +3361,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
                                 goto __pyx_L16;
                               }
 
-                              /* "fastTSNE/_tsne.pyx":74
+                              /* "fastTSNE/_tsne.pyx":76
  *                     beta[i] = (beta[i] + max_beta) / 2
  *             else:
  *                 max_beta = beta[i]             # <<<<<<<<<<<<<<
@@ -3401,7 +3372,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
                                 __pyx_t_36 = __pyx_v_i;
                                 __pyx_v_max_beta = (*((double *) ( /* dim=0 */ (__pyx_v_beta.data + __pyx_t_36 * __pyx_v_beta.strides[0]) )));
 
-                                /* "fastTSNE/_tsne.pyx":75
+                                /* "fastTSNE/_tsne.pyx":77
  *             else:
  *                 max_beta = beta[i]
  *                 if isinf(min_beta):             # <<<<<<<<<<<<<<
@@ -3411,7 +3382,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
                                 __pyx_t_8 = (isinf(__pyx_v_min_beta) != 0);
                                 if (__pyx_t_8) {
 
-                                  /* "fastTSNE/_tsne.pyx":76
+                                  /* "fastTSNE/_tsne.pyx":78
  *                 max_beta = beta[i]
  *                 if isinf(min_beta):
  *                     beta[i] /= 2             # <<<<<<<<<<<<<<
@@ -3421,7 +3392,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
                                   __pyx_t_37 = __pyx_v_i;
                                   *((double *) ( /* dim=0 */ (__pyx_v_beta.data + __pyx_t_37 * __pyx_v_beta.strides[0]) )) /= 2.0;
 
-                                  /* "fastTSNE/_tsne.pyx":75
+                                  /* "fastTSNE/_tsne.pyx":77
  *             else:
  *                 max_beta = beta[i]
  *                 if isinf(min_beta):             # <<<<<<<<<<<<<<
@@ -3431,7 +3402,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
                                   goto __pyx_L18;
                                 }
 
-                                /* "fastTSNE/_tsne.pyx":78
+                                /* "fastTSNE/_tsne.pyx":80
  *                     beta[i] /= 2
  *                 else:
  *                     beta[i] = (beta[i] + min_beta) / 2             # <<<<<<<<<<<<<<
@@ -3449,7 +3420,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
                             }
                             __pyx_L12_break:;
 
-                            /* "fastTSNE/_tsne.pyx":80
+                            /* "fastTSNE/_tsne.pyx":82
  *                     beta[i] = (beta[i] + min_beta) / 2
  * 
  *         for j in range(n_existing_points):             # <<<<<<<<<<<<<<
@@ -3461,7 +3432,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
                             for (__pyx_t_16 = 0; __pyx_t_16 < __pyx_t_15; __pyx_t_16+=1) {
                               __pyx_v_j = __pyx_t_16;
 
-                              /* "fastTSNE/_tsne.pyx":81
+                              /* "fastTSNE/_tsne.pyx":83
  * 
  *         for j in range(n_existing_points):
  *             P[i, j] /= sum_Pi             # <<<<<<<<<<<<<<
@@ -3485,7 +3456,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
         #endif
       }
 
-      /* "fastTSNE/_tsne.pyx":49
+      /* "fastTSNE/_tsne.pyx":51
  *         num_threads = 1
  * 
  *     for i in prange(n_new_points, nogil=True, schedule='guided', num_threads=num_threads):             # <<<<<<<<<<<<<<
@@ -3504,7 +3475,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
       }
   }
 
-  /* "fastTSNE/_tsne.pyx":83
+  /* "fastTSNE/_tsne.pyx":85
  *             P[i, j] /= sum_Pi
  * 
  *     return P             # <<<<<<<<<<<<<<
@@ -3515,7 +3486,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(_
   __pyx_r = __pyx_v_P;
   goto __pyx_L0;
 
-  /* "fastTSNE/_tsne.pyx":28
+  /* "fastTSNE/_tsne.pyx":30
  * 
  * 
  * cpdef double[:, ::1] compute_gaussian_perplexity(             # <<<<<<<<<<<<<<
@@ -3589,7 +3560,7 @@ static PyObject *__pyx_pw_8fastTSNE_5_tsne_1compute_gaussian_perplexity(PyObject
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_desired_perplexity)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("compute_gaussian_perplexity", 0, 2, 5, 1); __PYX_ERR(0, 28, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("compute_gaussian_perplexity", 0, 2, 5, 1); __PYX_ERR(0, 30, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -3611,7 +3582,7 @@ static PyObject *__pyx_pw_8fastTSNE_5_tsne_1compute_gaussian_perplexity(PyObject
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "compute_gaussian_perplexity") < 0)) __PYX_ERR(0, 28, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "compute_gaussian_perplexity") < 0)) __PYX_ERR(0, 30, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -3627,27 +3598,27 @@ static PyObject *__pyx_pw_8fastTSNE_5_tsne_1compute_gaussian_perplexity(PyObject
         default: goto __pyx_L5_argtuple_error;
       }
     }
-    __pyx_v_distances = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_distances.memview)) __PYX_ERR(0, 29, __pyx_L3_error)
-    __pyx_v_desired_perplexity = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_desired_perplexity == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 30, __pyx_L3_error)
+    __pyx_v_distances = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_distances.memview)) __PYX_ERR(0, 31, __pyx_L3_error)
+    __pyx_v_desired_perplexity = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_desired_perplexity == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 32, __pyx_L3_error)
     if (values[2]) {
-      __pyx_v_perplexity_tol = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_perplexity_tol == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 31, __pyx_L3_error)
+      __pyx_v_perplexity_tol = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_perplexity_tol == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 33, __pyx_L3_error)
     } else {
       __pyx_v_perplexity_tol = ((double)1e-8);
     }
     if (values[3]) {
-      __pyx_v_max_iter = __Pyx_PyIndex_AsSsize_t(values[3]); if (unlikely((__pyx_v_max_iter == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 32, __pyx_L3_error)
+      __pyx_v_max_iter = __Pyx_PyIndex_AsSsize_t(values[3]); if (unlikely((__pyx_v_max_iter == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 34, __pyx_L3_error)
     } else {
       __pyx_v_max_iter = ((Py_ssize_t)0xC8);
     }
     if (values[4]) {
-      __pyx_v_num_threads = __Pyx_PyIndex_AsSsize_t(values[4]); if (unlikely((__pyx_v_num_threads == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 33, __pyx_L3_error)
+      __pyx_v_num_threads = __Pyx_PyIndex_AsSsize_t(values[4]); if (unlikely((__pyx_v_num_threads == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 35, __pyx_L3_error)
     } else {
       __pyx_v_num_threads = ((Py_ssize_t)1);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("compute_gaussian_perplexity", 0, 2, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 28, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("compute_gaussian_perplexity", 0, 2, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 30, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("fastTSNE._tsne.compute_gaussian_perplexity", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -3668,14 +3639,14 @@ static PyObject *__pyx_pf_8fastTSNE_5_tsne_compute_gaussian_perplexity(CYTHON_UN
   struct __pyx_opt_args_8fastTSNE_5_tsne_compute_gaussian_perplexity __pyx_t_2;
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("compute_gaussian_perplexity", 0);
-  __Pyx_TraceCall("compute_gaussian_perplexity (wrapper)", __pyx_f[0], 28, 0, __PYX_ERR(0, 28, __pyx_L1_error));
+  __Pyx_TraceCall("compute_gaussian_perplexity (wrapper)", __pyx_f[0], 30, 0, __PYX_ERR(0, 30, __pyx_L1_error));
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_2.__pyx_n = 3;
   __pyx_t_2.perplexity_tol = __pyx_v_perplexity_tol;
   __pyx_t_2.max_iter = __pyx_v_max_iter;
   __pyx_t_2.num_threads = __pyx_v_num_threads;
-  __pyx_t_1 = __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(__pyx_v_distances, __pyx_v_desired_perplexity, 0, &__pyx_t_2); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 28, __pyx_L1_error)
-  __pyx_t_3 = __pyx_memoryview_fromslice(__pyx_t_1, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_8fastTSNE_5_tsne_compute_gaussian_perplexity(__pyx_v_distances, __pyx_v_desired_perplexity, 0, &__pyx_t_2); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 30, __pyx_L1_error)
+  __pyx_t_3 = __pyx_memoryview_fromslice(__pyx_t_1, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 30, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
   __pyx_t_1.memview = NULL;
@@ -3698,7 +3669,7 @@ static PyObject *__pyx_pf_8fastTSNE_5_tsne_compute_gaussian_perplexity(CYTHON_UN
   return __pyx_r;
 }
 
-/* "fastTSNE/_tsne.pyx":86
+/* "fastTSNE/_tsne.pyx":88
  * 
  * 
  * cpdef tuple estimate_positive_gradient_nn(             # <<<<<<<<<<<<<<
@@ -3711,7 +3682,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
   double __pyx_v_dof = ((double)1.0);
   Py_ssize_t __pyx_v_num_threads = ((Py_ssize_t)1);
 
-  /* "fastTSNE/_tsne.pyx":95
+  /* "fastTSNE/_tsne.pyx":97
  *     double dof=1,
  *     Py_ssize_t num_threads=1,
  *     bint should_eval_error=False,             # <<<<<<<<<<<<<<
@@ -3760,7 +3731,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
   PyObject *__pyx_t_24 = NULL;
   PyObject *__pyx_t_25 = NULL;
   __Pyx_RefNannySetupContext("estimate_positive_gradient_nn", 0);
-  __Pyx_TraceCall("estimate_positive_gradient_nn", __pyx_f[0], 86, 0, __PYX_ERR(0, 86, __pyx_L1_error));
+  __Pyx_TraceCall("estimate_positive_gradient_nn", __pyx_f[0], 88, 0, __PYX_ERR(0, 88, __pyx_L1_error));
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
       __pyx_v_dof = __pyx_optional_args->dof;
@@ -3773,7 +3744,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
     }
   }
 
-  /* "fastTSNE/_tsne.pyx":98
+  /* "fastTSNE/_tsne.pyx":100
  * ):
  *     cdef:
  *         Py_ssize_t n_samples = gradient.shape[0]             # <<<<<<<<<<<<<<
@@ -3782,7 +3753,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
  */
   __pyx_v_n_samples = (__pyx_v_gradient.shape[0]);
 
-  /* "fastTSNE/_tsne.pyx":99
+  /* "fastTSNE/_tsne.pyx":101
  *     cdef:
  *         Py_ssize_t n_samples = gradient.shape[0]
  *         Py_ssize_t n_dims = gradient.shape[1]             # <<<<<<<<<<<<<<
@@ -3791,7 +3762,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
  */
   __pyx_v_n_dims = (__pyx_v_gradient.shape[1]);
 
-  /* "fastTSNE/_tsne.pyx":101
+  /* "fastTSNE/_tsne.pyx":103
  *         Py_ssize_t n_dims = gradient.shape[1]
  *         double * diff
  *         double d_ij, p_ij, q_ij, kl_divergence = 0, sum_P = 0             # <<<<<<<<<<<<<<
@@ -3801,7 +3772,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
   __pyx_v_kl_divergence = 0.0;
   __pyx_v_sum_P = 0.0;
 
-  /* "fastTSNE/_tsne.pyx":105
+  /* "fastTSNE/_tsne.pyx":107
  *         Py_ssize_t i, j, k, d
  * 
  *     if num_threads < 1:             # <<<<<<<<<<<<<<
@@ -3811,7 +3782,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
   __pyx_t_1 = ((__pyx_v_num_threads < 1) != 0);
   if (__pyx_t_1) {
 
-    /* "fastTSNE/_tsne.pyx":106
+    /* "fastTSNE/_tsne.pyx":108
  * 
  *     if num_threads < 1:
  *         num_threads = 1             # <<<<<<<<<<<<<<
@@ -3820,7 +3791,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
  */
     __pyx_v_num_threads = 1;
 
-    /* "fastTSNE/_tsne.pyx":105
+    /* "fastTSNE/_tsne.pyx":107
  *         Py_ssize_t i, j, k, d
  * 
  *     if num_threads < 1:             # <<<<<<<<<<<<<<
@@ -3829,7 +3800,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
  */
   }
 
-  /* "fastTSNE/_tsne.pyx":108
+  /* "fastTSNE/_tsne.pyx":110
  *         num_threads = 1
  * 
  *     with nogil, parallel(num_threads=num_threads):             # <<<<<<<<<<<<<<
@@ -3867,7 +3838,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
                 /* Initialize private variables to invalid values */
                 __pyx_v_diff = ((double *)1);
 
-                /* "fastTSNE/_tsne.pyx":111
+                /* "fastTSNE/_tsne.pyx":113
  *         # Use `malloc` here instead of `PyMem_Malloc` because we're in a
  *         # `nogil` clause and we won't be allocating much memory
  *         diff = <double *>malloc(n_dims * sizeof(double))             # <<<<<<<<<<<<<<
@@ -3876,7 +3847,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
  */
                 __pyx_v_diff = ((double *)malloc((__pyx_v_n_dims * (sizeof(double)))));
 
-                /* "fastTSNE/_tsne.pyx":112
+                /* "fastTSNE/_tsne.pyx":114
  *         # `nogil` clause and we won't be allocating much memory
  *         diff = <double *>malloc(n_dims * sizeof(double))
  *         if not diff:             # <<<<<<<<<<<<<<
@@ -3886,7 +3857,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
                 __pyx_t_1 = ((!(__pyx_v_diff != 0)) != 0);
                 if (__pyx_t_1) {
 
-                  /* "fastTSNE/_tsne.pyx":113
+                  /* "fastTSNE/_tsne.pyx":115
  *         diff = <double *>malloc(n_dims * sizeof(double))
  *         if not diff:
  *             with gil:             # <<<<<<<<<<<<<<
@@ -3899,17 +3870,17 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
                       #endif
                       /*try:*/ {
 
-                        /* "fastTSNE/_tsne.pyx":114
+                        /* "fastTSNE/_tsne.pyx":116
  *         if not diff:
  *             with gil:
  *                 raise MemoryError()             # <<<<<<<<<<<<<<
  * 
  *         for i in prange(n_samples, schedule='guided'):
  */
-                        PyErr_NoMemory(); __PYX_ERR(0, 114, __pyx_L15_error)
+                        PyErr_NoMemory(); __PYX_ERR(0, 116, __pyx_L15_error)
                       }
 
-                      /* "fastTSNE/_tsne.pyx":113
+                      /* "fastTSNE/_tsne.pyx":115
  *         diff = <double *>malloc(n_dims * sizeof(double))
  *         if not diff:
  *             with gil:             # <<<<<<<<<<<<<<
@@ -3926,7 +3897,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
                       }
                   }
 
-                  /* "fastTSNE/_tsne.pyx":112
+                  /* "fastTSNE/_tsne.pyx":114
  *         # `nogil` clause and we won't be allocating much memory
  *         diff = <double *>malloc(n_dims * sizeof(double))
  *         if not diff:             # <<<<<<<<<<<<<<
@@ -3935,7 +3906,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
  */
                 }
 
-                /* "fastTSNE/_tsne.pyx":116
+                /* "fastTSNE/_tsne.pyx":118
  *                 raise MemoryError()
  * 
  *         for i in prange(n_samples, schedule='guided'):             # <<<<<<<<<<<<<<
@@ -3962,7 +3933,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
                                 __pyx_v_p_ij = ((double)__PYX_NAN());
                                 __pyx_v_q_ij = ((double)__PYX_NAN());
 
-                                /* "fastTSNE/_tsne.pyx":118
+                                /* "fastTSNE/_tsne.pyx":120
  *         for i in prange(n_samples, schedule='guided'):
  *             # Iterate over all the neighbors `j` and sum up their contribution
  *             for k in range(indptr[i], indptr[i + 1]):             # <<<<<<<<<<<<<<
@@ -3976,7 +3947,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
                                 for (__pyx_t_9 = (*((int *) ( /* dim=0 */ (__pyx_v_indptr.data + __pyx_t_7 * __pyx_v_indptr.strides[0]) ))); __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
                                   __pyx_v_k = __pyx_t_9;
 
-                                  /* "fastTSNE/_tsne.pyx":119
+                                  /* "fastTSNE/_tsne.pyx":121
  *             # Iterate over all the neighbors `j` and sum up their contribution
  *             for k in range(indptr[i], indptr[i + 1]):
  *                 j = indices[k]             # <<<<<<<<<<<<<<
@@ -3986,7 +3957,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
                                   __pyx_t_10 = __pyx_v_k;
                                   __pyx_v_j = (*((int *) ( /* dim=0 */ (__pyx_v_indices.data + __pyx_t_10 * __pyx_v_indices.strides[0]) )));
 
-                                  /* "fastTSNE/_tsne.pyx":120
+                                  /* "fastTSNE/_tsne.pyx":122
  *             for k in range(indptr[i], indptr[i + 1]):
  *                 j = indices[k]
  *                 p_ij = P_data[k]             # <<<<<<<<<<<<<<
@@ -3996,7 +3967,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
                                   __pyx_t_11 = __pyx_v_k;
                                   __pyx_v_p_ij = (*((double *) ( /* dim=0 */ (__pyx_v_P_data.data + __pyx_t_11 * __pyx_v_P_data.strides[0]) )));
 
-                                  /* "fastTSNE/_tsne.pyx":123
+                                  /* "fastTSNE/_tsne.pyx":125
  *                 # Compute the direction of the points attraction and the
  *                 # squared euclidean distance between the points
  *                 d_ij = 0             # <<<<<<<<<<<<<<
@@ -4005,7 +3976,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
  */
                                   __pyx_v_d_ij = 0.0;
 
-                                  /* "fastTSNE/_tsne.pyx":124
+                                  /* "fastTSNE/_tsne.pyx":126
  *                 # squared euclidean distance between the points
  *                 d_ij = 0
  *                 for d in range(n_dims):             # <<<<<<<<<<<<<<
@@ -4017,7 +3988,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
                                   for (__pyx_t_14 = 0; __pyx_t_14 < __pyx_t_13; __pyx_t_14+=1) {
                                     __pyx_v_d = __pyx_t_14;
 
-                                    /* "fastTSNE/_tsne.pyx":125
+                                    /* "fastTSNE/_tsne.pyx":127
  *                 d_ij = 0
  *                 for d in range(n_dims):
  *                     diff[d] = embedding[i, d] - reference_embedding[j, d]             # <<<<<<<<<<<<<<
@@ -4030,7 +4001,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
                                     __pyx_t_18 = __pyx_v_d;
                                     (__pyx_v_diff[__pyx_v_d]) = ((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_15 * __pyx_v_embedding.strides[0]) )) + __pyx_t_16)) ))) - (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_reference_embedding.data + __pyx_t_17 * __pyx_v_reference_embedding.strides[0]) )) + __pyx_t_18)) ))));
 
-                                    /* "fastTSNE/_tsne.pyx":126
+                                    /* "fastTSNE/_tsne.pyx":128
  *                 for d in range(n_dims):
  *                     diff[d] = embedding[i, d] - reference_embedding[j, d]
  *                     d_ij = d_ij + diff[d] ** 2             # <<<<<<<<<<<<<<
@@ -4040,7 +4011,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
                                     __pyx_v_d_ij = (__pyx_v_d_ij + pow((__pyx_v_diff[__pyx_v_d]), 2.0));
                                   }
 
-                                  /* "fastTSNE/_tsne.pyx":128
+                                  /* "fastTSNE/_tsne.pyx":130
  *                     d_ij = d_ij + diff[d] ** 2
  * 
  *                 q_ij = dof / (dof + d_ij)             # <<<<<<<<<<<<<<
@@ -4049,7 +4020,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
  */
                                   __pyx_v_q_ij = (__pyx_v_dof / (__pyx_v_dof + __pyx_v_d_ij));
 
-                                  /* "fastTSNE/_tsne.pyx":129
+                                  /* "fastTSNE/_tsne.pyx":131
  * 
  *                 q_ij = dof / (dof + d_ij)
  *                 if dof != 1:             # <<<<<<<<<<<<<<
@@ -4059,7 +4030,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
                                   __pyx_t_1 = ((__pyx_v_dof != 1.0) != 0);
                                   if (__pyx_t_1) {
 
-                                    /* "fastTSNE/_tsne.pyx":130
+                                    /* "fastTSNE/_tsne.pyx":132
  *                 q_ij = dof / (dof + d_ij)
  *                 if dof != 1:
  *                     q_ij = q_ij ** ((dof + 1) / 2)             # <<<<<<<<<<<<<<
@@ -4068,7 +4039,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
  */
                                     __pyx_v_q_ij = pow(__pyx_v_q_ij, ((__pyx_v_dof + 1.0) / 2.0));
 
-                                    /* "fastTSNE/_tsne.pyx":129
+                                    /* "fastTSNE/_tsne.pyx":131
  * 
  *                 q_ij = dof / (dof + d_ij)
  *                 if dof != 1:             # <<<<<<<<<<<<<<
@@ -4077,7 +4048,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
  */
                                   }
 
-                                  /* "fastTSNE/_tsne.pyx":133
+                                  /* "fastTSNE/_tsne.pyx":135
  * 
  *                 # Compute F_{attr} of point `j` on point `i`
  *                 for d in range(n_dims):             # <<<<<<<<<<<<<<
@@ -4089,7 +4060,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
                                   for (__pyx_t_14 = 0; __pyx_t_14 < __pyx_t_13; __pyx_t_14+=1) {
                                     __pyx_v_d = __pyx_t_14;
 
-                                    /* "fastTSNE/_tsne.pyx":134
+                                    /* "fastTSNE/_tsne.pyx":136
  *                 # Compute F_{attr} of point `j` on point `i`
  *                 for d in range(n_dims):
  *                     gradient[i, d] = gradient[i, d] + q_ij * p_ij * diff[d]             # <<<<<<<<<<<<<<
@@ -4103,7 +4074,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
                                     *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_gradient.data + __pyx_t_21 * __pyx_v_gradient.strides[0]) )) + __pyx_t_22)) )) = ((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_gradient.data + __pyx_t_19 * __pyx_v_gradient.strides[0]) )) + __pyx_t_20)) ))) + ((__pyx_v_q_ij * __pyx_v_p_ij) * (__pyx_v_diff[__pyx_v_d])));
                                   }
 
-                                  /* "fastTSNE/_tsne.pyx":140
+                                  /* "fastTSNE/_tsne.pyx":142
  *                 # is unnormalized, so we need to normalize once the sum of q_ij
  *                 # is known
  *                 if should_eval_error:             # <<<<<<<<<<<<<<
@@ -4113,7 +4084,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
                                   __pyx_t_1 = (__pyx_v_should_eval_error != 0);
                                   if (__pyx_t_1) {
 
-                                    /* "fastTSNE/_tsne.pyx":141
+                                    /* "fastTSNE/_tsne.pyx":143
  *                 # is known
  *                 if should_eval_error:
  *                     sum_P += p_ij             # <<<<<<<<<<<<<<
@@ -4122,7 +4093,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
  */
                                     __pyx_v_sum_P = (__pyx_v_sum_P + __pyx_v_p_ij);
 
-                                    /* "fastTSNE/_tsne.pyx":142
+                                    /* "fastTSNE/_tsne.pyx":144
  *                 if should_eval_error:
  *                     sum_P += p_ij
  *                     kl_divergence += p_ij * log(p_ij / (q_ij + EPSILON))             # <<<<<<<<<<<<<<
@@ -4131,7 +4102,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
  */
                                     __pyx_v_kl_divergence = (__pyx_v_kl_divergence + (__pyx_v_p_ij * log((__pyx_v_p_ij / (__pyx_v_q_ij + __pyx_v_8fastTSNE_5_tsne_EPSILON)))));
 
-                                    /* "fastTSNE/_tsne.pyx":140
+                                    /* "fastTSNE/_tsne.pyx":142
  *                 # is unnormalized, so we need to normalize once the sum of q_ij
  *                 # is known
  *                 if should_eval_error:             # <<<<<<<<<<<<<<
@@ -4145,7 +4116,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
                     }
                 }
 
-                /* "fastTSNE/_tsne.pyx":144
+                /* "fastTSNE/_tsne.pyx":146
  *                     kl_divergence += p_ij * log(p_ij / (q_ij + EPSILON))
  * 
  *         free(diff)             # <<<<<<<<<<<<<<
@@ -4220,7 +4191,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
         #endif
       }
 
-      /* "fastTSNE/_tsne.pyx":108
+      /* "fastTSNE/_tsne.pyx":110
  *         num_threads = 1
  * 
  *     with nogil, parallel(num_threads=num_threads):             # <<<<<<<<<<<<<<
@@ -4246,7 +4217,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
       }
   }
 
-  /* "fastTSNE/_tsne.pyx":146
+  /* "fastTSNE/_tsne.pyx":148
  *         free(diff)
  * 
  *     return sum_P, kl_divergence             # <<<<<<<<<<<<<<
@@ -4254,11 +4225,11 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_23 = PyFloat_FromDouble(__pyx_v_sum_P); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 146, __pyx_L1_error)
+  __pyx_t_23 = PyFloat_FromDouble(__pyx_v_sum_P); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 148, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_23);
-  __pyx_t_24 = PyFloat_FromDouble(__pyx_v_kl_divergence); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 146, __pyx_L1_error)
+  __pyx_t_24 = PyFloat_FromDouble(__pyx_v_kl_divergence); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 148, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_24);
-  __pyx_t_25 = PyTuple_New(2); if (unlikely(!__pyx_t_25)) __PYX_ERR(0, 146, __pyx_L1_error)
+  __pyx_t_25 = PyTuple_New(2); if (unlikely(!__pyx_t_25)) __PYX_ERR(0, 148, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_25);
   __Pyx_GIVEREF(__pyx_t_23);
   PyTuple_SET_ITEM(__pyx_t_25, 0, __pyx_t_23);
@@ -4270,7 +4241,7 @@ static PyObject *__pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
   __pyx_t_25 = 0;
   goto __pyx_L0;
 
-  /* "fastTSNE/_tsne.pyx":86
+  /* "fastTSNE/_tsne.pyx":88
  * 
  * 
  * cpdef tuple estimate_positive_gradient_nn(             # <<<<<<<<<<<<<<
@@ -4344,31 +4315,31 @@ static PyObject *__pyx_pw_8fastTSNE_5_tsne_3estimate_positive_gradient_nn(PyObje
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_indptr)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("estimate_positive_gradient_nn", 0, 6, 9, 1); __PYX_ERR(0, 86, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("estimate_positive_gradient_nn", 0, 6, 9, 1); __PYX_ERR(0, 88, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_P_data)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("estimate_positive_gradient_nn", 0, 6, 9, 2); __PYX_ERR(0, 86, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("estimate_positive_gradient_nn", 0, 6, 9, 2); __PYX_ERR(0, 88, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_embedding)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("estimate_positive_gradient_nn", 0, 6, 9, 3); __PYX_ERR(0, 86, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("estimate_positive_gradient_nn", 0, 6, 9, 3); __PYX_ERR(0, 88, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (likely((values[4] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_reference_embedding)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("estimate_positive_gradient_nn", 0, 6, 9, 4); __PYX_ERR(0, 86, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("estimate_positive_gradient_nn", 0, 6, 9, 4); __PYX_ERR(0, 88, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
         if (likely((values[5] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_gradient)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("estimate_positive_gradient_nn", 0, 6, 9, 5); __PYX_ERR(0, 86, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("estimate_positive_gradient_nn", 0, 6, 9, 5); __PYX_ERR(0, 88, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  6:
@@ -4390,7 +4361,7 @@ static PyObject *__pyx_pw_8fastTSNE_5_tsne_3estimate_positive_gradient_nn(PyObje
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "estimate_positive_gradient_nn") < 0)) __PYX_ERR(0, 86, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "estimate_positive_gradient_nn") < 0)) __PYX_ERR(0, 88, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -4410,27 +4381,27 @@ static PyObject *__pyx_pw_8fastTSNE_5_tsne_3estimate_positive_gradient_nn(PyObje
         default: goto __pyx_L5_argtuple_error;
       }
     }
-    __pyx_v_indices = __Pyx_PyObject_to_MemoryviewSlice_ds_int(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_indices.memview)) __PYX_ERR(0, 87, __pyx_L3_error)
-    __pyx_v_indptr = __Pyx_PyObject_to_MemoryviewSlice_ds_int(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_indptr.memview)) __PYX_ERR(0, 88, __pyx_L3_error)
-    __pyx_v_P_data = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_P_data.memview)) __PYX_ERR(0, 89, __pyx_L3_error)
-    __pyx_v_embedding = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[3], PyBUF_WRITABLE); if (unlikely(!__pyx_v_embedding.memview)) __PYX_ERR(0, 90, __pyx_L3_error)
-    __pyx_v_reference_embedding = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[4], PyBUF_WRITABLE); if (unlikely(!__pyx_v_reference_embedding.memview)) __PYX_ERR(0, 91, __pyx_L3_error)
-    __pyx_v_gradient = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[5], PyBUF_WRITABLE); if (unlikely(!__pyx_v_gradient.memview)) __PYX_ERR(0, 92, __pyx_L3_error)
+    __pyx_v_indices = __Pyx_PyObject_to_MemoryviewSlice_ds_int(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_indices.memview)) __PYX_ERR(0, 89, __pyx_L3_error)
+    __pyx_v_indptr = __Pyx_PyObject_to_MemoryviewSlice_ds_int(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_indptr.memview)) __PYX_ERR(0, 90, __pyx_L3_error)
+    __pyx_v_P_data = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_P_data.memview)) __PYX_ERR(0, 91, __pyx_L3_error)
+    __pyx_v_embedding = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[3], PyBUF_WRITABLE); if (unlikely(!__pyx_v_embedding.memview)) __PYX_ERR(0, 92, __pyx_L3_error)
+    __pyx_v_reference_embedding = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[4], PyBUF_WRITABLE); if (unlikely(!__pyx_v_reference_embedding.memview)) __PYX_ERR(0, 93, __pyx_L3_error)
+    __pyx_v_gradient = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[5], PyBUF_WRITABLE); if (unlikely(!__pyx_v_gradient.memview)) __PYX_ERR(0, 94, __pyx_L3_error)
     if (values[6]) {
-      __pyx_v_dof = __pyx_PyFloat_AsDouble(values[6]); if (unlikely((__pyx_v_dof == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 93, __pyx_L3_error)
+      __pyx_v_dof = __pyx_PyFloat_AsDouble(values[6]); if (unlikely((__pyx_v_dof == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 95, __pyx_L3_error)
     } else {
       __pyx_v_dof = ((double)1.0);
     }
     if (values[7]) {
-      __pyx_v_num_threads = __Pyx_PyIndex_AsSsize_t(values[7]); if (unlikely((__pyx_v_num_threads == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 94, __pyx_L3_error)
+      __pyx_v_num_threads = __Pyx_PyIndex_AsSsize_t(values[7]); if (unlikely((__pyx_v_num_threads == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L3_error)
     } else {
       __pyx_v_num_threads = ((Py_ssize_t)1);
     }
     if (values[8]) {
-      __pyx_v_should_eval_error = __Pyx_PyObject_IsTrue(values[8]); if (unlikely((__pyx_v_should_eval_error == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 95, __pyx_L3_error)
+      __pyx_v_should_eval_error = __Pyx_PyObject_IsTrue(values[8]); if (unlikely((__pyx_v_should_eval_error == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 97, __pyx_L3_error)
     } else {
 
-      /* "fastTSNE/_tsne.pyx":95
+      /* "fastTSNE/_tsne.pyx":97
  *     double dof=1,
  *     Py_ssize_t num_threads=1,
  *     bint should_eval_error=False,             # <<<<<<<<<<<<<<
@@ -4442,7 +4413,7 @@ static PyObject *__pyx_pw_8fastTSNE_5_tsne_3estimate_positive_gradient_nn(PyObje
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("estimate_positive_gradient_nn", 0, 6, 9, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 86, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("estimate_positive_gradient_nn", 0, 6, 9, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 88, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("fastTSNE._tsne.estimate_positive_gradient_nn", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -4450,7 +4421,7 @@ static PyObject *__pyx_pw_8fastTSNE_5_tsne_3estimate_positive_gradient_nn(PyObje
   __pyx_L4_argument_unpacking_done:;
   __pyx_r = __pyx_pf_8fastTSNE_5_tsne_2estimate_positive_gradient_nn(__pyx_self, __pyx_v_indices, __pyx_v_indptr, __pyx_v_P_data, __pyx_v_embedding, __pyx_v_reference_embedding, __pyx_v_gradient, __pyx_v_dof, __pyx_v_num_threads, __pyx_v_should_eval_error);
 
-  /* "fastTSNE/_tsne.pyx":86
+  /* "fastTSNE/_tsne.pyx":88
  * 
  * 
  * cpdef tuple estimate_positive_gradient_nn(             # <<<<<<<<<<<<<<
@@ -4470,13 +4441,13 @@ static PyObject *__pyx_pf_8fastTSNE_5_tsne_2estimate_positive_gradient_nn(CYTHON
   PyObject *__pyx_t_1 = NULL;
   struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_positive_gradient_nn __pyx_t_2;
   __Pyx_RefNannySetupContext("estimate_positive_gradient_nn", 0);
-  __Pyx_TraceCall("estimate_positive_gradient_nn (wrapper)", __pyx_f[0], 86, 0, __PYX_ERR(0, 86, __pyx_L1_error));
+  __Pyx_TraceCall("estimate_positive_gradient_nn (wrapper)", __pyx_f[0], 88, 0, __PYX_ERR(0, 88, __pyx_L1_error));
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_2.__pyx_n = 3;
   __pyx_t_2.dof = __pyx_v_dof;
   __pyx_t_2.num_threads = __pyx_v_num_threads;
   __pyx_t_2.should_eval_error = __pyx_v_should_eval_error;
-  __pyx_t_1 = __pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__pyx_v_indices, __pyx_v_indptr, __pyx_v_P_data, __pyx_v_embedding, __pyx_v_reference_embedding, __pyx_v_gradient, 0, &__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 86, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_8fastTSNE_5_tsne_estimate_positive_gradient_nn(__pyx_v_indices, __pyx_v_indptr, __pyx_v_P_data, __pyx_v_embedding, __pyx_v_reference_embedding, __pyx_v_gradient, 0, &__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 88, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -4500,7 +4471,7 @@ static PyObject *__pyx_pf_8fastTSNE_5_tsne_2estimate_positive_gradient_nn(CYTHON
   return __pyx_r;
 }
 
-/* "fastTSNE/_tsne.pyx":149
+/* "fastTSNE/_tsne.pyx":151
  * 
  * 
  * cpdef double estimate_negative_gradient_bh(             # <<<<<<<<<<<<<<
@@ -4542,7 +4513,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_bh(struct __py
   Py_ssize_t __pyx_t_19;
   Py_ssize_t __pyx_t_20;
   __Pyx_RefNannySetupContext("estimate_negative_gradient_bh", 0);
-  __Pyx_TraceCall("estimate_negative_gradient_bh", __pyx_f[0], 149, 0, __PYX_ERR(0, 149, __pyx_L1_error));
+  __Pyx_TraceCall("estimate_negative_gradient_bh", __pyx_f[0], 151, 0, __PYX_ERR(0, 151, __pyx_L1_error));
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
       __pyx_v_theta = __pyx_optional_args->theta;
@@ -4555,7 +4526,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_bh(struct __py
     }
   }
 
-  /* "fastTSNE/_tsne.pyx":168
+  /* "fastTSNE/_tsne.pyx":170
  *     """
  *     cdef:
  *         Py_ssize_t i, j, num_points = embedding.shape[0]             # <<<<<<<<<<<<<<
@@ -4564,7 +4535,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_bh(struct __py
  */
   __pyx_v_num_points = (__pyx_v_embedding.shape[0]);
 
-  /* "fastTSNE/_tsne.pyx":169
+  /* "fastTSNE/_tsne.pyx":171
  *     cdef:
  *         Py_ssize_t i, j, num_points = embedding.shape[0]
  *         double sum_Q = 0             # <<<<<<<<<<<<<<
@@ -4573,40 +4544,40 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_bh(struct __py
  */
   __pyx_v_sum_Q = 0.0;
 
-  /* "fastTSNE/_tsne.pyx":170
+  /* "fastTSNE/_tsne.pyx":172
  *         Py_ssize_t i, j, num_points = embedding.shape[0]
  *         double sum_Q = 0
  *         double[::1] sum_Qi = np.zeros(num_points, dtype=float)             # <<<<<<<<<<<<<<
  * 
  *     if num_threads < 1:
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 170, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 172, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 170, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 172, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_num_points); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 170, __pyx_L1_error)
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_num_points); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 172, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 170, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 172, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 170, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 172, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 170, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 170, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 172, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 172, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_4, PyBUF_WRITABLE); if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 170, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_4, PyBUF_WRITABLE); if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 172, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_sum_Qi = __pyx_t_5;
   __pyx_t_5.memview = NULL;
   __pyx_t_5.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":172
+  /* "fastTSNE/_tsne.pyx":174
  *         double[::1] sum_Qi = np.zeros(num_points, dtype=float)
  * 
  *     if num_threads < 1:             # <<<<<<<<<<<<<<
@@ -4616,7 +4587,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_bh(struct __py
   __pyx_t_6 = ((__pyx_v_num_threads < 1) != 0);
   if (__pyx_t_6) {
 
-    /* "fastTSNE/_tsne.pyx":173
+    /* "fastTSNE/_tsne.pyx":175
  * 
  *     if num_threads < 1:
  *         num_threads = 1             # <<<<<<<<<<<<<<
@@ -4625,7 +4596,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_bh(struct __py
  */
     __pyx_v_num_threads = 1;
 
-    /* "fastTSNE/_tsne.pyx":172
+    /* "fastTSNE/_tsne.pyx":174
  *         double[::1] sum_Qi = np.zeros(num_points, dtype=float)
  * 
  *     if num_threads < 1:             # <<<<<<<<<<<<<<
@@ -4634,7 +4605,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_bh(struct __py
  */
   }
 
-  /* "fastTSNE/_tsne.pyx":177
+  /* "fastTSNE/_tsne.pyx":179
  *     # In order to run gradient estimation in parallel, we need to pass each
  *     # worker it's own memory slot to write sum_Qs
  *     for i in prange(num_points, nogil=True, num_threads=num_threads, schedule='guided'):             # <<<<<<<<<<<<<<
@@ -4671,7 +4642,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_bh(struct __py
                         {
                             __pyx_v_i = (Py_ssize_t)(0 + 1 * __pyx_t_8);
 
-                            /* "fastTSNE/_tsne.pyx":179
+                            /* "fastTSNE/_tsne.pyx":181
  *     for i in prange(num_points, nogil=True, num_threads=num_threads, schedule='guided'):
  *         _estimate_negative_gradient_single(
  *             &tree.root, &embedding[i, 0], &gradient[i, 0], &sum_Qi[i], theta, dof)             # <<<<<<<<<<<<<<
@@ -4684,7 +4655,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_bh(struct __py
                             __pyx_t_13 = 0;
                             __pyx_t_14 = __pyx_v_i;
 
-                            /* "fastTSNE/_tsne.pyx":178
+                            /* "fastTSNE/_tsne.pyx":180
  *     # worker it's own memory slot to write sum_Qs
  *     for i in prange(num_points, nogil=True, num_threads=num_threads, schedule='guided'):
  *         _estimate_negative_gradient_single(             # <<<<<<<<<<<<<<
@@ -4705,7 +4676,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_bh(struct __py
         #endif
       }
 
-      /* "fastTSNE/_tsne.pyx":177
+      /* "fastTSNE/_tsne.pyx":179
  *     # In order to run gradient estimation in parallel, we need to pass each
  *     # worker it's own memory slot to write sum_Qs
  *     for i in prange(num_points, nogil=True, num_threads=num_threads, schedule='guided'):             # <<<<<<<<<<<<<<
@@ -4724,7 +4695,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_bh(struct __py
       }
   }
 
-  /* "fastTSNE/_tsne.pyx":181
+  /* "fastTSNE/_tsne.pyx":183
  *             &tree.root, &embedding[i, 0], &gradient[i, 0], &sum_Qi[i], theta, dof)
  * 
  *     for i in range(num_points):             # <<<<<<<<<<<<<<
@@ -4736,7 +4707,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_bh(struct __py
   for (__pyx_t_7 = 0; __pyx_t_7 < __pyx_t_8; __pyx_t_7+=1) {
     __pyx_v_i = __pyx_t_7;
 
-    /* "fastTSNE/_tsne.pyx":182
+    /* "fastTSNE/_tsne.pyx":184
  * 
  *     for i in range(num_points):
  *         sum_Q += sum_Qi[i]             # <<<<<<<<<<<<<<
@@ -4747,7 +4718,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_bh(struct __py
     __pyx_v_sum_Q = (__pyx_v_sum_Q + (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_sum_Qi.data) + __pyx_t_15)) ))));
   }
 
-  /* "fastTSNE/_tsne.pyx":185
+  /* "fastTSNE/_tsne.pyx":187
  * 
  *     # Normalize q_{ij}s
  *     for i in range(gradient.shape[0]):             # <<<<<<<<<<<<<<
@@ -4759,7 +4730,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_bh(struct __py
   for (__pyx_t_7 = 0; __pyx_t_7 < __pyx_t_8; __pyx_t_7+=1) {
     __pyx_v_i = __pyx_t_7;
 
-    /* "fastTSNE/_tsne.pyx":186
+    /* "fastTSNE/_tsne.pyx":188
  *     # Normalize q_{ij}s
  *     for i in range(gradient.shape[0]):
  *         for j in range(gradient.shape[1]):             # <<<<<<<<<<<<<<
@@ -4771,7 +4742,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_bh(struct __py
     for (__pyx_t_18 = 0; __pyx_t_18 < __pyx_t_17; __pyx_t_18+=1) {
       __pyx_v_j = __pyx_t_18;
 
-      /* "fastTSNE/_tsne.pyx":187
+      /* "fastTSNE/_tsne.pyx":189
  *     for i in range(gradient.shape[0]):
  *         for j in range(gradient.shape[1]):
  *             gradient[i, j] /= sum_Q + EPSILON             # <<<<<<<<<<<<<<
@@ -4784,7 +4755,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_bh(struct __py
     }
   }
 
-  /* "fastTSNE/_tsne.pyx":189
+  /* "fastTSNE/_tsne.pyx":191
  *             gradient[i, j] /= sum_Q + EPSILON
  * 
  *     return sum_Q             # <<<<<<<<<<<<<<
@@ -4794,7 +4765,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_bh(struct __py
   __pyx_r = __pyx_v_sum_Q;
   goto __pyx_L0;
 
-  /* "fastTSNE/_tsne.pyx":149
+  /* "fastTSNE/_tsne.pyx":151
  * 
  * 
  * cpdef double estimate_negative_gradient_bh(             # <<<<<<<<<<<<<<
@@ -4862,13 +4833,13 @@ static PyObject *__pyx_pw_8fastTSNE_5_tsne_5estimate_negative_gradient_bh(PyObje
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_embedding)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_bh", 0, 3, 6, 1); __PYX_ERR(0, 149, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_bh", 0, 3, 6, 1); __PYX_ERR(0, 151, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_gradient)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_bh", 0, 3, 6, 2); __PYX_ERR(0, 149, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_bh", 0, 3, 6, 2); __PYX_ERR(0, 151, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
@@ -4890,7 +4861,7 @@ static PyObject *__pyx_pw_8fastTSNE_5_tsne_5estimate_negative_gradient_bh(PyObje
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "estimate_negative_gradient_bh") < 0)) __PYX_ERR(0, 149, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "estimate_negative_gradient_bh") < 0)) __PYX_ERR(0, 151, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -4908,33 +4879,33 @@ static PyObject *__pyx_pw_8fastTSNE_5_tsne_5estimate_negative_gradient_bh(PyObje
       }
     }
     __pyx_v_tree = ((struct __pyx_obj_8fastTSNE_9quad_tree_QuadTree *)values[0]);
-    __pyx_v_embedding = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_embedding.memview)) __PYX_ERR(0, 151, __pyx_L3_error)
-    __pyx_v_gradient = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_gradient.memview)) __PYX_ERR(0, 152, __pyx_L3_error)
+    __pyx_v_embedding = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_embedding.memview)) __PYX_ERR(0, 153, __pyx_L3_error)
+    __pyx_v_gradient = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_gradient.memview)) __PYX_ERR(0, 154, __pyx_L3_error)
     if (values[3]) {
-      __pyx_v_theta = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_theta == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 153, __pyx_L3_error)
+      __pyx_v_theta = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_theta == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 155, __pyx_L3_error)
     } else {
       __pyx_v_theta = ((double)0.5);
     }
     if (values[4]) {
-      __pyx_v_dof = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_dof == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 154, __pyx_L3_error)
+      __pyx_v_dof = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_dof == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 156, __pyx_L3_error)
     } else {
       __pyx_v_dof = ((double)1.0);
     }
     if (values[5]) {
-      __pyx_v_num_threads = __Pyx_PyIndex_AsSsize_t(values[5]); if (unlikely((__pyx_v_num_threads == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 155, __pyx_L3_error)
+      __pyx_v_num_threads = __Pyx_PyIndex_AsSsize_t(values[5]); if (unlikely((__pyx_v_num_threads == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 157, __pyx_L3_error)
     } else {
       __pyx_v_num_threads = ((Py_ssize_t)1);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_bh", 0, 3, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 149, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_bh", 0, 3, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 151, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("fastTSNE._tsne.estimate_negative_gradient_bh", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_tree), __pyx_ptype_8fastTSNE_9quad_tree_QuadTree, 1, "tree", 0))) __PYX_ERR(0, 150, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_tree), __pyx_ptype_8fastTSNE_9quad_tree_QuadTree, 1, "tree", 0))) __PYX_ERR(0, 152, __pyx_L1_error)
   __pyx_r = __pyx_pf_8fastTSNE_5_tsne_4estimate_negative_gradient_bh(__pyx_self, __pyx_v_tree, __pyx_v_embedding, __pyx_v_gradient, __pyx_v_theta, __pyx_v_dof, __pyx_v_num_threads);
 
   /* function exit code */
@@ -4954,14 +4925,14 @@ static PyObject *__pyx_pf_8fastTSNE_5_tsne_4estimate_negative_gradient_bh(CYTHON
   struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_bh __pyx_t_2;
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("estimate_negative_gradient_bh", 0);
-  __Pyx_TraceCall("estimate_negative_gradient_bh (wrapper)", __pyx_f[0], 149, 0, __PYX_ERR(0, 149, __pyx_L1_error));
+  __Pyx_TraceCall("estimate_negative_gradient_bh (wrapper)", __pyx_f[0], 151, 0, __PYX_ERR(0, 151, __pyx_L1_error));
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_2.__pyx_n = 3;
   __pyx_t_2.theta = __pyx_v_theta;
   __pyx_t_2.dof = __pyx_v_dof;
   __pyx_t_2.num_threads = __pyx_v_num_threads;
   __pyx_t_1 = __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_bh(__pyx_v_tree, __pyx_v_embedding, __pyx_v_gradient, 0, &__pyx_t_2); 
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 149, __pyx_L1_error)
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 151, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_r = __pyx_t_3;
   __pyx_t_3 = 0;
@@ -4981,7 +4952,7 @@ static PyObject *__pyx_pf_8fastTSNE_5_tsne_4estimate_negative_gradient_bh(CYTHON
   return __pyx_r;
 }
 
-/* "fastTSNE/_tsne.pyx":192
+/* "fastTSNE/_tsne.pyx":194
  * 
  * 
  * cdef void _estimate_negative_gradient_single(             # <<<<<<<<<<<<<<
@@ -5001,9 +4972,9 @@ static void __pyx_f_8fastTSNE_5_tsne__estimate_negative_gradient_single(__pyx_t_
   Py_ssize_t __pyx_t_5;
   long __pyx_t_6;
   Py_ssize_t __pyx_t_7;
-  __Pyx_TraceCall("_estimate_negative_gradient_single", __pyx_f[0], 192, 1, __PYX_ERR(0, 192, __pyx_L1_error));
+  __Pyx_TraceCall("_estimate_negative_gradient_single", __pyx_f[0], 194, 1, __PYX_ERR(0, 194, __pyx_L1_error));
 
-  /* "fastTSNE/_tsne.pyx":201
+  /* "fastTSNE/_tsne.pyx":203
  * ) nogil:
  *     # Make sure that we spend no time on empty nodes or self-interactions
  *     if node.num_points == 0 or node.is_leaf and is_duplicate(node, point):             # <<<<<<<<<<<<<<
@@ -5027,7 +4998,7 @@ static void __pyx_f_8fastTSNE_5_tsne__estimate_negative_gradient_single(__pyx_t_
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "fastTSNE/_tsne.pyx":202
+    /* "fastTSNE/_tsne.pyx":204
  *     # Make sure that we spend no time on empty nodes or self-interactions
  *     if node.num_points == 0 or node.is_leaf and is_duplicate(node, point):
  *         return             # <<<<<<<<<<<<<<
@@ -5036,7 +5007,7 @@ static void __pyx_f_8fastTSNE_5_tsne__estimate_negative_gradient_single(__pyx_t_
  */
     goto __pyx_L0;
 
-    /* "fastTSNE/_tsne.pyx":201
+    /* "fastTSNE/_tsne.pyx":203
  * ) nogil:
  *     # Make sure that we spend no time on empty nodes or self-interactions
  *     if node.num_points == 0 or node.is_leaf and is_duplicate(node, point):             # <<<<<<<<<<<<<<
@@ -5045,7 +5016,7 @@ static void __pyx_f_8fastTSNE_5_tsne__estimate_negative_gradient_single(__pyx_t_
  */
   }
 
-  /* "fastTSNE/_tsne.pyx":205
+  /* "fastTSNE/_tsne.pyx":207
  * 
  *     cdef:
  *         double distance = EPSILON             # <<<<<<<<<<<<<<
@@ -5054,7 +5025,7 @@ static void __pyx_f_8fastTSNE_5_tsne__estimate_negative_gradient_single(__pyx_t_
  */
   __pyx_v_distance = __pyx_v_8fastTSNE_5_tsne_EPSILON;
 
-  /* "fastTSNE/_tsne.pyx":211
+  /* "fastTSNE/_tsne.pyx":213
  *     # Compute the squared euclidean disstance in the embedding space from the
  *     # new point to the center of mass
  *     for d in range(node.n_dims):             # <<<<<<<<<<<<<<
@@ -5066,7 +5037,7 @@ static void __pyx_f_8fastTSNE_5_tsne__estimate_negative_gradient_single(__pyx_t_
   for (__pyx_t_5 = 0; __pyx_t_5 < __pyx_t_4; __pyx_t_5+=1) {
     __pyx_v_d = __pyx_t_5;
 
-    /* "fastTSNE/_tsne.pyx":212
+    /* "fastTSNE/_tsne.pyx":214
  *     # new point to the center of mass
  *     for d in range(node.n_dims):
  *         distance += (node.center_of_mass[d] - point[d]) ** 2             # <<<<<<<<<<<<<<
@@ -5076,7 +5047,7 @@ static void __pyx_f_8fastTSNE_5_tsne__estimate_negative_gradient_single(__pyx_t_
     __pyx_v_distance = (__pyx_v_distance + pow(((__pyx_v_node->center_of_mass[__pyx_v_d]) - (__pyx_v_point[__pyx_v_d])), 2.0));
   }
 
-  /* "fastTSNE/_tsne.pyx":215
+  /* "fastTSNE/_tsne.pyx":217
  * 
  *     # Check whether we can use this node as a summary
  *     if node.is_leaf or node.length / sqrt(distance) < theta:             # <<<<<<<<<<<<<<
@@ -5094,7 +5065,7 @@ static void __pyx_f_8fastTSNE_5_tsne__estimate_negative_gradient_single(__pyx_t_
   __pyx_L10_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "fastTSNE/_tsne.pyx":216
+    /* "fastTSNE/_tsne.pyx":218
  *     # Check whether we can use this node as a summary
  *     if node.is_leaf or node.length / sqrt(distance) < theta:
  *         q_ij = dof / (dof + distance)             # <<<<<<<<<<<<<<
@@ -5103,7 +5074,7 @@ static void __pyx_f_8fastTSNE_5_tsne__estimate_negative_gradient_single(__pyx_t_
  */
     __pyx_v_q_ij = (__pyx_v_dof / (__pyx_v_dof + __pyx_v_distance));
 
-    /* "fastTSNE/_tsne.pyx":217
+    /* "fastTSNE/_tsne.pyx":219
  *     if node.is_leaf or node.length / sqrt(distance) < theta:
  *         q_ij = dof / (dof + distance)
  *         if dof != 1:             # <<<<<<<<<<<<<<
@@ -5113,7 +5084,7 @@ static void __pyx_f_8fastTSNE_5_tsne__estimate_negative_gradient_single(__pyx_t_
     __pyx_t_1 = ((__pyx_v_dof != 1.0) != 0);
     if (__pyx_t_1) {
 
-      /* "fastTSNE/_tsne.pyx":218
+      /* "fastTSNE/_tsne.pyx":220
  *         q_ij = dof / (dof + distance)
  *         if dof != 1:
  *             q_ij = q_ij ** ((dof + 1) / 2)             # <<<<<<<<<<<<<<
@@ -5122,7 +5093,7 @@ static void __pyx_f_8fastTSNE_5_tsne__estimate_negative_gradient_single(__pyx_t_
  */
       __pyx_v_q_ij = pow(__pyx_v_q_ij, ((__pyx_v_dof + 1.0) / 2.0));
 
-      /* "fastTSNE/_tsne.pyx":217
+      /* "fastTSNE/_tsne.pyx":219
  *     if node.is_leaf or node.length / sqrt(distance) < theta:
  *         q_ij = dof / (dof + distance)
  *         if dof != 1:             # <<<<<<<<<<<<<<
@@ -5131,7 +5102,7 @@ static void __pyx_f_8fastTSNE_5_tsne__estimate_negative_gradient_single(__pyx_t_
  */
     }
 
-    /* "fastTSNE/_tsne.pyx":219
+    /* "fastTSNE/_tsne.pyx":221
  *         if dof != 1:
  *             q_ij = q_ij ** ((dof + 1) / 2)
  *         sum_Q[0] += node.num_points * q_ij             # <<<<<<<<<<<<<<
@@ -5141,7 +5112,7 @@ static void __pyx_f_8fastTSNE_5_tsne__estimate_negative_gradient_single(__pyx_t_
     __pyx_t_6 = 0;
     (__pyx_v_sum_Q[__pyx_t_6]) = ((__pyx_v_sum_Q[__pyx_t_6]) + (__pyx_v_node->num_points * __pyx_v_q_ij));
 
-    /* "fastTSNE/_tsne.pyx":221
+    /* "fastTSNE/_tsne.pyx":223
  *         sum_Q[0] += node.num_points * q_ij
  * 
  *         for d in range(node.n_dims):             # <<<<<<<<<<<<<<
@@ -5153,7 +5124,7 @@ static void __pyx_f_8fastTSNE_5_tsne__estimate_negative_gradient_single(__pyx_t_
     for (__pyx_t_5 = 0; __pyx_t_5 < __pyx_t_4; __pyx_t_5+=1) {
       __pyx_v_d = __pyx_t_5;
 
-      /* "fastTSNE/_tsne.pyx":222
+      /* "fastTSNE/_tsne.pyx":224
  * 
  *         for d in range(node.n_dims):
  *             gradient[d] -= node.num_points * q_ij ** 2 * (point[d] - node.center_of_mass[d])             # <<<<<<<<<<<<<<
@@ -5164,7 +5135,7 @@ static void __pyx_f_8fastTSNE_5_tsne__estimate_negative_gradient_single(__pyx_t_
       (__pyx_v_gradient[__pyx_t_7]) = ((__pyx_v_gradient[__pyx_t_7]) - ((__pyx_v_node->num_points * pow(__pyx_v_q_ij, 2.0)) * ((__pyx_v_point[__pyx_v_d]) - (__pyx_v_node->center_of_mass[__pyx_v_d]))));
     }
 
-    /* "fastTSNE/_tsne.pyx":224
+    /* "fastTSNE/_tsne.pyx":226
  *             gradient[d] -= node.num_points * q_ij ** 2 * (point[d] - node.center_of_mass[d])
  * 
  *         return             # <<<<<<<<<<<<<<
@@ -5173,7 +5144,7 @@ static void __pyx_f_8fastTSNE_5_tsne__estimate_negative_gradient_single(__pyx_t_
  */
     goto __pyx_L0;
 
-    /* "fastTSNE/_tsne.pyx":215
+    /* "fastTSNE/_tsne.pyx":217
  * 
  *     # Check whether we can use this node as a summary
  *     if node.is_leaf or node.length / sqrt(distance) < theta:             # <<<<<<<<<<<<<<
@@ -5182,7 +5153,7 @@ static void __pyx_f_8fastTSNE_5_tsne__estimate_negative_gradient_single(__pyx_t_
  */
   }
 
-  /* "fastTSNE/_tsne.pyx":227
+  /* "fastTSNE/_tsne.pyx":229
  * 
  *     # Otherwise we have to look for summaries in the children
  *     for d in range(1 << node.n_dims):             # <<<<<<<<<<<<<<
@@ -5194,7 +5165,7 @@ static void __pyx_f_8fastTSNE_5_tsne__estimate_negative_gradient_single(__pyx_t_
   for (__pyx_t_5 = 0; __pyx_t_5 < __pyx_t_4; __pyx_t_5+=1) {
     __pyx_v_d = __pyx_t_5;
 
-    /* "fastTSNE/_tsne.pyx":228
+    /* "fastTSNE/_tsne.pyx":230
  *     # Otherwise we have to look for summaries in the children
  *     for d in range(1 << node.n_dims):
  *         _estimate_negative_gradient_single(&node.children[d], point, gradient, sum_Q, theta, dof)             # <<<<<<<<<<<<<<
@@ -5204,7 +5175,7 @@ static void __pyx_f_8fastTSNE_5_tsne__estimate_negative_gradient_single(__pyx_t_
     __pyx_f_8fastTSNE_5_tsne__estimate_negative_gradient_single((&(__pyx_v_node->children[__pyx_v_d])), __pyx_v_point, __pyx_v_gradient, __pyx_v_sum_Q, __pyx_v_theta, __pyx_v_dof);
   }
 
-  /* "fastTSNE/_tsne.pyx":192
+  /* "fastTSNE/_tsne.pyx":194
  * 
  * 
  * cdef void _estimate_negative_gradient_single(             # <<<<<<<<<<<<<<
@@ -5220,7 +5191,7 @@ static void __pyx_f_8fastTSNE_5_tsne__estimate_negative_gradient_single(__pyx_t_
   __Pyx_TraceReturn(Py_None, 1);
 }
 
-/* "fastTSNE/_tsne.pyx":231
+/* "fastTSNE/_tsne.pyx":233
  * 
  * 
  * cdef inline double squared_cauchy_1d(double x, double y) nogil:             # <<<<<<<<<<<<<<
@@ -5231,9 +5202,9 @@ static void __pyx_f_8fastTSNE_5_tsne__estimate_negative_gradient_single(__pyx_t_
 static CYTHON_INLINE double __pyx_f_8fastTSNE_5_tsne_squared_cauchy_1d(double __pyx_v_x, double __pyx_v_y) {
   double __pyx_r;
   __Pyx_TraceDeclarations
-  __Pyx_TraceCall("squared_cauchy_1d", __pyx_f[0], 231, 1, __PYX_ERR(0, 231, __pyx_L1_error));
+  __Pyx_TraceCall("squared_cauchy_1d", __pyx_f[0], 233, 1, __PYX_ERR(0, 233, __pyx_L1_error));
 
-  /* "fastTSNE/_tsne.pyx":232
+  /* "fastTSNE/_tsne.pyx":234
  * 
  * cdef inline double squared_cauchy_1d(double x, double y) nogil:
  *     return (1 + (x - y) ** 2) ** -2             # <<<<<<<<<<<<<<
@@ -5243,7 +5214,7 @@ static CYTHON_INLINE double __pyx_f_8fastTSNE_5_tsne_squared_cauchy_1d(double __
   __pyx_r = pow((1.0 + pow((__pyx_v_x - __pyx_v_y), 2.0)), -2.0);
   goto __pyx_L0;
 
-  /* "fastTSNE/_tsne.pyx":231
+  /* "fastTSNE/_tsne.pyx":233
  * 
  * 
  * cdef inline double squared_cauchy_1d(double x, double y) nogil:             # <<<<<<<<<<<<<<
@@ -5260,7 +5231,7 @@ static CYTHON_INLINE double __pyx_f_8fastTSNE_5_tsne_squared_cauchy_1d(double __
   return __pyx_r;
 }
 
-/* "fastTSNE/_tsne.pyx":235
+/* "fastTSNE/_tsne.pyx":237
  * 
  * 
  * cdef inline double squared_cauchy_2d(double x1, double x2, double y1, double y2) nogil:             # <<<<<<<<<<<<<<
@@ -5271,9 +5242,9 @@ static CYTHON_INLINE double __pyx_f_8fastTSNE_5_tsne_squared_cauchy_1d(double __
 static CYTHON_INLINE double __pyx_f_8fastTSNE_5_tsne_squared_cauchy_2d(double __pyx_v_x1, double __pyx_v_x2, double __pyx_v_y1, double __pyx_v_y2) {
   double __pyx_r;
   __Pyx_TraceDeclarations
-  __Pyx_TraceCall("squared_cauchy_2d", __pyx_f[0], 235, 1, __PYX_ERR(0, 235, __pyx_L1_error));
+  __Pyx_TraceCall("squared_cauchy_2d", __pyx_f[0], 237, 1, __PYX_ERR(0, 237, __pyx_L1_error));
 
-  /* "fastTSNE/_tsne.pyx":236
+  /* "fastTSNE/_tsne.pyx":238
  * 
  * cdef inline double squared_cauchy_2d(double x1, double x2, double y1, double y2) nogil:
  *     return (1 + (x1 - y1) ** 2 + (x2 - y2) ** 2) ** -2             # <<<<<<<<<<<<<<
@@ -5283,7 +5254,7 @@ static CYTHON_INLINE double __pyx_f_8fastTSNE_5_tsne_squared_cauchy_2d(double __
   __pyx_r = pow(((1.0 + pow((__pyx_v_x1 - __pyx_v_y1), 2.0)) + pow((__pyx_v_x2 - __pyx_v_y2), 2.0)), -2.0);
   goto __pyx_L0;
 
-  /* "fastTSNE/_tsne.pyx":235
+  /* "fastTSNE/_tsne.pyx":237
  * 
  * 
  * cdef inline double squared_cauchy_2d(double x1, double x2, double y1, double y2) nogil:             # <<<<<<<<<<<<<<
@@ -5300,7 +5271,7 @@ static CYTHON_INLINE double __pyx_f_8fastTSNE_5_tsne_squared_cauchy_2d(double __
   return __pyx_r;
 }
 
-/* "fastTSNE/_tsne.pyx":239
+/* "fastTSNE/_tsne.pyx":241
  * 
  * 
  * cdef double[:, ::1] interpolate(double[::1] y_in_box, double[::1] y_tilde):             # <<<<<<<<<<<<<<
@@ -5349,9 +5320,9 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_interpolate(__Pyx_memviewslic
   Py_ssize_t __pyx_t_28;
   Py_ssize_t __pyx_t_29;
   __Pyx_RefNannySetupContext("interpolate", 0);
-  __Pyx_TraceCall("interpolate", __pyx_f[0], 239, 0, __PYX_ERR(0, 239, __pyx_L1_error));
+  __Pyx_TraceCall("interpolate", __pyx_f[0], 241, 0, __PYX_ERR(0, 241, __pyx_L1_error));
 
-  /* "fastTSNE/_tsne.pyx":241
+  /* "fastTSNE/_tsne.pyx":243
  * cdef double[:, ::1] interpolate(double[::1] y_in_box, double[::1] y_tilde):
  *     """Lagrangian polynomial interpolation."""
  *     cdef Py_ssize_t N = y_in_box.shape[0]             # <<<<<<<<<<<<<<
@@ -5360,7 +5331,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_interpolate(__Pyx_memviewslic
  */
   __pyx_v_N = (__pyx_v_y_in_box.shape[0]);
 
-  /* "fastTSNE/_tsne.pyx":242
+  /* "fastTSNE/_tsne.pyx":244
  *     """Lagrangian polynomial interpolation."""
  *     cdef Py_ssize_t N = y_in_box.shape[0]
  *     cdef Py_ssize_t n_interpolation_points = y_tilde.shape[0]             # <<<<<<<<<<<<<<
@@ -5369,23 +5340,23 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_interpolate(__Pyx_memviewslic
  */
   __pyx_v_n_interpolation_points = (__pyx_v_y_tilde.shape[0]);
 
-  /* "fastTSNE/_tsne.pyx":244
+  /* "fastTSNE/_tsne.pyx":246
  *     cdef Py_ssize_t n_interpolation_points = y_tilde.shape[0]
  * 
  *     cdef double[:, ::1] interpolated_values = np.empty((N, n_interpolation_points), dtype=float)             # <<<<<<<<<<<<<<
  *     cdef double[::1] denominator = np.empty(n_interpolation_points, dtype=float)
  *     cdef Py_ssize_t i, j, k
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 244, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 246, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 244, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 246, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_N); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 244, __pyx_L1_error)
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_N); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 246, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_n_interpolation_points); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 244, __pyx_L1_error)
+  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_n_interpolation_points); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 246, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 244, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 246, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
@@ -5393,59 +5364,59 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_interpolate(__Pyx_memviewslic
   PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_3);
   __pyx_t_1 = 0;
   __pyx_t_3 = 0;
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 244, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 246, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 244, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 246, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 244, __pyx_L1_error)
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 244, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 246, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 246, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 244, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 246, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_interpolated_values = __pyx_t_5;
   __pyx_t_5.memview = NULL;
   __pyx_t_5.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":245
+  /* "fastTSNE/_tsne.pyx":247
  * 
  *     cdef double[:, ::1] interpolated_values = np.empty((N, n_interpolation_points), dtype=float)
  *     cdef double[::1] denominator = np.empty(n_interpolation_points, dtype=float)             # <<<<<<<<<<<<<<
  *     cdef Py_ssize_t i, j, k
  * 
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 245, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 247, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 245, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 247, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_interpolation_points); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 245, __pyx_L1_error)
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_interpolation_points); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 247, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 245, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 247, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 245, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 247, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 245, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 245, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 247, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 247, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_2, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 245, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_2, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 247, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_denominator = __pyx_t_6;
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":248
+  /* "fastTSNE/_tsne.pyx":250
  *     cdef Py_ssize_t i, j, k
  * 
  *     for i in range(n_interpolation_points):             # <<<<<<<<<<<<<<
@@ -5457,7 +5428,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_interpolate(__Pyx_memviewslic
   for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
     __pyx_v_i = __pyx_t_9;
 
-    /* "fastTSNE/_tsne.pyx":249
+    /* "fastTSNE/_tsne.pyx":251
  * 
  *     for i in range(n_interpolation_points):
  *         denominator[i] = 1             # <<<<<<<<<<<<<<
@@ -5467,7 +5438,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_interpolate(__Pyx_memviewslic
     __pyx_t_10 = __pyx_v_i;
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_denominator.data) + __pyx_t_10)) )) = 1.0;
 
-    /* "fastTSNE/_tsne.pyx":250
+    /* "fastTSNE/_tsne.pyx":252
  *     for i in range(n_interpolation_points):
  *         denominator[i] = 1
  *         for j in range(n_interpolation_points):             # <<<<<<<<<<<<<<
@@ -5479,7 +5450,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_interpolate(__Pyx_memviewslic
     for (__pyx_t_13 = 0; __pyx_t_13 < __pyx_t_12; __pyx_t_13+=1) {
       __pyx_v_j = __pyx_t_13;
 
-      /* "fastTSNE/_tsne.pyx":251
+      /* "fastTSNE/_tsne.pyx":253
  *         denominator[i] = 1
  *         for j in range(n_interpolation_points):
  *             if i != j:             # <<<<<<<<<<<<<<
@@ -5489,7 +5460,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_interpolate(__Pyx_memviewslic
       __pyx_t_14 = ((__pyx_v_i != __pyx_v_j) != 0);
       if (__pyx_t_14) {
 
-        /* "fastTSNE/_tsne.pyx":252
+        /* "fastTSNE/_tsne.pyx":254
  *         for j in range(n_interpolation_points):
  *             if i != j:
  *                 denominator[i] *= y_tilde[i] - y_tilde[j]             # <<<<<<<<<<<<<<
@@ -5501,7 +5472,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_interpolate(__Pyx_memviewslic
         __pyx_t_17 = __pyx_v_i;
         *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_denominator.data) + __pyx_t_17)) )) *= ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_15)) ))) - (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_16)) ))));
 
-        /* "fastTSNE/_tsne.pyx":251
+        /* "fastTSNE/_tsne.pyx":253
  *         denominator[i] = 1
  *         for j in range(n_interpolation_points):
  *             if i != j:             # <<<<<<<<<<<<<<
@@ -5512,7 +5483,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_interpolate(__Pyx_memviewslic
     }
   }
 
-  /* "fastTSNE/_tsne.pyx":254
+  /* "fastTSNE/_tsne.pyx":256
  *                 denominator[i] *= y_tilde[i] - y_tilde[j]
  * 
  *     for i in range(N):             # <<<<<<<<<<<<<<
@@ -5524,7 +5495,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_interpolate(__Pyx_memviewslic
   for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
     __pyx_v_i = __pyx_t_9;
 
-    /* "fastTSNE/_tsne.pyx":255
+    /* "fastTSNE/_tsne.pyx":257
  * 
  *     for i in range(N):
  *         for j in range(n_interpolation_points):             # <<<<<<<<<<<<<<
@@ -5536,7 +5507,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_interpolate(__Pyx_memviewslic
     for (__pyx_t_13 = 0; __pyx_t_13 < __pyx_t_12; __pyx_t_13+=1) {
       __pyx_v_j = __pyx_t_13;
 
-      /* "fastTSNE/_tsne.pyx":256
+      /* "fastTSNE/_tsne.pyx":258
  *     for i in range(N):
  *         for j in range(n_interpolation_points):
  *             interpolated_values[i, j] = 1             # <<<<<<<<<<<<<<
@@ -5547,7 +5518,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_interpolate(__Pyx_memviewslic
       __pyx_t_19 = __pyx_v_j;
       *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_interpolated_values.data + __pyx_t_18 * __pyx_v_interpolated_values.strides[0]) )) + __pyx_t_19)) )) = 1.0;
 
-      /* "fastTSNE/_tsne.pyx":257
+      /* "fastTSNE/_tsne.pyx":259
  *         for j in range(n_interpolation_points):
  *             interpolated_values[i, j] = 1
  *             for k in range(n_interpolation_points):             # <<<<<<<<<<<<<<
@@ -5559,7 +5530,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_interpolate(__Pyx_memviewslic
       for (__pyx_t_22 = 0; __pyx_t_22 < __pyx_t_21; __pyx_t_22+=1) {
         __pyx_v_k = __pyx_t_22;
 
-        /* "fastTSNE/_tsne.pyx":258
+        /* "fastTSNE/_tsne.pyx":260
  *             interpolated_values[i, j] = 1
  *             for k in range(n_interpolation_points):
  *                 if j != k:             # <<<<<<<<<<<<<<
@@ -5569,7 +5540,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_interpolate(__Pyx_memviewslic
         __pyx_t_14 = ((__pyx_v_j != __pyx_v_k) != 0);
         if (__pyx_t_14) {
 
-          /* "fastTSNE/_tsne.pyx":259
+          /* "fastTSNE/_tsne.pyx":261
  *             for k in range(n_interpolation_points):
  *                 if j != k:
  *                     interpolated_values[i, j] *= y_in_box[i] - y_tilde[k]             # <<<<<<<<<<<<<<
@@ -5582,7 +5553,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_interpolate(__Pyx_memviewslic
           __pyx_t_26 = __pyx_v_j;
           *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_interpolated_values.data + __pyx_t_25 * __pyx_v_interpolated_values.strides[0]) )) + __pyx_t_26)) )) *= ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_in_box.data) + __pyx_t_23)) ))) - (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_24)) ))));
 
-          /* "fastTSNE/_tsne.pyx":258
+          /* "fastTSNE/_tsne.pyx":260
  *             interpolated_values[i, j] = 1
  *             for k in range(n_interpolation_points):
  *                 if j != k:             # <<<<<<<<<<<<<<
@@ -5592,7 +5563,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_interpolate(__Pyx_memviewslic
         }
       }
 
-      /* "fastTSNE/_tsne.pyx":260
+      /* "fastTSNE/_tsne.pyx":262
  *                 if j != k:
  *                     interpolated_values[i, j] *= y_in_box[i] - y_tilde[k]
  *             interpolated_values[i, j] /= denominator[j]             # <<<<<<<<<<<<<<
@@ -5606,7 +5577,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_interpolate(__Pyx_memviewslic
     }
   }
 
-  /* "fastTSNE/_tsne.pyx":262
+  /* "fastTSNE/_tsne.pyx":264
  *             interpolated_values[i, j] /= denominator[j]
  * 
  *     return interpolated_values             # <<<<<<<<<<<<<<
@@ -5617,7 +5588,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_interpolate(__Pyx_memviewslic
   __pyx_r = __pyx_v_interpolated_values;
   goto __pyx_L0;
 
-  /* "fastTSNE/_tsne.pyx":239
+  /* "fastTSNE/_tsne.pyx":241
  * 
  * 
  * cdef double[:, ::1] interpolate(double[::1] y_in_box, double[::1] y_tilde):             # <<<<<<<<<<<<<<
@@ -5650,651 +5621,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_interpolate(__Pyx_memviewslic
   return __pyx_r;
 }
 
-/* "fastTSNE/_tsne.pyx":265
- * 
- * 
- * cdef double[:, ::1] matrix_multiply_fft_1d(             # <<<<<<<<<<<<<<
- *     double[::1] kernel_tilde,
- *     double[:, ::1] w_coefficients,
- */
-
-static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_matrix_multiply_fft_1d(__Pyx_memviewslice __pyx_v_kernel_tilde, __Pyx_memviewslice __pyx_v_w_coefficients) {
-  Py_ssize_t __pyx_v_n_interpolation_points_1d;
-  Py_ssize_t __pyx_v_n_terms;
-  Py_ssize_t __pyx_v_n_fft_coeffs;
-  __Pyx_memviewslice __pyx_v_y_tilde_values = { 0, 0, { 0 }, { 0 }, { 0 } };
-  __Pyx_memviewslice __pyx_v_fft_kernel_tilde = { 0, 0, { 0 }, { 0 }, { 0 } };
-  __Pyx_memviewslice __pyx_v_fft_w_coeffs = { 0, 0, { 0 }, { 0 }, { 0 } };
-  __Pyx_memviewslice __pyx_v_fft_in_buffer = { 0, 0, { 0 }, { 0 }, { 0 } };
-  __Pyx_memviewslice __pyx_v_fft_out_buffer = { 0, 0, { 0 }, { 0 }, { 0 } };
-  Py_ssize_t __pyx_v_d;
-  Py_ssize_t __pyx_v_i;
-  __Pyx_memviewslice __pyx_r = { 0, 0, { 0 }, { 0 }, { 0 } };
-  __Pyx_TraceDeclarations
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
-  PyObject *__pyx_t_4 = NULL;
-  __Pyx_memviewslice __pyx_t_5 = { 0, 0, { 0 }, { 0 }, { 0 } };
-  __Pyx_memviewslice __pyx_t_6 = { 0, 0, { 0 }, { 0 }, { 0 } };
-  PyObject *__pyx_t_7 = NULL;
-  Py_ssize_t __pyx_t_8;
-  Py_ssize_t __pyx_t_9;
-  Py_ssize_t __pyx_t_10;
-  Py_ssize_t __pyx_t_11;
-  Py_ssize_t __pyx_t_12;
-  Py_ssize_t __pyx_t_13;
-  Py_ssize_t __pyx_t_14;
-  Py_ssize_t __pyx_t_15;
-  Py_ssize_t __pyx_t_16;
-  int __pyx_t_17;
-  PyObject *__pyx_t_18 = NULL;
-  Py_ssize_t __pyx_t_19;
-  double __pyx_t_20;
-  Py_ssize_t __pyx_t_21;
-  Py_ssize_t __pyx_t_22;
-  __Pyx_RefNannySetupContext("matrix_multiply_fft_1d", 0);
-  __Pyx_TraceCall("matrix_multiply_fft_1d", __pyx_f[0], 265, 0, __PYX_ERR(0, 265, __pyx_L1_error));
-
-  /* "fastTSNE/_tsne.pyx":291
- *     """
- *     cdef:
- *         Py_ssize_t n_interpolation_points_1d = w_coefficients.shape[0]             # <<<<<<<<<<<<<<
- *         Py_ssize_t n_terms = w_coefficients.shape[1]
- *         Py_ssize_t n_fft_coeffs = kernel_tilde.shape[0]
- */
-  __pyx_v_n_interpolation_points_1d = (__pyx_v_w_coefficients.shape[0]);
-
-  /* "fastTSNE/_tsne.pyx":292
- *     cdef:
- *         Py_ssize_t n_interpolation_points_1d = w_coefficients.shape[0]
- *         Py_ssize_t n_terms = w_coefficients.shape[1]             # <<<<<<<<<<<<<<
- *         Py_ssize_t n_fft_coeffs = kernel_tilde.shape[0]
- * 
- */
-  __pyx_v_n_terms = (__pyx_v_w_coefficients.shape[1]);
-
-  /* "fastTSNE/_tsne.pyx":293
- *         Py_ssize_t n_interpolation_points_1d = w_coefficients.shape[0]
- *         Py_ssize_t n_terms = w_coefficients.shape[1]
- *         Py_ssize_t n_fft_coeffs = kernel_tilde.shape[0]             # <<<<<<<<<<<<<<
- * 
- *         double[:, ::1] y_tilde_values = np.empty((n_interpolation_points_1d, n_terms), dtype=float)
- */
-  __pyx_v_n_fft_coeffs = (__pyx_v_kernel_tilde.shape[0]);
-
-  /* "fastTSNE/_tsne.pyx":295
- *         Py_ssize_t n_fft_coeffs = kernel_tilde.shape[0]
- * 
- *         double[:, ::1] y_tilde_values = np.empty((n_interpolation_points_1d, n_terms), dtype=float)             # <<<<<<<<<<<<<<
- * 
- *         complex[::1] fft_kernel_tilde = np.empty(n_fft_coeffs, dtype=complex)
- */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 295, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 295, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_interpolation_points_1d); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 295, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_n_terms); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 295, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 295, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_3);
-  __pyx_t_1 = 0;
-  __pyx_t_3 = 0;
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 295, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_4);
-  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
-  __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 295, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 295, __pyx_L1_error)
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 295, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 295, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v_y_tilde_values = __pyx_t_5;
-  __pyx_t_5.memview = NULL;
-  __pyx_t_5.data = NULL;
-
-  /* "fastTSNE/_tsne.pyx":297
- *         double[:, ::1] y_tilde_values = np.empty((n_interpolation_points_1d, n_terms), dtype=float)
- * 
- *         complex[::1] fft_kernel_tilde = np.empty(n_fft_coeffs, dtype=complex)             # <<<<<<<<<<<<<<
- *         complex[::1] fft_w_coeffs = np.empty(n_fft_coeffs, dtype=complex)
- *         # Note that we can't use the same buffer for the input and output since
- */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 297, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 297, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 297, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 297, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
-  __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 297, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyComplex_Type))) < 0) __PYX_ERR(0, 297, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 297, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dc___pyx_t_double_complex(__pyx_t_2, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 297, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_v_fft_kernel_tilde = __pyx_t_6;
-  __pyx_t_6.memview = NULL;
-  __pyx_t_6.data = NULL;
-
-  /* "fastTSNE/_tsne.pyx":298
- * 
- *         complex[::1] fft_kernel_tilde = np.empty(n_fft_coeffs, dtype=complex)
- *         complex[::1] fft_w_coeffs = np.empty(n_fft_coeffs, dtype=complex)             # <<<<<<<<<<<<<<
- *         # Note that we can't use the same buffer for the input and output since
- *         # we only write to the first half of the vector - we'd need to
- */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 298, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_empty); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 298, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 298, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 298, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_2);
-  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
-  __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 298, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, ((PyObject *)(&PyComplex_Type))) < 0) __PYX_ERR(0, 298, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 298, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dc___pyx_t_double_complex(__pyx_t_4, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 298, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_v_fft_w_coeffs = __pyx_t_6;
-  __pyx_t_6.memview = NULL;
-  __pyx_t_6.data = NULL;
-
-  /* "fastTSNE/_tsne.pyx":304
- *         # changed during the IDFT, so it's faster to use two buffers, at the
- *         # cost of some memory
- *         complex[::1] fft_in_buffer = np.zeros(n_fft_coeffs, dtype=complex)             # <<<<<<<<<<<<<<
- *         complex[::1] fft_out_buffer = np.zeros(n_fft_coeffs, dtype=complex)
- * 
- */
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 304, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 304, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 304, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 304, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_4);
-  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
-  __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 304, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, ((PyObject *)(&PyComplex_Type))) < 0) __PYX_ERR(0, 304, __pyx_L1_error)
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 304, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dc___pyx_t_double_complex(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 304, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v_fft_in_buffer = __pyx_t_6;
-  __pyx_t_6.memview = NULL;
-  __pyx_t_6.data = NULL;
-
-  /* "fastTSNE/_tsne.pyx":305
- *         # cost of some memory
- *         complex[::1] fft_in_buffer = np.zeros(n_fft_coeffs, dtype=complex)
- *         complex[::1] fft_out_buffer = np.zeros(n_fft_coeffs, dtype=complex)             # <<<<<<<<<<<<<<
- * 
- *         Py_ssize_t d, i
- */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 305, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 305, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 305, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 305, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
-  __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 305, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyComplex_Type))) < 0) __PYX_ERR(0, 305, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 305, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dc___pyx_t_double_complex(__pyx_t_2, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 305, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_v_fft_out_buffer = __pyx_t_6;
-  __pyx_t_6.memview = NULL;
-  __pyx_t_6.data = NULL;
-
-  /* "fastTSNE/_tsne.pyx":310
- * 
- *     # Compute the FFT of the kernel vector
- *     fft_kernel_tilde = np.fft.fft(kernel_tilde)             # <<<<<<<<<<<<<<
- * 
- *     for d in range(n_terms):
- */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 310, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_fft); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 310, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_fft); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 310, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __pyx_memoryview_fromslice(__pyx_v_kernel_tilde, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 310, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = NULL;
-  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_1))) {
-    __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_1);
-    if (likely(__pyx_t_4)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
-      __Pyx_INCREF(__pyx_t_4);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_1, function);
-    }
-  }
-  if (!__pyx_t_4) {
-    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 310, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __Pyx_GOTREF(__pyx_t_2);
-  } else {
-    #if CYTHON_FAST_PYCALL
-    if (PyFunction_Check(__pyx_t_1)) {
-      PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_3};
-      __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_1, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 310, __pyx_L1_error)
-      __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    } else
-    #endif
-    #if CYTHON_FAST_PYCCALL
-    if (__Pyx_PyFastCFunction_Check(__pyx_t_1)) {
-      PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_3};
-      __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_1, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 310, __pyx_L1_error)
-      __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    } else
-    #endif
-    {
-      __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 310, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_7);
-      __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_4); __pyx_t_4 = NULL;
-      __Pyx_GIVEREF(__pyx_t_3);
-      PyTuple_SET_ITEM(__pyx_t_7, 0+1, __pyx_t_3);
-      __pyx_t_3 = 0;
-      __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_7, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 310, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    }
-  }
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dc___pyx_t_double_complex(__pyx_t_2, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 310, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __PYX_XDEC_MEMVIEW(&__pyx_v_fft_kernel_tilde, 1);
-  __pyx_v_fft_kernel_tilde = __pyx_t_6;
-  __pyx_t_6.memview = NULL;
-  __pyx_t_6.data = NULL;
-
-  /* "fastTSNE/_tsne.pyx":312
- *     fft_kernel_tilde = np.fft.fft(kernel_tilde)
- * 
- *     for d in range(n_terms):             # <<<<<<<<<<<<<<
- *         for i in range(n_interpolation_points_1d):
- *             fft_in_buffer[i] = w_coefficients[i, d]
- */
-  __pyx_t_8 = __pyx_v_n_terms;
-  __pyx_t_9 = __pyx_t_8;
-  for (__pyx_t_10 = 0; __pyx_t_10 < __pyx_t_9; __pyx_t_10+=1) {
-    __pyx_v_d = __pyx_t_10;
-
-    /* "fastTSNE/_tsne.pyx":313
- * 
- *     for d in range(n_terms):
- *         for i in range(n_interpolation_points_1d):             # <<<<<<<<<<<<<<
- *             fft_in_buffer[i] = w_coefficients[i, d]
- * 
- */
-    __pyx_t_11 = __pyx_v_n_interpolation_points_1d;
-    __pyx_t_12 = __pyx_t_11;
-    for (__pyx_t_13 = 0; __pyx_t_13 < __pyx_t_12; __pyx_t_13+=1) {
-      __pyx_v_i = __pyx_t_13;
-
-      /* "fastTSNE/_tsne.pyx":314
- *     for d in range(n_terms):
- *         for i in range(n_interpolation_points_1d):
- *             fft_in_buffer[i] = w_coefficients[i, d]             # <<<<<<<<<<<<<<
- * 
- *         fft_w_coeffs = np.fft.fft(fft_in_buffer)
- */
-      __pyx_t_14 = __pyx_v_i;
-      __pyx_t_15 = __pyx_v_d;
-      __pyx_t_16 = __pyx_v_i;
-      *((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_in_buffer.data) + __pyx_t_16)) )) = __pyx_t_double_complex_from_parts((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_w_coefficients.data + __pyx_t_14 * __pyx_v_w_coefficients.strides[0]) )) + __pyx_t_15)) ))), 0);
-    }
-
-    /* "fastTSNE/_tsne.pyx":316
- *             fft_in_buffer[i] = w_coefficients[i, d]
- * 
- *         fft_w_coeffs = np.fft.fft(fft_in_buffer)             # <<<<<<<<<<<<<<
- * 
- *         # Take the Hadamard product of two complex vectors
- */
-    __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 316, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_fft); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 316, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_fft); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 316, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_v_fft_in_buffer, 1, (PyObject *(*)(char *)) __pyx_memview_get___pyx_t_double_complex, (int (*)(char *, PyObject *)) __pyx_memview_set___pyx_t_double_complex, 0);; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 316, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_3 = NULL;
-    if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_1))) {
-      __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_1);
-      if (likely(__pyx_t_3)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
-        __Pyx_INCREF(__pyx_t_3);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_1, function);
-      }
-    }
-    if (!__pyx_t_3) {
-      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_7); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 316, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      __Pyx_GOTREF(__pyx_t_2);
-    } else {
-      #if CYTHON_FAST_PYCALL
-      if (PyFunction_Check(__pyx_t_1)) {
-        PyObject *__pyx_temp[2] = {__pyx_t_3, __pyx_t_7};
-        __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_1, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 316, __pyx_L1_error)
-        __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-        __Pyx_GOTREF(__pyx_t_2);
-        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      } else
-      #endif
-      #if CYTHON_FAST_PYCCALL
-      if (__Pyx_PyFastCFunction_Check(__pyx_t_1)) {
-        PyObject *__pyx_temp[2] = {__pyx_t_3, __pyx_t_7};
-        __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_1, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 316, __pyx_L1_error)
-        __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-        __Pyx_GOTREF(__pyx_t_2);
-        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      } else
-      #endif
-      {
-        __pyx_t_4 = PyTuple_New(1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 316, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_4);
-        __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_3); __pyx_t_3 = NULL;
-        __Pyx_GIVEREF(__pyx_t_7);
-        PyTuple_SET_ITEM(__pyx_t_4, 0+1, __pyx_t_7);
-        __pyx_t_7 = 0;
-        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_4, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 316, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_2);
-        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      }
-    }
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dc___pyx_t_double_complex(__pyx_t_2, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 316, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __PYX_XDEC_MEMVIEW(&__pyx_v_fft_w_coeffs, 1);
-    __pyx_v_fft_w_coeffs = __pyx_t_6;
-    __pyx_t_6.memview = NULL;
-    __pyx_t_6.data = NULL;
-
-    /* "fastTSNE/_tsne.pyx":319
- * 
- *         # Take the Hadamard product of two complex vectors
- *         fft_w_coeffs = np.multiply(fft_w_coeffs, fft_kernel_tilde)             # <<<<<<<<<<<<<<
- * 
- *         fft_out_buffer = np.fft.ifft(fft_w_coeffs)
- */
-    __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 319, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_multiply); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 319, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_fft_w_coeffs, 1, (PyObject *(*)(char *)) __pyx_memview_get___pyx_t_double_complex, (int (*)(char *, PyObject *)) __pyx_memview_set___pyx_t_double_complex, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 319, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_v_fft_kernel_tilde, 1, (PyObject *(*)(char *)) __pyx_memview_get___pyx_t_double_complex, (int (*)(char *, PyObject *)) __pyx_memview_set___pyx_t_double_complex, 0);; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 319, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_3 = NULL;
-    __pyx_t_17 = 0;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_4))) {
-      __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_4);
-      if (likely(__pyx_t_3)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
-        __Pyx_INCREF(__pyx_t_3);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_4, function);
-        __pyx_t_17 = 1;
-      }
-    }
-    #if CYTHON_FAST_PYCALL
-    if (PyFunction_Check(__pyx_t_4)) {
-      PyObject *__pyx_temp[3] = {__pyx_t_3, __pyx_t_1, __pyx_t_7};
-      __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_17, 2+__pyx_t_17); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 319, __pyx_L1_error)
-      __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    } else
-    #endif
-    #if CYTHON_FAST_PYCCALL
-    if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
-      PyObject *__pyx_temp[3] = {__pyx_t_3, __pyx_t_1, __pyx_t_7};
-      __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_17, 2+__pyx_t_17); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 319, __pyx_L1_error)
-      __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    } else
-    #endif
-    {
-      __pyx_t_18 = PyTuple_New(2+__pyx_t_17); if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 319, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_18);
-      if (__pyx_t_3) {
-        __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_18, 0, __pyx_t_3); __pyx_t_3 = NULL;
-      }
-      __Pyx_GIVEREF(__pyx_t_1);
-      PyTuple_SET_ITEM(__pyx_t_18, 0+__pyx_t_17, __pyx_t_1);
-      __Pyx_GIVEREF(__pyx_t_7);
-      PyTuple_SET_ITEM(__pyx_t_18, 1+__pyx_t_17, __pyx_t_7);
-      __pyx_t_1 = 0;
-      __pyx_t_7 = 0;
-      __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_18, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 319, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
-    }
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dc___pyx_t_double_complex(__pyx_t_2, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 319, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __PYX_XDEC_MEMVIEW(&__pyx_v_fft_w_coeffs, 1);
-    __pyx_v_fft_w_coeffs = __pyx_t_6;
-    __pyx_t_6.memview = NULL;
-    __pyx_t_6.data = NULL;
-
-    /* "fastTSNE/_tsne.pyx":321
- *         fft_w_coeffs = np.multiply(fft_w_coeffs, fft_kernel_tilde)
- * 
- *         fft_out_buffer = np.fft.ifft(fft_w_coeffs)             # <<<<<<<<<<<<<<
- * 
- *         for i in range(n_interpolation_points_1d):
- */
-    __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 321, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_18 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_fft); if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 321, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_18);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_18, __pyx_n_s_ifft); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 321, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
-    __pyx_t_18 = __pyx_memoryview_fromslice(__pyx_v_fft_w_coeffs, 1, (PyObject *(*)(char *)) __pyx_memview_get___pyx_t_double_complex, (int (*)(char *, PyObject *)) __pyx_memview_set___pyx_t_double_complex, 0);; if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 321, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_18);
-    __pyx_t_7 = NULL;
-    if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
-      __pyx_t_7 = PyMethod_GET_SELF(__pyx_t_4);
-      if (likely(__pyx_t_7)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
-        __Pyx_INCREF(__pyx_t_7);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_4, function);
-      }
-    }
-    if (!__pyx_t_7) {
-      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_18); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 321, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
-      __Pyx_GOTREF(__pyx_t_2);
-    } else {
-      #if CYTHON_FAST_PYCALL
-      if (PyFunction_Check(__pyx_t_4)) {
-        PyObject *__pyx_temp[2] = {__pyx_t_7, __pyx_t_18};
-        __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 321, __pyx_L1_error)
-        __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-        __Pyx_GOTREF(__pyx_t_2);
-        __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
-      } else
-      #endif
-      #if CYTHON_FAST_PYCCALL
-      if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
-        PyObject *__pyx_temp[2] = {__pyx_t_7, __pyx_t_18};
-        __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 321, __pyx_L1_error)
-        __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-        __Pyx_GOTREF(__pyx_t_2);
-        __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
-      } else
-      #endif
-      {
-        __pyx_t_1 = PyTuple_New(1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 321, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_1);
-        __Pyx_GIVEREF(__pyx_t_7); PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_7); __pyx_t_7 = NULL;
-        __Pyx_GIVEREF(__pyx_t_18);
-        PyTuple_SET_ITEM(__pyx_t_1, 0+1, __pyx_t_18);
-        __pyx_t_18 = 0;
-        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_1, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 321, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_2);
-        __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      }
-    }
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dc___pyx_t_double_complex(__pyx_t_2, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 321, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __PYX_XDEC_MEMVIEW(&__pyx_v_fft_out_buffer, 1);
-    __pyx_v_fft_out_buffer = __pyx_t_6;
-    __pyx_t_6.memview = NULL;
-    __pyx_t_6.data = NULL;
-
-    /* "fastTSNE/_tsne.pyx":323
- *         fft_out_buffer = np.fft.ifft(fft_w_coeffs)
- * 
- *         for i in range(n_interpolation_points_1d):             # <<<<<<<<<<<<<<
- *             y_tilde_values[i, d] = fft_out_buffer[n_interpolation_points_1d + i].real
- * 
- */
-    __pyx_t_11 = __pyx_v_n_interpolation_points_1d;
-    __pyx_t_12 = __pyx_t_11;
-    for (__pyx_t_13 = 0; __pyx_t_13 < __pyx_t_12; __pyx_t_13+=1) {
-      __pyx_v_i = __pyx_t_13;
-
-      /* "fastTSNE/_tsne.pyx":324
- * 
- *         for i in range(n_interpolation_points_1d):
- *             y_tilde_values[i, d] = fft_out_buffer[n_interpolation_points_1d + i].real             # <<<<<<<<<<<<<<
- * 
- *     return y_tilde_values
- */
-      __pyx_t_19 = (__pyx_v_n_interpolation_points_1d + __pyx_v_i);
-      __pyx_t_20 = __Pyx_CREAL((*((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_out_buffer.data) + __pyx_t_19)) ))));
-      __pyx_t_21 = __pyx_v_i;
-      __pyx_t_22 = __pyx_v_d;
-      *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_y_tilde_values.data + __pyx_t_21 * __pyx_v_y_tilde_values.strides[0]) )) + __pyx_t_22)) )) = __pyx_t_20;
-    }
-  }
-
-  /* "fastTSNE/_tsne.pyx":326
- *             y_tilde_values[i, d] = fft_out_buffer[n_interpolation_points_1d + i].real
- * 
- *     return y_tilde_values             # <<<<<<<<<<<<<<
- * 
- * 
- */
-  __PYX_INC_MEMVIEW(&__pyx_v_y_tilde_values, 0);
-  __pyx_r = __pyx_v_y_tilde_values;
-  goto __pyx_L0;
-
-  /* "fastTSNE/_tsne.pyx":265
- * 
- * 
- * cdef double[:, ::1] matrix_multiply_fft_1d(             # <<<<<<<<<<<<<<
- *     double[::1] kernel_tilde,
- *     double[:, ::1] w_coefficients,
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_XDECREF(__pyx_t_4);
-  __PYX_XDEC_MEMVIEW(&__pyx_t_5, 1);
-  __PYX_XDEC_MEMVIEW(&__pyx_t_6, 1);
-  __Pyx_XDECREF(__pyx_t_7);
-  __Pyx_XDECREF(__pyx_t_18);
-  __pyx_r.data = NULL;
-  __pyx_r.memview = NULL;
-  __Pyx_AddTraceback("fastTSNE._tsne.matrix_multiply_fft_1d", __pyx_clineno, __pyx_lineno, __pyx_filename);
-
-  goto __pyx_L2;
-  __pyx_L0:;
-  if (unlikely(!__pyx_r.memview)) {
-    PyErr_SetString(PyExc_TypeError, "Memoryview return value is not initialized");
-  }
-  __pyx_L2:;
-  __PYX_XDEC_MEMVIEW(&__pyx_v_y_tilde_values, 1);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_fft_kernel_tilde, 1);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_fft_w_coeffs, 1);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_fft_in_buffer, 1);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_fft_out_buffer, 1);
-  __Pyx_TraceReturn(Py_None, 0);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "fastTSNE/_tsne.pyx":329
+/* "fastTSNE/_tsne.pyx":267
  * 
  * 
  * cdef double[::1] compute_kernel_tilde_1d(             # <<<<<<<<<<<<<<
@@ -6327,42 +5654,42 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_1d(Py_ss
   Py_ssize_t __pyx_t_14;
   Py_ssize_t __pyx_t_15;
   __Pyx_RefNannySetupContext("compute_kernel_tilde_1d", 0);
-  __Pyx_TraceCall("compute_kernel_tilde_1d", __pyx_f[0], 329, 0, __PYX_ERR(0, 329, __pyx_L1_error));
+  __Pyx_TraceCall("compute_kernel_tilde_1d", __pyx_f[0], 267, 0, __PYX_ERR(0, 267, __pyx_L1_error));
 
-  /* "fastTSNE/_tsne.pyx":335
+  /* "fastTSNE/_tsne.pyx":273
  * ):
  *     cdef:
  *         double[::1] y_tilde = np.empty(n_interpolation_points_1d, dtype=float)             # <<<<<<<<<<<<<<
  * 
  *         Py_ssize_t embedded_size = 2 * n_interpolation_points_1d
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 335, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 273, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 335, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 273, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_interpolation_points_1d); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 335, __pyx_L1_error)
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_interpolation_points_1d); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 273, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 335, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 273, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 335, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 273, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 335, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 335, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 273, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 273, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_4, PyBUF_WRITABLE); if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 335, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_4, PyBUF_WRITABLE); if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 273, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_y_tilde = __pyx_t_5;
   __pyx_t_5.memview = NULL;
   __pyx_t_5.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":337
+  /* "fastTSNE/_tsne.pyx":275
  *         double[::1] y_tilde = np.empty(n_interpolation_points_1d, dtype=float)
  * 
  *         Py_ssize_t embedded_size = 2 * n_interpolation_points_1d             # <<<<<<<<<<<<<<
@@ -6371,40 +5698,40 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_1d(Py_ss
  */
   __pyx_v_embedded_size = (2 * __pyx_v_n_interpolation_points_1d);
 
-  /* "fastTSNE/_tsne.pyx":338
+  /* "fastTSNE/_tsne.pyx":276
  * 
  *         Py_ssize_t embedded_size = 2 * n_interpolation_points_1d
  *         double[::1] kernel_tilde = np.zeros(embedded_size, dtype=float)             # <<<<<<<<<<<<<<
  * 
  *         Py_ssize_t i
  */
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 338, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 276, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_zeros); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 338, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_zeros); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 276, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyInt_FromSsize_t(__pyx_v_embedded_size); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 338, __pyx_L1_error)
+  __pyx_t_4 = PyInt_FromSsize_t(__pyx_v_embedded_size); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 276, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 338, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 276, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 338, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 276, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 338, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 338, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 276, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 276, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_2, PyBUF_WRITABLE); if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 338, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_2, PyBUF_WRITABLE); if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 276, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_kernel_tilde = __pyx_t_5;
   __pyx_t_5.memview = NULL;
   __pyx_t_5.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":342
+  /* "fastTSNE/_tsne.pyx":280
  *         Py_ssize_t i
  * 
  *     y_tilde[0] = coord_spacing / 2 + coord_min             # <<<<<<<<<<<<<<
@@ -6414,7 +5741,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_1d(Py_ss
   __pyx_t_6 = 0;
   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_6)) )) = ((__pyx_v_coord_spacing / 2.0) + __pyx_v_coord_min);
 
-  /* "fastTSNE/_tsne.pyx":343
+  /* "fastTSNE/_tsne.pyx":281
  * 
  *     y_tilde[0] = coord_spacing / 2 + coord_min
  *     for i in range(1, n_interpolation_points_1d):             # <<<<<<<<<<<<<<
@@ -6426,7 +5753,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_1d(Py_ss
   for (__pyx_t_9 = 1; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
     __pyx_v_i = __pyx_t_9;
 
-    /* "fastTSNE/_tsne.pyx":344
+    /* "fastTSNE/_tsne.pyx":282
  *     y_tilde[0] = coord_spacing / 2 + coord_min
  *     for i in range(1, n_interpolation_points_1d):
  *         y_tilde[i] = y_tilde[i - 1] + coord_spacing             # <<<<<<<<<<<<<<
@@ -6438,7 +5765,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_1d(Py_ss
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_11)) )) = ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_10)) ))) + __pyx_v_coord_spacing);
   }
 
-  /* "fastTSNE/_tsne.pyx":349
+  /* "fastTSNE/_tsne.pyx":287
  *     # generating kernel vector for a circulant matrix
  *     cdef double tmp
  *     for i in range(n_interpolation_points_1d):             # <<<<<<<<<<<<<<
@@ -6450,7 +5777,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_1d(Py_ss
   for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
     __pyx_v_i = __pyx_t_9;
 
-    /* "fastTSNE/_tsne.pyx":350
+    /* "fastTSNE/_tsne.pyx":288
  *     cdef double tmp
  *     for i in range(n_interpolation_points_1d):
  *         tmp = squared_cauchy_1d(y_tilde[0], y_tilde[i])             # <<<<<<<<<<<<<<
@@ -6461,7 +5788,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_1d(Py_ss
     __pyx_t_13 = __pyx_v_i;
     __pyx_v_tmp = __pyx_f_8fastTSNE_5_tsne_squared_cauchy_1d((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_12)) ))), (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_13)) ))));
 
-    /* "fastTSNE/_tsne.pyx":352
+    /* "fastTSNE/_tsne.pyx":290
  *         tmp = squared_cauchy_1d(y_tilde[0], y_tilde[i])
  * 
  *         kernel_tilde[n_interpolation_points_1d + i] = tmp             # <<<<<<<<<<<<<<
@@ -6471,7 +5798,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_1d(Py_ss
     __pyx_t_14 = (__pyx_v_n_interpolation_points_1d + __pyx_v_i);
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_kernel_tilde.data) + __pyx_t_14)) )) = __pyx_v_tmp;
 
-    /* "fastTSNE/_tsne.pyx":353
+    /* "fastTSNE/_tsne.pyx":291
  * 
  *         kernel_tilde[n_interpolation_points_1d + i] = tmp
  *         kernel_tilde[n_interpolation_points_1d - i] = tmp             # <<<<<<<<<<<<<<
@@ -6482,7 +5809,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_1d(Py_ss
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_kernel_tilde.data) + __pyx_t_15)) )) = __pyx_v_tmp;
   }
 
-  /* "fastTSNE/_tsne.pyx":355
+  /* "fastTSNE/_tsne.pyx":293
  *         kernel_tilde[n_interpolation_points_1d - i] = tmp
  * 
  *     return kernel_tilde             # <<<<<<<<<<<<<<
@@ -6493,7 +5820,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_1d(Py_ss
   __pyx_r = __pyx_v_kernel_tilde;
   goto __pyx_L0;
 
-  /* "fastTSNE/_tsne.pyx":329
+  /* "fastTSNE/_tsne.pyx":267
  * 
  * 
  * cdef double[::1] compute_kernel_tilde_1d(             # <<<<<<<<<<<<<<
@@ -6525,7 +5852,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_1d(Py_ss
   return __pyx_r;
 }
 
-/* "fastTSNE/_tsne.pyx":358
+/* "fastTSNE/_tsne.pyx":296
  * 
  * 
  * cpdef double estimate_negative_gradient_fft_1d(             # <<<<<<<<<<<<<<
@@ -6629,7 +5956,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
   Py_ssize_t __pyx_t_62;
   Py_ssize_t __pyx_t_63;
   __Pyx_RefNannySetupContext("estimate_negative_gradient_fft_1d", 0);
-  __Pyx_TraceCall("estimate_negative_gradient_fft_1d", __pyx_f[0], 358, 0, __PYX_ERR(0, 358, __pyx_L1_error));
+  __Pyx_TraceCall("estimate_negative_gradient_fft_1d", __pyx_f[0], 296, 0, __PYX_ERR(0, 296, __pyx_L1_error));
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
       __pyx_v_n_interpolation_points = __pyx_optional_args->n_interpolation_points;
@@ -6642,7 +5969,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
     }
   }
 
-  /* "fastTSNE/_tsne.pyx":365
+  /* "fastTSNE/_tsne.pyx":303
  *     double ints_in_interval=1,
  * ):
  *     cdef Py_ssize_t i, j, d, box_idx, n_samples = embedding.shape[0]             # <<<<<<<<<<<<<<
@@ -6651,7 +5978,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
  */
   __pyx_v_n_samples = (__pyx_v_embedding.shape[0]);
 
-  /* "fastTSNE/_tsne.pyx":366
+  /* "fastTSNE/_tsne.pyx":304
  * ):
  *     cdef Py_ssize_t i, j, d, box_idx, n_samples = embedding.shape[0]
  *     cdef double y_max = -INFINITY, y_min = INFINITY             # <<<<<<<<<<<<<<
@@ -6661,7 +5988,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
   __pyx_v_y_max = (-INFINITY);
   __pyx_v_y_min = INFINITY;
 
-  /* "fastTSNE/_tsne.pyx":368
+  /* "fastTSNE/_tsne.pyx":306
  *     cdef double y_max = -INFINITY, y_min = INFINITY
  *     # Determine the min/max values of the embedding
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -6673,7 +6000,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":369
+    /* "fastTSNE/_tsne.pyx":307
  *     # Determine the min/max values of the embedding
  *     for i in range(n_samples):
  *         if embedding[i] < y_min:             # <<<<<<<<<<<<<<
@@ -6684,7 +6011,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
     __pyx_t_5 = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_embedding.data) + __pyx_t_4)) ))) < __pyx_v_y_min) != 0);
     if (__pyx_t_5) {
 
-      /* "fastTSNE/_tsne.pyx":370
+      /* "fastTSNE/_tsne.pyx":308
  *     for i in range(n_samples):
  *         if embedding[i] < y_min:
  *             y_min = embedding[i]             # <<<<<<<<<<<<<<
@@ -6694,7 +6021,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
       __pyx_t_6 = __pyx_v_i;
       __pyx_v_y_min = (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_embedding.data) + __pyx_t_6)) )));
 
-      /* "fastTSNE/_tsne.pyx":369
+      /* "fastTSNE/_tsne.pyx":307
  *     # Determine the min/max values of the embedding
  *     for i in range(n_samples):
  *         if embedding[i] < y_min:             # <<<<<<<<<<<<<<
@@ -6704,7 +6031,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
       goto __pyx_L5;
     }
 
-    /* "fastTSNE/_tsne.pyx":371
+    /* "fastTSNE/_tsne.pyx":309
  *         if embedding[i] < y_min:
  *             y_min = embedding[i]
  *         elif embedding[i] > y_max:             # <<<<<<<<<<<<<<
@@ -6715,7 +6042,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
     __pyx_t_5 = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_embedding.data) + __pyx_t_7)) ))) > __pyx_v_y_max) != 0);
     if (__pyx_t_5) {
 
-      /* "fastTSNE/_tsne.pyx":372
+      /* "fastTSNE/_tsne.pyx":310
  *             y_min = embedding[i]
  *         elif embedding[i] > y_max:
  *             y_max = embedding[i]             # <<<<<<<<<<<<<<
@@ -6725,7 +6052,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
       __pyx_t_8 = __pyx_v_i;
       __pyx_v_y_max = (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_embedding.data) + __pyx_t_8)) )));
 
-      /* "fastTSNE/_tsne.pyx":371
+      /* "fastTSNE/_tsne.pyx":309
  *         if embedding[i] < y_min:
  *             y_min = embedding[i]
  *         elif embedding[i] > y_max:             # <<<<<<<<<<<<<<
@@ -6736,7 +6063,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
     __pyx_L5:;
   }
 
-  /* "fastTSNE/_tsne.pyx":374
+  /* "fastTSNE/_tsne.pyx":312
  *             y_max = embedding[i]
  * 
  *     cdef int n_boxes = <int>fmax(min_num_intervals, (y_max - y_min) / ints_in_interval)             # <<<<<<<<<<<<<<
@@ -6745,7 +6072,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
  */
   __pyx_v_n_boxes = ((int)fmax(__pyx_v_min_num_intervals, ((__pyx_v_y_max - __pyx_v_y_min) / __pyx_v_ints_in_interval)));
 
-  /* "fastTSNE/_tsne.pyx":375
+  /* "fastTSNE/_tsne.pyx":313
  * 
  *     cdef int n_boxes = <int>fmax(min_num_intervals, (y_max - y_min) / ints_in_interval)
  *     cdef double box_width = (y_max - y_min) / n_boxes             # <<<<<<<<<<<<<<
@@ -6754,73 +6081,73 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
  */
   __pyx_v_box_width = ((__pyx_v_y_max - __pyx_v_y_min) / __pyx_v_n_boxes);
 
-  /* "fastTSNE/_tsne.pyx":378
+  /* "fastTSNE/_tsne.pyx":316
  * 
  *     # Compute the box bounds
  *     cdef double[::1] box_lower_bounds = np.empty(n_boxes, dtype=float)             # <<<<<<<<<<<<<<
  *     cdef double[::1] box_upper_bounds = np.empty(n_boxes, dtype=float)
  *     for box_idx in range(n_boxes):
  */
-  __pyx_t_9 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 378, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 316, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_9, __pyx_n_s_empty); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 378, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_9, __pyx_n_s_empty); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 316, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_10);
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  __pyx_t_9 = __Pyx_PyInt_From_int(__pyx_v_n_boxes); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 378, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyInt_From_int(__pyx_v_n_boxes); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 316, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_11 = PyTuple_New(1); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 378, __pyx_L1_error)
+  __pyx_t_11 = PyTuple_New(1); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 316, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_11);
   __Pyx_GIVEREF(__pyx_t_9);
   PyTuple_SET_ITEM(__pyx_t_11, 0, __pyx_t_9);
   __pyx_t_9 = 0;
-  __pyx_t_9 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 378, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 316, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  if (PyDict_SetItem(__pyx_t_9, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 378, __pyx_L1_error)
-  __pyx_t_12 = __Pyx_PyObject_Call(__pyx_t_10, __pyx_t_11, __pyx_t_9); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 378, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_9, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 316, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyObject_Call(__pyx_t_10, __pyx_t_11, __pyx_t_9); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 316, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_12);
   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
   __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  __pyx_t_13 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_12, PyBUF_WRITABLE); if (unlikely(!__pyx_t_13.memview)) __PYX_ERR(0, 378, __pyx_L1_error)
+  __pyx_t_13 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_12, PyBUF_WRITABLE); if (unlikely(!__pyx_t_13.memview)) __PYX_ERR(0, 316, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
   __pyx_v_box_lower_bounds = __pyx_t_13;
   __pyx_t_13.memview = NULL;
   __pyx_t_13.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":379
+  /* "fastTSNE/_tsne.pyx":317
  *     # Compute the box bounds
  *     cdef double[::1] box_lower_bounds = np.empty(n_boxes, dtype=float)
  *     cdef double[::1] box_upper_bounds = np.empty(n_boxes, dtype=float)             # <<<<<<<<<<<<<<
  *     for box_idx in range(n_boxes):
  *         box_lower_bounds[box_idx] = box_idx * box_width + y_min
  */
-  __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 379, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 317, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_12);
-  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_12, __pyx_n_s_empty); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 379, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_12, __pyx_n_s_empty); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 317, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-  __pyx_t_12 = __Pyx_PyInt_From_int(__pyx_v_n_boxes); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 379, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyInt_From_int(__pyx_v_n_boxes); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 317, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_12);
-  __pyx_t_11 = PyTuple_New(1); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 379, __pyx_L1_error)
+  __pyx_t_11 = PyTuple_New(1); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 317, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_11);
   __Pyx_GIVEREF(__pyx_t_12);
   PyTuple_SET_ITEM(__pyx_t_11, 0, __pyx_t_12);
   __pyx_t_12 = 0;
-  __pyx_t_12 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 379, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 317, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_12);
-  if (PyDict_SetItem(__pyx_t_12, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 379, __pyx_L1_error)
-  __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_11, __pyx_t_12); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 379, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_12, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 317, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_11, __pyx_t_12); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 317, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_10);
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
   __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-  __pyx_t_13 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_10, PyBUF_WRITABLE); if (unlikely(!__pyx_t_13.memview)) __PYX_ERR(0, 379, __pyx_L1_error)
+  __pyx_t_13 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_10, PyBUF_WRITABLE); if (unlikely(!__pyx_t_13.memview)) __PYX_ERR(0, 317, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
   __pyx_v_box_upper_bounds = __pyx_t_13;
   __pyx_t_13.memview = NULL;
   __pyx_t_13.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":380
+  /* "fastTSNE/_tsne.pyx":318
  *     cdef double[::1] box_lower_bounds = np.empty(n_boxes, dtype=float)
  *     cdef double[::1] box_upper_bounds = np.empty(n_boxes, dtype=float)
  *     for box_idx in range(n_boxes):             # <<<<<<<<<<<<<<
@@ -6832,7 +6159,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
   for (__pyx_t_1 = 0; __pyx_t_1 < __pyx_t_15; __pyx_t_1+=1) {
     __pyx_v_box_idx = __pyx_t_1;
 
-    /* "fastTSNE/_tsne.pyx":381
+    /* "fastTSNE/_tsne.pyx":319
  *     cdef double[::1] box_upper_bounds = np.empty(n_boxes, dtype=float)
  *     for box_idx in range(n_boxes):
  *         box_lower_bounds[box_idx] = box_idx * box_width + y_min             # <<<<<<<<<<<<<<
@@ -6842,7 +6169,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
     __pyx_t_16 = __pyx_v_box_idx;
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_box_lower_bounds.data) + __pyx_t_16)) )) = ((__pyx_v_box_idx * __pyx_v_box_width) + __pyx_v_y_min);
 
-    /* "fastTSNE/_tsne.pyx":382
+    /* "fastTSNE/_tsne.pyx":320
  *     for box_idx in range(n_boxes):
  *         box_lower_bounds[box_idx] = box_idx * box_width + y_min
  *         box_upper_bounds[box_idx] = (box_idx + 1) * box_width + y_min             # <<<<<<<<<<<<<<
@@ -6853,7 +6180,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_box_upper_bounds.data) + __pyx_t_17)) )) = (((__pyx_v_box_idx + 1) * __pyx_v_box_width) + __pyx_v_y_min);
   }
 
-  /* "fastTSNE/_tsne.pyx":385
+  /* "fastTSNE/_tsne.pyx":323
  * 
  *     # Determine which box each point belongs to
  *     cdef int *point_box_idx = <int *>PyMem_Malloc(n_samples * sizeof(int))             # <<<<<<<<<<<<<<
@@ -6862,7 +6189,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
  */
   __pyx_v_point_box_idx = ((int *)PyMem_Malloc((__pyx_v_n_samples * (sizeof(int)))));
 
-  /* "fastTSNE/_tsne.pyx":386
+  /* "fastTSNE/_tsne.pyx":324
  *     # Determine which box each point belongs to
  *     cdef int *point_box_idx = <int *>PyMem_Malloc(n_samples * sizeof(int))
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -6874,7 +6201,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":387
+    /* "fastTSNE/_tsne.pyx":325
  *     cdef int *point_box_idx = <int *>PyMem_Malloc(n_samples * sizeof(int))
  *     for i in range(n_samples):
  *         box_idx = <int>((embedding[i] - y_min) / box_width)             # <<<<<<<<<<<<<<
@@ -6884,7 +6211,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
     __pyx_t_18 = __pyx_v_i;
     __pyx_v_box_idx = ((int)(((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_embedding.data) + __pyx_t_18)) ))) - __pyx_v_y_min) / __pyx_v_box_width));
 
-    /* "fastTSNE/_tsne.pyx":390
+    /* "fastTSNE/_tsne.pyx":328
  *         # The right most point maps directly into `n_boxes`, while it should
  *         # belong to the last box
  *         if box_idx >= n_boxes:             # <<<<<<<<<<<<<<
@@ -6894,7 +6221,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
     __pyx_t_5 = ((__pyx_v_box_idx >= __pyx_v_n_boxes) != 0);
     if (__pyx_t_5) {
 
-      /* "fastTSNE/_tsne.pyx":391
+      /* "fastTSNE/_tsne.pyx":329
  *         # belong to the last box
  *         if box_idx >= n_boxes:
  *             box_idx = n_boxes - 1             # <<<<<<<<<<<<<<
@@ -6903,7 +6230,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
  */
       __pyx_v_box_idx = (__pyx_v_n_boxes - 1);
 
-      /* "fastTSNE/_tsne.pyx":390
+      /* "fastTSNE/_tsne.pyx":328
  *         # The right most point maps directly into `n_boxes`, while it should
  *         # belong to the last box
  *         if box_idx >= n_boxes:             # <<<<<<<<<<<<<<
@@ -6912,7 +6239,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
  */
     }
 
-    /* "fastTSNE/_tsne.pyx":393
+    /* "fastTSNE/_tsne.pyx":331
  *             box_idx = n_boxes - 1
  * 
  *         point_box_idx[i] = box_idx             # <<<<<<<<<<<<<<
@@ -6922,7 +6249,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
     (__pyx_v_point_box_idx[__pyx_v_i]) = __pyx_v_box_idx;
   }
 
-  /* "fastTSNE/_tsne.pyx":395
+  /* "fastTSNE/_tsne.pyx":333
  *         point_box_idx[i] = box_idx
  * 
  *     cdef int n_interpolation_points_1d = n_interpolation_points * n_boxes             # <<<<<<<<<<<<<<
@@ -6931,40 +6258,40 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
  */
   __pyx_v_n_interpolation_points_1d = (__pyx_v_n_interpolation_points * __pyx_v_n_boxes);
 
-  /* "fastTSNE/_tsne.pyx":398
+  /* "fastTSNE/_tsne.pyx":336
  *     # Prepare the interpolants for a single interval, so we can use their
  *     # relative positions later on
  *     cdef double[::1] y_tilde = np.empty(n_interpolation_points, dtype=float)             # <<<<<<<<<<<<<<
  *     cdef double h = 1. / n_interpolation_points
  *     y_tilde[0] = h / 2
  */
-  __pyx_t_10 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 398, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 336, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_10);
-  __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_t_10, __pyx_n_s_empty); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 398, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_t_10, __pyx_n_s_empty); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 336, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_12);
   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-  __pyx_t_10 = PyInt_FromSsize_t(__pyx_v_n_interpolation_points); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 398, __pyx_L1_error)
+  __pyx_t_10 = PyInt_FromSsize_t(__pyx_v_n_interpolation_points); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 336, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_10);
-  __pyx_t_11 = PyTuple_New(1); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 398, __pyx_L1_error)
+  __pyx_t_11 = PyTuple_New(1); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 336, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_11);
   __Pyx_GIVEREF(__pyx_t_10);
   PyTuple_SET_ITEM(__pyx_t_11, 0, __pyx_t_10);
   __pyx_t_10 = 0;
-  __pyx_t_10 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 398, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 336, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_10);
-  if (PyDict_SetItem(__pyx_t_10, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 398, __pyx_L1_error)
-  __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_11, __pyx_t_10); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 398, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_10, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 336, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_11, __pyx_t_10); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 336, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
   __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-  __pyx_t_13 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_9, PyBUF_WRITABLE); if (unlikely(!__pyx_t_13.memview)) __PYX_ERR(0, 398, __pyx_L1_error)
+  __pyx_t_13 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_9, PyBUF_WRITABLE); if (unlikely(!__pyx_t_13.memview)) __PYX_ERR(0, 336, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   __pyx_v_y_tilde = __pyx_t_13;
   __pyx_t_13.memview = NULL;
   __pyx_t_13.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":399
+  /* "fastTSNE/_tsne.pyx":337
  *     # relative positions later on
  *     cdef double[::1] y_tilde = np.empty(n_interpolation_points, dtype=float)
  *     cdef double h = 1. / n_interpolation_points             # <<<<<<<<<<<<<<
@@ -6973,7 +6300,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
  */
   __pyx_v_h = (1. / __pyx_v_n_interpolation_points);
 
-  /* "fastTSNE/_tsne.pyx":400
+  /* "fastTSNE/_tsne.pyx":338
  *     cdef double[::1] y_tilde = np.empty(n_interpolation_points, dtype=float)
  *     cdef double h = 1. / n_interpolation_points
  *     y_tilde[0] = h / 2             # <<<<<<<<<<<<<<
@@ -6983,7 +6310,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
   __pyx_t_19 = 0;
   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_19)) )) = (__pyx_v_h / 2.0);
 
-  /* "fastTSNE/_tsne.pyx":401
+  /* "fastTSNE/_tsne.pyx":339
  *     cdef double h = 1. / n_interpolation_points
  *     y_tilde[0] = h / 2
  *     for i in range(1, n_interpolation_points):             # <<<<<<<<<<<<<<
@@ -6995,7 +6322,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
   for (__pyx_t_3 = 1; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":402
+    /* "fastTSNE/_tsne.pyx":340
  *     y_tilde[0] = h / 2
  *     for i in range(1, n_interpolation_points):
  *         y_tilde[i] = y_tilde[i - 1] + h             # <<<<<<<<<<<<<<
@@ -7007,19 +6334,19 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_21)) )) = ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_20)) ))) + __pyx_v_h);
   }
 
-  /* "fastTSNE/_tsne.pyx":405
+  /* "fastTSNE/_tsne.pyx":343
  * 
  *     # Evaluate the kernel at the interpolation nodes
  *     cdef double[::1] kernel_tilde = compute_kernel_tilde_1d(             # <<<<<<<<<<<<<<
  *         n_interpolation_points_1d, y_min, h * box_width)
  * 
  */
-  __pyx_t_13 = __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_1d(__pyx_v_n_interpolation_points_1d, __pyx_v_y_min, (__pyx_v_h * __pyx_v_box_width)); if (unlikely(!__pyx_t_13.memview)) __PYX_ERR(0, 405, __pyx_L1_error)
+  __pyx_t_13 = __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_1d(__pyx_v_n_interpolation_points_1d, __pyx_v_y_min, (__pyx_v_h * __pyx_v_box_width)); if (unlikely(!__pyx_t_13.memview)) __PYX_ERR(0, 343, __pyx_L1_error)
   __pyx_v_kernel_tilde = __pyx_t_13;
   __pyx_t_13.memview = NULL;
   __pyx_t_13.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":410
+  /* "fastTSNE/_tsne.pyx":348
  *     # STEP 1: Compute the w coefficients
  *     # Set up q_j values
  *     cdef int n_terms = 3             # <<<<<<<<<<<<<<
@@ -7028,23 +6355,23 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
  */
   __pyx_v_n_terms = 3;
 
-  /* "fastTSNE/_tsne.pyx":411
+  /* "fastTSNE/_tsne.pyx":349
  *     # Set up q_j values
  *     cdef int n_terms = 3
  *     cdef double[:, ::1] q_j = np.empty((n_samples, n_terms), dtype=float)             # <<<<<<<<<<<<<<
  *     for i in range(n_samples):
  *         q_j[i, 0] = 1
  */
-  __pyx_t_9 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 411, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 349, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_9, __pyx_n_s_empty); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 411, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_9, __pyx_n_s_empty); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 349, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_10);
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  __pyx_t_9 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 411, __pyx_L1_error)
+  __pyx_t_9 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 349, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_11 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 411, __pyx_L1_error)
+  __pyx_t_11 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 349, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_11);
-  __pyx_t_12 = PyTuple_New(2); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 411, __pyx_L1_error)
+  __pyx_t_12 = PyTuple_New(2); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 349, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_12);
   __Pyx_GIVEREF(__pyx_t_9);
   PyTuple_SET_ITEM(__pyx_t_12, 0, __pyx_t_9);
@@ -7052,26 +6379,26 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
   PyTuple_SET_ITEM(__pyx_t_12, 1, __pyx_t_11);
   __pyx_t_9 = 0;
   __pyx_t_11 = 0;
-  __pyx_t_11 = PyTuple_New(1); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 411, __pyx_L1_error)
+  __pyx_t_11 = PyTuple_New(1); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 349, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_11);
   __Pyx_GIVEREF(__pyx_t_12);
   PyTuple_SET_ITEM(__pyx_t_11, 0, __pyx_t_12);
   __pyx_t_12 = 0;
-  __pyx_t_12 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 411, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 349, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_12);
-  if (PyDict_SetItem(__pyx_t_12, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 411, __pyx_L1_error)
-  __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_10, __pyx_t_11, __pyx_t_12); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 411, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_12, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 349, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_10, __pyx_t_11, __pyx_t_12); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 349, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
   __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
   __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-  __pyx_t_22 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_9, PyBUF_WRITABLE); if (unlikely(!__pyx_t_22.memview)) __PYX_ERR(0, 411, __pyx_L1_error)
+  __pyx_t_22 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_9, PyBUF_WRITABLE); if (unlikely(!__pyx_t_22.memview)) __PYX_ERR(0, 349, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   __pyx_v_q_j = __pyx_t_22;
   __pyx_t_22.memview = NULL;
   __pyx_t_22.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":412
+  /* "fastTSNE/_tsne.pyx":350
  *     cdef int n_terms = 3
  *     cdef double[:, ::1] q_j = np.empty((n_samples, n_terms), dtype=float)
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -7083,7 +6410,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":413
+    /* "fastTSNE/_tsne.pyx":351
  *     cdef double[:, ::1] q_j = np.empty((n_samples, n_terms), dtype=float)
  *     for i in range(n_samples):
  *         q_j[i, 0] = 1             # <<<<<<<<<<<<<<
@@ -7094,7 +6421,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
     __pyx_t_24 = 0;
     *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_q_j.data + __pyx_t_23 * __pyx_v_q_j.strides[0]) )) + __pyx_t_24)) )) = 1.0;
 
-    /* "fastTSNE/_tsne.pyx":414
+    /* "fastTSNE/_tsne.pyx":352
  *     for i in range(n_samples):
  *         q_j[i, 0] = 1
  *         q_j[i, 1] = embedding[i]             # <<<<<<<<<<<<<<
@@ -7106,7 +6433,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
     __pyx_t_27 = 1;
     *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_q_j.data + __pyx_t_26 * __pyx_v_q_j.strides[0]) )) + __pyx_t_27)) )) = (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_embedding.data) + __pyx_t_25)) )));
 
-    /* "fastTSNE/_tsne.pyx":415
+    /* "fastTSNE/_tsne.pyx":353
  *         q_j[i, 0] = 1
  *         q_j[i, 1] = embedding[i]
  *         q_j[i, 2] = embedding[i] ** 2             # <<<<<<<<<<<<<<
@@ -7119,40 +6446,40 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
     *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_q_j.data + __pyx_t_29 * __pyx_v_q_j.strides[0]) )) + __pyx_t_30)) )) = pow((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_embedding.data) + __pyx_t_28)) ))), 2.0);
   }
 
-  /* "fastTSNE/_tsne.pyx":418
+  /* "fastTSNE/_tsne.pyx":356
  * 
  *     # Compute the relative position of each reference point in its box
  *     cdef double[::1] y_in_box = np.empty(n_samples, dtype=float)             # <<<<<<<<<<<<<<
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i]
  */
-  __pyx_t_9 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 418, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 356, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_t_9, __pyx_n_s_empty); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 418, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_t_9, __pyx_n_s_empty); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 356, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_12);
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  __pyx_t_9 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 418, __pyx_L1_error)
+  __pyx_t_9 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 356, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_11 = PyTuple_New(1); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 418, __pyx_L1_error)
+  __pyx_t_11 = PyTuple_New(1); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 356, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_11);
   __Pyx_GIVEREF(__pyx_t_9);
   PyTuple_SET_ITEM(__pyx_t_11, 0, __pyx_t_9);
   __pyx_t_9 = 0;
-  __pyx_t_9 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 418, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 356, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  if (PyDict_SetItem(__pyx_t_9, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 418, __pyx_L1_error)
-  __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_11, __pyx_t_9); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 418, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_9, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 356, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_11, __pyx_t_9); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 356, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_10);
   __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
   __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  __pyx_t_13 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_10, PyBUF_WRITABLE); if (unlikely(!__pyx_t_13.memview)) __PYX_ERR(0, 418, __pyx_L1_error)
+  __pyx_t_13 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_10, PyBUF_WRITABLE); if (unlikely(!__pyx_t_13.memview)) __PYX_ERR(0, 356, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
   __pyx_v_y_in_box = __pyx_t_13;
   __pyx_t_13.memview = NULL;
   __pyx_t_13.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":419
+  /* "fastTSNE/_tsne.pyx":357
  *     # Compute the relative position of each reference point in its box
  *     cdef double[::1] y_in_box = np.empty(n_samples, dtype=float)
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -7164,7 +6491,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":420
+    /* "fastTSNE/_tsne.pyx":358
  *     cdef double[::1] y_in_box = np.empty(n_samples, dtype=float)
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i]             # <<<<<<<<<<<<<<
@@ -7173,7 +6500,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
  */
     __pyx_v_box_idx = (__pyx_v_point_box_idx[__pyx_v_i]);
 
-    /* "fastTSNE/_tsne.pyx":421
+    /* "fastTSNE/_tsne.pyx":359
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i]
  *         y_in_box[i] = (embedding[i] - box_lower_bounds[box_idx]) / box_width             # <<<<<<<<<<<<<<
@@ -7186,35 +6513,35 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_in_box.data) + __pyx_t_33)) )) = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_embedding.data) + __pyx_t_31)) ))) - (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_box_lower_bounds.data) + __pyx_t_32)) )))) / __pyx_v_box_width);
   }
 
-  /* "fastTSNE/_tsne.pyx":424
+  /* "fastTSNE/_tsne.pyx":362
  * 
  *     # Interpolate kernel using Lagrange polynomials
  *     cdef double[:, ::1] interpolated_values = interpolate(y_in_box, y_tilde)             # <<<<<<<<<<<<<<
  * 
  *     # Actually compute w_{ij}s
  */
-  __pyx_t_22 = __pyx_f_8fastTSNE_5_tsne_interpolate(__pyx_v_y_in_box, __pyx_v_y_tilde); if (unlikely(!__pyx_t_22.memview)) __PYX_ERR(0, 424, __pyx_L1_error)
+  __pyx_t_22 = __pyx_f_8fastTSNE_5_tsne_interpolate(__pyx_v_y_in_box, __pyx_v_y_tilde); if (unlikely(!__pyx_t_22.memview)) __PYX_ERR(0, 362, __pyx_L1_error)
   __pyx_v_interpolated_values = __pyx_t_22;
   __pyx_t_22.memview = NULL;
   __pyx_t_22.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":427
+  /* "fastTSNE/_tsne.pyx":365
  * 
  *     # Actually compute w_{ij}s
  *     cdef double[:, ::1] w_coefficients = np.zeros((n_interpolation_points_1d, n_terms), dtype=float)             # <<<<<<<<<<<<<<
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i] * n_interpolation_points
  */
-  __pyx_t_10 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 427, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 365, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_10);
-  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_10, __pyx_n_s_zeros); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 427, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_10, __pyx_n_s_zeros); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 365, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-  __pyx_t_10 = __Pyx_PyInt_From_int(__pyx_v_n_interpolation_points_1d); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 427, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_PyInt_From_int(__pyx_v_n_interpolation_points_1d); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 365, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_10);
-  __pyx_t_11 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 427, __pyx_L1_error)
+  __pyx_t_11 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 365, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_11);
-  __pyx_t_12 = PyTuple_New(2); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 427, __pyx_L1_error)
+  __pyx_t_12 = PyTuple_New(2); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 365, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_12);
   __Pyx_GIVEREF(__pyx_t_10);
   PyTuple_SET_ITEM(__pyx_t_12, 0, __pyx_t_10);
@@ -7222,26 +6549,26 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
   PyTuple_SET_ITEM(__pyx_t_12, 1, __pyx_t_11);
   __pyx_t_10 = 0;
   __pyx_t_11 = 0;
-  __pyx_t_11 = PyTuple_New(1); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 427, __pyx_L1_error)
+  __pyx_t_11 = PyTuple_New(1); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 365, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_11);
   __Pyx_GIVEREF(__pyx_t_12);
   PyTuple_SET_ITEM(__pyx_t_11, 0, __pyx_t_12);
   __pyx_t_12 = 0;
-  __pyx_t_12 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 427, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 365, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_12);
-  if (PyDict_SetItem(__pyx_t_12, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 427, __pyx_L1_error)
-  __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_11, __pyx_t_12); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 427, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_12, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 365, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_11, __pyx_t_12); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 365, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_10);
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
   __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-  __pyx_t_22 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_10, PyBUF_WRITABLE); if (unlikely(!__pyx_t_22.memview)) __PYX_ERR(0, 427, __pyx_L1_error)
+  __pyx_t_22 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_10, PyBUF_WRITABLE); if (unlikely(!__pyx_t_22.memview)) __PYX_ERR(0, 365, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
   __pyx_v_w_coefficients = __pyx_t_22;
   __pyx_t_22.memview = NULL;
   __pyx_t_22.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":428
+  /* "fastTSNE/_tsne.pyx":366
  *     # Actually compute w_{ij}s
  *     cdef double[:, ::1] w_coefficients = np.zeros((n_interpolation_points_1d, n_terms), dtype=float)
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -7253,7 +6580,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":429
+    /* "fastTSNE/_tsne.pyx":367
  *     cdef double[:, ::1] w_coefficients = np.zeros((n_interpolation_points_1d, n_terms), dtype=float)
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i] * n_interpolation_points             # <<<<<<<<<<<<<<
@@ -7262,7 +6589,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
  */
     __pyx_v_box_idx = ((__pyx_v_point_box_idx[__pyx_v_i]) * __pyx_v_n_interpolation_points);
 
-    /* "fastTSNE/_tsne.pyx":430
+    /* "fastTSNE/_tsne.pyx":368
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i] * n_interpolation_points
  *         for j in range(n_interpolation_points):             # <<<<<<<<<<<<<<
@@ -7274,7 +6601,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
     for (__pyx_t_36 = 0; __pyx_t_36 < __pyx_t_35; __pyx_t_36+=1) {
       __pyx_v_j = __pyx_t_36;
 
-      /* "fastTSNE/_tsne.pyx":431
+      /* "fastTSNE/_tsne.pyx":369
  *         box_idx = point_box_idx[i] * n_interpolation_points
  *         for j in range(n_interpolation_points):
  *             for d in range(n_terms):             # <<<<<<<<<<<<<<
@@ -7286,7 +6613,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
       for (__pyx_t_37 = 0; __pyx_t_37 < __pyx_t_15; __pyx_t_37+=1) {
         __pyx_v_d = __pyx_t_37;
 
-        /* "fastTSNE/_tsne.pyx":432
+        /* "fastTSNE/_tsne.pyx":370
  *         for j in range(n_interpolation_points):
  *             for d in range(n_terms):
  *                 w_coefficients[box_idx + j, d] += interpolated_values[i, j] * q_j[i, d]             # <<<<<<<<<<<<<<
@@ -7304,35 +6631,35 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
     }
   }
 
-  /* "fastTSNE/_tsne.pyx":435
+  /* "fastTSNE/_tsne.pyx":373
  * 
  *     # STEP 2: Compute the kernel values evaluated at the interpolation nodes
  *     cdef double[:, ::1] y_tilde_values = matrix_multiply_fft_1d(kernel_tilde, w_coefficients)             # <<<<<<<<<<<<<<
  * 
  *     # STEP 3: Compute the potentials \tilde{\phi(y_i)}
  */
-  __pyx_t_22 = __pyx_f_8fastTSNE_5_tsne_matrix_multiply_fft_1d(__pyx_v_kernel_tilde, __pyx_v_w_coefficients); if (unlikely(!__pyx_t_22.memview)) __PYX_ERR(0, 435, __pyx_L1_error)
+  __pyx_t_22 = __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_multiply_fft_1d(__pyx_v_kernel_tilde, __pyx_v_w_coefficients); if (unlikely(!__pyx_t_22.memview)) __PYX_ERR(0, 373, __pyx_L1_error)
   __pyx_v_y_tilde_values = __pyx_t_22;
   __pyx_t_22.memview = NULL;
   __pyx_t_22.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":438
+  /* "fastTSNE/_tsne.pyx":376
  * 
  *     # STEP 3: Compute the potentials \tilde{\phi(y_i)}
  *     cdef double[:, ::1] phi = np.zeros((n_samples, n_terms), dtype=float)             # <<<<<<<<<<<<<<
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i] * n_interpolation_points
  */
-  __pyx_t_10 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 438, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 376, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_10);
-  __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_t_10, __pyx_n_s_zeros); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 438, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_t_10, __pyx_n_s_zeros); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 376, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_12);
   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-  __pyx_t_10 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 438, __pyx_L1_error)
+  __pyx_t_10 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 376, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_10);
-  __pyx_t_11 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 438, __pyx_L1_error)
+  __pyx_t_11 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 376, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_11);
-  __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 438, __pyx_L1_error)
+  __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 376, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_GIVEREF(__pyx_t_10);
   PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_10);
@@ -7340,26 +6667,26 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
   PyTuple_SET_ITEM(__pyx_t_9, 1, __pyx_t_11);
   __pyx_t_10 = 0;
   __pyx_t_11 = 0;
-  __pyx_t_11 = PyTuple_New(1); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 438, __pyx_L1_error)
+  __pyx_t_11 = PyTuple_New(1); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 376, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_11);
   __Pyx_GIVEREF(__pyx_t_9);
   PyTuple_SET_ITEM(__pyx_t_11, 0, __pyx_t_9);
   __pyx_t_9 = 0;
-  __pyx_t_9 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 438, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 376, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  if (PyDict_SetItem(__pyx_t_9, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 438, __pyx_L1_error)
-  __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_11, __pyx_t_9); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 438, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_9, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 376, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_11, __pyx_t_9); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 376, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_10);
   __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
   __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  __pyx_t_22 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_10, PyBUF_WRITABLE); if (unlikely(!__pyx_t_22.memview)) __PYX_ERR(0, 438, __pyx_L1_error)
+  __pyx_t_22 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_10, PyBUF_WRITABLE); if (unlikely(!__pyx_t_22.memview)) __PYX_ERR(0, 376, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
   __pyx_v_phi = __pyx_t_22;
   __pyx_t_22.memview = NULL;
   __pyx_t_22.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":439
+  /* "fastTSNE/_tsne.pyx":377
  *     # STEP 3: Compute the potentials \tilde{\phi(y_i)}
  *     cdef double[:, ::1] phi = np.zeros((n_samples, n_terms), dtype=float)
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -7371,7 +6698,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":440
+    /* "fastTSNE/_tsne.pyx":378
  *     cdef double[:, ::1] phi = np.zeros((n_samples, n_terms), dtype=float)
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i] * n_interpolation_points             # <<<<<<<<<<<<<<
@@ -7380,7 +6707,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
  */
     __pyx_v_box_idx = ((__pyx_v_point_box_idx[__pyx_v_i]) * __pyx_v_n_interpolation_points);
 
-    /* "fastTSNE/_tsne.pyx":441
+    /* "fastTSNE/_tsne.pyx":379
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i] * n_interpolation_points
  *         for j in range(n_interpolation_points):             # <<<<<<<<<<<<<<
@@ -7392,7 +6719,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
     for (__pyx_t_36 = 0; __pyx_t_36 < __pyx_t_35; __pyx_t_36+=1) {
       __pyx_v_j = __pyx_t_36;
 
-      /* "fastTSNE/_tsne.pyx":442
+      /* "fastTSNE/_tsne.pyx":380
  *         box_idx = point_box_idx[i] * n_interpolation_points
  *         for j in range(n_interpolation_points):
  *             for d in range(n_terms):             # <<<<<<<<<<<<<<
@@ -7404,7 +6731,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
       for (__pyx_t_37 = 0; __pyx_t_37 < __pyx_t_15; __pyx_t_37+=1) {
         __pyx_v_d = __pyx_t_37;
 
-        /* "fastTSNE/_tsne.pyx":443
+        /* "fastTSNE/_tsne.pyx":381
  *         for j in range(n_interpolation_points):
  *             for d in range(n_terms):
  *                 phi[i, d] += interpolated_values[i, j] * y_tilde_values[box_idx + j, d]             # <<<<<<<<<<<<<<
@@ -7422,7 +6749,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
     }
   }
 
-  /* "fastTSNE/_tsne.pyx":445
+  /* "fastTSNE/_tsne.pyx":383
  *                 phi[i, d] += interpolated_values[i, j] * y_tilde_values[box_idx + j, d]
  * 
  *     PyMem_Free(point_box_idx)             # <<<<<<<<<<<<<<
@@ -7431,7 +6758,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
  */
   PyMem_Free(__pyx_v_point_box_idx);
 
-  /* "fastTSNE/_tsne.pyx":449
+  /* "fastTSNE/_tsne.pyx":387
  *     # Compute the normalization term Z or sum of q_{ij}s, this is not described
  *     # in the paper, but can be worked out
  *     cdef double sum_Q = 0             # <<<<<<<<<<<<<<
@@ -7440,7 +6767,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
  */
   __pyx_v_sum_Q = 0.0;
 
-  /* "fastTSNE/_tsne.pyx":450
+  /* "fastTSNE/_tsne.pyx":388
  *     # in the paper, but can be worked out
  *     cdef double sum_Q = 0
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -7452,7 +6779,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":451
+    /* "fastTSNE/_tsne.pyx":389
  *     cdef double sum_Q = 0
  *     for i in range(n_samples):
  *         sum_Q += (1 + embedding[i] ** 2) * phi[i, 0] - \             # <<<<<<<<<<<<<<
@@ -7463,7 +6790,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
     __pyx_t_51 = __pyx_v_i;
     __pyx_t_52 = 0;
 
-    /* "fastTSNE/_tsne.pyx":452
+    /* "fastTSNE/_tsne.pyx":390
  *     for i in range(n_samples):
  *         sum_Q += (1 + embedding[i] ** 2) * phi[i, 0] - \
  *                  2 * embedding[i] * phi[i, 1] + \             # <<<<<<<<<<<<<<
@@ -7474,7 +6801,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
     __pyx_t_54 = __pyx_v_i;
     __pyx_t_55 = 1;
 
-    /* "fastTSNE/_tsne.pyx":453
+    /* "fastTSNE/_tsne.pyx":391
  *         sum_Q += (1 + embedding[i] ** 2) * phi[i, 0] - \
  *                  2 * embedding[i] * phi[i, 1] + \
  *                  phi[i, 2]             # <<<<<<<<<<<<<<
@@ -7484,7 +6811,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
     __pyx_t_56 = __pyx_v_i;
     __pyx_t_57 = 2;
 
-    /* "fastTSNE/_tsne.pyx":451
+    /* "fastTSNE/_tsne.pyx":389
  *     cdef double sum_Q = 0
  *     for i in range(n_samples):
  *         sum_Q += (1 + embedding[i] ** 2) * phi[i, 0] - \             # <<<<<<<<<<<<<<
@@ -7494,7 +6821,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
     __pyx_v_sum_Q = (__pyx_v_sum_Q + ((((1.0 + pow((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_embedding.data) + __pyx_t_50)) ))), 2.0)) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_51 * __pyx_v_phi.strides[0]) )) + __pyx_t_52)) )))) - ((2.0 * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_embedding.data) + __pyx_t_53)) )))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_54 * __pyx_v_phi.strides[0]) )) + __pyx_t_55)) ))))) + (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_56 * __pyx_v_phi.strides[0]) )) + __pyx_t_57)) )))));
   }
 
-  /* "fastTSNE/_tsne.pyx":454
+  /* "fastTSNE/_tsne.pyx":392
  *                  2 * embedding[i] * phi[i, 1] + \
  *                  phi[i, 2]
  *     sum_Q -= n_samples             # <<<<<<<<<<<<<<
@@ -7503,7 +6830,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
  */
   __pyx_v_sum_Q = (__pyx_v_sum_Q - __pyx_v_n_samples);
 
-  /* "fastTSNE/_tsne.pyx":458
+  /* "fastTSNE/_tsne.pyx":396
  *     # Compute the gradient using a slight variation on the formula provided in
  *     # the paper
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -7515,7 +6842,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":459
+    /* "fastTSNE/_tsne.pyx":397
  *     # the paper
  *     for i in range(n_samples):
  *         gradient[i] -= (embedding[i] * phi[i, 0] - phi[i, 1]) / sum_Q             # <<<<<<<<<<<<<<
@@ -7531,7 +6858,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_gradient.data) + __pyx_t_63)) )) -= ((((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_embedding.data) + __pyx_t_58)) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_59 * __pyx_v_phi.strides[0]) )) + __pyx_t_60)) )))) - (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_61 * __pyx_v_phi.strides[0]) )) + __pyx_t_62)) )))) / __pyx_v_sum_Q);
   }
 
-  /* "fastTSNE/_tsne.pyx":461
+  /* "fastTSNE/_tsne.pyx":399
  *         gradient[i] -= (embedding[i] * phi[i, 0] - phi[i, 1]) / sum_Q
  * 
  *     return sum_Q             # <<<<<<<<<<<<<<
@@ -7541,7 +6868,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__Pyx_m
   __pyx_r = __pyx_v_sum_Q;
   goto __pyx_L0;
 
-  /* "fastTSNE/_tsne.pyx":358
+  /* "fastTSNE/_tsne.pyx":296
  * 
  * 
  * cpdef double estimate_negative_gradient_fft_1d(             # <<<<<<<<<<<<<<
@@ -7615,7 +6942,7 @@ static PyObject *__pyx_pw_8fastTSNE_5_tsne_7estimate_negative_gradient_fft_1d(Py
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_gradient)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_fft_1d", 0, 2, 5, 1); __PYX_ERR(0, 358, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_fft_1d", 0, 2, 5, 1); __PYX_ERR(0, 296, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -7637,7 +6964,7 @@ static PyObject *__pyx_pw_8fastTSNE_5_tsne_7estimate_negative_gradient_fft_1d(Py
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "estimate_negative_gradient_fft_1d") < 0)) __PYX_ERR(0, 358, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "estimate_negative_gradient_fft_1d") < 0)) __PYX_ERR(0, 296, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -7653,27 +6980,27 @@ static PyObject *__pyx_pw_8fastTSNE_5_tsne_7estimate_negative_gradient_fft_1d(Py
         default: goto __pyx_L5_argtuple_error;
       }
     }
-    __pyx_v_embedding = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_embedding.memview)) __PYX_ERR(0, 359, __pyx_L3_error)
-    __pyx_v_gradient = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_gradient.memview)) __PYX_ERR(0, 360, __pyx_L3_error)
+    __pyx_v_embedding = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_embedding.memview)) __PYX_ERR(0, 297, __pyx_L3_error)
+    __pyx_v_gradient = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_gradient.memview)) __PYX_ERR(0, 298, __pyx_L3_error)
     if (values[2]) {
-      __pyx_v_n_interpolation_points = __Pyx_PyIndex_AsSsize_t(values[2]); if (unlikely((__pyx_v_n_interpolation_points == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 361, __pyx_L3_error)
+      __pyx_v_n_interpolation_points = __Pyx_PyIndex_AsSsize_t(values[2]); if (unlikely((__pyx_v_n_interpolation_points == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 299, __pyx_L3_error)
     } else {
       __pyx_v_n_interpolation_points = ((Py_ssize_t)3);
     }
     if (values[3]) {
-      __pyx_v_min_num_intervals = __Pyx_PyIndex_AsSsize_t(values[3]); if (unlikely((__pyx_v_min_num_intervals == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 362, __pyx_L3_error)
+      __pyx_v_min_num_intervals = __Pyx_PyIndex_AsSsize_t(values[3]); if (unlikely((__pyx_v_min_num_intervals == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 300, __pyx_L3_error)
     } else {
       __pyx_v_min_num_intervals = ((Py_ssize_t)10);
     }
     if (values[4]) {
-      __pyx_v_ints_in_interval = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_ints_in_interval == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 363, __pyx_L3_error)
+      __pyx_v_ints_in_interval = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_ints_in_interval == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 301, __pyx_L3_error)
     } else {
       __pyx_v_ints_in_interval = ((double)1.0);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_fft_1d", 0, 2, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 358, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_fft_1d", 0, 2, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 296, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("fastTSNE._tsne.estimate_negative_gradient_fft_1d", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -7694,14 +7021,14 @@ static PyObject *__pyx_pf_8fastTSNE_5_tsne_6estimate_negative_gradient_fft_1d(CY
   struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d __pyx_t_2;
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("estimate_negative_gradient_fft_1d", 0);
-  __Pyx_TraceCall("estimate_negative_gradient_fft_1d (wrapper)", __pyx_f[0], 358, 0, __PYX_ERR(0, 358, __pyx_L1_error));
+  __Pyx_TraceCall("estimate_negative_gradient_fft_1d (wrapper)", __pyx_f[0], 296, 0, __PYX_ERR(0, 296, __pyx_L1_error));
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_2.__pyx_n = 3;
   __pyx_t_2.n_interpolation_points = __pyx_v_n_interpolation_points;
   __pyx_t_2.min_num_intervals = __pyx_v_min_num_intervals;
   __pyx_t_2.ints_in_interval = __pyx_v_ints_in_interval;
   __pyx_t_1 = __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d(__pyx_v_embedding, __pyx_v_gradient, 0, &__pyx_t_2); 
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 358, __pyx_L1_error)
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 296, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_r = __pyx_t_3;
   __pyx_t_3 = 0;
@@ -7721,7 +7048,7 @@ static PyObject *__pyx_pf_8fastTSNE_5_tsne_6estimate_negative_gradient_fft_1d(CY
   return __pyx_r;
 }
 
-/* "fastTSNE/_tsne.pyx":464
+/* "fastTSNE/_tsne.pyx":402
  * 
  * 
  * cpdef double estimate_negative_gradient_fft_1d_with_reference(             # <<<<<<<<<<<<<<
@@ -7837,7 +7164,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
   Py_ssize_t __pyx_t_70;
   Py_ssize_t __pyx_t_71;
   __Pyx_RefNannySetupContext("estimate_negative_gradient_fft_1d_with_reference", 0);
-  __Pyx_TraceCall("estimate_negative_gradient_fft_1d_with_reference", __pyx_f[0], 464, 0, __PYX_ERR(0, 464, __pyx_L1_error));
+  __Pyx_TraceCall("estimate_negative_gradient_fft_1d_with_reference", __pyx_f[0], 402, 0, __PYX_ERR(0, 402, __pyx_L1_error));
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
       __pyx_v_n_interpolation_points = __pyx_optional_args->n_interpolation_points;
@@ -7850,7 +7177,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     }
   }
 
-  /* "fastTSNE/_tsne.pyx":474
+  /* "fastTSNE/_tsne.pyx":412
  *     cdef:
  *         Py_ssize_t i, j, d, box_idx
  *         Py_ssize_t n_samples = embedding.shape[0]             # <<<<<<<<<<<<<<
@@ -7859,7 +7186,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
  */
   __pyx_v_n_samples = (__pyx_v_embedding.shape[0]);
 
-  /* "fastTSNE/_tsne.pyx":475
+  /* "fastTSNE/_tsne.pyx":413
  *         Py_ssize_t i, j, d, box_idx
  *         Py_ssize_t n_samples = embedding.shape[0]
  *         Py_ssize_t n_reference_samples = reference_embedding.shape[0]             # <<<<<<<<<<<<<<
@@ -7868,7 +7195,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
  */
   __pyx_v_n_reference_samples = (__pyx_v_reference_embedding.shape[0]);
 
-  /* "fastTSNE/_tsne.pyx":477
+  /* "fastTSNE/_tsne.pyx":415
  *         Py_ssize_t n_reference_samples = reference_embedding.shape[0]
  * 
  *         double y_max = -INFINITY, y_min = INFINITY             # <<<<<<<<<<<<<<
@@ -7878,7 +7205,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
   __pyx_v_y_max = (-INFINITY);
   __pyx_v_y_min = INFINITY;
 
-  /* "fastTSNE/_tsne.pyx":480
+  /* "fastTSNE/_tsne.pyx":418
  *     # Determine the min/max values of the embedding
  *     # First, check the existing embedding
  *     for i in range(n_reference_samples):             # <<<<<<<<<<<<<<
@@ -7890,7 +7217,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":481
+    /* "fastTSNE/_tsne.pyx":419
  *     # First, check the existing embedding
  *     for i in range(n_reference_samples):
  *         if reference_embedding[i] < y_min:             # <<<<<<<<<<<<<<
@@ -7901,7 +7228,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     __pyx_t_5 = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_reference_embedding.data) + __pyx_t_4)) ))) < __pyx_v_y_min) != 0);
     if (__pyx_t_5) {
 
-      /* "fastTSNE/_tsne.pyx":482
+      /* "fastTSNE/_tsne.pyx":420
  *     for i in range(n_reference_samples):
  *         if reference_embedding[i] < y_min:
  *             y_min = reference_embedding[i]             # <<<<<<<<<<<<<<
@@ -7911,7 +7238,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
       __pyx_t_6 = __pyx_v_i;
       __pyx_v_y_min = (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_reference_embedding.data) + __pyx_t_6)) )));
 
-      /* "fastTSNE/_tsne.pyx":481
+      /* "fastTSNE/_tsne.pyx":419
  *     # First, check the existing embedding
  *     for i in range(n_reference_samples):
  *         if reference_embedding[i] < y_min:             # <<<<<<<<<<<<<<
@@ -7921,7 +7248,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
       goto __pyx_L5;
     }
 
-    /* "fastTSNE/_tsne.pyx":483
+    /* "fastTSNE/_tsne.pyx":421
  *         if reference_embedding[i] < y_min:
  *             y_min = reference_embedding[i]
  *         elif reference_embedding[i] > y_max:             # <<<<<<<<<<<<<<
@@ -7932,7 +7259,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     __pyx_t_5 = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_reference_embedding.data) + __pyx_t_7)) ))) > __pyx_v_y_max) != 0);
     if (__pyx_t_5) {
 
-      /* "fastTSNE/_tsne.pyx":484
+      /* "fastTSNE/_tsne.pyx":422
  *             y_min = reference_embedding[i]
  *         elif reference_embedding[i] > y_max:
  *             y_max = reference_embedding[i]             # <<<<<<<<<<<<<<
@@ -7942,7 +7269,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
       __pyx_t_8 = __pyx_v_i;
       __pyx_v_y_max = (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_reference_embedding.data) + __pyx_t_8)) )));
 
-      /* "fastTSNE/_tsne.pyx":483
+      /* "fastTSNE/_tsne.pyx":421
  *         if reference_embedding[i] < y_min:
  *             y_min = reference_embedding[i]
  *         elif reference_embedding[i] > y_max:             # <<<<<<<<<<<<<<
@@ -7953,7 +7280,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     __pyx_L5:;
   }
 
-  /* "fastTSNE/_tsne.pyx":486
+  /* "fastTSNE/_tsne.pyx":424
  *             y_max = reference_embedding[i]
  *     # And check the new embedding points
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -7965,7 +7292,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":487
+    /* "fastTSNE/_tsne.pyx":425
  *     # And check the new embedding points
  *     for i in range(n_samples):
  *         if embedding[i] < y_min:             # <<<<<<<<<<<<<<
@@ -7976,7 +7303,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     __pyx_t_5 = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_embedding.data) + __pyx_t_9)) ))) < __pyx_v_y_min) != 0);
     if (__pyx_t_5) {
 
-      /* "fastTSNE/_tsne.pyx":488
+      /* "fastTSNE/_tsne.pyx":426
  *     for i in range(n_samples):
  *         if embedding[i] < y_min:
  *             y_min = embedding[i]             # <<<<<<<<<<<<<<
@@ -7986,7 +7313,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
       __pyx_t_10 = __pyx_v_i;
       __pyx_v_y_min = (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_embedding.data) + __pyx_t_10)) )));
 
-      /* "fastTSNE/_tsne.pyx":487
+      /* "fastTSNE/_tsne.pyx":425
  *     # And check the new embedding points
  *     for i in range(n_samples):
  *         if embedding[i] < y_min:             # <<<<<<<<<<<<<<
@@ -7996,7 +7323,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
       goto __pyx_L8;
     }
 
-    /* "fastTSNE/_tsne.pyx":489
+    /* "fastTSNE/_tsne.pyx":427
  *         if embedding[i] < y_min:
  *             y_min = embedding[i]
  *         elif embedding[i] > y_max:             # <<<<<<<<<<<<<<
@@ -8007,7 +7334,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     __pyx_t_5 = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_embedding.data) + __pyx_t_11)) ))) > __pyx_v_y_max) != 0);
     if (__pyx_t_5) {
 
-      /* "fastTSNE/_tsne.pyx":490
+      /* "fastTSNE/_tsne.pyx":428
  *             y_min = embedding[i]
  *         elif embedding[i] > y_max:
  *             y_max = embedding[i]             # <<<<<<<<<<<<<<
@@ -8017,7 +7344,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
       __pyx_t_12 = __pyx_v_i;
       __pyx_v_y_max = (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_embedding.data) + __pyx_t_12)) )));
 
-      /* "fastTSNE/_tsne.pyx":489
+      /* "fastTSNE/_tsne.pyx":427
  *         if embedding[i] < y_min:
  *             y_min = embedding[i]
  *         elif embedding[i] > y_max:             # <<<<<<<<<<<<<<
@@ -8028,7 +7355,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     __pyx_L8:;
   }
 
-  /* "fastTSNE/_tsne.pyx":492
+  /* "fastTSNE/_tsne.pyx":430
  *             y_max = embedding[i]
  * 
  *     cdef int n_boxes = <int>fmax(min_num_intervals, (y_max - y_min) / ints_in_interval)             # <<<<<<<<<<<<<<
@@ -8037,7 +7364,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
  */
   __pyx_v_n_boxes = ((int)fmax(__pyx_v_min_num_intervals, ((__pyx_v_y_max - __pyx_v_y_min) / __pyx_v_ints_in_interval)));
 
-  /* "fastTSNE/_tsne.pyx":493
+  /* "fastTSNE/_tsne.pyx":431
  * 
  *     cdef int n_boxes = <int>fmax(min_num_intervals, (y_max - y_min) / ints_in_interval)
  *     cdef double box_width = (y_max - y_min) / n_boxes             # <<<<<<<<<<<<<<
@@ -8046,73 +7373,73 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
  */
   __pyx_v_box_width = ((__pyx_v_y_max - __pyx_v_y_min) / __pyx_v_n_boxes);
 
-  /* "fastTSNE/_tsne.pyx":496
+  /* "fastTSNE/_tsne.pyx":434
  * 
  *     # Compute the box bounds
  *     cdef double[::1] box_lower_bounds = np.empty(n_boxes, dtype=float)             # <<<<<<<<<<<<<<
  *     cdef double[::1] box_upper_bounds = np.empty(n_boxes, dtype=float)
  *     for box_idx in range(n_boxes):
  */
-  __pyx_t_13 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 496, __pyx_L1_error)
+  __pyx_t_13 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 434, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_13);
-  __pyx_t_14 = __Pyx_PyObject_GetAttrStr(__pyx_t_13, __pyx_n_s_empty); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 496, __pyx_L1_error)
+  __pyx_t_14 = __Pyx_PyObject_GetAttrStr(__pyx_t_13, __pyx_n_s_empty); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 434, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_14);
   __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-  __pyx_t_13 = __Pyx_PyInt_From_int(__pyx_v_n_boxes); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 496, __pyx_L1_error)
+  __pyx_t_13 = __Pyx_PyInt_From_int(__pyx_v_n_boxes); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 434, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_13);
-  __pyx_t_15 = PyTuple_New(1); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 496, __pyx_L1_error)
+  __pyx_t_15 = PyTuple_New(1); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 434, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_15);
   __Pyx_GIVEREF(__pyx_t_13);
   PyTuple_SET_ITEM(__pyx_t_15, 0, __pyx_t_13);
   __pyx_t_13 = 0;
-  __pyx_t_13 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 496, __pyx_L1_error)
+  __pyx_t_13 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 434, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_13);
-  if (PyDict_SetItem(__pyx_t_13, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 496, __pyx_L1_error)
-  __pyx_t_16 = __Pyx_PyObject_Call(__pyx_t_14, __pyx_t_15, __pyx_t_13); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 496, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_13, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 434, __pyx_L1_error)
+  __pyx_t_16 = __Pyx_PyObject_Call(__pyx_t_14, __pyx_t_15, __pyx_t_13); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 434, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_16);
   __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
   __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-  __pyx_t_17 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_16, PyBUF_WRITABLE); if (unlikely(!__pyx_t_17.memview)) __PYX_ERR(0, 496, __pyx_L1_error)
+  __pyx_t_17 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_16, PyBUF_WRITABLE); if (unlikely(!__pyx_t_17.memview)) __PYX_ERR(0, 434, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
   __pyx_v_box_lower_bounds = __pyx_t_17;
   __pyx_t_17.memview = NULL;
   __pyx_t_17.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":497
+  /* "fastTSNE/_tsne.pyx":435
  *     # Compute the box bounds
  *     cdef double[::1] box_lower_bounds = np.empty(n_boxes, dtype=float)
  *     cdef double[::1] box_upper_bounds = np.empty(n_boxes, dtype=float)             # <<<<<<<<<<<<<<
  *     for box_idx in range(n_boxes):
  *         box_lower_bounds[box_idx] = box_idx * box_width + y_min
  */
-  __pyx_t_16 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 497, __pyx_L1_error)
+  __pyx_t_16 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 435, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_16);
-  __pyx_t_13 = __Pyx_PyObject_GetAttrStr(__pyx_t_16, __pyx_n_s_empty); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 497, __pyx_L1_error)
+  __pyx_t_13 = __Pyx_PyObject_GetAttrStr(__pyx_t_16, __pyx_n_s_empty); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 435, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_13);
   __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-  __pyx_t_16 = __Pyx_PyInt_From_int(__pyx_v_n_boxes); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 497, __pyx_L1_error)
+  __pyx_t_16 = __Pyx_PyInt_From_int(__pyx_v_n_boxes); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 435, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_16);
-  __pyx_t_15 = PyTuple_New(1); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 497, __pyx_L1_error)
+  __pyx_t_15 = PyTuple_New(1); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 435, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_15);
   __Pyx_GIVEREF(__pyx_t_16);
   PyTuple_SET_ITEM(__pyx_t_15, 0, __pyx_t_16);
   __pyx_t_16 = 0;
-  __pyx_t_16 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 497, __pyx_L1_error)
+  __pyx_t_16 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 435, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_16);
-  if (PyDict_SetItem(__pyx_t_16, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 497, __pyx_L1_error)
-  __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_13, __pyx_t_15, __pyx_t_16); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 497, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_16, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 435, __pyx_L1_error)
+  __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_13, __pyx_t_15, __pyx_t_16); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 435, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_14);
   __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
   __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-  __pyx_t_17 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_14, PyBUF_WRITABLE); if (unlikely(!__pyx_t_17.memview)) __PYX_ERR(0, 497, __pyx_L1_error)
+  __pyx_t_17 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_14, PyBUF_WRITABLE); if (unlikely(!__pyx_t_17.memview)) __PYX_ERR(0, 435, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
   __pyx_v_box_upper_bounds = __pyx_t_17;
   __pyx_t_17.memview = NULL;
   __pyx_t_17.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":498
+  /* "fastTSNE/_tsne.pyx":436
  *     cdef double[::1] box_lower_bounds = np.empty(n_boxes, dtype=float)
  *     cdef double[::1] box_upper_bounds = np.empty(n_boxes, dtype=float)
  *     for box_idx in range(n_boxes):             # <<<<<<<<<<<<<<
@@ -8124,7 +7451,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
   for (__pyx_t_1 = 0; __pyx_t_1 < __pyx_t_19; __pyx_t_1+=1) {
     __pyx_v_box_idx = __pyx_t_1;
 
-    /* "fastTSNE/_tsne.pyx":499
+    /* "fastTSNE/_tsne.pyx":437
  *     cdef double[::1] box_upper_bounds = np.empty(n_boxes, dtype=float)
  *     for box_idx in range(n_boxes):
  *         box_lower_bounds[box_idx] = box_idx * box_width + y_min             # <<<<<<<<<<<<<<
@@ -8134,7 +7461,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     __pyx_t_20 = __pyx_v_box_idx;
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_box_lower_bounds.data) + __pyx_t_20)) )) = ((__pyx_v_box_idx * __pyx_v_box_width) + __pyx_v_y_min);
 
-    /* "fastTSNE/_tsne.pyx":500
+    /* "fastTSNE/_tsne.pyx":438
  *     for box_idx in range(n_boxes):
  *         box_lower_bounds[box_idx] = box_idx * box_width + y_min
  *         box_upper_bounds[box_idx] = (box_idx + 1) * box_width + y_min             # <<<<<<<<<<<<<<
@@ -8145,7 +7472,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_box_upper_bounds.data) + __pyx_t_21)) )) = (((__pyx_v_box_idx + 1) * __pyx_v_box_width) + __pyx_v_y_min);
   }
 
-  /* "fastTSNE/_tsne.pyx":503
+  /* "fastTSNE/_tsne.pyx":441
  * 
  *     # Determine which box each reference point belongs to
  *     cdef int *reference_point_box_idx = <int *>PyMem_Malloc(n_reference_samples * sizeof(int))             # <<<<<<<<<<<<<<
@@ -8154,7 +7481,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
  */
   __pyx_v_reference_point_box_idx = ((int *)PyMem_Malloc((__pyx_v_n_reference_samples * (sizeof(int)))));
 
-  /* "fastTSNE/_tsne.pyx":504
+  /* "fastTSNE/_tsne.pyx":442
  *     # Determine which box each reference point belongs to
  *     cdef int *reference_point_box_idx = <int *>PyMem_Malloc(n_reference_samples * sizeof(int))
  *     for i in range(n_reference_samples):             # <<<<<<<<<<<<<<
@@ -8166,7 +7493,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":505
+    /* "fastTSNE/_tsne.pyx":443
  *     cdef int *reference_point_box_idx = <int *>PyMem_Malloc(n_reference_samples * sizeof(int))
  *     for i in range(n_reference_samples):
  *         box_idx = <int>((reference_embedding[i] - y_min) / box_width)             # <<<<<<<<<<<<<<
@@ -8176,7 +7503,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     __pyx_t_22 = __pyx_v_i;
     __pyx_v_box_idx = ((int)(((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_reference_embedding.data) + __pyx_t_22)) ))) - __pyx_v_y_min) / __pyx_v_box_width));
 
-    /* "fastTSNE/_tsne.pyx":508
+    /* "fastTSNE/_tsne.pyx":446
  *         # The right most point maps directly into `n_boxes`, while it should
  *         # belong to the last box
  *         if box_idx >= n_boxes:             # <<<<<<<<<<<<<<
@@ -8186,7 +7513,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     __pyx_t_5 = ((__pyx_v_box_idx >= __pyx_v_n_boxes) != 0);
     if (__pyx_t_5) {
 
-      /* "fastTSNE/_tsne.pyx":509
+      /* "fastTSNE/_tsne.pyx":447
  *         # belong to the last box
  *         if box_idx >= n_boxes:
  *             box_idx = n_boxes - 1             # <<<<<<<<<<<<<<
@@ -8195,7 +7522,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
  */
       __pyx_v_box_idx = (__pyx_v_n_boxes - 1);
 
-      /* "fastTSNE/_tsne.pyx":508
+      /* "fastTSNE/_tsne.pyx":446
  *         # The right most point maps directly into `n_boxes`, while it should
  *         # belong to the last box
  *         if box_idx >= n_boxes:             # <<<<<<<<<<<<<<
@@ -8204,7 +7531,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
  */
     }
 
-    /* "fastTSNE/_tsne.pyx":511
+    /* "fastTSNE/_tsne.pyx":449
  *             box_idx = n_boxes - 1
  * 
  *         reference_point_box_idx[i] = box_idx             # <<<<<<<<<<<<<<
@@ -8214,7 +7541,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     (__pyx_v_reference_point_box_idx[__pyx_v_i]) = __pyx_v_box_idx;
   }
 
-  /* "fastTSNE/_tsne.pyx":514
+  /* "fastTSNE/_tsne.pyx":452
  * 
  *     # Determine which box each new point belongs to
  *     cdef int *point_box_idx = <int *>PyMem_Malloc(n_samples * sizeof(int))             # <<<<<<<<<<<<<<
@@ -8223,7 +7550,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
  */
   __pyx_v_point_box_idx = ((int *)PyMem_Malloc((__pyx_v_n_samples * (sizeof(int)))));
 
-  /* "fastTSNE/_tsne.pyx":515
+  /* "fastTSNE/_tsne.pyx":453
  *     # Determine which box each new point belongs to
  *     cdef int *point_box_idx = <int *>PyMem_Malloc(n_samples * sizeof(int))
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -8235,7 +7562,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":516
+    /* "fastTSNE/_tsne.pyx":454
  *     cdef int *point_box_idx = <int *>PyMem_Malloc(n_samples * sizeof(int))
  *     for i in range(n_samples):
  *         box_idx = <int>((embedding[i] - y_min) / box_width)             # <<<<<<<<<<<<<<
@@ -8245,7 +7572,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     __pyx_t_23 = __pyx_v_i;
     __pyx_v_box_idx = ((int)(((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_embedding.data) + __pyx_t_23)) ))) - __pyx_v_y_min) / __pyx_v_box_width));
 
-    /* "fastTSNE/_tsne.pyx":519
+    /* "fastTSNE/_tsne.pyx":457
  *         # The right most point maps directly into `n_boxes`, while it should
  *         # belong to the last box
  *         if box_idx >= n_boxes:             # <<<<<<<<<<<<<<
@@ -8255,7 +7582,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     __pyx_t_5 = ((__pyx_v_box_idx >= __pyx_v_n_boxes) != 0);
     if (__pyx_t_5) {
 
-      /* "fastTSNE/_tsne.pyx":520
+      /* "fastTSNE/_tsne.pyx":458
  *         # belong to the last box
  *         if box_idx >= n_boxes:
  *             box_idx = n_boxes - 1             # <<<<<<<<<<<<<<
@@ -8264,7 +7591,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
  */
       __pyx_v_box_idx = (__pyx_v_n_boxes - 1);
 
-      /* "fastTSNE/_tsne.pyx":519
+      /* "fastTSNE/_tsne.pyx":457
  *         # The right most point maps directly into `n_boxes`, while it should
  *         # belong to the last box
  *         if box_idx >= n_boxes:             # <<<<<<<<<<<<<<
@@ -8273,7 +7600,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
  */
     }
 
-    /* "fastTSNE/_tsne.pyx":522
+    /* "fastTSNE/_tsne.pyx":460
  *             box_idx = n_boxes - 1
  * 
  *         point_box_idx[i] = box_idx             # <<<<<<<<<<<<<<
@@ -8283,7 +7610,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     (__pyx_v_point_box_idx[__pyx_v_i]) = __pyx_v_box_idx;
   }
 
-  /* "fastTSNE/_tsne.pyx":524
+  /* "fastTSNE/_tsne.pyx":462
  *         point_box_idx[i] = box_idx
  * 
  *     cdef int n_interpolation_points_1d = n_interpolation_points * n_boxes             # <<<<<<<<<<<<<<
@@ -8292,40 +7619,40 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
  */
   __pyx_v_n_interpolation_points_1d = (__pyx_v_n_interpolation_points * __pyx_v_n_boxes);
 
-  /* "fastTSNE/_tsne.pyx":527
+  /* "fastTSNE/_tsne.pyx":465
  *     # Prepare the interpolants for a single interval, so we can use their
  *     # relative positions later on
  *     cdef double[::1] y_tilde = np.empty(n_interpolation_points, dtype=float)             # <<<<<<<<<<<<<<
  *     cdef double h = 1. / n_interpolation_points
  *     y_tilde[0] = h / 2
  */
-  __pyx_t_14 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 527, __pyx_L1_error)
+  __pyx_t_14 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 465, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_14);
-  __pyx_t_16 = __Pyx_PyObject_GetAttrStr(__pyx_t_14, __pyx_n_s_empty); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 527, __pyx_L1_error)
+  __pyx_t_16 = __Pyx_PyObject_GetAttrStr(__pyx_t_14, __pyx_n_s_empty); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 465, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_16);
   __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-  __pyx_t_14 = PyInt_FromSsize_t(__pyx_v_n_interpolation_points); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 527, __pyx_L1_error)
+  __pyx_t_14 = PyInt_FromSsize_t(__pyx_v_n_interpolation_points); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 465, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_14);
-  __pyx_t_15 = PyTuple_New(1); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 527, __pyx_L1_error)
+  __pyx_t_15 = PyTuple_New(1); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 465, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_15);
   __Pyx_GIVEREF(__pyx_t_14);
   PyTuple_SET_ITEM(__pyx_t_15, 0, __pyx_t_14);
   __pyx_t_14 = 0;
-  __pyx_t_14 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 527, __pyx_L1_error)
+  __pyx_t_14 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 465, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_14);
-  if (PyDict_SetItem(__pyx_t_14, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 527, __pyx_L1_error)
-  __pyx_t_13 = __Pyx_PyObject_Call(__pyx_t_16, __pyx_t_15, __pyx_t_14); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 527, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_14, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 465, __pyx_L1_error)
+  __pyx_t_13 = __Pyx_PyObject_Call(__pyx_t_16, __pyx_t_15, __pyx_t_14); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 465, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_13);
   __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
   __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-  __pyx_t_17 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_13, PyBUF_WRITABLE); if (unlikely(!__pyx_t_17.memview)) __PYX_ERR(0, 527, __pyx_L1_error)
+  __pyx_t_17 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_13, PyBUF_WRITABLE); if (unlikely(!__pyx_t_17.memview)) __PYX_ERR(0, 465, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
   __pyx_v_y_tilde = __pyx_t_17;
   __pyx_t_17.memview = NULL;
   __pyx_t_17.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":528
+  /* "fastTSNE/_tsne.pyx":466
  *     # relative positions later on
  *     cdef double[::1] y_tilde = np.empty(n_interpolation_points, dtype=float)
  *     cdef double h = 1. / n_interpolation_points             # <<<<<<<<<<<<<<
@@ -8334,7 +7661,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
  */
   __pyx_v_h = (1. / __pyx_v_n_interpolation_points);
 
-  /* "fastTSNE/_tsne.pyx":529
+  /* "fastTSNE/_tsne.pyx":467
  *     cdef double[::1] y_tilde = np.empty(n_interpolation_points, dtype=float)
  *     cdef double h = 1. / n_interpolation_points
  *     y_tilde[0] = h / 2             # <<<<<<<<<<<<<<
@@ -8344,7 +7671,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
   __pyx_t_24 = 0;
   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_24)) )) = (__pyx_v_h / 2.0);
 
-  /* "fastTSNE/_tsne.pyx":530
+  /* "fastTSNE/_tsne.pyx":468
  *     cdef double h = 1. / n_interpolation_points
  *     y_tilde[0] = h / 2
  *     for i in range(1, n_interpolation_points):             # <<<<<<<<<<<<<<
@@ -8356,7 +7683,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
   for (__pyx_t_3 = 1; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":531
+    /* "fastTSNE/_tsne.pyx":469
  *     y_tilde[0] = h / 2
  *     for i in range(1, n_interpolation_points):
  *         y_tilde[i] = y_tilde[i - 1] + h             # <<<<<<<<<<<<<<
@@ -8368,19 +7695,19 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_26)) )) = ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_25)) ))) + __pyx_v_h);
   }
 
-  /* "fastTSNE/_tsne.pyx":534
+  /* "fastTSNE/_tsne.pyx":472
  * 
  *     # Evaluate the kernel at the interpolation nodes
  *     cdef double[::1] kernel_tilde = compute_kernel_tilde_1d(             # <<<<<<<<<<<<<<
  *         n_interpolation_points_1d, y_min, h * box_width)
  * 
  */
-  __pyx_t_17 = __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_1d(__pyx_v_n_interpolation_points_1d, __pyx_v_y_min, (__pyx_v_h * __pyx_v_box_width)); if (unlikely(!__pyx_t_17.memview)) __PYX_ERR(0, 534, __pyx_L1_error)
+  __pyx_t_17 = __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_1d(__pyx_v_n_interpolation_points_1d, __pyx_v_y_min, (__pyx_v_h * __pyx_v_box_width)); if (unlikely(!__pyx_t_17.memview)) __PYX_ERR(0, 472, __pyx_L1_error)
   __pyx_v_kernel_tilde = __pyx_t_17;
   __pyx_t_17.memview = NULL;
   __pyx_t_17.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":539
+  /* "fastTSNE/_tsne.pyx":477
  *     # STEP 1: Compute the w coefficients
  *     # Set up q_j values
  *     cdef int n_terms = 3             # <<<<<<<<<<<<<<
@@ -8389,23 +7716,23 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
  */
   __pyx_v_n_terms = 3;
 
-  /* "fastTSNE/_tsne.pyx":540
+  /* "fastTSNE/_tsne.pyx":478
  *     # Set up q_j values
  *     cdef int n_terms = 3
  *     cdef double[:, ::1] q_j = np.empty((n_reference_samples, n_terms), dtype=float)             # <<<<<<<<<<<<<<
  *     for i in range(n_reference_samples):
  *         q_j[i, 0] = 1
  */
-  __pyx_t_13 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 540, __pyx_L1_error)
+  __pyx_t_13 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 478, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_13);
-  __pyx_t_14 = __Pyx_PyObject_GetAttrStr(__pyx_t_13, __pyx_n_s_empty); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 540, __pyx_L1_error)
+  __pyx_t_14 = __Pyx_PyObject_GetAttrStr(__pyx_t_13, __pyx_n_s_empty); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 478, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_14);
   __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-  __pyx_t_13 = PyInt_FromSsize_t(__pyx_v_n_reference_samples); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 540, __pyx_L1_error)
+  __pyx_t_13 = PyInt_FromSsize_t(__pyx_v_n_reference_samples); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 478, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_13);
-  __pyx_t_15 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 540, __pyx_L1_error)
+  __pyx_t_15 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 478, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_15);
-  __pyx_t_16 = PyTuple_New(2); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 540, __pyx_L1_error)
+  __pyx_t_16 = PyTuple_New(2); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 478, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_16);
   __Pyx_GIVEREF(__pyx_t_13);
   PyTuple_SET_ITEM(__pyx_t_16, 0, __pyx_t_13);
@@ -8413,26 +7740,26 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
   PyTuple_SET_ITEM(__pyx_t_16, 1, __pyx_t_15);
   __pyx_t_13 = 0;
   __pyx_t_15 = 0;
-  __pyx_t_15 = PyTuple_New(1); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 540, __pyx_L1_error)
+  __pyx_t_15 = PyTuple_New(1); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 478, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_15);
   __Pyx_GIVEREF(__pyx_t_16);
   PyTuple_SET_ITEM(__pyx_t_15, 0, __pyx_t_16);
   __pyx_t_16 = 0;
-  __pyx_t_16 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 540, __pyx_L1_error)
+  __pyx_t_16 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 478, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_16);
-  if (PyDict_SetItem(__pyx_t_16, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 540, __pyx_L1_error)
-  __pyx_t_13 = __Pyx_PyObject_Call(__pyx_t_14, __pyx_t_15, __pyx_t_16); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 540, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_16, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 478, __pyx_L1_error)
+  __pyx_t_13 = __Pyx_PyObject_Call(__pyx_t_14, __pyx_t_15, __pyx_t_16); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 478, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_13);
   __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
   __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-  __pyx_t_27 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_13, PyBUF_WRITABLE); if (unlikely(!__pyx_t_27.memview)) __PYX_ERR(0, 540, __pyx_L1_error)
+  __pyx_t_27 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_13, PyBUF_WRITABLE); if (unlikely(!__pyx_t_27.memview)) __PYX_ERR(0, 478, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
   __pyx_v_q_j = __pyx_t_27;
   __pyx_t_27.memview = NULL;
   __pyx_t_27.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":541
+  /* "fastTSNE/_tsne.pyx":479
  *     cdef int n_terms = 3
  *     cdef double[:, ::1] q_j = np.empty((n_reference_samples, n_terms), dtype=float)
  *     for i in range(n_reference_samples):             # <<<<<<<<<<<<<<
@@ -8444,7 +7771,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":542
+    /* "fastTSNE/_tsne.pyx":480
  *     cdef double[:, ::1] q_j = np.empty((n_reference_samples, n_terms), dtype=float)
  *     for i in range(n_reference_samples):
  *         q_j[i, 0] = 1             # <<<<<<<<<<<<<<
@@ -8455,7 +7782,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     __pyx_t_29 = 0;
     *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_q_j.data + __pyx_t_28 * __pyx_v_q_j.strides[0]) )) + __pyx_t_29)) )) = 1.0;
 
-    /* "fastTSNE/_tsne.pyx":543
+    /* "fastTSNE/_tsne.pyx":481
  *     for i in range(n_reference_samples):
  *         q_j[i, 0] = 1
  *         q_j[i, 1] = reference_embedding[i]             # <<<<<<<<<<<<<<
@@ -8467,7 +7794,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     __pyx_t_32 = 1;
     *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_q_j.data + __pyx_t_31 * __pyx_v_q_j.strides[0]) )) + __pyx_t_32)) )) = (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_reference_embedding.data) + __pyx_t_30)) )));
 
-    /* "fastTSNE/_tsne.pyx":544
+    /* "fastTSNE/_tsne.pyx":482
  *         q_j[i, 0] = 1
  *         q_j[i, 1] = reference_embedding[i]
  *         q_j[i, 2] = reference_embedding[i] ** 2             # <<<<<<<<<<<<<<
@@ -8480,40 +7807,40 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_q_j.data + __pyx_t_34 * __pyx_v_q_j.strides[0]) )) + __pyx_t_35)) )) = pow((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_reference_embedding.data) + __pyx_t_33)) ))), 2.0);
   }
 
-  /* "fastTSNE/_tsne.pyx":547
+  /* "fastTSNE/_tsne.pyx":485
  * 
  *     # Compute the relative position of each reference point in its box
  *     cdef double[::1] reference_y_in_box = np.empty(n_reference_samples, dtype=float)             # <<<<<<<<<<<<<<
  *     for i in range(n_reference_samples):
  *         box_idx = reference_point_box_idx[i]
  */
-  __pyx_t_13 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 547, __pyx_L1_error)
+  __pyx_t_13 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 485, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_13);
-  __pyx_t_16 = __Pyx_PyObject_GetAttrStr(__pyx_t_13, __pyx_n_s_empty); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 547, __pyx_L1_error)
+  __pyx_t_16 = __Pyx_PyObject_GetAttrStr(__pyx_t_13, __pyx_n_s_empty); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 485, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_16);
   __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-  __pyx_t_13 = PyInt_FromSsize_t(__pyx_v_n_reference_samples); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 547, __pyx_L1_error)
+  __pyx_t_13 = PyInt_FromSsize_t(__pyx_v_n_reference_samples); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 485, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_13);
-  __pyx_t_15 = PyTuple_New(1); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 547, __pyx_L1_error)
+  __pyx_t_15 = PyTuple_New(1); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 485, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_15);
   __Pyx_GIVEREF(__pyx_t_13);
   PyTuple_SET_ITEM(__pyx_t_15, 0, __pyx_t_13);
   __pyx_t_13 = 0;
-  __pyx_t_13 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 547, __pyx_L1_error)
+  __pyx_t_13 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 485, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_13);
-  if (PyDict_SetItem(__pyx_t_13, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 547, __pyx_L1_error)
-  __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_16, __pyx_t_15, __pyx_t_13); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 547, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_13, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 485, __pyx_L1_error)
+  __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_16, __pyx_t_15, __pyx_t_13); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 485, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_14);
   __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
   __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-  __pyx_t_17 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_14, PyBUF_WRITABLE); if (unlikely(!__pyx_t_17.memview)) __PYX_ERR(0, 547, __pyx_L1_error)
+  __pyx_t_17 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_14, PyBUF_WRITABLE); if (unlikely(!__pyx_t_17.memview)) __PYX_ERR(0, 485, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
   __pyx_v_reference_y_in_box = __pyx_t_17;
   __pyx_t_17.memview = NULL;
   __pyx_t_17.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":548
+  /* "fastTSNE/_tsne.pyx":486
  *     # Compute the relative position of each reference point in its box
  *     cdef double[::1] reference_y_in_box = np.empty(n_reference_samples, dtype=float)
  *     for i in range(n_reference_samples):             # <<<<<<<<<<<<<<
@@ -8525,7 +7852,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":549
+    /* "fastTSNE/_tsne.pyx":487
  *     cdef double[::1] reference_y_in_box = np.empty(n_reference_samples, dtype=float)
  *     for i in range(n_reference_samples):
  *         box_idx = reference_point_box_idx[i]             # <<<<<<<<<<<<<<
@@ -8534,7 +7861,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
  */
     __pyx_v_box_idx = (__pyx_v_reference_point_box_idx[__pyx_v_i]);
 
-    /* "fastTSNE/_tsne.pyx":550
+    /* "fastTSNE/_tsne.pyx":488
  *     for i in range(n_reference_samples):
  *         box_idx = reference_point_box_idx[i]
  *         reference_y_in_box[i] = (reference_embedding[i] - box_lower_bounds[box_idx]) / box_width             # <<<<<<<<<<<<<<
@@ -8547,35 +7874,35 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_reference_y_in_box.data) + __pyx_t_38)) )) = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_reference_embedding.data) + __pyx_t_36)) ))) - (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_box_lower_bounds.data) + __pyx_t_37)) )))) / __pyx_v_box_width);
   }
 
-  /* "fastTSNE/_tsne.pyx":553
+  /* "fastTSNE/_tsne.pyx":491
  * 
  *     # Interpolate kernel using Lagrange polynomials
  *     cdef double[:, ::1] reference_interpolated_values = interpolate(reference_y_in_box, y_tilde)             # <<<<<<<<<<<<<<
  * 
  *     # Actually compute w_{ij}s
  */
-  __pyx_t_27 = __pyx_f_8fastTSNE_5_tsne_interpolate(__pyx_v_reference_y_in_box, __pyx_v_y_tilde); if (unlikely(!__pyx_t_27.memview)) __PYX_ERR(0, 553, __pyx_L1_error)
+  __pyx_t_27 = __pyx_f_8fastTSNE_5_tsne_interpolate(__pyx_v_reference_y_in_box, __pyx_v_y_tilde); if (unlikely(!__pyx_t_27.memview)) __PYX_ERR(0, 491, __pyx_L1_error)
   __pyx_v_reference_interpolated_values = __pyx_t_27;
   __pyx_t_27.memview = NULL;
   __pyx_t_27.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":556
+  /* "fastTSNE/_tsne.pyx":494
  * 
  *     # Actually compute w_{ij}s
  *     cdef double[:, ::1] w_coefficients = np.zeros((n_interpolation_points_1d, n_terms), dtype=float)             # <<<<<<<<<<<<<<
  *     for i in range(n_reference_samples):
  *         box_idx = reference_point_box_idx[i] * n_interpolation_points
  */
-  __pyx_t_14 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 556, __pyx_L1_error)
+  __pyx_t_14 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 494, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_14);
-  __pyx_t_13 = __Pyx_PyObject_GetAttrStr(__pyx_t_14, __pyx_n_s_zeros); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 556, __pyx_L1_error)
+  __pyx_t_13 = __Pyx_PyObject_GetAttrStr(__pyx_t_14, __pyx_n_s_zeros); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 494, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_13);
   __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-  __pyx_t_14 = __Pyx_PyInt_From_int(__pyx_v_n_interpolation_points_1d); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 556, __pyx_L1_error)
+  __pyx_t_14 = __Pyx_PyInt_From_int(__pyx_v_n_interpolation_points_1d); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 494, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_14);
-  __pyx_t_15 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 556, __pyx_L1_error)
+  __pyx_t_15 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 494, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_15);
-  __pyx_t_16 = PyTuple_New(2); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 556, __pyx_L1_error)
+  __pyx_t_16 = PyTuple_New(2); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 494, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_16);
   __Pyx_GIVEREF(__pyx_t_14);
   PyTuple_SET_ITEM(__pyx_t_16, 0, __pyx_t_14);
@@ -8583,26 +7910,26 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
   PyTuple_SET_ITEM(__pyx_t_16, 1, __pyx_t_15);
   __pyx_t_14 = 0;
   __pyx_t_15 = 0;
-  __pyx_t_15 = PyTuple_New(1); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 556, __pyx_L1_error)
+  __pyx_t_15 = PyTuple_New(1); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 494, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_15);
   __Pyx_GIVEREF(__pyx_t_16);
   PyTuple_SET_ITEM(__pyx_t_15, 0, __pyx_t_16);
   __pyx_t_16 = 0;
-  __pyx_t_16 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 556, __pyx_L1_error)
+  __pyx_t_16 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 494, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_16);
-  if (PyDict_SetItem(__pyx_t_16, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 556, __pyx_L1_error)
-  __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_13, __pyx_t_15, __pyx_t_16); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 556, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_16, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 494, __pyx_L1_error)
+  __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_13, __pyx_t_15, __pyx_t_16); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 494, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_14);
   __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
   __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-  __pyx_t_27 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_14, PyBUF_WRITABLE); if (unlikely(!__pyx_t_27.memview)) __PYX_ERR(0, 556, __pyx_L1_error)
+  __pyx_t_27 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_14, PyBUF_WRITABLE); if (unlikely(!__pyx_t_27.memview)) __PYX_ERR(0, 494, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
   __pyx_v_w_coefficients = __pyx_t_27;
   __pyx_t_27.memview = NULL;
   __pyx_t_27.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":557
+  /* "fastTSNE/_tsne.pyx":495
  *     # Actually compute w_{ij}s
  *     cdef double[:, ::1] w_coefficients = np.zeros((n_interpolation_points_1d, n_terms), dtype=float)
  *     for i in range(n_reference_samples):             # <<<<<<<<<<<<<<
@@ -8614,7 +7941,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":558
+    /* "fastTSNE/_tsne.pyx":496
  *     cdef double[:, ::1] w_coefficients = np.zeros((n_interpolation_points_1d, n_terms), dtype=float)
  *     for i in range(n_reference_samples):
  *         box_idx = reference_point_box_idx[i] * n_interpolation_points             # <<<<<<<<<<<<<<
@@ -8623,7 +7950,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
  */
     __pyx_v_box_idx = ((__pyx_v_reference_point_box_idx[__pyx_v_i]) * __pyx_v_n_interpolation_points);
 
-    /* "fastTSNE/_tsne.pyx":559
+    /* "fastTSNE/_tsne.pyx":497
  *     for i in range(n_reference_samples):
  *         box_idx = reference_point_box_idx[i] * n_interpolation_points
  *         for j in range(n_interpolation_points):             # <<<<<<<<<<<<<<
@@ -8635,7 +7962,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     for (__pyx_t_41 = 0; __pyx_t_41 < __pyx_t_40; __pyx_t_41+=1) {
       __pyx_v_j = __pyx_t_41;
 
-      /* "fastTSNE/_tsne.pyx":560
+      /* "fastTSNE/_tsne.pyx":498
  *         box_idx = reference_point_box_idx[i] * n_interpolation_points
  *         for j in range(n_interpolation_points):
  *             for d in range(n_terms):             # <<<<<<<<<<<<<<
@@ -8647,7 +7974,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
       for (__pyx_t_42 = 0; __pyx_t_42 < __pyx_t_19; __pyx_t_42+=1) {
         __pyx_v_d = __pyx_t_42;
 
-        /* "fastTSNE/_tsne.pyx":561
+        /* "fastTSNE/_tsne.pyx":499
  *         for j in range(n_interpolation_points):
  *             for d in range(n_terms):
  *                 w_coefficients[box_idx + j, d] += reference_interpolated_values[i, j] * q_j[i, d]             # <<<<<<<<<<<<<<
@@ -8665,52 +7992,52 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     }
   }
 
-  /* "fastTSNE/_tsne.pyx":564
+  /* "fastTSNE/_tsne.pyx":502
  * 
  *     # STEP 2: Compute the kernel values evaluated at the interpolation nodes
  *     cdef double[:, ::1] y_tilde_values = matrix_multiply_fft_1d(kernel_tilde, w_coefficients)             # <<<<<<<<<<<<<<
  * 
  *     # STEP 3: Compute the potentials \tilde{\phi(y_i)}
  */
-  __pyx_t_27 = __pyx_f_8fastTSNE_5_tsne_matrix_multiply_fft_1d(__pyx_v_kernel_tilde, __pyx_v_w_coefficients); if (unlikely(!__pyx_t_27.memview)) __PYX_ERR(0, 564, __pyx_L1_error)
+  __pyx_t_27 = __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_multiply_fft_1d(__pyx_v_kernel_tilde, __pyx_v_w_coefficients); if (unlikely(!__pyx_t_27.memview)) __PYX_ERR(0, 502, __pyx_L1_error)
   __pyx_v_y_tilde_values = __pyx_t_27;
   __pyx_t_27.memview = NULL;
   __pyx_t_27.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":568
+  /* "fastTSNE/_tsne.pyx":506
  *     # STEP 3: Compute the potentials \tilde{\phi(y_i)}
  *     # Compute the relative position of each new embedding point in its box
  *     cdef double[::1] y_in_box = np.empty(n_samples, dtype=float)             # <<<<<<<<<<<<<<
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i]
  */
-  __pyx_t_14 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 568, __pyx_L1_error)
+  __pyx_t_14 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 506, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_14);
-  __pyx_t_16 = __Pyx_PyObject_GetAttrStr(__pyx_t_14, __pyx_n_s_empty); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 568, __pyx_L1_error)
+  __pyx_t_16 = __Pyx_PyObject_GetAttrStr(__pyx_t_14, __pyx_n_s_empty); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 506, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_16);
   __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-  __pyx_t_14 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 568, __pyx_L1_error)
+  __pyx_t_14 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 506, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_14);
-  __pyx_t_15 = PyTuple_New(1); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 568, __pyx_L1_error)
+  __pyx_t_15 = PyTuple_New(1); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 506, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_15);
   __Pyx_GIVEREF(__pyx_t_14);
   PyTuple_SET_ITEM(__pyx_t_15, 0, __pyx_t_14);
   __pyx_t_14 = 0;
-  __pyx_t_14 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 568, __pyx_L1_error)
+  __pyx_t_14 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 506, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_14);
-  if (PyDict_SetItem(__pyx_t_14, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 568, __pyx_L1_error)
-  __pyx_t_13 = __Pyx_PyObject_Call(__pyx_t_16, __pyx_t_15, __pyx_t_14); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 568, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_14, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 506, __pyx_L1_error)
+  __pyx_t_13 = __Pyx_PyObject_Call(__pyx_t_16, __pyx_t_15, __pyx_t_14); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 506, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_13);
   __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
   __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-  __pyx_t_17 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_13, PyBUF_WRITABLE); if (unlikely(!__pyx_t_17.memview)) __PYX_ERR(0, 568, __pyx_L1_error)
+  __pyx_t_17 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_13, PyBUF_WRITABLE); if (unlikely(!__pyx_t_17.memview)) __PYX_ERR(0, 506, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
   __pyx_v_y_in_box = __pyx_t_17;
   __pyx_t_17.memview = NULL;
   __pyx_t_17.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":569
+  /* "fastTSNE/_tsne.pyx":507
  *     # Compute the relative position of each new embedding point in its box
  *     cdef double[::1] y_in_box = np.empty(n_samples, dtype=float)
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -8722,7 +8049,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":570
+    /* "fastTSNE/_tsne.pyx":508
  *     cdef double[::1] y_in_box = np.empty(n_samples, dtype=float)
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i]             # <<<<<<<<<<<<<<
@@ -8731,7 +8058,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
  */
     __pyx_v_box_idx = (__pyx_v_point_box_idx[__pyx_v_i]);
 
-    /* "fastTSNE/_tsne.pyx":571
+    /* "fastTSNE/_tsne.pyx":509
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i]
  *         y_in_box[i] = (embedding[i] - box_lower_bounds[box_idx]) / box_width             # <<<<<<<<<<<<<<
@@ -8744,35 +8071,35 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_in_box.data) + __pyx_t_51)) )) = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_embedding.data) + __pyx_t_49)) ))) - (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_box_lower_bounds.data) + __pyx_t_50)) )))) / __pyx_v_box_width);
   }
 
-  /* "fastTSNE/_tsne.pyx":574
+  /* "fastTSNE/_tsne.pyx":512
  * 
  *     # Interpolate kernel using Lagrange polynomials
  *     cdef double[:, ::1] interpolated_values = interpolate(y_in_box, y_tilde)             # <<<<<<<<<<<<<<
  * 
  *     # Actually compute \tilde{\phi(y_i)}
  */
-  __pyx_t_27 = __pyx_f_8fastTSNE_5_tsne_interpolate(__pyx_v_y_in_box, __pyx_v_y_tilde); if (unlikely(!__pyx_t_27.memview)) __PYX_ERR(0, 574, __pyx_L1_error)
+  __pyx_t_27 = __pyx_f_8fastTSNE_5_tsne_interpolate(__pyx_v_y_in_box, __pyx_v_y_tilde); if (unlikely(!__pyx_t_27.memview)) __PYX_ERR(0, 512, __pyx_L1_error)
   __pyx_v_interpolated_values = __pyx_t_27;
   __pyx_t_27.memview = NULL;
   __pyx_t_27.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":577
+  /* "fastTSNE/_tsne.pyx":515
  * 
  *     # Actually compute \tilde{\phi(y_i)}
  *     cdef double[:, ::1] phi = np.zeros((n_samples, n_terms), dtype=float)             # <<<<<<<<<<<<<<
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i] * n_interpolation_points
  */
-  __pyx_t_13 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 577, __pyx_L1_error)
+  __pyx_t_13 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 515, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_13);
-  __pyx_t_14 = __Pyx_PyObject_GetAttrStr(__pyx_t_13, __pyx_n_s_zeros); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 577, __pyx_L1_error)
+  __pyx_t_14 = __Pyx_PyObject_GetAttrStr(__pyx_t_13, __pyx_n_s_zeros); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 515, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_14);
   __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-  __pyx_t_13 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 577, __pyx_L1_error)
+  __pyx_t_13 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 515, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_13);
-  __pyx_t_15 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 577, __pyx_L1_error)
+  __pyx_t_15 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 515, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_15);
-  __pyx_t_16 = PyTuple_New(2); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 577, __pyx_L1_error)
+  __pyx_t_16 = PyTuple_New(2); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 515, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_16);
   __Pyx_GIVEREF(__pyx_t_13);
   PyTuple_SET_ITEM(__pyx_t_16, 0, __pyx_t_13);
@@ -8780,26 +8107,26 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
   PyTuple_SET_ITEM(__pyx_t_16, 1, __pyx_t_15);
   __pyx_t_13 = 0;
   __pyx_t_15 = 0;
-  __pyx_t_15 = PyTuple_New(1); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 577, __pyx_L1_error)
+  __pyx_t_15 = PyTuple_New(1); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 515, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_15);
   __Pyx_GIVEREF(__pyx_t_16);
   PyTuple_SET_ITEM(__pyx_t_15, 0, __pyx_t_16);
   __pyx_t_16 = 0;
-  __pyx_t_16 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 577, __pyx_L1_error)
+  __pyx_t_16 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 515, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_16);
-  if (PyDict_SetItem(__pyx_t_16, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 577, __pyx_L1_error)
-  __pyx_t_13 = __Pyx_PyObject_Call(__pyx_t_14, __pyx_t_15, __pyx_t_16); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 577, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_16, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 515, __pyx_L1_error)
+  __pyx_t_13 = __Pyx_PyObject_Call(__pyx_t_14, __pyx_t_15, __pyx_t_16); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 515, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_13);
   __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
   __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-  __pyx_t_27 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_13, PyBUF_WRITABLE); if (unlikely(!__pyx_t_27.memview)) __PYX_ERR(0, 577, __pyx_L1_error)
+  __pyx_t_27 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_13, PyBUF_WRITABLE); if (unlikely(!__pyx_t_27.memview)) __PYX_ERR(0, 515, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
   __pyx_v_phi = __pyx_t_27;
   __pyx_t_27.memview = NULL;
   __pyx_t_27.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":578
+  /* "fastTSNE/_tsne.pyx":516
  *     # Actually compute \tilde{\phi(y_i)}
  *     cdef double[:, ::1] phi = np.zeros((n_samples, n_terms), dtype=float)
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -8811,7 +8138,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":579
+    /* "fastTSNE/_tsne.pyx":517
  *     cdef double[:, ::1] phi = np.zeros((n_samples, n_terms), dtype=float)
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i] * n_interpolation_points             # <<<<<<<<<<<<<<
@@ -8820,7 +8147,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
  */
     __pyx_v_box_idx = ((__pyx_v_point_box_idx[__pyx_v_i]) * __pyx_v_n_interpolation_points);
 
-    /* "fastTSNE/_tsne.pyx":580
+    /* "fastTSNE/_tsne.pyx":518
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i] * n_interpolation_points
  *         for j in range(n_interpolation_points):             # <<<<<<<<<<<<<<
@@ -8832,7 +8159,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     for (__pyx_t_41 = 0; __pyx_t_41 < __pyx_t_40; __pyx_t_41+=1) {
       __pyx_v_j = __pyx_t_41;
 
-      /* "fastTSNE/_tsne.pyx":581
+      /* "fastTSNE/_tsne.pyx":519
  *         box_idx = point_box_idx[i] * n_interpolation_points
  *         for j in range(n_interpolation_points):
  *             for d in range(n_terms):             # <<<<<<<<<<<<<<
@@ -8844,7 +8171,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
       for (__pyx_t_42 = 0; __pyx_t_42 < __pyx_t_19; __pyx_t_42+=1) {
         __pyx_v_d = __pyx_t_42;
 
-        /* "fastTSNE/_tsne.pyx":582
+        /* "fastTSNE/_tsne.pyx":520
  *         for j in range(n_interpolation_points):
  *             for d in range(n_terms):
  *                 phi[i, d] += interpolated_values[i, j] * y_tilde_values[box_idx + j, d]             # <<<<<<<<<<<<<<
@@ -8862,7 +8189,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     }
   }
 
-  /* "fastTSNE/_tsne.pyx":584
+  /* "fastTSNE/_tsne.pyx":522
  *                 phi[i, d] += interpolated_values[i, j] * y_tilde_values[box_idx + j, d]
  * 
  *     PyMem_Free(reference_point_box_idx)             # <<<<<<<<<<<<<<
@@ -8871,7 +8198,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
  */
   PyMem_Free(__pyx_v_reference_point_box_idx);
 
-  /* "fastTSNE/_tsne.pyx":585
+  /* "fastTSNE/_tsne.pyx":523
  * 
  *     PyMem_Free(reference_point_box_idx)
  *     PyMem_Free(point_box_idx)             # <<<<<<<<<<<<<<
@@ -8880,7 +8207,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
  */
   PyMem_Free(__pyx_v_point_box_idx);
 
-  /* "fastTSNE/_tsne.pyx":589
+  /* "fastTSNE/_tsne.pyx":527
  *     # Compute the normalization term Z or sum of q_{ij}s, this is not described
  *     # in the paper, but can be worked out
  *     cdef double sum_Q = 0             # <<<<<<<<<<<<<<
@@ -8889,7 +8216,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
  */
   __pyx_v_sum_Q = 0.0;
 
-  /* "fastTSNE/_tsne.pyx":590
+  /* "fastTSNE/_tsne.pyx":528
  *     # in the paper, but can be worked out
  *     cdef double sum_Q = 0
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -8901,7 +8228,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":591
+    /* "fastTSNE/_tsne.pyx":529
  *     cdef double sum_Q = 0
  *     for i in range(n_samples):
  *         sum_Q += (1 + embedding[i] ** 2) * phi[i, 0] - \             # <<<<<<<<<<<<<<
@@ -8912,7 +8239,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     __pyx_t_59 = __pyx_v_i;
     __pyx_t_60 = 0;
 
-    /* "fastTSNE/_tsne.pyx":592
+    /* "fastTSNE/_tsne.pyx":530
  *     for i in range(n_samples):
  *         sum_Q += (1 + embedding[i] ** 2) * phi[i, 0] - \
  *                  2 * embedding[i] * phi[i, 1] + \             # <<<<<<<<<<<<<<
@@ -8923,7 +8250,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     __pyx_t_62 = __pyx_v_i;
     __pyx_t_63 = 1;
 
-    /* "fastTSNE/_tsne.pyx":593
+    /* "fastTSNE/_tsne.pyx":531
  *         sum_Q += (1 + embedding[i] ** 2) * phi[i, 0] - \
  *                  2 * embedding[i] * phi[i, 1] + \
  *                  phi[i, 2]             # <<<<<<<<<<<<<<
@@ -8933,7 +8260,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     __pyx_t_64 = __pyx_v_i;
     __pyx_t_65 = 2;
 
-    /* "fastTSNE/_tsne.pyx":591
+    /* "fastTSNE/_tsne.pyx":529
  *     cdef double sum_Q = 0
  *     for i in range(n_samples):
  *         sum_Q += (1 + embedding[i] ** 2) * phi[i, 0] - \             # <<<<<<<<<<<<<<
@@ -8943,7 +8270,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     __pyx_v_sum_Q = (__pyx_v_sum_Q + ((((1.0 + pow((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_embedding.data) + __pyx_t_58)) ))), 2.0)) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_59 * __pyx_v_phi.strides[0]) )) + __pyx_t_60)) )))) - ((2.0 * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_embedding.data) + __pyx_t_61)) )))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_62 * __pyx_v_phi.strides[0]) )) + __pyx_t_63)) ))))) + (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_64 * __pyx_v_phi.strides[0]) )) + __pyx_t_65)) )))));
   }
 
-  /* "fastTSNE/_tsne.pyx":594
+  /* "fastTSNE/_tsne.pyx":532
  *                  2 * embedding[i] * phi[i, 1] + \
  *                  phi[i, 2]
  *     sum_Q -= n_samples             # <<<<<<<<<<<<<<
@@ -8952,7 +8279,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
  */
   __pyx_v_sum_Q = (__pyx_v_sum_Q - __pyx_v_n_samples);
 
-  /* "fastTSNE/_tsne.pyx":598
+  /* "fastTSNE/_tsne.pyx":536
  *     # Compute the gradient using a slight variation on the formula provided in
  *     # the paper
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -8964,7 +8291,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":599
+    /* "fastTSNE/_tsne.pyx":537
  *     # the paper
  *     for i in range(n_samples):
  *         gradient[i] -= (embedding[i] * phi[i, 0] - phi[i, 1]) / sum_Q             # <<<<<<<<<<<<<<
@@ -8980,7 +8307,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_gradient.data) + __pyx_t_71)) )) -= ((((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_embedding.data) + __pyx_t_66)) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_67 * __pyx_v_phi.strides[0]) )) + __pyx_t_68)) )))) - (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_69 * __pyx_v_phi.strides[0]) )) + __pyx_t_70)) )))) / __pyx_v_sum_Q);
   }
 
-  /* "fastTSNE/_tsne.pyx":601
+  /* "fastTSNE/_tsne.pyx":539
  *         gradient[i] -= (embedding[i] * phi[i, 0] - phi[i, 1]) / sum_Q
  * 
  *     return sum_Q             # <<<<<<<<<<<<<<
@@ -8990,7 +8317,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
   __pyx_r = __pyx_v_sum_Q;
   goto __pyx_L0;
 
-  /* "fastTSNE/_tsne.pyx":464
+  /* "fastTSNE/_tsne.pyx":402
  * 
  * 
  * cpdef double estimate_negative_gradient_fft_1d_with_reference(             # <<<<<<<<<<<<<<
@@ -9069,13 +8396,13 @@ static PyObject *__pyx_pw_8fastTSNE_5_tsne_9estimate_negative_gradient_fft_1d_wi
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_reference_embedding)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_fft_1d_with_reference", 0, 3, 6, 1); __PYX_ERR(0, 464, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_fft_1d_with_reference", 0, 3, 6, 1); __PYX_ERR(0, 402, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_gradient)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_fft_1d_with_reference", 0, 3, 6, 2); __PYX_ERR(0, 464, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_fft_1d_with_reference", 0, 3, 6, 2); __PYX_ERR(0, 402, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
@@ -9097,7 +8424,7 @@ static PyObject *__pyx_pw_8fastTSNE_5_tsne_9estimate_negative_gradient_fft_1d_wi
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "estimate_negative_gradient_fft_1d_with_reference") < 0)) __PYX_ERR(0, 464, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "estimate_negative_gradient_fft_1d_with_reference") < 0)) __PYX_ERR(0, 402, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -9114,28 +8441,28 @@ static PyObject *__pyx_pw_8fastTSNE_5_tsne_9estimate_negative_gradient_fft_1d_wi
         default: goto __pyx_L5_argtuple_error;
       }
     }
-    __pyx_v_embedding = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_embedding.memview)) __PYX_ERR(0, 465, __pyx_L3_error)
-    __pyx_v_reference_embedding = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_reference_embedding.memview)) __PYX_ERR(0, 466, __pyx_L3_error)
-    __pyx_v_gradient = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_gradient.memview)) __PYX_ERR(0, 467, __pyx_L3_error)
+    __pyx_v_embedding = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_embedding.memview)) __PYX_ERR(0, 403, __pyx_L3_error)
+    __pyx_v_reference_embedding = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_reference_embedding.memview)) __PYX_ERR(0, 404, __pyx_L3_error)
+    __pyx_v_gradient = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_gradient.memview)) __PYX_ERR(0, 405, __pyx_L3_error)
     if (values[3]) {
-      __pyx_v_n_interpolation_points = __Pyx_PyIndex_AsSsize_t(values[3]); if (unlikely((__pyx_v_n_interpolation_points == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 468, __pyx_L3_error)
+      __pyx_v_n_interpolation_points = __Pyx_PyIndex_AsSsize_t(values[3]); if (unlikely((__pyx_v_n_interpolation_points == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 406, __pyx_L3_error)
     } else {
       __pyx_v_n_interpolation_points = ((Py_ssize_t)3);
     }
     if (values[4]) {
-      __pyx_v_min_num_intervals = __Pyx_PyIndex_AsSsize_t(values[4]); if (unlikely((__pyx_v_min_num_intervals == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 469, __pyx_L3_error)
+      __pyx_v_min_num_intervals = __Pyx_PyIndex_AsSsize_t(values[4]); if (unlikely((__pyx_v_min_num_intervals == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 407, __pyx_L3_error)
     } else {
       __pyx_v_min_num_intervals = ((Py_ssize_t)10);
     }
     if (values[5]) {
-      __pyx_v_ints_in_interval = __pyx_PyFloat_AsDouble(values[5]); if (unlikely((__pyx_v_ints_in_interval == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 470, __pyx_L3_error)
+      __pyx_v_ints_in_interval = __pyx_PyFloat_AsDouble(values[5]); if (unlikely((__pyx_v_ints_in_interval == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 408, __pyx_L3_error)
     } else {
       __pyx_v_ints_in_interval = ((double)1.0);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_fft_1d_with_reference", 0, 3, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 464, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_fft_1d_with_reference", 0, 3, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 402, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("fastTSNE._tsne.estimate_negative_gradient_fft_1d_with_reference", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -9156,14 +8483,14 @@ static PyObject *__pyx_pf_8fastTSNE_5_tsne_8estimate_negative_gradient_fft_1d_wi
   struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_reference __pyx_t_2;
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("estimate_negative_gradient_fft_1d_with_reference", 0);
-  __Pyx_TraceCall("estimate_negative_gradient_fft_1d_with_reference (wrapper)", __pyx_f[0], 464, 0, __PYX_ERR(0, 464, __pyx_L1_error));
+  __Pyx_TraceCall("estimate_negative_gradient_fft_1d_with_reference (wrapper)", __pyx_f[0], 402, 0, __PYX_ERR(0, 402, __pyx_L1_error));
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_2.__pyx_n = 3;
   __pyx_t_2.n_interpolation_points = __pyx_v_n_interpolation_points;
   __pyx_t_2.min_num_intervals = __pyx_v_min_num_intervals;
   __pyx_t_2.ints_in_interval = __pyx_v_ints_in_interval;
   __pyx_t_1 = __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_reference(__pyx_v_embedding, __pyx_v_reference_embedding, __pyx_v_gradient, 0, &__pyx_t_2); 
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 464, __pyx_L1_error)
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 402, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_r = __pyx_t_3;
   __pyx_t_3 = 0;
@@ -9184,800 +8511,7 @@ static PyObject *__pyx_pf_8fastTSNE_5_tsne_8estimate_negative_gradient_fft_1d_wi
   return __pyx_r;
 }
 
-/* "fastTSNE/_tsne.pyx":604
- * 
- * 
- * cdef double[:, ::1] matrix_multiply_fft_2d(             # <<<<<<<<<<<<<<
- *     double[:, ::1] kernel_tilde,
- *     double[:, ::1] w_coefficients,
- */
-
-static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_matrix_multiply_fft_2d(__Pyx_memviewslice __pyx_v_kernel_tilde, __Pyx_memviewslice __pyx_v_w_coefficients) {
-  Py_ssize_t __pyx_v_total_interpolation_points;
-  Py_ssize_t __pyx_v_n_terms;
-  Py_ssize_t __pyx_v_n_fft_coeffs;
-  Py_ssize_t __pyx_v_n_interpolation_points_1d;
-  __Pyx_memviewslice __pyx_v_y_tilde_values = { 0, 0, { 0 }, { 0 }, { 0 } };
-  __Pyx_memviewslice __pyx_v_fft_w_coefficients = { 0, 0, { 0 }, { 0 }, { 0 } };
-  __Pyx_memviewslice __pyx_v_fft_kernel_tilde = { 0, 0, { 0 }, { 0 }, { 0 } };
-  __Pyx_memviewslice __pyx_v_fft_in_buffer = { 0, 0, { 0 }, { 0 }, { 0 } };
-  __Pyx_memviewslice __pyx_v_fft_out_buffer = { 0, 0, { 0 }, { 0 }, { 0 } };
-  Py_ssize_t __pyx_v_d;
-  Py_ssize_t __pyx_v_i;
-  Py_ssize_t __pyx_v_j;
-  Py_ssize_t __pyx_v_idx;
-  __Pyx_memviewslice __pyx_r = { 0, 0, { 0 }, { 0 }, { 0 } };
-  __Pyx_TraceDeclarations
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
-  PyObject *__pyx_t_4 = NULL;
-  PyObject *__pyx_t_5 = NULL;
-  __Pyx_memviewslice __pyx_t_6 = { 0, 0, { 0 }, { 0 }, { 0 } };
-  __Pyx_memviewslice __pyx_t_7 = { 0, 0, { 0 }, { 0 }, { 0 } };
-  Py_ssize_t __pyx_t_8;
-  Py_ssize_t __pyx_t_9;
-  Py_ssize_t __pyx_t_10;
-  Py_ssize_t __pyx_t_11;
-  Py_ssize_t __pyx_t_12;
-  Py_ssize_t __pyx_t_13;
-  Py_ssize_t __pyx_t_14;
-  Py_ssize_t __pyx_t_15;
-  Py_ssize_t __pyx_t_16;
-  Py_ssize_t __pyx_t_17;
-  Py_ssize_t __pyx_t_18;
-  Py_ssize_t __pyx_t_19;
-  Py_ssize_t __pyx_t_20;
-  int __pyx_t_21;
-  PyObject *__pyx_t_22 = NULL;
-  Py_ssize_t __pyx_t_23;
-  Py_ssize_t __pyx_t_24;
-  double __pyx_t_25;
-  Py_ssize_t __pyx_t_26;
-  Py_ssize_t __pyx_t_27;
-  __Pyx_RefNannySetupContext("matrix_multiply_fft_2d", 0);
-  __Pyx_TraceCall("matrix_multiply_fft_2d", __pyx_f[0], 604, 0, __PYX_ERR(0, 604, __pyx_L1_error));
-
-  /* "fastTSNE/_tsne.pyx":630
- *     """
- *     cdef:
- *         Py_ssize_t total_interpolation_points = w_coefficients.shape[0]             # <<<<<<<<<<<<<<
- *         Py_ssize_t n_terms = w_coefficients.shape[1]
- *         Py_ssize_t n_fft_coeffs = kernel_tilde.shape[0]
- */
-  __pyx_v_total_interpolation_points = (__pyx_v_w_coefficients.shape[0]);
-
-  /* "fastTSNE/_tsne.pyx":631
- *     cdef:
- *         Py_ssize_t total_interpolation_points = w_coefficients.shape[0]
- *         Py_ssize_t n_terms = w_coefficients.shape[1]             # <<<<<<<<<<<<<<
- *         Py_ssize_t n_fft_coeffs = kernel_tilde.shape[0]
- *         Py_ssize_t n_interpolation_points_1d = n_fft_coeffs / 2
- */
-  __pyx_v_n_terms = (__pyx_v_w_coefficients.shape[1]);
-
-  /* "fastTSNE/_tsne.pyx":632
- *         Py_ssize_t total_interpolation_points = w_coefficients.shape[0]
- *         Py_ssize_t n_terms = w_coefficients.shape[1]
- *         Py_ssize_t n_fft_coeffs = kernel_tilde.shape[0]             # <<<<<<<<<<<<<<
- *         Py_ssize_t n_interpolation_points_1d = n_fft_coeffs / 2
- * 
- */
-  __pyx_v_n_fft_coeffs = (__pyx_v_kernel_tilde.shape[0]);
-
-  /* "fastTSNE/_tsne.pyx":633
- *         Py_ssize_t n_terms = w_coefficients.shape[1]
- *         Py_ssize_t n_fft_coeffs = kernel_tilde.shape[0]
- *         Py_ssize_t n_interpolation_points_1d = n_fft_coeffs / 2             # <<<<<<<<<<<<<<
- * 
- *         double[:, ::1] y_tilde_values = np.empty((total_interpolation_points, n_terms))
- */
-  __pyx_v_n_interpolation_points_1d = (__pyx_v_n_fft_coeffs / 2);
-
-  /* "fastTSNE/_tsne.pyx":635
- *         Py_ssize_t n_interpolation_points_1d = n_fft_coeffs / 2
- * 
- *         double[:, ::1] y_tilde_values = np.empty((total_interpolation_points, n_terms))             # <<<<<<<<<<<<<<
- * 
- *         complex[:, :] fft_w_coefficients = np.empty((n_fft_coeffs, (n_fft_coeffs / 2 + 1)), dtype=complex)
- */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 635, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_empty); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 635, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_total_interpolation_points); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 635, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = PyInt_FromSsize_t(__pyx_v_n_terms); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 635, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 635, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_GIVEREF(__pyx_t_2);
-  PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_2);
-  __Pyx_GIVEREF(__pyx_t_4);
-  PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_4);
-  __pyx_t_2 = 0;
-  __pyx_t_4 = 0;
-  __pyx_t_4 = NULL;
-  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
-    __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_3);
-    if (likely(__pyx_t_4)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
-      __Pyx_INCREF(__pyx_t_4);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_3, function);
-    }
-  }
-  if (!__pyx_t_4) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 635, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __Pyx_GOTREF(__pyx_t_1);
-  } else {
-    #if CYTHON_FAST_PYCALL
-    if (PyFunction_Check(__pyx_t_3)) {
-      PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_5};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 635, __pyx_L1_error)
-      __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    } else
-    #endif
-    #if CYTHON_FAST_PYCCALL
-    if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
-      PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_5};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 635, __pyx_L1_error)
-      __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    } else
-    #endif
-    {
-      __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 635, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_4); __pyx_t_4 = NULL;
-      __Pyx_GIVEREF(__pyx_t_5);
-      PyTuple_SET_ITEM(__pyx_t_2, 0+1, __pyx_t_5);
-      __pyx_t_5 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 635, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    }
-  }
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 635, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v_y_tilde_values = __pyx_t_6;
-  __pyx_t_6.memview = NULL;
-  __pyx_t_6.data = NULL;
-
-  /* "fastTSNE/_tsne.pyx":637
- *         double[:, ::1] y_tilde_values = np.empty((total_interpolation_points, n_terms))
- * 
- *         complex[:, :] fft_w_coefficients = np.empty((n_fft_coeffs, (n_fft_coeffs / 2 + 1)), dtype=complex)             # <<<<<<<<<<<<<<
- *         complex[:, :] fft_kernel_tilde = np.empty((n_fft_coeffs, (n_fft_coeffs / 2 + 1)), dtype=complex)
- *         # Note that we can't use the same buffer for the input and output since
- */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 637, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 637, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 637, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyInt_FromSsize_t(((__pyx_v_n_fft_coeffs / 2) + 1)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 637, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 637, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_2);
-  PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_2);
-  __pyx_t_1 = 0;
-  __pyx_t_2 = 0;
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 637, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_GIVEREF(__pyx_t_5);
-  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_5);
-  __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 637, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_dtype, ((PyObject *)(&PyComplex_Type))) < 0) __PYX_ERR(0, 637, __pyx_L1_error)
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 637, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dsds___pyx_t_double_complex(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 637, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v_fft_w_coefficients = __pyx_t_7;
-  __pyx_t_7.memview = NULL;
-  __pyx_t_7.data = NULL;
-
-  /* "fastTSNE/_tsne.pyx":638
- * 
- *         complex[:, :] fft_w_coefficients = np.empty((n_fft_coeffs, (n_fft_coeffs / 2 + 1)), dtype=complex)
- *         complex[:, :] fft_kernel_tilde = np.empty((n_fft_coeffs, (n_fft_coeffs / 2 + 1)), dtype=complex)             # <<<<<<<<<<<<<<
- *         # Note that we can't use the same buffer for the input and output since
- *         # we only write to the top quadrant of the in matrix - we'd need to
- */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 638, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 638, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 638, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyInt_FromSsize_t(((__pyx_v_n_fft_coeffs / 2) + 1)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 638, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 638, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_2);
-  PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
-  __pyx_t_1 = 0;
-  __pyx_t_2 = 0;
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 638, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_GIVEREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_3);
-  __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 638, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, ((PyObject *)(&PyComplex_Type))) < 0) __PYX_ERR(0, 638, __pyx_L1_error)
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 638, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dsds___pyx_t_double_complex(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 638, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v_fft_kernel_tilde = __pyx_t_7;
-  __pyx_t_7.memview = NULL;
-  __pyx_t_7.data = NULL;
-
-  /* "fastTSNE/_tsne.pyx":644
- *         # changed during the IDFT, so it's faster to use two buffers, at the
- *         # cost of some memory
- *         double[:, ::1] fft_in_buffer = np.zeros((n_fft_coeffs, n_fft_coeffs), dtype=float)             # <<<<<<<<<<<<<<
- *         double[:, ::1] fft_out_buffer = np.zeros((n_fft_coeffs, n_fft_coeffs), dtype=float)
- * 
- */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 644, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 644, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 644, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 644, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 644, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_2);
-  PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_2);
-  __pyx_t_1 = 0;
-  __pyx_t_2 = 0;
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 644, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_GIVEREF(__pyx_t_5);
-  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_5);
-  __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 644, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 644, __pyx_L1_error)
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 644, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 644, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v_fft_in_buffer = __pyx_t_6;
-  __pyx_t_6.memview = NULL;
-  __pyx_t_6.data = NULL;
-
-  /* "fastTSNE/_tsne.pyx":645
- *         # cost of some memory
- *         double[:, ::1] fft_in_buffer = np.zeros((n_fft_coeffs, n_fft_coeffs), dtype=float)
- *         double[:, ::1] fft_out_buffer = np.zeros((n_fft_coeffs, n_fft_coeffs), dtype=float)             # <<<<<<<<<<<<<<
- * 
- *         Py_ssize_t d, i, j, idx
- */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 645, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 645, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 645, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 645, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 645, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_2);
-  PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
-  __pyx_t_1 = 0;
-  __pyx_t_2 = 0;
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 645, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_GIVEREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_3);
-  __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 645, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 645, __pyx_L1_error)
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 645, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 645, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v_fft_out_buffer = __pyx_t_6;
-  __pyx_t_6.memview = NULL;
-  __pyx_t_6.data = NULL;
-
-  /* "fastTSNE/_tsne.pyx":649
- *         Py_ssize_t d, i, j, idx
- * 
- *     fft_kernel_tilde = np.fft.rfft2(kernel_tilde)             # <<<<<<<<<<<<<<
- * 
- *     for d in range(n_terms):
- */
-  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 649, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_fft); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 649, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_rfft2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 649, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_v_kernel_tilde, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 649, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_5 = NULL;
-  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
-    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_3);
-    if (likely(__pyx_t_5)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
-      __Pyx_INCREF(__pyx_t_5);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_3, function);
-    }
-  }
-  if (!__pyx_t_5) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 649, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __Pyx_GOTREF(__pyx_t_1);
-  } else {
-    #if CYTHON_FAST_PYCALL
-    if (PyFunction_Check(__pyx_t_3)) {
-      PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_2};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 649, __pyx_L1_error)
-      __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    } else
-    #endif
-    #if CYTHON_FAST_PYCCALL
-    if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
-      PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_2};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 649, __pyx_L1_error)
-      __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    } else
-    #endif
-    {
-      __pyx_t_4 = PyTuple_New(1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 649, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_4);
-      __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_5); __pyx_t_5 = NULL;
-      __Pyx_GIVEREF(__pyx_t_2);
-      PyTuple_SET_ITEM(__pyx_t_4, 0+1, __pyx_t_2);
-      __pyx_t_2 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_4, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 649, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    }
-  }
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dsds___pyx_t_double_complex(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 649, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __PYX_XDEC_MEMVIEW(&__pyx_v_fft_kernel_tilde, 1);
-  __pyx_v_fft_kernel_tilde = __pyx_t_7;
-  __pyx_t_7.memview = NULL;
-  __pyx_t_7.data = NULL;
-
-  /* "fastTSNE/_tsne.pyx":651
- *     fft_kernel_tilde = np.fft.rfft2(kernel_tilde)
- * 
- *     for d in range(n_terms):             # <<<<<<<<<<<<<<
- *         for i in range(n_interpolation_points_1d):
- *             for j in range(n_interpolation_points_1d):
- */
-  __pyx_t_8 = __pyx_v_n_terms;
-  __pyx_t_9 = __pyx_t_8;
-  for (__pyx_t_10 = 0; __pyx_t_10 < __pyx_t_9; __pyx_t_10+=1) {
-    __pyx_v_d = __pyx_t_10;
-
-    /* "fastTSNE/_tsne.pyx":652
- * 
- *     for d in range(n_terms):
- *         for i in range(n_interpolation_points_1d):             # <<<<<<<<<<<<<<
- *             for j in range(n_interpolation_points_1d):
- *                 fft_in_buffer[i, j] = w_coefficients[i * n_interpolation_points_1d + j, d]
- */
-    __pyx_t_11 = __pyx_v_n_interpolation_points_1d;
-    __pyx_t_12 = __pyx_t_11;
-    for (__pyx_t_13 = 0; __pyx_t_13 < __pyx_t_12; __pyx_t_13+=1) {
-      __pyx_v_i = __pyx_t_13;
-
-      /* "fastTSNE/_tsne.pyx":653
- *     for d in range(n_terms):
- *         for i in range(n_interpolation_points_1d):
- *             for j in range(n_interpolation_points_1d):             # <<<<<<<<<<<<<<
- *                 fft_in_buffer[i, j] = w_coefficients[i * n_interpolation_points_1d + j, d]
- * 
- */
-      __pyx_t_14 = __pyx_v_n_interpolation_points_1d;
-      __pyx_t_15 = __pyx_t_14;
-      for (__pyx_t_16 = 0; __pyx_t_16 < __pyx_t_15; __pyx_t_16+=1) {
-        __pyx_v_j = __pyx_t_16;
-
-        /* "fastTSNE/_tsne.pyx":654
- *         for i in range(n_interpolation_points_1d):
- *             for j in range(n_interpolation_points_1d):
- *                 fft_in_buffer[i, j] = w_coefficients[i * n_interpolation_points_1d + j, d]             # <<<<<<<<<<<<<<
- * 
- *         fft_w_coefficients = np.fft.rfft2(fft_in_buffer)
- */
-        __pyx_t_17 = ((__pyx_v_i * __pyx_v_n_interpolation_points_1d) + __pyx_v_j);
-        __pyx_t_18 = __pyx_v_d;
-        __pyx_t_19 = __pyx_v_i;
-        __pyx_t_20 = __pyx_v_j;
-        *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_fft_in_buffer.data + __pyx_t_19 * __pyx_v_fft_in_buffer.strides[0]) )) + __pyx_t_20)) )) = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_w_coefficients.data + __pyx_t_17 * __pyx_v_w_coefficients.strides[0]) )) + __pyx_t_18)) )));
-      }
-    }
-
-    /* "fastTSNE/_tsne.pyx":656
- *                 fft_in_buffer[i, j] = w_coefficients[i * n_interpolation_points_1d + j, d]
- * 
- *         fft_w_coefficients = np.fft.rfft2(fft_in_buffer)             # <<<<<<<<<<<<<<
- * 
- *         # Take the Hadamard product of two complex vectors
- */
-    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 656, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_fft); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 656, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_rfft2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 656, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = __pyx_memoryview_fromslice(__pyx_v_fft_in_buffer, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 656, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_2 = NULL;
-    if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
-      __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_3);
-      if (likely(__pyx_t_2)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
-        __Pyx_INCREF(__pyx_t_2);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_3, function);
-      }
-    }
-    if (!__pyx_t_2) {
-      __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 656, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __Pyx_GOTREF(__pyx_t_1);
-    } else {
-      #if CYTHON_FAST_PYCALL
-      if (PyFunction_Check(__pyx_t_3)) {
-        PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_t_4};
-        __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 656, __pyx_L1_error)
-        __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-        __Pyx_GOTREF(__pyx_t_1);
-        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      } else
-      #endif
-      #if CYTHON_FAST_PYCCALL
-      if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
-        PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_t_4};
-        __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 656, __pyx_L1_error)
-        __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-        __Pyx_GOTREF(__pyx_t_1);
-        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      } else
-      #endif
-      {
-        __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 656, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_5);
-        __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_2); __pyx_t_2 = NULL;
-        __Pyx_GIVEREF(__pyx_t_4);
-        PyTuple_SET_ITEM(__pyx_t_5, 0+1, __pyx_t_4);
-        __pyx_t_4 = 0;
-        __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 656, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_1);
-        __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-      }
-    }
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dsds___pyx_t_double_complex(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 656, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __PYX_XDEC_MEMVIEW(&__pyx_v_fft_w_coefficients, 1);
-    __pyx_v_fft_w_coefficients = __pyx_t_7;
-    __pyx_t_7.memview = NULL;
-    __pyx_t_7.data = NULL;
-
-    /* "fastTSNE/_tsne.pyx":659
- * 
- *         # Take the Hadamard product of two complex vectors
- *         fft_w_coefficients = np.multiply(fft_w_coefficients, fft_kernel_tilde)             # <<<<<<<<<<<<<<
- * 
- *         # Invert the computed values at the interpolated nodes
- */
-    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 659, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_multiply); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 659, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __pyx_memoryview_fromslice(__pyx_v_fft_w_coefficients, 2, (PyObject *(*)(char *)) __pyx_memview_get___pyx_t_double_complex, (int (*)(char *, PyObject *)) __pyx_memview_set___pyx_t_double_complex, 0);; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 659, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __pyx_memoryview_fromslice(__pyx_v_fft_kernel_tilde, 2, (PyObject *(*)(char *)) __pyx_memview_get___pyx_t_double_complex, (int (*)(char *, PyObject *)) __pyx_memview_set___pyx_t_double_complex, 0);; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 659, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_2 = NULL;
-    __pyx_t_21 = 0;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_5))) {
-      __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_5);
-      if (likely(__pyx_t_2)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_5);
-        __Pyx_INCREF(__pyx_t_2);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_5, function);
-        __pyx_t_21 = 1;
-      }
-    }
-    #if CYTHON_FAST_PYCALL
-    if (PyFunction_Check(__pyx_t_5)) {
-      PyObject *__pyx_temp[3] = {__pyx_t_2, __pyx_t_3, __pyx_t_4};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_21, 2+__pyx_t_21); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 659, __pyx_L1_error)
-      __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    } else
-    #endif
-    #if CYTHON_FAST_PYCCALL
-    if (__Pyx_PyFastCFunction_Check(__pyx_t_5)) {
-      PyObject *__pyx_temp[3] = {__pyx_t_2, __pyx_t_3, __pyx_t_4};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_21, 2+__pyx_t_21); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 659, __pyx_L1_error)
-      __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    } else
-    #endif
-    {
-      __pyx_t_22 = PyTuple_New(2+__pyx_t_21); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 659, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_22);
-      if (__pyx_t_2) {
-        __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_2); __pyx_t_2 = NULL;
-      }
-      __Pyx_GIVEREF(__pyx_t_3);
-      PyTuple_SET_ITEM(__pyx_t_22, 0+__pyx_t_21, __pyx_t_3);
-      __Pyx_GIVEREF(__pyx_t_4);
-      PyTuple_SET_ITEM(__pyx_t_22, 1+__pyx_t_21, __pyx_t_4);
-      __pyx_t_3 = 0;
-      __pyx_t_4 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_22, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 659, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
-    }
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dsds___pyx_t_double_complex(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 659, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __PYX_XDEC_MEMVIEW(&__pyx_v_fft_w_coefficients, 1);
-    __pyx_v_fft_w_coefficients = __pyx_t_7;
-    __pyx_t_7.memview = NULL;
-    __pyx_t_7.data = NULL;
-
-    /* "fastTSNE/_tsne.pyx":662
- * 
- *         # Invert the computed values at the interpolated nodes
- *         fft_out_buffer = np.fft.irfft2(fft_w_coefficients)             # <<<<<<<<<<<<<<
- * 
- *         for i in range(n_interpolation_points_1d):
- */
-    __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 662, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_22 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_fft); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 662, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_22);
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_22, __pyx_n_s_irfft2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 662, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
-    __pyx_t_22 = __pyx_memoryview_fromslice(__pyx_v_fft_w_coefficients, 2, (PyObject *(*)(char *)) __pyx_memview_get___pyx_t_double_complex, (int (*)(char *, PyObject *)) __pyx_memview_set___pyx_t_double_complex, 0);; if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 662, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_22);
-    __pyx_t_4 = NULL;
-    if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_5))) {
-      __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_5);
-      if (likely(__pyx_t_4)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_5);
-        __Pyx_INCREF(__pyx_t_4);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_5, function);
-      }
-    }
-    if (!__pyx_t_4) {
-      __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_22); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 662, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
-      __Pyx_GOTREF(__pyx_t_1);
-    } else {
-      #if CYTHON_FAST_PYCALL
-      if (PyFunction_Check(__pyx_t_5)) {
-        PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_22};
-        __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 662, __pyx_L1_error)
-        __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-        __Pyx_GOTREF(__pyx_t_1);
-        __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
-      } else
-      #endif
-      #if CYTHON_FAST_PYCCALL
-      if (__Pyx_PyFastCFunction_Check(__pyx_t_5)) {
-        PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_22};
-        __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 662, __pyx_L1_error)
-        __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-        __Pyx_GOTREF(__pyx_t_1);
-        __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
-      } else
-      #endif
-      {
-        __pyx_t_3 = PyTuple_New(1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 662, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_3);
-        __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4); __pyx_t_4 = NULL;
-        __Pyx_GIVEREF(__pyx_t_22);
-        PyTuple_SET_ITEM(__pyx_t_3, 0+1, __pyx_t_22);
-        __pyx_t_22 = 0;
-        __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_3, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 662, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_1);
-        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      }
-    }
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 662, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __PYX_XDEC_MEMVIEW(&__pyx_v_fft_out_buffer, 1);
-    __pyx_v_fft_out_buffer = __pyx_t_6;
-    __pyx_t_6.memview = NULL;
-    __pyx_t_6.data = NULL;
-
-    /* "fastTSNE/_tsne.pyx":664
- *         fft_out_buffer = np.fft.irfft2(fft_w_coefficients)
- * 
- *         for i in range(n_interpolation_points_1d):             # <<<<<<<<<<<<<<
- *             for j in range(n_interpolation_points_1d):
- *                 idx = i * n_interpolation_points_1d + j
- */
-    __pyx_t_11 = __pyx_v_n_interpolation_points_1d;
-    __pyx_t_12 = __pyx_t_11;
-    for (__pyx_t_13 = 0; __pyx_t_13 < __pyx_t_12; __pyx_t_13+=1) {
-      __pyx_v_i = __pyx_t_13;
-
-      /* "fastTSNE/_tsne.pyx":665
- * 
- *         for i in range(n_interpolation_points_1d):
- *             for j in range(n_interpolation_points_1d):             # <<<<<<<<<<<<<<
- *                 idx = i * n_interpolation_points_1d + j
- *                 y_tilde_values[idx, d] = fft_out_buffer[n_interpolation_points_1d + i,
- */
-      __pyx_t_14 = __pyx_v_n_interpolation_points_1d;
-      __pyx_t_15 = __pyx_t_14;
-      for (__pyx_t_16 = 0; __pyx_t_16 < __pyx_t_15; __pyx_t_16+=1) {
-        __pyx_v_j = __pyx_t_16;
-
-        /* "fastTSNE/_tsne.pyx":666
- *         for i in range(n_interpolation_points_1d):
- *             for j in range(n_interpolation_points_1d):
- *                 idx = i * n_interpolation_points_1d + j             # <<<<<<<<<<<<<<
- *                 y_tilde_values[idx, d] = fft_out_buffer[n_interpolation_points_1d + i,
- *                                                         n_interpolation_points_1d + j].real
- */
-        __pyx_v_idx = ((__pyx_v_i * __pyx_v_n_interpolation_points_1d) + __pyx_v_j);
-
-        /* "fastTSNE/_tsne.pyx":667
- *             for j in range(n_interpolation_points_1d):
- *                 idx = i * n_interpolation_points_1d + j
- *                 y_tilde_values[idx, d] = fft_out_buffer[n_interpolation_points_1d + i,             # <<<<<<<<<<<<<<
- *                                                         n_interpolation_points_1d + j].real
- * 
- */
-        __pyx_t_23 = (__pyx_v_n_interpolation_points_1d + __pyx_v_i);
-        __pyx_t_24 = (__pyx_v_n_interpolation_points_1d + __pyx_v_j);
-        __pyx_t_1 = PyFloat_FromDouble((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_fft_out_buffer.data + __pyx_t_23 * __pyx_v_fft_out_buffer.strides[0]) )) + __pyx_t_24)) )))); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 667, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_1);
-
-        /* "fastTSNE/_tsne.pyx":668
- *                 idx = i * n_interpolation_points_1d + j
- *                 y_tilde_values[idx, d] = fft_out_buffer[n_interpolation_points_1d + i,
- *                                                         n_interpolation_points_1d + j].real             # <<<<<<<<<<<<<<
- * 
- *     return y_tilde_values
- */
-        __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_real); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 668, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_5);
-        __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-        __pyx_t_25 = __pyx_PyFloat_AsDouble(__pyx_t_5); if (unlikely((__pyx_t_25 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 668, __pyx_L1_error)
-        __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-
-        /* "fastTSNE/_tsne.pyx":667
- *             for j in range(n_interpolation_points_1d):
- *                 idx = i * n_interpolation_points_1d + j
- *                 y_tilde_values[idx, d] = fft_out_buffer[n_interpolation_points_1d + i,             # <<<<<<<<<<<<<<
- *                                                         n_interpolation_points_1d + j].real
- * 
- */
-        __pyx_t_26 = __pyx_v_idx;
-        __pyx_t_27 = __pyx_v_d;
-        *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_y_tilde_values.data + __pyx_t_26 * __pyx_v_y_tilde_values.strides[0]) )) + __pyx_t_27)) )) = __pyx_t_25;
-      }
-    }
-  }
-
-  /* "fastTSNE/_tsne.pyx":670
- *                                                         n_interpolation_points_1d + j].real
- * 
- *     return y_tilde_values             # <<<<<<<<<<<<<<
- * 
- * 
- */
-  __PYX_INC_MEMVIEW(&__pyx_v_y_tilde_values, 0);
-  __pyx_r = __pyx_v_y_tilde_values;
-  goto __pyx_L0;
-
-  /* "fastTSNE/_tsne.pyx":604
- * 
- * 
- * cdef double[:, ::1] matrix_multiply_fft_2d(             # <<<<<<<<<<<<<<
- *     double[:, ::1] kernel_tilde,
- *     double[:, ::1] w_coefficients,
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_5);
-  __PYX_XDEC_MEMVIEW(&__pyx_t_6, 1);
-  __PYX_XDEC_MEMVIEW(&__pyx_t_7, 1);
-  __Pyx_XDECREF(__pyx_t_22);
-  __pyx_r.data = NULL;
-  __pyx_r.memview = NULL;
-  __Pyx_AddTraceback("fastTSNE._tsne.matrix_multiply_fft_2d", __pyx_clineno, __pyx_lineno, __pyx_filename);
-
-  goto __pyx_L2;
-  __pyx_L0:;
-  if (unlikely(!__pyx_r.memview)) {
-    PyErr_SetString(PyExc_TypeError, "Memoryview return value is not initialized");
-  }
-  __pyx_L2:;
-  __PYX_XDEC_MEMVIEW(&__pyx_v_y_tilde_values, 1);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_fft_w_coefficients, 1);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_fft_kernel_tilde, 1);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_fft_in_buffer, 1);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_fft_out_buffer, 1);
-  __Pyx_TraceReturn(Py_None, 0);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "fastTSNE/_tsne.pyx":673
+/* "fastTSNE/_tsne.pyx":542
  * 
  * 
  * cdef double[:, ::1] compute_kernel_tilde_2d(             # <<<<<<<<<<<<<<
@@ -10027,75 +8561,75 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_2d(Py_ss
   Py_ssize_t __pyx_t_29;
   Py_ssize_t __pyx_t_30;
   __Pyx_RefNannySetupContext("compute_kernel_tilde_2d", 0);
-  __Pyx_TraceCall("compute_kernel_tilde_2d", __pyx_f[0], 673, 0, __PYX_ERR(0, 673, __pyx_L1_error));
+  __Pyx_TraceCall("compute_kernel_tilde_2d", __pyx_f[0], 542, 0, __PYX_ERR(0, 542, __pyx_L1_error));
 
-  /* "fastTSNE/_tsne.pyx":679
+  /* "fastTSNE/_tsne.pyx":548
  * ):
  *     cdef:
  *         double[::1] y_tilde = np.empty(n_interpolation_points_1d, dtype=float)             # <<<<<<<<<<<<<<
  *         double[::1] x_tilde = np.empty(n_interpolation_points_1d, dtype=float)
  * 
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 679, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 548, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 679, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 548, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_interpolation_points_1d); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 679, __pyx_L1_error)
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_interpolation_points_1d); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 548, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 679, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 548, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 679, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 548, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 679, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 679, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 548, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 548, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_4, PyBUF_WRITABLE); if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 679, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_4, PyBUF_WRITABLE); if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 548, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_y_tilde = __pyx_t_5;
   __pyx_t_5.memview = NULL;
   __pyx_t_5.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":680
+  /* "fastTSNE/_tsne.pyx":549
  *     cdef:
  *         double[::1] y_tilde = np.empty(n_interpolation_points_1d, dtype=float)
  *         double[::1] x_tilde = np.empty(n_interpolation_points_1d, dtype=float)             # <<<<<<<<<<<<<<
  * 
  *         Py_ssize_t embedded_size = 2 * n_interpolation_points_1d
  */
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 680, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 549, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_empty); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 680, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_empty); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 549, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyInt_FromSsize_t(__pyx_v_n_interpolation_points_1d); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 680, __pyx_L1_error)
+  __pyx_t_4 = PyInt_FromSsize_t(__pyx_v_n_interpolation_points_1d); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 549, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 680, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 549, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 680, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 549, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 680, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 680, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 549, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 549, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_2, PyBUF_WRITABLE); if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 680, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_2, PyBUF_WRITABLE); if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 549, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_x_tilde = __pyx_t_5;
   __pyx_t_5.memview = NULL;
   __pyx_t_5.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":682
+  /* "fastTSNE/_tsne.pyx":551
  *         double[::1] x_tilde = np.empty(n_interpolation_points_1d, dtype=float)
  * 
  *         Py_ssize_t embedded_size = 2 * n_interpolation_points_1d             # <<<<<<<<<<<<<<
@@ -10104,23 +8638,23 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_2d(Py_ss
  */
   __pyx_v_embedded_size = (2 * __pyx_v_n_interpolation_points_1d);
 
-  /* "fastTSNE/_tsne.pyx":683
+  /* "fastTSNE/_tsne.pyx":552
  * 
  *         Py_ssize_t embedded_size = 2 * n_interpolation_points_1d
  *         double[:, ::1] kernel_tilde = np.zeros((embedded_size, embedded_size), dtype=float)             # <<<<<<<<<<<<<<
  * 
  *         Py_ssize_t i, j
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 683, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 552, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 683, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 552, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_embedded_size); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 683, __pyx_L1_error)
+  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_embedded_size); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 552, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_embedded_size); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 683, __pyx_L1_error)
+  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_embedded_size); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 552, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 683, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 552, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_2);
@@ -10128,26 +8662,26 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_2d(Py_ss
   PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_3);
   __pyx_t_2 = 0;
   __pyx_t_3 = 0;
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 683, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 552, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 683, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 552, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 683, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 683, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 552, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 552, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_2, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 683, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_2, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 552, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_kernel_tilde = __pyx_t_6;
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":687
+  /* "fastTSNE/_tsne.pyx":556
  *         Py_ssize_t i, j
  * 
  *     x_tilde[0] = coord_min + coord_spacing / 2             # <<<<<<<<<<<<<<
@@ -10157,7 +8691,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_2d(Py_ss
   __pyx_t_7 = 0;
   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_x_tilde.data) + __pyx_t_7)) )) = (__pyx_v_coord_min + (__pyx_v_coord_spacing / 2.0));
 
-  /* "fastTSNE/_tsne.pyx":688
+  /* "fastTSNE/_tsne.pyx":557
  * 
  *     x_tilde[0] = coord_min + coord_spacing / 2
  *     y_tilde[0] = coord_min + coord_spacing / 2             # <<<<<<<<<<<<<<
@@ -10167,7 +8701,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_2d(Py_ss
   __pyx_t_8 = 0;
   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_8)) )) = (__pyx_v_coord_min + (__pyx_v_coord_spacing / 2.0));
 
-  /* "fastTSNE/_tsne.pyx":689
+  /* "fastTSNE/_tsne.pyx":558
  *     x_tilde[0] = coord_min + coord_spacing / 2
  *     y_tilde[0] = coord_min + coord_spacing / 2
  *     for i in range(1, n_interpolation_points_1d):             # <<<<<<<<<<<<<<
@@ -10179,7 +8713,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_2d(Py_ss
   for (__pyx_t_11 = 1; __pyx_t_11 < __pyx_t_10; __pyx_t_11+=1) {
     __pyx_v_i = __pyx_t_11;
 
-    /* "fastTSNE/_tsne.pyx":690
+    /* "fastTSNE/_tsne.pyx":559
  *     y_tilde[0] = coord_min + coord_spacing / 2
  *     for i in range(1, n_interpolation_points_1d):
  *         x_tilde[i] = x_tilde[i - 1] + coord_spacing             # <<<<<<<<<<<<<<
@@ -10190,7 +8724,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_2d(Py_ss
     __pyx_t_13 = __pyx_v_i;
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_x_tilde.data) + __pyx_t_13)) )) = ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_x_tilde.data) + __pyx_t_12)) ))) + __pyx_v_coord_spacing);
 
-    /* "fastTSNE/_tsne.pyx":691
+    /* "fastTSNE/_tsne.pyx":560
  *     for i in range(1, n_interpolation_points_1d):
  *         x_tilde[i] = x_tilde[i - 1] + coord_spacing
  *         y_tilde[i] = y_tilde[i - 1] + coord_spacing             # <<<<<<<<<<<<<<
@@ -10202,7 +8736,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_2d(Py_ss
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_15)) )) = ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_14)) ))) + __pyx_v_coord_spacing);
   }
 
-  /* "fastTSNE/_tsne.pyx":696
+  /* "fastTSNE/_tsne.pyx":565
  *     # generating kernel vector for a circulant matrix
  *     cdef double tmp
  *     for i in range(n_interpolation_points_1d):             # <<<<<<<<<<<<<<
@@ -10214,7 +8748,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_2d(Py_ss
   for (__pyx_t_11 = 0; __pyx_t_11 < __pyx_t_10; __pyx_t_11+=1) {
     __pyx_v_i = __pyx_t_11;
 
-    /* "fastTSNE/_tsne.pyx":697
+    /* "fastTSNE/_tsne.pyx":566
  *     cdef double tmp
  *     for i in range(n_interpolation_points_1d):
  *         for j in range(n_interpolation_points_1d):             # <<<<<<<<<<<<<<
@@ -10226,7 +8760,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_2d(Py_ss
     for (__pyx_t_18 = 0; __pyx_t_18 < __pyx_t_17; __pyx_t_18+=1) {
       __pyx_v_j = __pyx_t_18;
 
-      /* "fastTSNE/_tsne.pyx":698
+      /* "fastTSNE/_tsne.pyx":567
  *     for i in range(n_interpolation_points_1d):
  *         for j in range(n_interpolation_points_1d):
  *             tmp = squared_cauchy_2d(y_tilde[0], x_tilde[0], y_tilde[i], x_tilde[j])             # <<<<<<<<<<<<<<
@@ -10239,7 +8773,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_2d(Py_ss
       __pyx_t_22 = __pyx_v_j;
       __pyx_v_tmp = __pyx_f_8fastTSNE_5_tsne_squared_cauchy_2d((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_19)) ))), (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_x_tilde.data) + __pyx_t_20)) ))), (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_21)) ))), (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_x_tilde.data) + __pyx_t_22)) ))));
 
-      /* "fastTSNE/_tsne.pyx":700
+      /* "fastTSNE/_tsne.pyx":569
  *             tmp = squared_cauchy_2d(y_tilde[0], x_tilde[0], y_tilde[i], x_tilde[j])
  * 
  *             kernel_tilde[n_interpolation_points_1d + i, n_interpolation_points_1d + j] = tmp             # <<<<<<<<<<<<<<
@@ -10250,7 +8784,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_2d(Py_ss
       __pyx_t_24 = (__pyx_v_n_interpolation_points_1d + __pyx_v_j);
       *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_kernel_tilde.data + __pyx_t_23 * __pyx_v_kernel_tilde.strides[0]) )) + __pyx_t_24)) )) = __pyx_v_tmp;
 
-      /* "fastTSNE/_tsne.pyx":701
+      /* "fastTSNE/_tsne.pyx":570
  * 
  *             kernel_tilde[n_interpolation_points_1d + i, n_interpolation_points_1d + j] = tmp
  *             kernel_tilde[n_interpolation_points_1d - i, n_interpolation_points_1d + j] = tmp             # <<<<<<<<<<<<<<
@@ -10261,7 +8795,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_2d(Py_ss
       __pyx_t_26 = (__pyx_v_n_interpolation_points_1d + __pyx_v_j);
       *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_kernel_tilde.data + __pyx_t_25 * __pyx_v_kernel_tilde.strides[0]) )) + __pyx_t_26)) )) = __pyx_v_tmp;
 
-      /* "fastTSNE/_tsne.pyx":702
+      /* "fastTSNE/_tsne.pyx":571
  *             kernel_tilde[n_interpolation_points_1d + i, n_interpolation_points_1d + j] = tmp
  *             kernel_tilde[n_interpolation_points_1d - i, n_interpolation_points_1d + j] = tmp
  *             kernel_tilde[n_interpolation_points_1d + i, n_interpolation_points_1d - j] = tmp             # <<<<<<<<<<<<<<
@@ -10272,7 +8806,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_2d(Py_ss
       __pyx_t_28 = (__pyx_v_n_interpolation_points_1d - __pyx_v_j);
       *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_kernel_tilde.data + __pyx_t_27 * __pyx_v_kernel_tilde.strides[0]) )) + __pyx_t_28)) )) = __pyx_v_tmp;
 
-      /* "fastTSNE/_tsne.pyx":703
+      /* "fastTSNE/_tsne.pyx":572
  *             kernel_tilde[n_interpolation_points_1d - i, n_interpolation_points_1d + j] = tmp
  *             kernel_tilde[n_interpolation_points_1d + i, n_interpolation_points_1d - j] = tmp
  *             kernel_tilde[n_interpolation_points_1d - i, n_interpolation_points_1d - j] = tmp             # <<<<<<<<<<<<<<
@@ -10285,7 +8819,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_2d(Py_ss
     }
   }
 
-  /* "fastTSNE/_tsne.pyx":705
+  /* "fastTSNE/_tsne.pyx":574
  *             kernel_tilde[n_interpolation_points_1d - i, n_interpolation_points_1d - j] = tmp
  * 
  *     return kernel_tilde             # <<<<<<<<<<<<<<
@@ -10296,7 +8830,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_2d(Py_ss
   __pyx_r = __pyx_v_kernel_tilde;
   goto __pyx_L0;
 
-  /* "fastTSNE/_tsne.pyx":673
+  /* "fastTSNE/_tsne.pyx":542
  * 
  * 
  * cdef double[:, ::1] compute_kernel_tilde_2d(             # <<<<<<<<<<<<<<
@@ -10330,7 +8864,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_2d(Py_ss
   return __pyx_r;
 }
 
-/* "fastTSNE/_tsne.pyx":708
+/* "fastTSNE/_tsne.pyx":577
  * 
  * 
  * cpdef double estimate_negative_gradient_fft_2d(             # <<<<<<<<<<<<<<
@@ -10504,7 +9038,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
   Py_ssize_t __pyx_t_115;
   Py_ssize_t __pyx_t_116;
   __Pyx_RefNannySetupContext("estimate_negative_gradient_fft_2d", 0);
-  __Pyx_TraceCall("estimate_negative_gradient_fft_2d", __pyx_f[0], 708, 0, __PYX_ERR(0, 708, __pyx_L1_error));
+  __Pyx_TraceCall("estimate_negative_gradient_fft_2d", __pyx_f[0], 577, 0, __PYX_ERR(0, 577, __pyx_L1_error));
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
       __pyx_v_n_interpolation_points = __pyx_optional_args->n_interpolation_points;
@@ -10517,7 +9051,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     }
   }
 
-  /* "fastTSNE/_tsne.pyx":717
+  /* "fastTSNE/_tsne.pyx":586
  *     cdef:
  *         Py_ssize_t i, j, d, box_idx
  *         Py_ssize_t n_samples = embedding.shape[0]             # <<<<<<<<<<<<<<
@@ -10526,7 +9060,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
   __pyx_v_n_samples = (__pyx_v_embedding.shape[0]);
 
-  /* "fastTSNE/_tsne.pyx":718
+  /* "fastTSNE/_tsne.pyx":587
  *         Py_ssize_t i, j, d, box_idx
  *         Py_ssize_t n_samples = embedding.shape[0]
  *         Py_ssize_t n_dims = embedding.shape[1]             # <<<<<<<<<<<<<<
@@ -10535,7 +9069,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
   __pyx_v_n_dims = (__pyx_v_embedding.shape[1]);
 
-  /* "fastTSNE/_tsne.pyx":720
+  /* "fastTSNE/_tsne.pyx":589
  *         Py_ssize_t n_dims = embedding.shape[1]
  * 
  *         double coord_max = -INFINITY, coord_min = INFINITY             # <<<<<<<<<<<<<<
@@ -10545,7 +9079,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
   __pyx_v_coord_max = (-INFINITY);
   __pyx_v_coord_min = INFINITY;
 
-  /* "fastTSNE/_tsne.pyx":722
+  /* "fastTSNE/_tsne.pyx":591
  *         double coord_max = -INFINITY, coord_min = INFINITY
  *     # Determine the min/max values of the embedding
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -10557,7 +9091,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":723
+    /* "fastTSNE/_tsne.pyx":592
  *     # Determine the min/max values of the embedding
  *     for i in range(n_samples):
  *         if embedding[i, 0] < coord_min:             # <<<<<<<<<<<<<<
@@ -10569,7 +9103,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     __pyx_t_6 = (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_4 * __pyx_v_embedding.strides[0]) )) + __pyx_t_5)) ))) < __pyx_v_coord_min) != 0);
     if (__pyx_t_6) {
 
-      /* "fastTSNE/_tsne.pyx":724
+      /* "fastTSNE/_tsne.pyx":593
  *     for i in range(n_samples):
  *         if embedding[i, 0] < coord_min:
  *             coord_min = embedding[i, 0]             # <<<<<<<<<<<<<<
@@ -10580,7 +9114,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
       __pyx_t_8 = 0;
       __pyx_v_coord_min = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_7 * __pyx_v_embedding.strides[0]) )) + __pyx_t_8)) )));
 
-      /* "fastTSNE/_tsne.pyx":723
+      /* "fastTSNE/_tsne.pyx":592
  *     # Determine the min/max values of the embedding
  *     for i in range(n_samples):
  *         if embedding[i, 0] < coord_min:             # <<<<<<<<<<<<<<
@@ -10590,7 +9124,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
       goto __pyx_L5;
     }
 
-    /* "fastTSNE/_tsne.pyx":725
+    /* "fastTSNE/_tsne.pyx":594
  *         if embedding[i, 0] < coord_min:
  *             coord_min = embedding[i, 0]
  *         elif embedding[i, 0] > coord_max:             # <<<<<<<<<<<<<<
@@ -10602,7 +9136,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     __pyx_t_6 = (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_9 * __pyx_v_embedding.strides[0]) )) + __pyx_t_10)) ))) > __pyx_v_coord_max) != 0);
     if (__pyx_t_6) {
 
-      /* "fastTSNE/_tsne.pyx":726
+      /* "fastTSNE/_tsne.pyx":595
  *             coord_min = embedding[i, 0]
  *         elif embedding[i, 0] > coord_max:
  *             coord_max = embedding[i, 0]             # <<<<<<<<<<<<<<
@@ -10613,7 +9147,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
       __pyx_t_12 = 0;
       __pyx_v_coord_max = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_11 * __pyx_v_embedding.strides[0]) )) + __pyx_t_12)) )));
 
-      /* "fastTSNE/_tsne.pyx":725
+      /* "fastTSNE/_tsne.pyx":594
  *         if embedding[i, 0] < coord_min:
  *             coord_min = embedding[i, 0]
  *         elif embedding[i, 0] > coord_max:             # <<<<<<<<<<<<<<
@@ -10623,7 +9157,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     }
     __pyx_L5:;
 
-    /* "fastTSNE/_tsne.pyx":727
+    /* "fastTSNE/_tsne.pyx":596
  *         elif embedding[i, 0] > coord_max:
  *             coord_max = embedding[i, 0]
  *         if embedding[i, 1] < coord_min:             # <<<<<<<<<<<<<<
@@ -10635,7 +9169,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     __pyx_t_6 = (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_13 * __pyx_v_embedding.strides[0]) )) + __pyx_t_14)) ))) < __pyx_v_coord_min) != 0);
     if (__pyx_t_6) {
 
-      /* "fastTSNE/_tsne.pyx":728
+      /* "fastTSNE/_tsne.pyx":597
  *             coord_max = embedding[i, 0]
  *         if embedding[i, 1] < coord_min:
  *             coord_min = embedding[i, 1]             # <<<<<<<<<<<<<<
@@ -10646,7 +9180,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
       __pyx_t_16 = 1;
       __pyx_v_coord_min = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_15 * __pyx_v_embedding.strides[0]) )) + __pyx_t_16)) )));
 
-      /* "fastTSNE/_tsne.pyx":727
+      /* "fastTSNE/_tsne.pyx":596
  *         elif embedding[i, 0] > coord_max:
  *             coord_max = embedding[i, 0]
  *         if embedding[i, 1] < coord_min:             # <<<<<<<<<<<<<<
@@ -10656,7 +9190,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
       goto __pyx_L6;
     }
 
-    /* "fastTSNE/_tsne.pyx":729
+    /* "fastTSNE/_tsne.pyx":598
  *         if embedding[i, 1] < coord_min:
  *             coord_min = embedding[i, 1]
  *         elif embedding[i, 1] > coord_max:             # <<<<<<<<<<<<<<
@@ -10668,7 +9202,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     __pyx_t_6 = (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_17 * __pyx_v_embedding.strides[0]) )) + __pyx_t_18)) ))) > __pyx_v_coord_max) != 0);
     if (__pyx_t_6) {
 
-      /* "fastTSNE/_tsne.pyx":730
+      /* "fastTSNE/_tsne.pyx":599
  *             coord_min = embedding[i, 1]
  *         elif embedding[i, 1] > coord_max:
  *             coord_max = embedding[i, 1]             # <<<<<<<<<<<<<<
@@ -10679,7 +9213,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
       __pyx_t_20 = 1;
       __pyx_v_coord_max = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_19 * __pyx_v_embedding.strides[0]) )) + __pyx_t_20)) )));
 
-      /* "fastTSNE/_tsne.pyx":729
+      /* "fastTSNE/_tsne.pyx":598
  *         if embedding[i, 1] < coord_min:
  *             coord_min = embedding[i, 1]
  *         elif embedding[i, 1] > coord_max:             # <<<<<<<<<<<<<<
@@ -10690,7 +9224,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     __pyx_L6:;
   }
 
-  /* "fastTSNE/_tsne.pyx":732
+  /* "fastTSNE/_tsne.pyx":601
  *             coord_max = embedding[i, 1]
  * 
  *     cdef int n_boxes_1d = <int>fmax(min_num_intervals, (coord_max - coord_min) / ints_in_interval)             # <<<<<<<<<<<<<<
@@ -10699,7 +9233,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
   __pyx_v_n_boxes_1d = ((int)fmax(__pyx_v_min_num_intervals, ((__pyx_v_coord_max - __pyx_v_coord_min) / __pyx_v_ints_in_interval)));
 
-  /* "fastTSNE/_tsne.pyx":733
+  /* "fastTSNE/_tsne.pyx":602
  * 
  *     cdef int n_boxes_1d = <int>fmax(min_num_intervals, (coord_max - coord_min) / ints_in_interval)
  *     cdef int n_total_boxes = n_boxes_1d ** 2             # <<<<<<<<<<<<<<
@@ -10708,7 +9242,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
   __pyx_v_n_total_boxes = __Pyx_pow_long(((long)__pyx_v_n_boxes_1d), 2);
 
-  /* "fastTSNE/_tsne.pyx":734
+  /* "fastTSNE/_tsne.pyx":603
  *     cdef int n_boxes_1d = <int>fmax(min_num_intervals, (coord_max - coord_min) / ints_in_interval)
  *     cdef int n_total_boxes = n_boxes_1d ** 2
  *     cdef double box_width = (coord_max - coord_min) / n_boxes_1d             # <<<<<<<<<<<<<<
@@ -10717,139 +9251,139 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
   __pyx_v_box_width = ((__pyx_v_coord_max - __pyx_v_coord_min) / __pyx_v_n_boxes_1d);
 
-  /* "fastTSNE/_tsne.pyx":738
+  /* "fastTSNE/_tsne.pyx":607
  *     # Compute the box bounds
  *     cdef:
  *         double[::1] box_x_lower_bounds = np.empty(n_total_boxes, dtype=float)             # <<<<<<<<<<<<<<
  *         double[::1] box_x_upper_bounds = np.empty(n_total_boxes, dtype=float)
  *         double[::1] box_y_lower_bounds = np.empty(n_total_boxes, dtype=float)
  */
-  __pyx_t_21 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 738, __pyx_L1_error)
+  __pyx_t_21 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 607, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_21);
-  __pyx_t_22 = __Pyx_PyObject_GetAttrStr(__pyx_t_21, __pyx_n_s_empty); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 738, __pyx_L1_error)
+  __pyx_t_22 = __Pyx_PyObject_GetAttrStr(__pyx_t_21, __pyx_n_s_empty); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 607, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_22);
   __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
-  __pyx_t_21 = __Pyx_PyInt_From_int(__pyx_v_n_total_boxes); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 738, __pyx_L1_error)
+  __pyx_t_21 = __Pyx_PyInt_From_int(__pyx_v_n_total_boxes); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 607, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_21);
-  __pyx_t_23 = PyTuple_New(1); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 738, __pyx_L1_error)
+  __pyx_t_23 = PyTuple_New(1); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 607, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_23);
   __Pyx_GIVEREF(__pyx_t_21);
   PyTuple_SET_ITEM(__pyx_t_23, 0, __pyx_t_21);
   __pyx_t_21 = 0;
-  __pyx_t_21 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 738, __pyx_L1_error)
+  __pyx_t_21 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 607, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_21);
-  if (PyDict_SetItem(__pyx_t_21, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 738, __pyx_L1_error)
-  __pyx_t_24 = __Pyx_PyObject_Call(__pyx_t_22, __pyx_t_23, __pyx_t_21); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 738, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_21, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 607, __pyx_L1_error)
+  __pyx_t_24 = __Pyx_PyObject_Call(__pyx_t_22, __pyx_t_23, __pyx_t_21); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 607, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_24);
   __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
   __Pyx_DECREF(__pyx_t_23); __pyx_t_23 = 0;
   __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
-  __pyx_t_25 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_24, PyBUF_WRITABLE); if (unlikely(!__pyx_t_25.memview)) __PYX_ERR(0, 738, __pyx_L1_error)
+  __pyx_t_25 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_24, PyBUF_WRITABLE); if (unlikely(!__pyx_t_25.memview)) __PYX_ERR(0, 607, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
   __pyx_v_box_x_lower_bounds = __pyx_t_25;
   __pyx_t_25.memview = NULL;
   __pyx_t_25.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":739
+  /* "fastTSNE/_tsne.pyx":608
  *     cdef:
  *         double[::1] box_x_lower_bounds = np.empty(n_total_boxes, dtype=float)
  *         double[::1] box_x_upper_bounds = np.empty(n_total_boxes, dtype=float)             # <<<<<<<<<<<<<<
  *         double[::1] box_y_lower_bounds = np.empty(n_total_boxes, dtype=float)
  *         double[::1] box_y_upper_bounds = np.empty(n_total_boxes, dtype=float)
  */
-  __pyx_t_24 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 739, __pyx_L1_error)
+  __pyx_t_24 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 608, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_24);
-  __pyx_t_21 = __Pyx_PyObject_GetAttrStr(__pyx_t_24, __pyx_n_s_empty); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 739, __pyx_L1_error)
+  __pyx_t_21 = __Pyx_PyObject_GetAttrStr(__pyx_t_24, __pyx_n_s_empty); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 608, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_21);
   __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
-  __pyx_t_24 = __Pyx_PyInt_From_int(__pyx_v_n_total_boxes); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 739, __pyx_L1_error)
+  __pyx_t_24 = __Pyx_PyInt_From_int(__pyx_v_n_total_boxes); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 608, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_24);
-  __pyx_t_23 = PyTuple_New(1); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 739, __pyx_L1_error)
+  __pyx_t_23 = PyTuple_New(1); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 608, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_23);
   __Pyx_GIVEREF(__pyx_t_24);
   PyTuple_SET_ITEM(__pyx_t_23, 0, __pyx_t_24);
   __pyx_t_24 = 0;
-  __pyx_t_24 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 739, __pyx_L1_error)
+  __pyx_t_24 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 608, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_24);
-  if (PyDict_SetItem(__pyx_t_24, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 739, __pyx_L1_error)
-  __pyx_t_22 = __Pyx_PyObject_Call(__pyx_t_21, __pyx_t_23, __pyx_t_24); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 739, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_24, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 608, __pyx_L1_error)
+  __pyx_t_22 = __Pyx_PyObject_Call(__pyx_t_21, __pyx_t_23, __pyx_t_24); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 608, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_22);
   __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
   __Pyx_DECREF(__pyx_t_23); __pyx_t_23 = 0;
   __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
-  __pyx_t_25 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_22, PyBUF_WRITABLE); if (unlikely(!__pyx_t_25.memview)) __PYX_ERR(0, 739, __pyx_L1_error)
+  __pyx_t_25 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_22, PyBUF_WRITABLE); if (unlikely(!__pyx_t_25.memview)) __PYX_ERR(0, 608, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
   __pyx_v_box_x_upper_bounds = __pyx_t_25;
   __pyx_t_25.memview = NULL;
   __pyx_t_25.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":740
+  /* "fastTSNE/_tsne.pyx":609
  *         double[::1] box_x_lower_bounds = np.empty(n_total_boxes, dtype=float)
  *         double[::1] box_x_upper_bounds = np.empty(n_total_boxes, dtype=float)
  *         double[::1] box_y_lower_bounds = np.empty(n_total_boxes, dtype=float)             # <<<<<<<<<<<<<<
  *         double[::1] box_y_upper_bounds = np.empty(n_total_boxes, dtype=float)
  * 
  */
-  __pyx_t_22 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 740, __pyx_L1_error)
+  __pyx_t_22 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 609, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_22);
-  __pyx_t_24 = __Pyx_PyObject_GetAttrStr(__pyx_t_22, __pyx_n_s_empty); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 740, __pyx_L1_error)
+  __pyx_t_24 = __Pyx_PyObject_GetAttrStr(__pyx_t_22, __pyx_n_s_empty); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 609, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_24);
   __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
-  __pyx_t_22 = __Pyx_PyInt_From_int(__pyx_v_n_total_boxes); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 740, __pyx_L1_error)
+  __pyx_t_22 = __Pyx_PyInt_From_int(__pyx_v_n_total_boxes); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 609, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_22);
-  __pyx_t_23 = PyTuple_New(1); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 740, __pyx_L1_error)
+  __pyx_t_23 = PyTuple_New(1); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 609, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_23);
   __Pyx_GIVEREF(__pyx_t_22);
   PyTuple_SET_ITEM(__pyx_t_23, 0, __pyx_t_22);
   __pyx_t_22 = 0;
-  __pyx_t_22 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 740, __pyx_L1_error)
+  __pyx_t_22 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 609, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_22);
-  if (PyDict_SetItem(__pyx_t_22, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 740, __pyx_L1_error)
-  __pyx_t_21 = __Pyx_PyObject_Call(__pyx_t_24, __pyx_t_23, __pyx_t_22); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 740, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_22, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 609, __pyx_L1_error)
+  __pyx_t_21 = __Pyx_PyObject_Call(__pyx_t_24, __pyx_t_23, __pyx_t_22); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 609, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_21);
   __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
   __Pyx_DECREF(__pyx_t_23); __pyx_t_23 = 0;
   __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
-  __pyx_t_25 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_21, PyBUF_WRITABLE); if (unlikely(!__pyx_t_25.memview)) __PYX_ERR(0, 740, __pyx_L1_error)
+  __pyx_t_25 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_21, PyBUF_WRITABLE); if (unlikely(!__pyx_t_25.memview)) __PYX_ERR(0, 609, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
   __pyx_v_box_y_lower_bounds = __pyx_t_25;
   __pyx_t_25.memview = NULL;
   __pyx_t_25.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":741
+  /* "fastTSNE/_tsne.pyx":610
  *         double[::1] box_x_upper_bounds = np.empty(n_total_boxes, dtype=float)
  *         double[::1] box_y_lower_bounds = np.empty(n_total_boxes, dtype=float)
  *         double[::1] box_y_upper_bounds = np.empty(n_total_boxes, dtype=float)             # <<<<<<<<<<<<<<
  * 
  *     for i in range(n_boxes_1d):
  */
-  __pyx_t_21 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 741, __pyx_L1_error)
+  __pyx_t_21 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 610, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_21);
-  __pyx_t_22 = __Pyx_PyObject_GetAttrStr(__pyx_t_21, __pyx_n_s_empty); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 741, __pyx_L1_error)
+  __pyx_t_22 = __Pyx_PyObject_GetAttrStr(__pyx_t_21, __pyx_n_s_empty); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 610, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_22);
   __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
-  __pyx_t_21 = __Pyx_PyInt_From_int(__pyx_v_n_total_boxes); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 741, __pyx_L1_error)
+  __pyx_t_21 = __Pyx_PyInt_From_int(__pyx_v_n_total_boxes); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 610, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_21);
-  __pyx_t_23 = PyTuple_New(1); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 741, __pyx_L1_error)
+  __pyx_t_23 = PyTuple_New(1); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 610, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_23);
   __Pyx_GIVEREF(__pyx_t_21);
   PyTuple_SET_ITEM(__pyx_t_23, 0, __pyx_t_21);
   __pyx_t_21 = 0;
-  __pyx_t_21 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 741, __pyx_L1_error)
+  __pyx_t_21 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 610, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_21);
-  if (PyDict_SetItem(__pyx_t_21, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 741, __pyx_L1_error)
-  __pyx_t_24 = __Pyx_PyObject_Call(__pyx_t_22, __pyx_t_23, __pyx_t_21); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 741, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_21, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 610, __pyx_L1_error)
+  __pyx_t_24 = __Pyx_PyObject_Call(__pyx_t_22, __pyx_t_23, __pyx_t_21); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 610, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_24);
   __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
   __Pyx_DECREF(__pyx_t_23); __pyx_t_23 = 0;
   __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
-  __pyx_t_25 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_24, PyBUF_WRITABLE); if (unlikely(!__pyx_t_25.memview)) __PYX_ERR(0, 741, __pyx_L1_error)
+  __pyx_t_25 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_24, PyBUF_WRITABLE); if (unlikely(!__pyx_t_25.memview)) __PYX_ERR(0, 610, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
   __pyx_v_box_y_upper_bounds = __pyx_t_25;
   __pyx_t_25.memview = NULL;
   __pyx_t_25.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":743
+  /* "fastTSNE/_tsne.pyx":612
  *         double[::1] box_y_upper_bounds = np.empty(n_total_boxes, dtype=float)
  * 
  *     for i in range(n_boxes_1d):             # <<<<<<<<<<<<<<
@@ -10861,7 +9395,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
   for (__pyx_t_1 = 0; __pyx_t_1 < __pyx_t_27; __pyx_t_1+=1) {
     __pyx_v_i = __pyx_t_1;
 
-    /* "fastTSNE/_tsne.pyx":744
+    /* "fastTSNE/_tsne.pyx":613
  * 
  *     for i in range(n_boxes_1d):
  *         for j in range(n_boxes_1d):             # <<<<<<<<<<<<<<
@@ -10873,7 +9407,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_29; __pyx_t_2+=1) {
       __pyx_v_j = __pyx_t_2;
 
-      /* "fastTSNE/_tsne.pyx":745
+      /* "fastTSNE/_tsne.pyx":614
  *     for i in range(n_boxes_1d):
  *         for j in range(n_boxes_1d):
  *             box_x_lower_bounds[i * n_boxes_1d + j] = j * box_width + coord_min             # <<<<<<<<<<<<<<
@@ -10883,7 +9417,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
       __pyx_t_30 = ((__pyx_v_i * __pyx_v_n_boxes_1d) + __pyx_v_j);
       *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_box_x_lower_bounds.data) + __pyx_t_30)) )) = ((__pyx_v_j * __pyx_v_box_width) + __pyx_v_coord_min);
 
-      /* "fastTSNE/_tsne.pyx":746
+      /* "fastTSNE/_tsne.pyx":615
  *         for j in range(n_boxes_1d):
  *             box_x_lower_bounds[i * n_boxes_1d + j] = j * box_width + coord_min
  *             box_x_upper_bounds[i * n_boxes_1d + j] = (j + 1) * box_width + coord_min             # <<<<<<<<<<<<<<
@@ -10893,7 +9427,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
       __pyx_t_31 = ((__pyx_v_i * __pyx_v_n_boxes_1d) + __pyx_v_j);
       *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_box_x_upper_bounds.data) + __pyx_t_31)) )) = (((__pyx_v_j + 1) * __pyx_v_box_width) + __pyx_v_coord_min);
 
-      /* "fastTSNE/_tsne.pyx":748
+      /* "fastTSNE/_tsne.pyx":617
  *             box_x_upper_bounds[i * n_boxes_1d + j] = (j + 1) * box_width + coord_min
  * 
  *             box_y_lower_bounds[i * n_boxes_1d + j] = i * box_width + coord_min             # <<<<<<<<<<<<<<
@@ -10903,7 +9437,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
       __pyx_t_32 = ((__pyx_v_i * __pyx_v_n_boxes_1d) + __pyx_v_j);
       *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_box_y_lower_bounds.data) + __pyx_t_32)) )) = ((__pyx_v_i * __pyx_v_box_width) + __pyx_v_coord_min);
 
-      /* "fastTSNE/_tsne.pyx":749
+      /* "fastTSNE/_tsne.pyx":618
  * 
  *             box_y_lower_bounds[i * n_boxes_1d + j] = i * box_width + coord_min
  *             box_y_upper_bounds[i * n_boxes_1d + j] = (i + 1) * box_width + coord_min             # <<<<<<<<<<<<<<
@@ -10915,7 +9449,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     }
   }
 
-  /* "fastTSNE/_tsne.pyx":752
+  /* "fastTSNE/_tsne.pyx":621
  * 
  *     # Determine which box each reference point belongs to
  *     cdef int *point_box_idx = <int *>PyMem_Malloc(n_samples * sizeof(int))             # <<<<<<<<<<<<<<
@@ -10924,7 +9458,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
   __pyx_v_point_box_idx = ((int *)PyMem_Malloc((__pyx_v_n_samples * (sizeof(int)))));
 
-  /* "fastTSNE/_tsne.pyx":754
+  /* "fastTSNE/_tsne.pyx":623
  *     cdef int *point_box_idx = <int *>PyMem_Malloc(n_samples * sizeof(int))
  *     cdef int box_x_idx, box_y_idx
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -10936,7 +9470,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":755
+    /* "fastTSNE/_tsne.pyx":624
  *     cdef int box_x_idx, box_y_idx
  *     for i in range(n_samples):
  *         box_x_idx = <int>((embedding[i, 0] - coord_min) / box_width)             # <<<<<<<<<<<<<<
@@ -10947,7 +9481,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     __pyx_t_35 = 0;
     __pyx_v_box_x_idx = ((int)(((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_34 * __pyx_v_embedding.strides[0]) )) + __pyx_t_35)) ))) - __pyx_v_coord_min) / __pyx_v_box_width));
 
-    /* "fastTSNE/_tsne.pyx":756
+    /* "fastTSNE/_tsne.pyx":625
  *     for i in range(n_samples):
  *         box_x_idx = <int>((embedding[i, 0] - coord_min) / box_width)
  *         box_y_idx = <int>((embedding[i, 1] - coord_min) / box_width)             # <<<<<<<<<<<<<<
@@ -10958,7 +9492,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     __pyx_t_37 = 1;
     __pyx_v_box_y_idx = ((int)(((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_36 * __pyx_v_embedding.strides[0]) )) + __pyx_t_37)) ))) - __pyx_v_coord_min) / __pyx_v_box_width));
 
-    /* "fastTSNE/_tsne.pyx":759
+    /* "fastTSNE/_tsne.pyx":628
  *         # The right most point maps directly into `n_boxes`, while it should
  *         # belong to the last box
  *         if box_x_idx >= n_boxes_1d:             # <<<<<<<<<<<<<<
@@ -10968,7 +9502,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     __pyx_t_6 = ((__pyx_v_box_x_idx >= __pyx_v_n_boxes_1d) != 0);
     if (__pyx_t_6) {
 
-      /* "fastTSNE/_tsne.pyx":760
+      /* "fastTSNE/_tsne.pyx":629
  *         # belong to the last box
  *         if box_x_idx >= n_boxes_1d:
  *             box_x_idx = n_boxes_1d - 1             # <<<<<<<<<<<<<<
@@ -10977,7 +9511,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
       __pyx_v_box_x_idx = (__pyx_v_n_boxes_1d - 1);
 
-      /* "fastTSNE/_tsne.pyx":759
+      /* "fastTSNE/_tsne.pyx":628
  *         # The right most point maps directly into `n_boxes`, while it should
  *         # belong to the last box
  *         if box_x_idx >= n_boxes_1d:             # <<<<<<<<<<<<<<
@@ -10986,7 +9520,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
     }
 
-    /* "fastTSNE/_tsne.pyx":761
+    /* "fastTSNE/_tsne.pyx":630
  *         if box_x_idx >= n_boxes_1d:
  *             box_x_idx = n_boxes_1d - 1
  *         if box_y_idx >= n_boxes_1d:             # <<<<<<<<<<<<<<
@@ -10996,7 +9530,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     __pyx_t_6 = ((__pyx_v_box_y_idx >= __pyx_v_n_boxes_1d) != 0);
     if (__pyx_t_6) {
 
-      /* "fastTSNE/_tsne.pyx":762
+      /* "fastTSNE/_tsne.pyx":631
  *             box_x_idx = n_boxes_1d - 1
  *         if box_y_idx >= n_boxes_1d:
  *             box_y_idx = n_boxes_1d - 1             # <<<<<<<<<<<<<<
@@ -11005,7 +9539,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
       __pyx_v_box_y_idx = (__pyx_v_n_boxes_1d - 1);
 
-      /* "fastTSNE/_tsne.pyx":761
+      /* "fastTSNE/_tsne.pyx":630
  *         if box_x_idx >= n_boxes_1d:
  *             box_x_idx = n_boxes_1d - 1
  *         if box_y_idx >= n_boxes_1d:             # <<<<<<<<<<<<<<
@@ -11014,7 +9548,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
     }
 
-    /* "fastTSNE/_tsne.pyx":764
+    /* "fastTSNE/_tsne.pyx":633
  *             box_y_idx = n_boxes_1d - 1
  * 
  *         point_box_idx[i] = box_y_idx * n_boxes_1d + box_x_idx             # <<<<<<<<<<<<<<
@@ -11024,40 +9558,40 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     (__pyx_v_point_box_idx[__pyx_v_i]) = ((__pyx_v_box_y_idx * __pyx_v_n_boxes_1d) + __pyx_v_box_x_idx);
   }
 
-  /* "fastTSNE/_tsne.pyx":768
+  /* "fastTSNE/_tsne.pyx":637
  *     # Prepare the interpolants for a single interval, so we can use their
  *     # relative positions later on
  *     cdef double[::1] y_tilde = np.empty(n_interpolation_points, dtype=float)             # <<<<<<<<<<<<<<
  *     cdef double h = 1. / n_interpolation_points
  *     y_tilde[0] = h / 2
  */
-  __pyx_t_24 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 768, __pyx_L1_error)
+  __pyx_t_24 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 637, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_24);
-  __pyx_t_21 = __Pyx_PyObject_GetAttrStr(__pyx_t_24, __pyx_n_s_empty); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 768, __pyx_L1_error)
+  __pyx_t_21 = __Pyx_PyObject_GetAttrStr(__pyx_t_24, __pyx_n_s_empty); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 637, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_21);
   __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
-  __pyx_t_24 = PyInt_FromSsize_t(__pyx_v_n_interpolation_points); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 768, __pyx_L1_error)
+  __pyx_t_24 = PyInt_FromSsize_t(__pyx_v_n_interpolation_points); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 637, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_24);
-  __pyx_t_23 = PyTuple_New(1); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 768, __pyx_L1_error)
+  __pyx_t_23 = PyTuple_New(1); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 637, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_23);
   __Pyx_GIVEREF(__pyx_t_24);
   PyTuple_SET_ITEM(__pyx_t_23, 0, __pyx_t_24);
   __pyx_t_24 = 0;
-  __pyx_t_24 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 768, __pyx_L1_error)
+  __pyx_t_24 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 637, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_24);
-  if (PyDict_SetItem(__pyx_t_24, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 768, __pyx_L1_error)
-  __pyx_t_22 = __Pyx_PyObject_Call(__pyx_t_21, __pyx_t_23, __pyx_t_24); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 768, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_24, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 637, __pyx_L1_error)
+  __pyx_t_22 = __Pyx_PyObject_Call(__pyx_t_21, __pyx_t_23, __pyx_t_24); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 637, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_22);
   __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
   __Pyx_DECREF(__pyx_t_23); __pyx_t_23 = 0;
   __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
-  __pyx_t_25 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_22, PyBUF_WRITABLE); if (unlikely(!__pyx_t_25.memview)) __PYX_ERR(0, 768, __pyx_L1_error)
+  __pyx_t_25 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_22, PyBUF_WRITABLE); if (unlikely(!__pyx_t_25.memview)) __PYX_ERR(0, 637, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
   __pyx_v_y_tilde = __pyx_t_25;
   __pyx_t_25.memview = NULL;
   __pyx_t_25.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":769
+  /* "fastTSNE/_tsne.pyx":638
  *     # relative positions later on
  *     cdef double[::1] y_tilde = np.empty(n_interpolation_points, dtype=float)
  *     cdef double h = 1. / n_interpolation_points             # <<<<<<<<<<<<<<
@@ -11066,7 +9600,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
   __pyx_v_h = (1. / __pyx_v_n_interpolation_points);
 
-  /* "fastTSNE/_tsne.pyx":770
+  /* "fastTSNE/_tsne.pyx":639
  *     cdef double[::1] y_tilde = np.empty(n_interpolation_points, dtype=float)
  *     cdef double h = 1. / n_interpolation_points
  *     y_tilde[0] = h / 2             # <<<<<<<<<<<<<<
@@ -11076,7 +9610,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
   __pyx_t_38 = 0;
   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_38)) )) = (__pyx_v_h / 2.0);
 
-  /* "fastTSNE/_tsne.pyx":771
+  /* "fastTSNE/_tsne.pyx":640
  *     cdef double h = 1. / n_interpolation_points
  *     y_tilde[0] = h / 2
  *     for i in range(1, n_interpolation_points):             # <<<<<<<<<<<<<<
@@ -11088,7 +9622,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
   for (__pyx_t_3 = 1; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":772
+    /* "fastTSNE/_tsne.pyx":641
  *     y_tilde[0] = h / 2
  *     for i in range(1, n_interpolation_points):
  *         y_tilde[i] = y_tilde[i - 1] + h             # <<<<<<<<<<<<<<
@@ -11100,19 +9634,19 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_40)) )) = ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_39)) ))) + __pyx_v_h);
   }
 
-  /* "fastTSNE/_tsne.pyx":775
+  /* "fastTSNE/_tsne.pyx":644
  * 
  *     # Evaluate the kernel at the interpolation nodes
  *     cdef double[:, ::1] kernel_tilde = compute_kernel_tilde_2d(             # <<<<<<<<<<<<<<
  *         n_interpolation_points * n_boxes_1d, coord_min, h * box_width)
  * 
  */
-  __pyx_t_41 = __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_2d((__pyx_v_n_interpolation_points * __pyx_v_n_boxes_1d), __pyx_v_coord_min, (__pyx_v_h * __pyx_v_box_width)); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 775, __pyx_L1_error)
+  __pyx_t_41 = __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_2d((__pyx_v_n_interpolation_points * __pyx_v_n_boxes_1d), __pyx_v_coord_min, (__pyx_v_h * __pyx_v_box_width)); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 644, __pyx_L1_error)
   __pyx_v_kernel_tilde = __pyx_t_41;
   __pyx_t_41.memview = NULL;
   __pyx_t_41.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":780
+  /* "fastTSNE/_tsne.pyx":649
  *     # STEP 1: Compute the w coefficients
  *     # Set up q_j values
  *     cdef int n_terms = 4             # <<<<<<<<<<<<<<
@@ -11121,23 +9655,23 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
   __pyx_v_n_terms = 4;
 
-  /* "fastTSNE/_tsne.pyx":781
+  /* "fastTSNE/_tsne.pyx":650
  *     # Set up q_j values
  *     cdef int n_terms = 4
  *     cdef double[:, ::1] q_j = np.empty((n_samples, n_terms), dtype=float)             # <<<<<<<<<<<<<<
  *     for i in range(n_samples):
  *         q_j[i, 0] = 1
  */
-  __pyx_t_22 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 781, __pyx_L1_error)
+  __pyx_t_22 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 650, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_22);
-  __pyx_t_24 = __Pyx_PyObject_GetAttrStr(__pyx_t_22, __pyx_n_s_empty); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 781, __pyx_L1_error)
+  __pyx_t_24 = __Pyx_PyObject_GetAttrStr(__pyx_t_22, __pyx_n_s_empty); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 650, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_24);
   __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
-  __pyx_t_22 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 781, __pyx_L1_error)
+  __pyx_t_22 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 650, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_22);
-  __pyx_t_23 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 781, __pyx_L1_error)
+  __pyx_t_23 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 650, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_23);
-  __pyx_t_21 = PyTuple_New(2); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 781, __pyx_L1_error)
+  __pyx_t_21 = PyTuple_New(2); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 650, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_21);
   __Pyx_GIVEREF(__pyx_t_22);
   PyTuple_SET_ITEM(__pyx_t_21, 0, __pyx_t_22);
@@ -11145,26 +9679,26 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
   PyTuple_SET_ITEM(__pyx_t_21, 1, __pyx_t_23);
   __pyx_t_22 = 0;
   __pyx_t_23 = 0;
-  __pyx_t_23 = PyTuple_New(1); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 781, __pyx_L1_error)
+  __pyx_t_23 = PyTuple_New(1); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 650, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_23);
   __Pyx_GIVEREF(__pyx_t_21);
   PyTuple_SET_ITEM(__pyx_t_23, 0, __pyx_t_21);
   __pyx_t_21 = 0;
-  __pyx_t_21 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 781, __pyx_L1_error)
+  __pyx_t_21 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 650, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_21);
-  if (PyDict_SetItem(__pyx_t_21, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 781, __pyx_L1_error)
-  __pyx_t_22 = __Pyx_PyObject_Call(__pyx_t_24, __pyx_t_23, __pyx_t_21); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 781, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_21, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 650, __pyx_L1_error)
+  __pyx_t_22 = __Pyx_PyObject_Call(__pyx_t_24, __pyx_t_23, __pyx_t_21); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 650, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_22);
   __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
   __Pyx_DECREF(__pyx_t_23); __pyx_t_23 = 0;
   __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
-  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_22, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 781, __pyx_L1_error)
+  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_22, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 650, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
   __pyx_v_q_j = __pyx_t_41;
   __pyx_t_41.memview = NULL;
   __pyx_t_41.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":782
+  /* "fastTSNE/_tsne.pyx":651
  *     cdef int n_terms = 4
  *     cdef double[:, ::1] q_j = np.empty((n_samples, n_terms), dtype=float)
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -11176,7 +9710,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":783
+    /* "fastTSNE/_tsne.pyx":652
  *     cdef double[:, ::1] q_j = np.empty((n_samples, n_terms), dtype=float)
  *     for i in range(n_samples):
  *         q_j[i, 0] = 1             # <<<<<<<<<<<<<<
@@ -11187,7 +9721,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     __pyx_t_43 = 0;
     *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_q_j.data + __pyx_t_42 * __pyx_v_q_j.strides[0]) )) + __pyx_t_43)) )) = 1.0;
 
-    /* "fastTSNE/_tsne.pyx":784
+    /* "fastTSNE/_tsne.pyx":653
  *     for i in range(n_samples):
  *         q_j[i, 0] = 1
  *         q_j[i, 1] = embedding[i, 0]             # <<<<<<<<<<<<<<
@@ -11200,7 +9734,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     __pyx_t_47 = 1;
     *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_q_j.data + __pyx_t_46 * __pyx_v_q_j.strides[0]) )) + __pyx_t_47)) )) = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_44 * __pyx_v_embedding.strides[0]) )) + __pyx_t_45)) )));
 
-    /* "fastTSNE/_tsne.pyx":785
+    /* "fastTSNE/_tsne.pyx":654
  *         q_j[i, 0] = 1
  *         q_j[i, 1] = embedding[i, 0]
  *         q_j[i, 2] = embedding[i, 1]             # <<<<<<<<<<<<<<
@@ -11213,7 +9747,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     __pyx_t_51 = 2;
     *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_q_j.data + __pyx_t_50 * __pyx_v_q_j.strides[0]) )) + __pyx_t_51)) )) = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_48 * __pyx_v_embedding.strides[0]) )) + __pyx_t_49)) )));
 
-    /* "fastTSNE/_tsne.pyx":786
+    /* "fastTSNE/_tsne.pyx":655
  *         q_j[i, 1] = embedding[i, 0]
  *         q_j[i, 2] = embedding[i, 1]
  *         q_j[i, 3] = embedding[i, 0] ** 2 + embedding[i, 1] ** 2             # <<<<<<<<<<<<<<
@@ -11229,73 +9763,73 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_q_j.data + __pyx_t_56 * __pyx_v_q_j.strides[0]) )) + __pyx_t_57)) )) = (pow((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_52 * __pyx_v_embedding.strides[0]) )) + __pyx_t_53)) ))), 2.0) + pow((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_54 * __pyx_v_embedding.strides[0]) )) + __pyx_t_55)) ))), 2.0));
   }
 
-  /* "fastTSNE/_tsne.pyx":790
+  /* "fastTSNE/_tsne.pyx":659
  *     # Compute the relative position of each reference point in its box
  *     cdef:
  *         double[::1] x_in_box = np.empty(n_samples, dtype=float)             # <<<<<<<<<<<<<<
  *         double[::1] y_in_box = np.empty(n_samples, dtype=float)
  *         double y_min, x_min
  */
-  __pyx_t_22 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 790, __pyx_L1_error)
+  __pyx_t_22 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 659, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_22);
-  __pyx_t_21 = __Pyx_PyObject_GetAttrStr(__pyx_t_22, __pyx_n_s_empty); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 790, __pyx_L1_error)
+  __pyx_t_21 = __Pyx_PyObject_GetAttrStr(__pyx_t_22, __pyx_n_s_empty); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 659, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_21);
   __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
-  __pyx_t_22 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 790, __pyx_L1_error)
+  __pyx_t_22 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 659, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_22);
-  __pyx_t_23 = PyTuple_New(1); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 790, __pyx_L1_error)
+  __pyx_t_23 = PyTuple_New(1); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 659, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_23);
   __Pyx_GIVEREF(__pyx_t_22);
   PyTuple_SET_ITEM(__pyx_t_23, 0, __pyx_t_22);
   __pyx_t_22 = 0;
-  __pyx_t_22 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 790, __pyx_L1_error)
+  __pyx_t_22 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 659, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_22);
-  if (PyDict_SetItem(__pyx_t_22, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 790, __pyx_L1_error)
-  __pyx_t_24 = __Pyx_PyObject_Call(__pyx_t_21, __pyx_t_23, __pyx_t_22); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 790, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_22, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 659, __pyx_L1_error)
+  __pyx_t_24 = __Pyx_PyObject_Call(__pyx_t_21, __pyx_t_23, __pyx_t_22); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 659, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_24);
   __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
   __Pyx_DECREF(__pyx_t_23); __pyx_t_23 = 0;
   __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
-  __pyx_t_25 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_24, PyBUF_WRITABLE); if (unlikely(!__pyx_t_25.memview)) __PYX_ERR(0, 790, __pyx_L1_error)
+  __pyx_t_25 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_24, PyBUF_WRITABLE); if (unlikely(!__pyx_t_25.memview)) __PYX_ERR(0, 659, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
   __pyx_v_x_in_box = __pyx_t_25;
   __pyx_t_25.memview = NULL;
   __pyx_t_25.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":791
+  /* "fastTSNE/_tsne.pyx":660
  *     cdef:
  *         double[::1] x_in_box = np.empty(n_samples, dtype=float)
  *         double[::1] y_in_box = np.empty(n_samples, dtype=float)             # <<<<<<<<<<<<<<
  *         double y_min, x_min
  * 
  */
-  __pyx_t_24 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 791, __pyx_L1_error)
+  __pyx_t_24 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 660, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_24);
-  __pyx_t_22 = __Pyx_PyObject_GetAttrStr(__pyx_t_24, __pyx_n_s_empty); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 791, __pyx_L1_error)
+  __pyx_t_22 = __Pyx_PyObject_GetAttrStr(__pyx_t_24, __pyx_n_s_empty); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 660, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_22);
   __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
-  __pyx_t_24 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 791, __pyx_L1_error)
+  __pyx_t_24 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 660, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_24);
-  __pyx_t_23 = PyTuple_New(1); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 791, __pyx_L1_error)
+  __pyx_t_23 = PyTuple_New(1); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 660, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_23);
   __Pyx_GIVEREF(__pyx_t_24);
   PyTuple_SET_ITEM(__pyx_t_23, 0, __pyx_t_24);
   __pyx_t_24 = 0;
-  __pyx_t_24 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 791, __pyx_L1_error)
+  __pyx_t_24 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 660, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_24);
-  if (PyDict_SetItem(__pyx_t_24, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 791, __pyx_L1_error)
-  __pyx_t_21 = __Pyx_PyObject_Call(__pyx_t_22, __pyx_t_23, __pyx_t_24); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 791, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_24, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 660, __pyx_L1_error)
+  __pyx_t_21 = __Pyx_PyObject_Call(__pyx_t_22, __pyx_t_23, __pyx_t_24); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 660, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_21);
   __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
   __Pyx_DECREF(__pyx_t_23); __pyx_t_23 = 0;
   __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
-  __pyx_t_25 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_21, PyBUF_WRITABLE); if (unlikely(!__pyx_t_25.memview)) __PYX_ERR(0, 791, __pyx_L1_error)
+  __pyx_t_25 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_21, PyBUF_WRITABLE); if (unlikely(!__pyx_t_25.memview)) __PYX_ERR(0, 660, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
   __pyx_v_y_in_box = __pyx_t_25;
   __pyx_t_25.memview = NULL;
   __pyx_t_25.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":794
+  /* "fastTSNE/_tsne.pyx":663
  *         double y_min, x_min
  * 
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -11307,7 +9841,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":795
+    /* "fastTSNE/_tsne.pyx":664
  * 
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i]             # <<<<<<<<<<<<<<
@@ -11316,7 +9850,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
     __pyx_v_box_idx = (__pyx_v_point_box_idx[__pyx_v_i]);
 
-    /* "fastTSNE/_tsne.pyx":796
+    /* "fastTSNE/_tsne.pyx":665
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i]
  *         x_min = box_x_lower_bounds[box_idx]             # <<<<<<<<<<<<<<
@@ -11326,7 +9860,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     __pyx_t_58 = __pyx_v_box_idx;
     __pyx_v_x_min = (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_box_x_lower_bounds.data) + __pyx_t_58)) )));
 
-    /* "fastTSNE/_tsne.pyx":797
+    /* "fastTSNE/_tsne.pyx":666
  *         box_idx = point_box_idx[i]
  *         x_min = box_x_lower_bounds[box_idx]
  *         y_min = box_y_lower_bounds[box_idx]             # <<<<<<<<<<<<<<
@@ -11336,7 +9870,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     __pyx_t_59 = __pyx_v_box_idx;
     __pyx_v_y_min = (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_box_y_lower_bounds.data) + __pyx_t_59)) )));
 
-    /* "fastTSNE/_tsne.pyx":798
+    /* "fastTSNE/_tsne.pyx":667
  *         x_min = box_x_lower_bounds[box_idx]
  *         y_min = box_y_lower_bounds[box_idx]
  *         x_in_box[i] = (embedding[i, 0] - x_min) / box_width             # <<<<<<<<<<<<<<
@@ -11348,7 +9882,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     __pyx_t_62 = __pyx_v_i;
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_x_in_box.data) + __pyx_t_62)) )) = (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_60 * __pyx_v_embedding.strides[0]) )) + __pyx_t_61)) ))) - __pyx_v_x_min) / __pyx_v_box_width);
 
-    /* "fastTSNE/_tsne.pyx":799
+    /* "fastTSNE/_tsne.pyx":668
  *         y_min = box_y_lower_bounds[box_idx]
  *         x_in_box[i] = (embedding[i, 0] - x_min) / box_width
  *         y_in_box[i] = (embedding[i, 1] - y_min) / box_width             # <<<<<<<<<<<<<<
@@ -11361,31 +9895,31 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_in_box.data) + __pyx_t_65)) )) = (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_63 * __pyx_v_embedding.strides[0]) )) + __pyx_t_64)) ))) - __pyx_v_y_min) / __pyx_v_box_width);
   }
 
-  /* "fastTSNE/_tsne.pyx":802
+  /* "fastTSNE/_tsne.pyx":671
  * 
  *     # Interpolate kernel using Lagrange polynomials
  *     cdef double[:, ::1] x_interpolated_values = interpolate(x_in_box, y_tilde)             # <<<<<<<<<<<<<<
  *     cdef double[:, ::1] y_interpolated_values = interpolate(y_in_box, y_tilde)
  * 
  */
-  __pyx_t_41 = __pyx_f_8fastTSNE_5_tsne_interpolate(__pyx_v_x_in_box, __pyx_v_y_tilde); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 802, __pyx_L1_error)
+  __pyx_t_41 = __pyx_f_8fastTSNE_5_tsne_interpolate(__pyx_v_x_in_box, __pyx_v_y_tilde); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 671, __pyx_L1_error)
   __pyx_v_x_interpolated_values = __pyx_t_41;
   __pyx_t_41.memview = NULL;
   __pyx_t_41.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":803
+  /* "fastTSNE/_tsne.pyx":672
  *     # Interpolate kernel using Lagrange polynomials
  *     cdef double[:, ::1] x_interpolated_values = interpolate(x_in_box, y_tilde)
  *     cdef double[:, ::1] y_interpolated_values = interpolate(y_in_box, y_tilde)             # <<<<<<<<<<<<<<
  * 
  *     # Actually compute w_{ij}s
  */
-  __pyx_t_41 = __pyx_f_8fastTSNE_5_tsne_interpolate(__pyx_v_y_in_box, __pyx_v_y_tilde); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 803, __pyx_L1_error)
+  __pyx_t_41 = __pyx_f_8fastTSNE_5_tsne_interpolate(__pyx_v_y_in_box, __pyx_v_y_tilde); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 672, __pyx_L1_error)
   __pyx_v_y_interpolated_values = __pyx_t_41;
   __pyx_t_41.memview = NULL;
   __pyx_t_41.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":807
+  /* "fastTSNE/_tsne.pyx":676
  *     # Actually compute w_{ij}s
  *     cdef:
  *         int total_interpolation_points = n_total_boxes * n_interpolation_points ** 2             # <<<<<<<<<<<<<<
@@ -11394,23 +9928,23 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
   __pyx_v_total_interpolation_points = (__pyx_v_n_total_boxes * __Pyx_pow_Py_ssize_t(__pyx_v_n_interpolation_points, 2));
 
-  /* "fastTSNE/_tsne.pyx":808
+  /* "fastTSNE/_tsne.pyx":677
  *     cdef:
  *         int total_interpolation_points = n_total_boxes * n_interpolation_points ** 2
  *         double[:, ::1] w_coefficients = np.zeros((total_interpolation_points, n_terms), dtype=float)             # <<<<<<<<<<<<<<
  *         Py_ssize_t box_i, box_j, interp_i, interp_j, idx
  * 
  */
-  __pyx_t_21 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 808, __pyx_L1_error)
+  __pyx_t_21 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 677, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_21);
-  __pyx_t_24 = __Pyx_PyObject_GetAttrStr(__pyx_t_21, __pyx_n_s_zeros); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 808, __pyx_L1_error)
+  __pyx_t_24 = __Pyx_PyObject_GetAttrStr(__pyx_t_21, __pyx_n_s_zeros); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 677, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_24);
   __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
-  __pyx_t_21 = __Pyx_PyInt_From_int(__pyx_v_total_interpolation_points); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 808, __pyx_L1_error)
+  __pyx_t_21 = __Pyx_PyInt_From_int(__pyx_v_total_interpolation_points); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 677, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_21);
-  __pyx_t_23 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 808, __pyx_L1_error)
+  __pyx_t_23 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 677, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_23);
-  __pyx_t_22 = PyTuple_New(2); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 808, __pyx_L1_error)
+  __pyx_t_22 = PyTuple_New(2); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 677, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_22);
   __Pyx_GIVEREF(__pyx_t_21);
   PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_21);
@@ -11418,26 +9952,26 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
   PyTuple_SET_ITEM(__pyx_t_22, 1, __pyx_t_23);
   __pyx_t_21 = 0;
   __pyx_t_23 = 0;
-  __pyx_t_23 = PyTuple_New(1); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 808, __pyx_L1_error)
+  __pyx_t_23 = PyTuple_New(1); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 677, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_23);
   __Pyx_GIVEREF(__pyx_t_22);
   PyTuple_SET_ITEM(__pyx_t_23, 0, __pyx_t_22);
   __pyx_t_22 = 0;
-  __pyx_t_22 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 808, __pyx_L1_error)
+  __pyx_t_22 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 677, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_22);
-  if (PyDict_SetItem(__pyx_t_22, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 808, __pyx_L1_error)
-  __pyx_t_21 = __Pyx_PyObject_Call(__pyx_t_24, __pyx_t_23, __pyx_t_22); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 808, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_22, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 677, __pyx_L1_error)
+  __pyx_t_21 = __Pyx_PyObject_Call(__pyx_t_24, __pyx_t_23, __pyx_t_22); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 677, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_21);
   __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
   __Pyx_DECREF(__pyx_t_23); __pyx_t_23 = 0;
   __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
-  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_21, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 808, __pyx_L1_error)
+  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_21, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 677, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
   __pyx_v_w_coefficients = __pyx_t_41;
   __pyx_t_41.memview = NULL;
   __pyx_t_41.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":811
+  /* "fastTSNE/_tsne.pyx":680
  *         Py_ssize_t box_i, box_j, interp_i, interp_j, idx
  * 
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -11449,7 +9983,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":812
+    /* "fastTSNE/_tsne.pyx":681
  * 
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i]             # <<<<<<<<<<<<<<
@@ -11458,7 +9992,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
     __pyx_v_box_idx = (__pyx_v_point_box_idx[__pyx_v_i]);
 
-    /* "fastTSNE/_tsne.pyx":813
+    /* "fastTSNE/_tsne.pyx":682
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i]
  *         box_i = box_idx % n_boxes_1d             # <<<<<<<<<<<<<<
@@ -11467,7 +10001,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
     __pyx_v_box_i = (__pyx_v_box_idx % __pyx_v_n_boxes_1d);
 
-    /* "fastTSNE/_tsne.pyx":814
+    /* "fastTSNE/_tsne.pyx":683
  *         box_idx = point_box_idx[i]
  *         box_i = box_idx % n_boxes_1d
  *         box_j = box_idx // n_boxes_1d             # <<<<<<<<<<<<<<
@@ -11476,7 +10010,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
     __pyx_v_box_j = (__pyx_v_box_idx / __pyx_v_n_boxes_1d);
 
-    /* "fastTSNE/_tsne.pyx":815
+    /* "fastTSNE/_tsne.pyx":684
  *         box_i = box_idx % n_boxes_1d
  *         box_j = box_idx // n_boxes_1d
  *         for interp_i in range(n_interpolation_points):             # <<<<<<<<<<<<<<
@@ -11488,7 +10022,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     for (__pyx_t_68 = 0; __pyx_t_68 < __pyx_t_67; __pyx_t_68+=1) {
       __pyx_v_interp_i = __pyx_t_68;
 
-      /* "fastTSNE/_tsne.pyx":816
+      /* "fastTSNE/_tsne.pyx":685
  *         box_j = box_idx // n_boxes_1d
  *         for interp_i in range(n_interpolation_points):
  *             for interp_j in range(n_interpolation_points):             # <<<<<<<<<<<<<<
@@ -11500,7 +10034,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
       for (__pyx_t_71 = 0; __pyx_t_71 < __pyx_t_70; __pyx_t_71+=1) {
         __pyx_v_interp_j = __pyx_t_71;
 
-        /* "fastTSNE/_tsne.pyx":819
+        /* "fastTSNE/_tsne.pyx":688
  *                 idx = (box_i * n_interpolation_points + interp_i) * \
  *                       (n_boxes_1d * n_interpolation_points) + \
  *                       (box_j * n_interpolation_points) + \             # <<<<<<<<<<<<<<
@@ -11509,7 +10043,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
         __pyx_v_idx = (((((__pyx_v_box_i * __pyx_v_n_interpolation_points) + __pyx_v_interp_i) * (__pyx_v_n_boxes_1d * __pyx_v_n_interpolation_points)) + (__pyx_v_box_j * __pyx_v_n_interpolation_points)) + __pyx_v_interp_j);
 
-        /* "fastTSNE/_tsne.pyx":821
+        /* "fastTSNE/_tsne.pyx":690
  *                       (box_j * n_interpolation_points) + \
  *                       interp_j
  *                 for d in range(n_terms):             # <<<<<<<<<<<<<<
@@ -11521,7 +10055,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
         for (__pyx_t_72 = 0; __pyx_t_72 < __pyx_t_27; __pyx_t_72+=1) {
           __pyx_v_d = __pyx_t_72;
 
-          /* "fastTSNE/_tsne.pyx":823
+          /* "fastTSNE/_tsne.pyx":692
  *                 for d in range(n_terms):
  *                     w_coefficients[idx, d] += \
  *                         x_interpolated_values[i, interp_i] * \             # <<<<<<<<<<<<<<
@@ -11531,7 +10065,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
           __pyx_t_73 = __pyx_v_i;
           __pyx_t_74 = __pyx_v_interp_i;
 
-          /* "fastTSNE/_tsne.pyx":824
+          /* "fastTSNE/_tsne.pyx":693
  *                     w_coefficients[idx, d] += \
  *                         x_interpolated_values[i, interp_i] * \
  *                         y_interpolated_values[i, interp_j] * \             # <<<<<<<<<<<<<<
@@ -11541,7 +10075,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
           __pyx_t_75 = __pyx_v_i;
           __pyx_t_76 = __pyx_v_interp_j;
 
-          /* "fastTSNE/_tsne.pyx":825
+          /* "fastTSNE/_tsne.pyx":694
  *                         x_interpolated_values[i, interp_i] * \
  *                         y_interpolated_values[i, interp_j] * \
  *                         q_j[i, d]             # <<<<<<<<<<<<<<
@@ -11551,7 +10085,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
           __pyx_t_77 = __pyx_v_i;
           __pyx_t_78 = __pyx_v_d;
 
-          /* "fastTSNE/_tsne.pyx":822
+          /* "fastTSNE/_tsne.pyx":691
  *                       interp_j
  *                 for d in range(n_terms):
  *                     w_coefficients[idx, d] += \             # <<<<<<<<<<<<<<
@@ -11566,35 +10100,35 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     }
   }
 
-  /* "fastTSNE/_tsne.pyx":828
+  /* "fastTSNE/_tsne.pyx":697
  * 
  *     # STEP 2: Compute the kernel values evaluated at the interpolation nodes
  *     cdef double[:, ::1] y_tilde_values = matrix_multiply_fft_2d(kernel_tilde, w_coefficients)             # <<<<<<<<<<<<<<
  * 
  *     # STEP 3: Compute the potentials \tilde{\phi(y_i)}
  */
-  __pyx_t_41 = __pyx_f_8fastTSNE_5_tsne_matrix_multiply_fft_2d(__pyx_v_kernel_tilde, __pyx_v_w_coefficients); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 828, __pyx_L1_error)
+  __pyx_t_41 = __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_multiply_fft_2d(__pyx_v_kernel_tilde, __pyx_v_w_coefficients); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 697, __pyx_L1_error)
   __pyx_v_y_tilde_values = __pyx_t_41;
   __pyx_t_41.memview = NULL;
   __pyx_t_41.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":831
+  /* "fastTSNE/_tsne.pyx":700
  * 
  *     # STEP 3: Compute the potentials \tilde{\phi(y_i)}
  *     cdef double[:, ::1] phi = np.zeros((n_samples, n_terms), dtype=float)             # <<<<<<<<<<<<<<
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i]
  */
-  __pyx_t_21 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 831, __pyx_L1_error)
+  __pyx_t_21 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 700, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_21);
-  __pyx_t_22 = __Pyx_PyObject_GetAttrStr(__pyx_t_21, __pyx_n_s_zeros); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 831, __pyx_L1_error)
+  __pyx_t_22 = __Pyx_PyObject_GetAttrStr(__pyx_t_21, __pyx_n_s_zeros); if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 700, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_22);
   __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
-  __pyx_t_21 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 831, __pyx_L1_error)
+  __pyx_t_21 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 700, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_21);
-  __pyx_t_23 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 831, __pyx_L1_error)
+  __pyx_t_23 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 700, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_23);
-  __pyx_t_24 = PyTuple_New(2); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 831, __pyx_L1_error)
+  __pyx_t_24 = PyTuple_New(2); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 700, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_24);
   __Pyx_GIVEREF(__pyx_t_21);
   PyTuple_SET_ITEM(__pyx_t_24, 0, __pyx_t_21);
@@ -11602,26 +10136,26 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
   PyTuple_SET_ITEM(__pyx_t_24, 1, __pyx_t_23);
   __pyx_t_21 = 0;
   __pyx_t_23 = 0;
-  __pyx_t_23 = PyTuple_New(1); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 831, __pyx_L1_error)
+  __pyx_t_23 = PyTuple_New(1); if (unlikely(!__pyx_t_23)) __PYX_ERR(0, 700, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_23);
   __Pyx_GIVEREF(__pyx_t_24);
   PyTuple_SET_ITEM(__pyx_t_23, 0, __pyx_t_24);
   __pyx_t_24 = 0;
-  __pyx_t_24 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 831, __pyx_L1_error)
+  __pyx_t_24 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 700, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_24);
-  if (PyDict_SetItem(__pyx_t_24, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 831, __pyx_L1_error)
-  __pyx_t_21 = __Pyx_PyObject_Call(__pyx_t_22, __pyx_t_23, __pyx_t_24); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 831, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_24, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 700, __pyx_L1_error)
+  __pyx_t_21 = __Pyx_PyObject_Call(__pyx_t_22, __pyx_t_23, __pyx_t_24); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 700, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_21);
   __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
   __Pyx_DECREF(__pyx_t_23); __pyx_t_23 = 0;
   __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
-  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_21, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 831, __pyx_L1_error)
+  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_21, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 700, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
   __pyx_v_phi = __pyx_t_41;
   __pyx_t_41.memview = NULL;
   __pyx_t_41.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":832
+  /* "fastTSNE/_tsne.pyx":701
  *     # STEP 3: Compute the potentials \tilde{\phi(y_i)}
  *     cdef double[:, ::1] phi = np.zeros((n_samples, n_terms), dtype=float)
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -11633,7 +10167,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":833
+    /* "fastTSNE/_tsne.pyx":702
  *     cdef double[:, ::1] phi = np.zeros((n_samples, n_terms), dtype=float)
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i]             # <<<<<<<<<<<<<<
@@ -11642,7 +10176,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
     __pyx_v_box_idx = (__pyx_v_point_box_idx[__pyx_v_i]);
 
-    /* "fastTSNE/_tsne.pyx":834
+    /* "fastTSNE/_tsne.pyx":703
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i]
  *         box_i = box_idx % n_boxes_1d             # <<<<<<<<<<<<<<
@@ -11651,7 +10185,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
     __pyx_v_box_i = (__pyx_v_box_idx % __pyx_v_n_boxes_1d);
 
-    /* "fastTSNE/_tsne.pyx":835
+    /* "fastTSNE/_tsne.pyx":704
  *         box_idx = point_box_idx[i]
  *         box_i = box_idx % n_boxes_1d
  *         box_j = box_idx // n_boxes_1d             # <<<<<<<<<<<<<<
@@ -11660,7 +10194,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
     __pyx_v_box_j = (__pyx_v_box_idx / __pyx_v_n_boxes_1d);
 
-    /* "fastTSNE/_tsne.pyx":836
+    /* "fastTSNE/_tsne.pyx":705
  *         box_i = box_idx % n_boxes_1d
  *         box_j = box_idx // n_boxes_1d
  *         for interp_i in range(n_interpolation_points):             # <<<<<<<<<<<<<<
@@ -11672,7 +10206,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     for (__pyx_t_68 = 0; __pyx_t_68 < __pyx_t_67; __pyx_t_68+=1) {
       __pyx_v_interp_i = __pyx_t_68;
 
-      /* "fastTSNE/_tsne.pyx":837
+      /* "fastTSNE/_tsne.pyx":706
  *         box_j = box_idx // n_boxes_1d
  *         for interp_i in range(n_interpolation_points):
  *             for interp_j in range(n_interpolation_points):             # <<<<<<<<<<<<<<
@@ -11684,7 +10218,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
       for (__pyx_t_71 = 0; __pyx_t_71 < __pyx_t_70; __pyx_t_71+=1) {
         __pyx_v_interp_j = __pyx_t_71;
 
-        /* "fastTSNE/_tsne.pyx":840
+        /* "fastTSNE/_tsne.pyx":709
  *                 idx = (box_i * n_interpolation_points + interp_i) * \
  *                       (n_boxes_1d * n_interpolation_points) + \
  *                       (box_j * n_interpolation_points) + \             # <<<<<<<<<<<<<<
@@ -11693,7 +10227,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
         __pyx_v_idx = (((((__pyx_v_box_i * __pyx_v_n_interpolation_points) + __pyx_v_interp_i) * (__pyx_v_n_boxes_1d * __pyx_v_n_interpolation_points)) + (__pyx_v_box_j * __pyx_v_n_interpolation_points)) + __pyx_v_interp_j);
 
-        /* "fastTSNE/_tsne.pyx":842
+        /* "fastTSNE/_tsne.pyx":711
  *                       (box_j * n_interpolation_points) + \
  *                       interp_j
  *                 for d in range(n_terms):             # <<<<<<<<<<<<<<
@@ -11705,7 +10239,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
         for (__pyx_t_72 = 0; __pyx_t_72 < __pyx_t_27; __pyx_t_72+=1) {
           __pyx_v_d = __pyx_t_72;
 
-          /* "fastTSNE/_tsne.pyx":843
+          /* "fastTSNE/_tsne.pyx":712
  *                       interp_j
  *                 for d in range(n_terms):
  *                     phi[i, d] += x_interpolated_values[i, interp_i] * \             # <<<<<<<<<<<<<<
@@ -11715,7 +10249,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
           __pyx_t_81 = __pyx_v_i;
           __pyx_t_82 = __pyx_v_interp_i;
 
-          /* "fastTSNE/_tsne.pyx":844
+          /* "fastTSNE/_tsne.pyx":713
  *                 for d in range(n_terms):
  *                     phi[i, d] += x_interpolated_values[i, interp_i] * \
  *                                  y_interpolated_values[i, interp_j] * \             # <<<<<<<<<<<<<<
@@ -11725,7 +10259,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
           __pyx_t_83 = __pyx_v_i;
           __pyx_t_84 = __pyx_v_interp_j;
 
-          /* "fastTSNE/_tsne.pyx":845
+          /* "fastTSNE/_tsne.pyx":714
  *                     phi[i, d] += x_interpolated_values[i, interp_i] * \
  *                                  y_interpolated_values[i, interp_j] * \
  *                                  y_tilde_values[idx, d]             # <<<<<<<<<<<<<<
@@ -11735,7 +10269,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
           __pyx_t_85 = __pyx_v_idx;
           __pyx_t_86 = __pyx_v_d;
 
-          /* "fastTSNE/_tsne.pyx":843
+          /* "fastTSNE/_tsne.pyx":712
  *                       interp_j
  *                 for d in range(n_terms):
  *                     phi[i, d] += x_interpolated_values[i, interp_i] * \             # <<<<<<<<<<<<<<
@@ -11750,7 +10284,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     }
   }
 
-  /* "fastTSNE/_tsne.pyx":847
+  /* "fastTSNE/_tsne.pyx":716
  *                                  y_tilde_values[idx, d]
  * 
  *     PyMem_Free(point_box_idx)             # <<<<<<<<<<<<<<
@@ -11759,7 +10293,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
   PyMem_Free(__pyx_v_point_box_idx);
 
-  /* "fastTSNE/_tsne.pyx":851
+  /* "fastTSNE/_tsne.pyx":720
  *     # Compute the normalization term Z or sum of q_{ij}s, this is not described
  *     # in the paper, but can be worked out
  *     cdef double sum_Q = 0, y1, y2             # <<<<<<<<<<<<<<
@@ -11768,7 +10302,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
   __pyx_v_sum_Q = 0.0;
 
-  /* "fastTSNE/_tsne.pyx":852
+  /* "fastTSNE/_tsne.pyx":721
  *     # in the paper, but can be worked out
  *     cdef double sum_Q = 0, y1, y2
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -11780,7 +10314,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":853
+    /* "fastTSNE/_tsne.pyx":722
  *     cdef double sum_Q = 0, y1, y2
  *     for i in range(n_samples):
  *         y1 = embedding[i, 0]             # <<<<<<<<<<<<<<
@@ -11791,7 +10325,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     __pyx_t_90 = 0;
     __pyx_v_y1 = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_89 * __pyx_v_embedding.strides[0]) )) + __pyx_t_90)) )));
 
-    /* "fastTSNE/_tsne.pyx":854
+    /* "fastTSNE/_tsne.pyx":723
  *     for i in range(n_samples):
  *         y1 = embedding[i, 0]
  *         y2 = embedding[i, 1]             # <<<<<<<<<<<<<<
@@ -11802,7 +10336,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     __pyx_t_92 = 1;
     __pyx_v_y2 = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_91 * __pyx_v_embedding.strides[0]) )) + __pyx_t_92)) )));
 
-    /* "fastTSNE/_tsne.pyx":856
+    /* "fastTSNE/_tsne.pyx":725
  *         y2 = embedding[i, 1]
  * 
  *         sum_Q += (1 + y1 ** 2 + y2 ** 2) * phi[i, 0] - \             # <<<<<<<<<<<<<<
@@ -11812,7 +10346,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     __pyx_t_93 = __pyx_v_i;
     __pyx_t_94 = 0;
 
-    /* "fastTSNE/_tsne.pyx":857
+    /* "fastTSNE/_tsne.pyx":726
  * 
  *         sum_Q += (1 + y1 ** 2 + y2 ** 2) * phi[i, 0] - \
  *                  2 * (y1 * phi[i, 1] + y2 * phi[i, 2]) + \             # <<<<<<<<<<<<<<
@@ -11824,7 +10358,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     __pyx_t_97 = __pyx_v_i;
     __pyx_t_98 = 2;
 
-    /* "fastTSNE/_tsne.pyx":858
+    /* "fastTSNE/_tsne.pyx":727
  *         sum_Q += (1 + y1 ** 2 + y2 ** 2) * phi[i, 0] - \
  *                  2 * (y1 * phi[i, 1] + y2 * phi[i, 2]) + \
  *                  phi[i, 3]             # <<<<<<<<<<<<<<
@@ -11834,7 +10368,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     __pyx_t_99 = __pyx_v_i;
     __pyx_t_100 = 3;
 
-    /* "fastTSNE/_tsne.pyx":856
+    /* "fastTSNE/_tsne.pyx":725
  *         y2 = embedding[i, 1]
  * 
  *         sum_Q += (1 + y1 ** 2 + y2 ** 2) * phi[i, 0] - \             # <<<<<<<<<<<<<<
@@ -11844,7 +10378,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     __pyx_v_sum_Q = (__pyx_v_sum_Q + (((((1.0 + pow(__pyx_v_y1, 2.0)) + pow(__pyx_v_y2, 2.0)) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_93 * __pyx_v_phi.strides[0]) )) + __pyx_t_94)) )))) - (2.0 * ((__pyx_v_y1 * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_95 * __pyx_v_phi.strides[0]) )) + __pyx_t_96)) )))) + (__pyx_v_y2 * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_97 * __pyx_v_phi.strides[0]) )) + __pyx_t_98)) ))))))) + (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_99 * __pyx_v_phi.strides[0]) )) + __pyx_t_100)) )))));
   }
 
-  /* "fastTSNE/_tsne.pyx":859
+  /* "fastTSNE/_tsne.pyx":728
  *                  2 * (y1 * phi[i, 1] + y2 * phi[i, 2]) + \
  *                  phi[i, 3]
  *     sum_Q -= n_samples             # <<<<<<<<<<<<<<
@@ -11853,7 +10387,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
  */
   __pyx_v_sum_Q = (__pyx_v_sum_Q - __pyx_v_n_samples);
 
-  /* "fastTSNE/_tsne.pyx":863
+  /* "fastTSNE/_tsne.pyx":732
  *     # Compute the gradient using a slight variation on the formula provided in
  *     # the paper
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -11865,7 +10399,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":864
+    /* "fastTSNE/_tsne.pyx":733
  *     # the paper
  *     for i in range(n_samples):
  *         gradient[i, 0] -= (embedding[i, 0] * phi[i, 0] - phi[i, 1]) / sum_Q             # <<<<<<<<<<<<<<
@@ -11882,7 +10416,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     __pyx_t_108 = 0;
     *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_gradient.data + __pyx_t_107 * __pyx_v_gradient.strides[0]) )) + __pyx_t_108)) )) -= ((((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_101 * __pyx_v_embedding.strides[0]) )) + __pyx_t_102)) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_103 * __pyx_v_phi.strides[0]) )) + __pyx_t_104)) )))) - (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_105 * __pyx_v_phi.strides[0]) )) + __pyx_t_106)) )))) / __pyx_v_sum_Q);
 
-    /* "fastTSNE/_tsne.pyx":865
+    /* "fastTSNE/_tsne.pyx":734
  *     for i in range(n_samples):
  *         gradient[i, 0] -= (embedding[i, 0] * phi[i, 0] - phi[i, 1]) / sum_Q
  *         gradient[i, 1] -= (embedding[i, 1] * phi[i, 0] - phi[i, 2]) / sum_Q             # <<<<<<<<<<<<<<
@@ -11900,7 +10434,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
     *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_gradient.data + __pyx_t_115 * __pyx_v_gradient.strides[0]) )) + __pyx_t_116)) )) -= ((((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_109 * __pyx_v_embedding.strides[0]) )) + __pyx_t_110)) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_111 * __pyx_v_phi.strides[0]) )) + __pyx_t_112)) )))) - (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_113 * __pyx_v_phi.strides[0]) )) + __pyx_t_114)) )))) / __pyx_v_sum_Q);
   }
 
-  /* "fastTSNE/_tsne.pyx":867
+  /* "fastTSNE/_tsne.pyx":736
  *         gradient[i, 1] -= (embedding[i, 1] * phi[i, 0] - phi[i, 2]) / sum_Q
  * 
  *     return sum_Q             # <<<<<<<<<<<<<<
@@ -11910,7 +10444,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__Pyx_m
   __pyx_r = __pyx_v_sum_Q;
   goto __pyx_L0;
 
-  /* "fastTSNE/_tsne.pyx":708
+  /* "fastTSNE/_tsne.pyx":577
  * 
  * 
  * cpdef double estimate_negative_gradient_fft_2d(             # <<<<<<<<<<<<<<
@@ -11988,7 +10522,7 @@ static PyObject *__pyx_pw_8fastTSNE_5_tsne_11estimate_negative_gradient_fft_2d(P
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_gradient)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_fft_2d", 0, 2, 5, 1); __PYX_ERR(0, 708, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_fft_2d", 0, 2, 5, 1); __PYX_ERR(0, 577, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -12010,7 +10544,7 @@ static PyObject *__pyx_pw_8fastTSNE_5_tsne_11estimate_negative_gradient_fft_2d(P
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "estimate_negative_gradient_fft_2d") < 0)) __PYX_ERR(0, 708, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "estimate_negative_gradient_fft_2d") < 0)) __PYX_ERR(0, 577, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -12026,27 +10560,27 @@ static PyObject *__pyx_pw_8fastTSNE_5_tsne_11estimate_negative_gradient_fft_2d(P
         default: goto __pyx_L5_argtuple_error;
       }
     }
-    __pyx_v_embedding = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_embedding.memview)) __PYX_ERR(0, 709, __pyx_L3_error)
-    __pyx_v_gradient = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_gradient.memview)) __PYX_ERR(0, 710, __pyx_L3_error)
+    __pyx_v_embedding = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_embedding.memview)) __PYX_ERR(0, 578, __pyx_L3_error)
+    __pyx_v_gradient = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_gradient.memview)) __PYX_ERR(0, 579, __pyx_L3_error)
     if (values[2]) {
-      __pyx_v_n_interpolation_points = __Pyx_PyIndex_AsSsize_t(values[2]); if (unlikely((__pyx_v_n_interpolation_points == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 711, __pyx_L3_error)
+      __pyx_v_n_interpolation_points = __Pyx_PyIndex_AsSsize_t(values[2]); if (unlikely((__pyx_v_n_interpolation_points == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 580, __pyx_L3_error)
     } else {
       __pyx_v_n_interpolation_points = ((Py_ssize_t)3);
     }
     if (values[3]) {
-      __pyx_v_min_num_intervals = __Pyx_PyIndex_AsSsize_t(values[3]); if (unlikely((__pyx_v_min_num_intervals == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 712, __pyx_L3_error)
+      __pyx_v_min_num_intervals = __Pyx_PyIndex_AsSsize_t(values[3]); if (unlikely((__pyx_v_min_num_intervals == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 581, __pyx_L3_error)
     } else {
       __pyx_v_min_num_intervals = ((Py_ssize_t)10);
     }
     if (values[4]) {
-      __pyx_v_ints_in_interval = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_ints_in_interval == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 713, __pyx_L3_error)
+      __pyx_v_ints_in_interval = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_ints_in_interval == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 582, __pyx_L3_error)
     } else {
       __pyx_v_ints_in_interval = ((double)1.0);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_fft_2d", 0, 2, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 708, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_fft_2d", 0, 2, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 577, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("fastTSNE._tsne.estimate_negative_gradient_fft_2d", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -12067,14 +10601,14 @@ static PyObject *__pyx_pf_8fastTSNE_5_tsne_10estimate_negative_gradient_fft_2d(C
   struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d __pyx_t_2;
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("estimate_negative_gradient_fft_2d", 0);
-  __Pyx_TraceCall("estimate_negative_gradient_fft_2d (wrapper)", __pyx_f[0], 708, 0, __PYX_ERR(0, 708, __pyx_L1_error));
+  __Pyx_TraceCall("estimate_negative_gradient_fft_2d (wrapper)", __pyx_f[0], 577, 0, __PYX_ERR(0, 577, __pyx_L1_error));
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_2.__pyx_n = 3;
   __pyx_t_2.n_interpolation_points = __pyx_v_n_interpolation_points;
   __pyx_t_2.min_num_intervals = __pyx_v_min_num_intervals;
   __pyx_t_2.ints_in_interval = __pyx_v_ints_in_interval;
   __pyx_t_1 = __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d(__pyx_v_embedding, __pyx_v_gradient, 0, &__pyx_t_2); 
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 708, __pyx_L1_error)
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 577, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_r = __pyx_t_3;
   __pyx_t_3 = 0;
@@ -12094,7 +10628,7 @@ static PyObject *__pyx_pf_8fastTSNE_5_tsne_10estimate_negative_gradient_fft_2d(C
   return __pyx_r;
 }
 
-/* "fastTSNE/_tsne.pyx":870
+/* "fastTSNE/_tsne.pyx":739
  * 
  * 
  * cpdef double estimate_negative_gradient_fft_2d_with_reference(             # <<<<<<<<<<<<<<
@@ -12302,7 +10836,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
   Py_ssize_t __pyx_t_143;
   Py_ssize_t __pyx_t_144;
   __Pyx_RefNannySetupContext("estimate_negative_gradient_fft_2d_with_reference", 0);
-  __Pyx_TraceCall("estimate_negative_gradient_fft_2d_with_reference", __pyx_f[0], 870, 0, __PYX_ERR(0, 870, __pyx_L1_error));
+  __Pyx_TraceCall("estimate_negative_gradient_fft_2d_with_reference", __pyx_f[0], 739, 0, __PYX_ERR(0, 739, __pyx_L1_error));
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
       __pyx_v_n_interpolation_points = __pyx_optional_args->n_interpolation_points;
@@ -12315,7 +10849,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     }
   }
 
-  /* "fastTSNE/_tsne.pyx":880
+  /* "fastTSNE/_tsne.pyx":749
  *     cdef:
  *         Py_ssize_t i, j, d, box_idx
  *         Py_ssize_t n_samples = embedding.shape[0]             # <<<<<<<<<<<<<<
@@ -12324,7 +10858,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
   __pyx_v_n_samples = (__pyx_v_embedding.shape[0]);
 
-  /* "fastTSNE/_tsne.pyx":881
+  /* "fastTSNE/_tsne.pyx":750
  *         Py_ssize_t i, j, d, box_idx
  *         Py_ssize_t n_samples = embedding.shape[0]
  *         Py_ssize_t n_reference_samples = reference_embedding.shape[0]             # <<<<<<<<<<<<<<
@@ -12333,7 +10867,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
   __pyx_v_n_reference_samples = (__pyx_v_reference_embedding.shape[0]);
 
-  /* "fastTSNE/_tsne.pyx":882
+  /* "fastTSNE/_tsne.pyx":751
  *         Py_ssize_t n_samples = embedding.shape[0]
  *         Py_ssize_t n_reference_samples = reference_embedding.shape[0]
  *         Py_ssize_t n_dims = embedding.shape[1]             # <<<<<<<<<<<<<<
@@ -12342,7 +10876,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
   __pyx_v_n_dims = (__pyx_v_embedding.shape[1]);
 
-  /* "fastTSNE/_tsne.pyx":884
+  /* "fastTSNE/_tsne.pyx":753
  *         Py_ssize_t n_dims = embedding.shape[1]
  * 
  *         double coord_max = -INFINITY, coord_min = INFINITY             # <<<<<<<<<<<<<<
@@ -12352,7 +10886,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
   __pyx_v_coord_max = (-INFINITY);
   __pyx_v_coord_min = INFINITY;
 
-  /* "fastTSNE/_tsne.pyx":887
+  /* "fastTSNE/_tsne.pyx":756
  *     # Determine the min/max values of the embedding
  *     # First, check the existing embedding
  *     for i in range(n_reference_samples):             # <<<<<<<<<<<<<<
@@ -12364,7 +10898,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":888
+    /* "fastTSNE/_tsne.pyx":757
  *     # First, check the existing embedding
  *     for i in range(n_reference_samples):
  *         if reference_embedding[i, 0] < coord_min:             # <<<<<<<<<<<<<<
@@ -12376,7 +10910,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_6 = (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_reference_embedding.data + __pyx_t_4 * __pyx_v_reference_embedding.strides[0]) )) + __pyx_t_5)) ))) < __pyx_v_coord_min) != 0);
     if (__pyx_t_6) {
 
-      /* "fastTSNE/_tsne.pyx":889
+      /* "fastTSNE/_tsne.pyx":758
  *     for i in range(n_reference_samples):
  *         if reference_embedding[i, 0] < coord_min:
  *             coord_min = reference_embedding[i, 0]             # <<<<<<<<<<<<<<
@@ -12387,7 +10921,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
       __pyx_t_8 = 0;
       __pyx_v_coord_min = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_reference_embedding.data + __pyx_t_7 * __pyx_v_reference_embedding.strides[0]) )) + __pyx_t_8)) )));
 
-      /* "fastTSNE/_tsne.pyx":888
+      /* "fastTSNE/_tsne.pyx":757
  *     # First, check the existing embedding
  *     for i in range(n_reference_samples):
  *         if reference_embedding[i, 0] < coord_min:             # <<<<<<<<<<<<<<
@@ -12397,7 +10931,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
       goto __pyx_L5;
     }
 
-    /* "fastTSNE/_tsne.pyx":890
+    /* "fastTSNE/_tsne.pyx":759
  *         if reference_embedding[i, 0] < coord_min:
  *             coord_min = reference_embedding[i, 0]
  *         elif reference_embedding[i, 0] > coord_max:             # <<<<<<<<<<<<<<
@@ -12409,7 +10943,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_6 = (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_reference_embedding.data + __pyx_t_9 * __pyx_v_reference_embedding.strides[0]) )) + __pyx_t_10)) ))) > __pyx_v_coord_max) != 0);
     if (__pyx_t_6) {
 
-      /* "fastTSNE/_tsne.pyx":891
+      /* "fastTSNE/_tsne.pyx":760
  *             coord_min = reference_embedding[i, 0]
  *         elif reference_embedding[i, 0] > coord_max:
  *             coord_max = reference_embedding[i, 0]             # <<<<<<<<<<<<<<
@@ -12420,7 +10954,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
       __pyx_t_12 = 0;
       __pyx_v_coord_max = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_reference_embedding.data + __pyx_t_11 * __pyx_v_reference_embedding.strides[0]) )) + __pyx_t_12)) )));
 
-      /* "fastTSNE/_tsne.pyx":890
+      /* "fastTSNE/_tsne.pyx":759
  *         if reference_embedding[i, 0] < coord_min:
  *             coord_min = reference_embedding[i, 0]
  *         elif reference_embedding[i, 0] > coord_max:             # <<<<<<<<<<<<<<
@@ -12430,7 +10964,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     }
     __pyx_L5:;
 
-    /* "fastTSNE/_tsne.pyx":892
+    /* "fastTSNE/_tsne.pyx":761
  *         elif reference_embedding[i, 0] > coord_max:
  *             coord_max = reference_embedding[i, 0]
  *         if reference_embedding[i, 1] < coord_min:             # <<<<<<<<<<<<<<
@@ -12442,7 +10976,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_6 = (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_reference_embedding.data + __pyx_t_13 * __pyx_v_reference_embedding.strides[0]) )) + __pyx_t_14)) ))) < __pyx_v_coord_min) != 0);
     if (__pyx_t_6) {
 
-      /* "fastTSNE/_tsne.pyx":893
+      /* "fastTSNE/_tsne.pyx":762
  *             coord_max = reference_embedding[i, 0]
  *         if reference_embedding[i, 1] < coord_min:
  *             coord_min = reference_embedding[i, 1]             # <<<<<<<<<<<<<<
@@ -12453,7 +10987,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
       __pyx_t_16 = 1;
       __pyx_v_coord_min = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_reference_embedding.data + __pyx_t_15 * __pyx_v_reference_embedding.strides[0]) )) + __pyx_t_16)) )));
 
-      /* "fastTSNE/_tsne.pyx":892
+      /* "fastTSNE/_tsne.pyx":761
  *         elif reference_embedding[i, 0] > coord_max:
  *             coord_max = reference_embedding[i, 0]
  *         if reference_embedding[i, 1] < coord_min:             # <<<<<<<<<<<<<<
@@ -12463,7 +10997,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
       goto __pyx_L6;
     }
 
-    /* "fastTSNE/_tsne.pyx":894
+    /* "fastTSNE/_tsne.pyx":763
  *         if reference_embedding[i, 1] < coord_min:
  *             coord_min = reference_embedding[i, 1]
  *         elif reference_embedding[i, 1] > coord_max:             # <<<<<<<<<<<<<<
@@ -12475,7 +11009,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_6 = (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_reference_embedding.data + __pyx_t_17 * __pyx_v_reference_embedding.strides[0]) )) + __pyx_t_18)) ))) > __pyx_v_coord_max) != 0);
     if (__pyx_t_6) {
 
-      /* "fastTSNE/_tsne.pyx":895
+      /* "fastTSNE/_tsne.pyx":764
  *             coord_min = reference_embedding[i, 1]
  *         elif reference_embedding[i, 1] > coord_max:
  *             coord_max = reference_embedding[i, 1]             # <<<<<<<<<<<<<<
@@ -12486,7 +11020,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
       __pyx_t_20 = 1;
       __pyx_v_coord_max = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_reference_embedding.data + __pyx_t_19 * __pyx_v_reference_embedding.strides[0]) )) + __pyx_t_20)) )));
 
-      /* "fastTSNE/_tsne.pyx":894
+      /* "fastTSNE/_tsne.pyx":763
  *         if reference_embedding[i, 1] < coord_min:
  *             coord_min = reference_embedding[i, 1]
  *         elif reference_embedding[i, 1] > coord_max:             # <<<<<<<<<<<<<<
@@ -12497,7 +11031,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_L6:;
   }
 
-  /* "fastTSNE/_tsne.pyx":897
+  /* "fastTSNE/_tsne.pyx":766
  *             coord_max = reference_embedding[i, 1]
  *     # And check the new embedding points
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -12509,7 +11043,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":898
+    /* "fastTSNE/_tsne.pyx":767
  *     # And check the new embedding points
  *     for i in range(n_samples):
  *         if embedding[i, 0] < coord_min:             # <<<<<<<<<<<<<<
@@ -12521,7 +11055,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_6 = (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_21 * __pyx_v_embedding.strides[0]) )) + __pyx_t_22)) ))) < __pyx_v_coord_min) != 0);
     if (__pyx_t_6) {
 
-      /* "fastTSNE/_tsne.pyx":899
+      /* "fastTSNE/_tsne.pyx":768
  *     for i in range(n_samples):
  *         if embedding[i, 0] < coord_min:
  *             coord_min = embedding[i, 0]             # <<<<<<<<<<<<<<
@@ -12532,7 +11066,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
       __pyx_t_24 = 0;
       __pyx_v_coord_min = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_23 * __pyx_v_embedding.strides[0]) )) + __pyx_t_24)) )));
 
-      /* "fastTSNE/_tsne.pyx":898
+      /* "fastTSNE/_tsne.pyx":767
  *     # And check the new embedding points
  *     for i in range(n_samples):
  *         if embedding[i, 0] < coord_min:             # <<<<<<<<<<<<<<
@@ -12542,7 +11076,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
       goto __pyx_L9;
     }
 
-    /* "fastTSNE/_tsne.pyx":900
+    /* "fastTSNE/_tsne.pyx":769
  *         if embedding[i, 0] < coord_min:
  *             coord_min = embedding[i, 0]
  *         elif embedding[i, 0] > coord_max:             # <<<<<<<<<<<<<<
@@ -12554,7 +11088,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_6 = (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_25 * __pyx_v_embedding.strides[0]) )) + __pyx_t_26)) ))) > __pyx_v_coord_max) != 0);
     if (__pyx_t_6) {
 
-      /* "fastTSNE/_tsne.pyx":901
+      /* "fastTSNE/_tsne.pyx":770
  *             coord_min = embedding[i, 0]
  *         elif embedding[i, 0] > coord_max:
  *             coord_max = embedding[i, 0]             # <<<<<<<<<<<<<<
@@ -12565,7 +11099,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
       __pyx_t_28 = 0;
       __pyx_v_coord_max = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_27 * __pyx_v_embedding.strides[0]) )) + __pyx_t_28)) )));
 
-      /* "fastTSNE/_tsne.pyx":900
+      /* "fastTSNE/_tsne.pyx":769
  *         if embedding[i, 0] < coord_min:
  *             coord_min = embedding[i, 0]
  *         elif embedding[i, 0] > coord_max:             # <<<<<<<<<<<<<<
@@ -12575,7 +11109,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     }
     __pyx_L9:;
 
-    /* "fastTSNE/_tsne.pyx":902
+    /* "fastTSNE/_tsne.pyx":771
  *         elif embedding[i, 0] > coord_max:
  *             coord_max = embedding[i, 0]
  *         if embedding[i, 1] < coord_min:             # <<<<<<<<<<<<<<
@@ -12587,7 +11121,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_6 = (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_29 * __pyx_v_embedding.strides[0]) )) + __pyx_t_30)) ))) < __pyx_v_coord_min) != 0);
     if (__pyx_t_6) {
 
-      /* "fastTSNE/_tsne.pyx":903
+      /* "fastTSNE/_tsne.pyx":772
  *             coord_max = embedding[i, 0]
  *         if embedding[i, 1] < coord_min:
  *             coord_min = embedding[i, 1]             # <<<<<<<<<<<<<<
@@ -12598,7 +11132,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
       __pyx_t_32 = 1;
       __pyx_v_coord_min = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_31 * __pyx_v_embedding.strides[0]) )) + __pyx_t_32)) )));
 
-      /* "fastTSNE/_tsne.pyx":902
+      /* "fastTSNE/_tsne.pyx":771
  *         elif embedding[i, 0] > coord_max:
  *             coord_max = embedding[i, 0]
  *         if embedding[i, 1] < coord_min:             # <<<<<<<<<<<<<<
@@ -12608,7 +11142,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
       goto __pyx_L10;
     }
 
-    /* "fastTSNE/_tsne.pyx":904
+    /* "fastTSNE/_tsne.pyx":773
  *         if embedding[i, 1] < coord_min:
  *             coord_min = embedding[i, 1]
  *         elif embedding[i, 1] > coord_max:             # <<<<<<<<<<<<<<
@@ -12620,7 +11154,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_6 = (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_33 * __pyx_v_embedding.strides[0]) )) + __pyx_t_34)) ))) > __pyx_v_coord_max) != 0);
     if (__pyx_t_6) {
 
-      /* "fastTSNE/_tsne.pyx":905
+      /* "fastTSNE/_tsne.pyx":774
  *             coord_min = embedding[i, 1]
  *         elif embedding[i, 1] > coord_max:
  *             coord_max = embedding[i, 1]             # <<<<<<<<<<<<<<
@@ -12631,7 +11165,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
       __pyx_t_36 = 1;
       __pyx_v_coord_max = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_35 * __pyx_v_embedding.strides[0]) )) + __pyx_t_36)) )));
 
-      /* "fastTSNE/_tsne.pyx":904
+      /* "fastTSNE/_tsne.pyx":773
  *         if embedding[i, 1] < coord_min:
  *             coord_min = embedding[i, 1]
  *         elif embedding[i, 1] > coord_max:             # <<<<<<<<<<<<<<
@@ -12642,7 +11176,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_L10:;
   }
 
-  /* "fastTSNE/_tsne.pyx":907
+  /* "fastTSNE/_tsne.pyx":776
  *             coord_max = embedding[i, 1]
  * 
  *     cdef int n_boxes_1d = <int>fmax(min_num_intervals, (coord_max - coord_min) / ints_in_interval)             # <<<<<<<<<<<<<<
@@ -12651,7 +11185,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
   __pyx_v_n_boxes_1d = ((int)fmax(__pyx_v_min_num_intervals, ((__pyx_v_coord_max - __pyx_v_coord_min) / __pyx_v_ints_in_interval)));
 
-  /* "fastTSNE/_tsne.pyx":908
+  /* "fastTSNE/_tsne.pyx":777
  * 
  *     cdef int n_boxes_1d = <int>fmax(min_num_intervals, (coord_max - coord_min) / ints_in_interval)
  *     cdef int n_total_boxes = n_boxes_1d ** 2             # <<<<<<<<<<<<<<
@@ -12660,7 +11194,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
   __pyx_v_n_total_boxes = __Pyx_pow_long(((long)__pyx_v_n_boxes_1d), 2);
 
-  /* "fastTSNE/_tsne.pyx":909
+  /* "fastTSNE/_tsne.pyx":778
  *     cdef int n_boxes_1d = <int>fmax(min_num_intervals, (coord_max - coord_min) / ints_in_interval)
  *     cdef int n_total_boxes = n_boxes_1d ** 2
  *     cdef double box_width = (coord_max - coord_min) / n_boxes_1d             # <<<<<<<<<<<<<<
@@ -12669,139 +11203,139 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
   __pyx_v_box_width = ((__pyx_v_coord_max - __pyx_v_coord_min) / __pyx_v_n_boxes_1d);
 
-  /* "fastTSNE/_tsne.pyx":913
+  /* "fastTSNE/_tsne.pyx":782
  *     # Compute the box bounds
  *     cdef:
  *         double[::1] box_x_lower_bounds = np.empty(n_total_boxes, dtype=float)             # <<<<<<<<<<<<<<
  *         double[::1] box_x_upper_bounds = np.empty(n_total_boxes, dtype=float)
  *         double[::1] box_y_lower_bounds = np.empty(n_total_boxes, dtype=float)
  */
-  __pyx_t_37 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 913, __pyx_L1_error)
+  __pyx_t_37 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 782, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_37);
-  __pyx_t_38 = __Pyx_PyObject_GetAttrStr(__pyx_t_37, __pyx_n_s_empty); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 913, __pyx_L1_error)
+  __pyx_t_38 = __Pyx_PyObject_GetAttrStr(__pyx_t_37, __pyx_n_s_empty); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 782, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_38);
   __Pyx_DECREF(__pyx_t_37); __pyx_t_37 = 0;
-  __pyx_t_37 = __Pyx_PyInt_From_int(__pyx_v_n_total_boxes); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 913, __pyx_L1_error)
+  __pyx_t_37 = __Pyx_PyInt_From_int(__pyx_v_n_total_boxes); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 782, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_37);
-  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 913, __pyx_L1_error)
+  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 782, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_39);
   __Pyx_GIVEREF(__pyx_t_37);
   PyTuple_SET_ITEM(__pyx_t_39, 0, __pyx_t_37);
   __pyx_t_37 = 0;
-  __pyx_t_37 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 913, __pyx_L1_error)
+  __pyx_t_37 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 782, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_37);
-  if (PyDict_SetItem(__pyx_t_37, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 913, __pyx_L1_error)
-  __pyx_t_40 = __Pyx_PyObject_Call(__pyx_t_38, __pyx_t_39, __pyx_t_37); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 913, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_37, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 782, __pyx_L1_error)
+  __pyx_t_40 = __Pyx_PyObject_Call(__pyx_t_38, __pyx_t_39, __pyx_t_37); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 782, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_40);
   __Pyx_DECREF(__pyx_t_38); __pyx_t_38 = 0;
   __Pyx_DECREF(__pyx_t_39); __pyx_t_39 = 0;
   __Pyx_DECREF(__pyx_t_37); __pyx_t_37 = 0;
-  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_40, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 913, __pyx_L1_error)
+  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_40, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 782, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_40); __pyx_t_40 = 0;
   __pyx_v_box_x_lower_bounds = __pyx_t_41;
   __pyx_t_41.memview = NULL;
   __pyx_t_41.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":914
+  /* "fastTSNE/_tsne.pyx":783
  *     cdef:
  *         double[::1] box_x_lower_bounds = np.empty(n_total_boxes, dtype=float)
  *         double[::1] box_x_upper_bounds = np.empty(n_total_boxes, dtype=float)             # <<<<<<<<<<<<<<
  *         double[::1] box_y_lower_bounds = np.empty(n_total_boxes, dtype=float)
  *         double[::1] box_y_upper_bounds = np.empty(n_total_boxes, dtype=float)
  */
-  __pyx_t_40 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 914, __pyx_L1_error)
+  __pyx_t_40 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 783, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_40);
-  __pyx_t_37 = __Pyx_PyObject_GetAttrStr(__pyx_t_40, __pyx_n_s_empty); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 914, __pyx_L1_error)
+  __pyx_t_37 = __Pyx_PyObject_GetAttrStr(__pyx_t_40, __pyx_n_s_empty); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 783, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_37);
   __Pyx_DECREF(__pyx_t_40); __pyx_t_40 = 0;
-  __pyx_t_40 = __Pyx_PyInt_From_int(__pyx_v_n_total_boxes); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 914, __pyx_L1_error)
+  __pyx_t_40 = __Pyx_PyInt_From_int(__pyx_v_n_total_boxes); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 783, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_40);
-  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 914, __pyx_L1_error)
+  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 783, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_39);
   __Pyx_GIVEREF(__pyx_t_40);
   PyTuple_SET_ITEM(__pyx_t_39, 0, __pyx_t_40);
   __pyx_t_40 = 0;
-  __pyx_t_40 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 914, __pyx_L1_error)
+  __pyx_t_40 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 783, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_40);
-  if (PyDict_SetItem(__pyx_t_40, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 914, __pyx_L1_error)
-  __pyx_t_38 = __Pyx_PyObject_Call(__pyx_t_37, __pyx_t_39, __pyx_t_40); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 914, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_40, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 783, __pyx_L1_error)
+  __pyx_t_38 = __Pyx_PyObject_Call(__pyx_t_37, __pyx_t_39, __pyx_t_40); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 783, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_38);
   __Pyx_DECREF(__pyx_t_37); __pyx_t_37 = 0;
   __Pyx_DECREF(__pyx_t_39); __pyx_t_39 = 0;
   __Pyx_DECREF(__pyx_t_40); __pyx_t_40 = 0;
-  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_38, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 914, __pyx_L1_error)
+  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_38, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 783, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_38); __pyx_t_38 = 0;
   __pyx_v_box_x_upper_bounds = __pyx_t_41;
   __pyx_t_41.memview = NULL;
   __pyx_t_41.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":915
+  /* "fastTSNE/_tsne.pyx":784
  *         double[::1] box_x_lower_bounds = np.empty(n_total_boxes, dtype=float)
  *         double[::1] box_x_upper_bounds = np.empty(n_total_boxes, dtype=float)
  *         double[::1] box_y_lower_bounds = np.empty(n_total_boxes, dtype=float)             # <<<<<<<<<<<<<<
  *         double[::1] box_y_upper_bounds = np.empty(n_total_boxes, dtype=float)
  * 
  */
-  __pyx_t_38 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 915, __pyx_L1_error)
+  __pyx_t_38 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 784, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_38);
-  __pyx_t_40 = __Pyx_PyObject_GetAttrStr(__pyx_t_38, __pyx_n_s_empty); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 915, __pyx_L1_error)
+  __pyx_t_40 = __Pyx_PyObject_GetAttrStr(__pyx_t_38, __pyx_n_s_empty); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 784, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_40);
   __Pyx_DECREF(__pyx_t_38); __pyx_t_38 = 0;
-  __pyx_t_38 = __Pyx_PyInt_From_int(__pyx_v_n_total_boxes); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 915, __pyx_L1_error)
+  __pyx_t_38 = __Pyx_PyInt_From_int(__pyx_v_n_total_boxes); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 784, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_38);
-  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 915, __pyx_L1_error)
+  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 784, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_39);
   __Pyx_GIVEREF(__pyx_t_38);
   PyTuple_SET_ITEM(__pyx_t_39, 0, __pyx_t_38);
   __pyx_t_38 = 0;
-  __pyx_t_38 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 915, __pyx_L1_error)
+  __pyx_t_38 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 784, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_38);
-  if (PyDict_SetItem(__pyx_t_38, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 915, __pyx_L1_error)
-  __pyx_t_37 = __Pyx_PyObject_Call(__pyx_t_40, __pyx_t_39, __pyx_t_38); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 915, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_38, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 784, __pyx_L1_error)
+  __pyx_t_37 = __Pyx_PyObject_Call(__pyx_t_40, __pyx_t_39, __pyx_t_38); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 784, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_37);
   __Pyx_DECREF(__pyx_t_40); __pyx_t_40 = 0;
   __Pyx_DECREF(__pyx_t_39); __pyx_t_39 = 0;
   __Pyx_DECREF(__pyx_t_38); __pyx_t_38 = 0;
-  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_37, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 915, __pyx_L1_error)
+  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_37, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 784, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_37); __pyx_t_37 = 0;
   __pyx_v_box_y_lower_bounds = __pyx_t_41;
   __pyx_t_41.memview = NULL;
   __pyx_t_41.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":916
+  /* "fastTSNE/_tsne.pyx":785
  *         double[::1] box_x_upper_bounds = np.empty(n_total_boxes, dtype=float)
  *         double[::1] box_y_lower_bounds = np.empty(n_total_boxes, dtype=float)
  *         double[::1] box_y_upper_bounds = np.empty(n_total_boxes, dtype=float)             # <<<<<<<<<<<<<<
  * 
  *     for i in range(n_boxes_1d):
  */
-  __pyx_t_37 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 916, __pyx_L1_error)
+  __pyx_t_37 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 785, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_37);
-  __pyx_t_38 = __Pyx_PyObject_GetAttrStr(__pyx_t_37, __pyx_n_s_empty); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 916, __pyx_L1_error)
+  __pyx_t_38 = __Pyx_PyObject_GetAttrStr(__pyx_t_37, __pyx_n_s_empty); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 785, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_38);
   __Pyx_DECREF(__pyx_t_37); __pyx_t_37 = 0;
-  __pyx_t_37 = __Pyx_PyInt_From_int(__pyx_v_n_total_boxes); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 916, __pyx_L1_error)
+  __pyx_t_37 = __Pyx_PyInt_From_int(__pyx_v_n_total_boxes); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 785, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_37);
-  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 916, __pyx_L1_error)
+  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 785, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_39);
   __Pyx_GIVEREF(__pyx_t_37);
   PyTuple_SET_ITEM(__pyx_t_39, 0, __pyx_t_37);
   __pyx_t_37 = 0;
-  __pyx_t_37 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 916, __pyx_L1_error)
+  __pyx_t_37 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 785, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_37);
-  if (PyDict_SetItem(__pyx_t_37, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 916, __pyx_L1_error)
-  __pyx_t_40 = __Pyx_PyObject_Call(__pyx_t_38, __pyx_t_39, __pyx_t_37); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 916, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_37, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 785, __pyx_L1_error)
+  __pyx_t_40 = __Pyx_PyObject_Call(__pyx_t_38, __pyx_t_39, __pyx_t_37); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 785, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_40);
   __Pyx_DECREF(__pyx_t_38); __pyx_t_38 = 0;
   __Pyx_DECREF(__pyx_t_39); __pyx_t_39 = 0;
   __Pyx_DECREF(__pyx_t_37); __pyx_t_37 = 0;
-  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_40, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 916, __pyx_L1_error)
+  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_40, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 785, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_40); __pyx_t_40 = 0;
   __pyx_v_box_y_upper_bounds = __pyx_t_41;
   __pyx_t_41.memview = NULL;
   __pyx_t_41.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":918
+  /* "fastTSNE/_tsne.pyx":787
  *         double[::1] box_y_upper_bounds = np.empty(n_total_boxes, dtype=float)
  * 
  *     for i in range(n_boxes_1d):             # <<<<<<<<<<<<<<
@@ -12813,7 +11347,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
   for (__pyx_t_1 = 0; __pyx_t_1 < __pyx_t_43; __pyx_t_1+=1) {
     __pyx_v_i = __pyx_t_1;
 
-    /* "fastTSNE/_tsne.pyx":919
+    /* "fastTSNE/_tsne.pyx":788
  * 
  *     for i in range(n_boxes_1d):
  *         for j in range(n_boxes_1d):             # <<<<<<<<<<<<<<
@@ -12825,7 +11359,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_45; __pyx_t_2+=1) {
       __pyx_v_j = __pyx_t_2;
 
-      /* "fastTSNE/_tsne.pyx":920
+      /* "fastTSNE/_tsne.pyx":789
  *     for i in range(n_boxes_1d):
  *         for j in range(n_boxes_1d):
  *             box_x_lower_bounds[i * n_boxes_1d + j] = j * box_width + coord_min             # <<<<<<<<<<<<<<
@@ -12835,7 +11369,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
       __pyx_t_46 = ((__pyx_v_i * __pyx_v_n_boxes_1d) + __pyx_v_j);
       *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_box_x_lower_bounds.data) + __pyx_t_46)) )) = ((__pyx_v_j * __pyx_v_box_width) + __pyx_v_coord_min);
 
-      /* "fastTSNE/_tsne.pyx":921
+      /* "fastTSNE/_tsne.pyx":790
  *         for j in range(n_boxes_1d):
  *             box_x_lower_bounds[i * n_boxes_1d + j] = j * box_width + coord_min
  *             box_x_upper_bounds[i * n_boxes_1d + j] = (j + 1) * box_width + coord_min             # <<<<<<<<<<<<<<
@@ -12845,7 +11379,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
       __pyx_t_47 = ((__pyx_v_i * __pyx_v_n_boxes_1d) + __pyx_v_j);
       *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_box_x_upper_bounds.data) + __pyx_t_47)) )) = (((__pyx_v_j + 1) * __pyx_v_box_width) + __pyx_v_coord_min);
 
-      /* "fastTSNE/_tsne.pyx":923
+      /* "fastTSNE/_tsne.pyx":792
  *             box_x_upper_bounds[i * n_boxes_1d + j] = (j + 1) * box_width + coord_min
  * 
  *             box_y_lower_bounds[i * n_boxes_1d + j] = i * box_width + coord_min             # <<<<<<<<<<<<<<
@@ -12855,7 +11389,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
       __pyx_t_48 = ((__pyx_v_i * __pyx_v_n_boxes_1d) + __pyx_v_j);
       *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_box_y_lower_bounds.data) + __pyx_t_48)) )) = ((__pyx_v_i * __pyx_v_box_width) + __pyx_v_coord_min);
 
-      /* "fastTSNE/_tsne.pyx":924
+      /* "fastTSNE/_tsne.pyx":793
  * 
  *             box_y_lower_bounds[i * n_boxes_1d + j] = i * box_width + coord_min
  *             box_y_upper_bounds[i * n_boxes_1d + j] = (i + 1) * box_width + coord_min             # <<<<<<<<<<<<<<
@@ -12867,7 +11401,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     }
   }
 
-  /* "fastTSNE/_tsne.pyx":927
+  /* "fastTSNE/_tsne.pyx":796
  * 
  *     # Determine which box each reference point belongs to
  *     cdef int *reference_point_box_idx = <int *>PyMem_Malloc(n_reference_samples * sizeof(int))             # <<<<<<<<<<<<<<
@@ -12876,7 +11410,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
   __pyx_v_reference_point_box_idx = ((int *)PyMem_Malloc((__pyx_v_n_reference_samples * (sizeof(int)))));
 
-  /* "fastTSNE/_tsne.pyx":929
+  /* "fastTSNE/_tsne.pyx":798
  *     cdef int *reference_point_box_idx = <int *>PyMem_Malloc(n_reference_samples * sizeof(int))
  *     cdef int box_x_idx, box_y_idx
  *     for i in range(n_reference_samples):             # <<<<<<<<<<<<<<
@@ -12888,7 +11422,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":930
+    /* "fastTSNE/_tsne.pyx":799
  *     cdef int box_x_idx, box_y_idx
  *     for i in range(n_reference_samples):
  *         box_x_idx = <int>((reference_embedding[i, 0] - coord_min) / box_width)             # <<<<<<<<<<<<<<
@@ -12899,7 +11433,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_51 = 0;
     __pyx_v_box_x_idx = ((int)(((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_reference_embedding.data + __pyx_t_50 * __pyx_v_reference_embedding.strides[0]) )) + __pyx_t_51)) ))) - __pyx_v_coord_min) / __pyx_v_box_width));
 
-    /* "fastTSNE/_tsne.pyx":931
+    /* "fastTSNE/_tsne.pyx":800
  *     for i in range(n_reference_samples):
  *         box_x_idx = <int>((reference_embedding[i, 0] - coord_min) / box_width)
  *         box_y_idx = <int>((reference_embedding[i, 1] - coord_min) / box_width)             # <<<<<<<<<<<<<<
@@ -12910,7 +11444,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_53 = 1;
     __pyx_v_box_y_idx = ((int)(((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_reference_embedding.data + __pyx_t_52 * __pyx_v_reference_embedding.strides[0]) )) + __pyx_t_53)) ))) - __pyx_v_coord_min) / __pyx_v_box_width));
 
-    /* "fastTSNE/_tsne.pyx":934
+    /* "fastTSNE/_tsne.pyx":803
  *         # The right most point maps directly into `n_boxes`, while it should
  *         # belong to the last box
  *         if box_x_idx >= n_boxes_1d:             # <<<<<<<<<<<<<<
@@ -12920,7 +11454,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_6 = ((__pyx_v_box_x_idx >= __pyx_v_n_boxes_1d) != 0);
     if (__pyx_t_6) {
 
-      /* "fastTSNE/_tsne.pyx":935
+      /* "fastTSNE/_tsne.pyx":804
  *         # belong to the last box
  *         if box_x_idx >= n_boxes_1d:
  *             box_x_idx = n_boxes_1d - 1             # <<<<<<<<<<<<<<
@@ -12929,7 +11463,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
       __pyx_v_box_x_idx = (__pyx_v_n_boxes_1d - 1);
 
-      /* "fastTSNE/_tsne.pyx":934
+      /* "fastTSNE/_tsne.pyx":803
  *         # The right most point maps directly into `n_boxes`, while it should
  *         # belong to the last box
  *         if box_x_idx >= n_boxes_1d:             # <<<<<<<<<<<<<<
@@ -12938,7 +11472,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
     }
 
-    /* "fastTSNE/_tsne.pyx":936
+    /* "fastTSNE/_tsne.pyx":805
  *         if box_x_idx >= n_boxes_1d:
  *             box_x_idx = n_boxes_1d - 1
  *         if box_y_idx >= n_boxes_1d:             # <<<<<<<<<<<<<<
@@ -12948,7 +11482,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_6 = ((__pyx_v_box_y_idx >= __pyx_v_n_boxes_1d) != 0);
     if (__pyx_t_6) {
 
-      /* "fastTSNE/_tsne.pyx":937
+      /* "fastTSNE/_tsne.pyx":806
  *             box_x_idx = n_boxes_1d - 1
  *         if box_y_idx >= n_boxes_1d:
  *             box_y_idx = n_boxes_1d - 1             # <<<<<<<<<<<<<<
@@ -12957,7 +11491,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
       __pyx_v_box_y_idx = (__pyx_v_n_boxes_1d - 1);
 
-      /* "fastTSNE/_tsne.pyx":936
+      /* "fastTSNE/_tsne.pyx":805
  *         if box_x_idx >= n_boxes_1d:
  *             box_x_idx = n_boxes_1d - 1
  *         if box_y_idx >= n_boxes_1d:             # <<<<<<<<<<<<<<
@@ -12966,7 +11500,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
     }
 
-    /* "fastTSNE/_tsne.pyx":939
+    /* "fastTSNE/_tsne.pyx":808
  *             box_y_idx = n_boxes_1d - 1
  * 
  *         reference_point_box_idx[i] = box_y_idx * n_boxes_1d + box_x_idx             # <<<<<<<<<<<<<<
@@ -12976,7 +11510,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     (__pyx_v_reference_point_box_idx[__pyx_v_i]) = ((__pyx_v_box_y_idx * __pyx_v_n_boxes_1d) + __pyx_v_box_x_idx);
   }
 
-  /* "fastTSNE/_tsne.pyx":942
+  /* "fastTSNE/_tsne.pyx":811
  * 
  *     # Determine which box each new point belongs to
  *     cdef int *point_box_idx = <int *>PyMem_Malloc(n_samples * sizeof(int))             # <<<<<<<<<<<<<<
@@ -12985,7 +11519,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
   __pyx_v_point_box_idx = ((int *)PyMem_Malloc((__pyx_v_n_samples * (sizeof(int)))));
 
-  /* "fastTSNE/_tsne.pyx":943
+  /* "fastTSNE/_tsne.pyx":812
  *     # Determine which box each new point belongs to
  *     cdef int *point_box_idx = <int *>PyMem_Malloc(n_samples * sizeof(int))
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -12997,7 +11531,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":944
+    /* "fastTSNE/_tsne.pyx":813
  *     cdef int *point_box_idx = <int *>PyMem_Malloc(n_samples * sizeof(int))
  *     for i in range(n_samples):
  *         box_x_idx = <int>((embedding[i, 0] - coord_min) / box_width)             # <<<<<<<<<<<<<<
@@ -13008,7 +11542,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_55 = 0;
     __pyx_v_box_x_idx = ((int)(((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_54 * __pyx_v_embedding.strides[0]) )) + __pyx_t_55)) ))) - __pyx_v_coord_min) / __pyx_v_box_width));
 
-    /* "fastTSNE/_tsne.pyx":945
+    /* "fastTSNE/_tsne.pyx":814
  *     for i in range(n_samples):
  *         box_x_idx = <int>((embedding[i, 0] - coord_min) / box_width)
  *         box_y_idx = <int>((embedding[i, 1] - coord_min) / box_width)             # <<<<<<<<<<<<<<
@@ -13019,7 +11553,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_57 = 1;
     __pyx_v_box_y_idx = ((int)(((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_56 * __pyx_v_embedding.strides[0]) )) + __pyx_t_57)) ))) - __pyx_v_coord_min) / __pyx_v_box_width));
 
-    /* "fastTSNE/_tsne.pyx":948
+    /* "fastTSNE/_tsne.pyx":817
  *         # The right most point maps directly into `n_boxes`, while it should
  *         # belong to the last box
  *         if box_x_idx >= n_boxes_1d:             # <<<<<<<<<<<<<<
@@ -13029,7 +11563,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_6 = ((__pyx_v_box_x_idx >= __pyx_v_n_boxes_1d) != 0);
     if (__pyx_t_6) {
 
-      /* "fastTSNE/_tsne.pyx":949
+      /* "fastTSNE/_tsne.pyx":818
  *         # belong to the last box
  *         if box_x_idx >= n_boxes_1d:
  *             box_x_idx = n_boxes_1d - 1             # <<<<<<<<<<<<<<
@@ -13038,7 +11572,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
       __pyx_v_box_x_idx = (__pyx_v_n_boxes_1d - 1);
 
-      /* "fastTSNE/_tsne.pyx":948
+      /* "fastTSNE/_tsne.pyx":817
  *         # The right most point maps directly into `n_boxes`, while it should
  *         # belong to the last box
  *         if box_x_idx >= n_boxes_1d:             # <<<<<<<<<<<<<<
@@ -13047,7 +11581,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
     }
 
-    /* "fastTSNE/_tsne.pyx":950
+    /* "fastTSNE/_tsne.pyx":819
  *         if box_x_idx >= n_boxes_1d:
  *             box_x_idx = n_boxes_1d - 1
  *         if box_y_idx >= n_boxes_1d:             # <<<<<<<<<<<<<<
@@ -13057,7 +11591,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_6 = ((__pyx_v_box_y_idx >= __pyx_v_n_boxes_1d) != 0);
     if (__pyx_t_6) {
 
-      /* "fastTSNE/_tsne.pyx":951
+      /* "fastTSNE/_tsne.pyx":820
  *             box_x_idx = n_boxes_1d - 1
  *         if box_y_idx >= n_boxes_1d:
  *             box_y_idx = n_boxes_1d - 1             # <<<<<<<<<<<<<<
@@ -13066,7 +11600,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
       __pyx_v_box_y_idx = (__pyx_v_n_boxes_1d - 1);
 
-      /* "fastTSNE/_tsne.pyx":950
+      /* "fastTSNE/_tsne.pyx":819
  *         if box_x_idx >= n_boxes_1d:
  *             box_x_idx = n_boxes_1d - 1
  *         if box_y_idx >= n_boxes_1d:             # <<<<<<<<<<<<<<
@@ -13075,7 +11609,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
     }
 
-    /* "fastTSNE/_tsne.pyx":953
+    /* "fastTSNE/_tsne.pyx":822
  *             box_y_idx = n_boxes_1d - 1
  * 
  *         point_box_idx[i] = box_y_idx * n_boxes_1d + box_x_idx             # <<<<<<<<<<<<<<
@@ -13085,40 +11619,40 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     (__pyx_v_point_box_idx[__pyx_v_i]) = ((__pyx_v_box_y_idx * __pyx_v_n_boxes_1d) + __pyx_v_box_x_idx);
   }
 
-  /* "fastTSNE/_tsne.pyx":957
+  /* "fastTSNE/_tsne.pyx":826
  *     # Prepare the interpolants for a single interval, so we can use their
  *     # relative positions later on
  *     cdef double[::1] y_tilde = np.empty(n_interpolation_points, dtype=float)             # <<<<<<<<<<<<<<
  *     cdef double h = 1. / n_interpolation_points
  *     y_tilde[0] = h / 2
  */
-  __pyx_t_40 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 957, __pyx_L1_error)
+  __pyx_t_40 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 826, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_40);
-  __pyx_t_37 = __Pyx_PyObject_GetAttrStr(__pyx_t_40, __pyx_n_s_empty); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 957, __pyx_L1_error)
+  __pyx_t_37 = __Pyx_PyObject_GetAttrStr(__pyx_t_40, __pyx_n_s_empty); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 826, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_37);
   __Pyx_DECREF(__pyx_t_40); __pyx_t_40 = 0;
-  __pyx_t_40 = PyInt_FromSsize_t(__pyx_v_n_interpolation_points); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 957, __pyx_L1_error)
+  __pyx_t_40 = PyInt_FromSsize_t(__pyx_v_n_interpolation_points); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 826, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_40);
-  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 957, __pyx_L1_error)
+  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 826, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_39);
   __Pyx_GIVEREF(__pyx_t_40);
   PyTuple_SET_ITEM(__pyx_t_39, 0, __pyx_t_40);
   __pyx_t_40 = 0;
-  __pyx_t_40 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 957, __pyx_L1_error)
+  __pyx_t_40 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 826, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_40);
-  if (PyDict_SetItem(__pyx_t_40, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 957, __pyx_L1_error)
-  __pyx_t_38 = __Pyx_PyObject_Call(__pyx_t_37, __pyx_t_39, __pyx_t_40); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 957, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_40, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 826, __pyx_L1_error)
+  __pyx_t_38 = __Pyx_PyObject_Call(__pyx_t_37, __pyx_t_39, __pyx_t_40); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 826, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_38);
   __Pyx_DECREF(__pyx_t_37); __pyx_t_37 = 0;
   __Pyx_DECREF(__pyx_t_39); __pyx_t_39 = 0;
   __Pyx_DECREF(__pyx_t_40); __pyx_t_40 = 0;
-  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_38, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 957, __pyx_L1_error)
+  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_38, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 826, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_38); __pyx_t_38 = 0;
   __pyx_v_y_tilde = __pyx_t_41;
   __pyx_t_41.memview = NULL;
   __pyx_t_41.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":958
+  /* "fastTSNE/_tsne.pyx":827
  *     # relative positions later on
  *     cdef double[::1] y_tilde = np.empty(n_interpolation_points, dtype=float)
  *     cdef double h = 1. / n_interpolation_points             # <<<<<<<<<<<<<<
@@ -13127,7 +11661,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
   __pyx_v_h = (1. / __pyx_v_n_interpolation_points);
 
-  /* "fastTSNE/_tsne.pyx":959
+  /* "fastTSNE/_tsne.pyx":828
  *     cdef double[::1] y_tilde = np.empty(n_interpolation_points, dtype=float)
  *     cdef double h = 1. / n_interpolation_points
  *     y_tilde[0] = h / 2             # <<<<<<<<<<<<<<
@@ -13137,7 +11671,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
   __pyx_t_58 = 0;
   *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_58)) )) = (__pyx_v_h / 2.0);
 
-  /* "fastTSNE/_tsne.pyx":960
+  /* "fastTSNE/_tsne.pyx":829
  *     cdef double h = 1. / n_interpolation_points
  *     y_tilde[0] = h / 2
  *     for i in range(1, n_interpolation_points):             # <<<<<<<<<<<<<<
@@ -13149,7 +11683,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
   for (__pyx_t_3 = 1; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":961
+    /* "fastTSNE/_tsne.pyx":830
  *     y_tilde[0] = h / 2
  *     for i in range(1, n_interpolation_points):
  *         y_tilde[i] = y_tilde[i - 1] + h             # <<<<<<<<<<<<<<
@@ -13161,19 +11695,19 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_60)) )) = ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_tilde.data) + __pyx_t_59)) ))) + __pyx_v_h);
   }
 
-  /* "fastTSNE/_tsne.pyx":964
+  /* "fastTSNE/_tsne.pyx":833
  * 
  *     # Evaluate the kernel at the interpolation nodes
  *     cdef double[:, ::1] kernel_tilde = compute_kernel_tilde_2d(             # <<<<<<<<<<<<<<
  *         n_interpolation_points * n_boxes_1d, coord_min, h * box_width)
  * 
  */
-  __pyx_t_61 = __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_2d((__pyx_v_n_interpolation_points * __pyx_v_n_boxes_1d), __pyx_v_coord_min, (__pyx_v_h * __pyx_v_box_width)); if (unlikely(!__pyx_t_61.memview)) __PYX_ERR(0, 964, __pyx_L1_error)
+  __pyx_t_61 = __pyx_f_8fastTSNE_5_tsne_compute_kernel_tilde_2d((__pyx_v_n_interpolation_points * __pyx_v_n_boxes_1d), __pyx_v_coord_min, (__pyx_v_h * __pyx_v_box_width)); if (unlikely(!__pyx_t_61.memview)) __PYX_ERR(0, 833, __pyx_L1_error)
   __pyx_v_kernel_tilde = __pyx_t_61;
   __pyx_t_61.memview = NULL;
   __pyx_t_61.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":969
+  /* "fastTSNE/_tsne.pyx":838
  *     # STEP 1: Compute the w coefficients
  *     # Set up q_j values
  *     cdef int n_terms = 4             # <<<<<<<<<<<<<<
@@ -13182,23 +11716,23 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
   __pyx_v_n_terms = 4;
 
-  /* "fastTSNE/_tsne.pyx":970
+  /* "fastTSNE/_tsne.pyx":839
  *     # Set up q_j values
  *     cdef int n_terms = 4
  *     cdef double[:, ::1] q_j = np.empty((n_reference_samples, n_terms), dtype=float)             # <<<<<<<<<<<<<<
  *     for i in range(n_reference_samples):
  *         q_j[i, 0] = 1
  */
-  __pyx_t_38 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 970, __pyx_L1_error)
+  __pyx_t_38 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 839, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_38);
-  __pyx_t_40 = __Pyx_PyObject_GetAttrStr(__pyx_t_38, __pyx_n_s_empty); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 970, __pyx_L1_error)
+  __pyx_t_40 = __Pyx_PyObject_GetAttrStr(__pyx_t_38, __pyx_n_s_empty); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 839, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_40);
   __Pyx_DECREF(__pyx_t_38); __pyx_t_38 = 0;
-  __pyx_t_38 = PyInt_FromSsize_t(__pyx_v_n_reference_samples); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 970, __pyx_L1_error)
+  __pyx_t_38 = PyInt_FromSsize_t(__pyx_v_n_reference_samples); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 839, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_38);
-  __pyx_t_39 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 970, __pyx_L1_error)
+  __pyx_t_39 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 839, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_39);
-  __pyx_t_37 = PyTuple_New(2); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 970, __pyx_L1_error)
+  __pyx_t_37 = PyTuple_New(2); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 839, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_37);
   __Pyx_GIVEREF(__pyx_t_38);
   PyTuple_SET_ITEM(__pyx_t_37, 0, __pyx_t_38);
@@ -13206,26 +11740,26 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
   PyTuple_SET_ITEM(__pyx_t_37, 1, __pyx_t_39);
   __pyx_t_38 = 0;
   __pyx_t_39 = 0;
-  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 970, __pyx_L1_error)
+  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 839, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_39);
   __Pyx_GIVEREF(__pyx_t_37);
   PyTuple_SET_ITEM(__pyx_t_39, 0, __pyx_t_37);
   __pyx_t_37 = 0;
-  __pyx_t_37 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 970, __pyx_L1_error)
+  __pyx_t_37 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 839, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_37);
-  if (PyDict_SetItem(__pyx_t_37, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 970, __pyx_L1_error)
-  __pyx_t_38 = __Pyx_PyObject_Call(__pyx_t_40, __pyx_t_39, __pyx_t_37); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 970, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_37, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 839, __pyx_L1_error)
+  __pyx_t_38 = __Pyx_PyObject_Call(__pyx_t_40, __pyx_t_39, __pyx_t_37); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 839, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_38);
   __Pyx_DECREF(__pyx_t_40); __pyx_t_40 = 0;
   __Pyx_DECREF(__pyx_t_39); __pyx_t_39 = 0;
   __Pyx_DECREF(__pyx_t_37); __pyx_t_37 = 0;
-  __pyx_t_61 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_38, PyBUF_WRITABLE); if (unlikely(!__pyx_t_61.memview)) __PYX_ERR(0, 970, __pyx_L1_error)
+  __pyx_t_61 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_38, PyBUF_WRITABLE); if (unlikely(!__pyx_t_61.memview)) __PYX_ERR(0, 839, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_38); __pyx_t_38 = 0;
   __pyx_v_q_j = __pyx_t_61;
   __pyx_t_61.memview = NULL;
   __pyx_t_61.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":971
+  /* "fastTSNE/_tsne.pyx":840
  *     cdef int n_terms = 4
  *     cdef double[:, ::1] q_j = np.empty((n_reference_samples, n_terms), dtype=float)
  *     for i in range(n_reference_samples):             # <<<<<<<<<<<<<<
@@ -13237,7 +11771,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":972
+    /* "fastTSNE/_tsne.pyx":841
  *     cdef double[:, ::1] q_j = np.empty((n_reference_samples, n_terms), dtype=float)
  *     for i in range(n_reference_samples):
  *         q_j[i, 0] = 1             # <<<<<<<<<<<<<<
@@ -13248,7 +11782,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_63 = 0;
     *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_q_j.data + __pyx_t_62 * __pyx_v_q_j.strides[0]) )) + __pyx_t_63)) )) = 1.0;
 
-    /* "fastTSNE/_tsne.pyx":973
+    /* "fastTSNE/_tsne.pyx":842
  *     for i in range(n_reference_samples):
  *         q_j[i, 0] = 1
  *         q_j[i, 1] = reference_embedding[i, 0]             # <<<<<<<<<<<<<<
@@ -13261,7 +11795,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_67 = 1;
     *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_q_j.data + __pyx_t_66 * __pyx_v_q_j.strides[0]) )) + __pyx_t_67)) )) = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_reference_embedding.data + __pyx_t_64 * __pyx_v_reference_embedding.strides[0]) )) + __pyx_t_65)) )));
 
-    /* "fastTSNE/_tsne.pyx":974
+    /* "fastTSNE/_tsne.pyx":843
  *         q_j[i, 0] = 1
  *         q_j[i, 1] = reference_embedding[i, 0]
  *         q_j[i, 2] = reference_embedding[i, 1]             # <<<<<<<<<<<<<<
@@ -13274,7 +11808,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_71 = 2;
     *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_q_j.data + __pyx_t_70 * __pyx_v_q_j.strides[0]) )) + __pyx_t_71)) )) = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_reference_embedding.data + __pyx_t_68 * __pyx_v_reference_embedding.strides[0]) )) + __pyx_t_69)) )));
 
-    /* "fastTSNE/_tsne.pyx":975
+    /* "fastTSNE/_tsne.pyx":844
  *         q_j[i, 1] = reference_embedding[i, 0]
  *         q_j[i, 2] = reference_embedding[i, 1]
  *         q_j[i, 3] = reference_embedding[i, 0] ** 2 + reference_embedding[i, 1] ** 2             # <<<<<<<<<<<<<<
@@ -13290,73 +11824,73 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_q_j.data + __pyx_t_76 * __pyx_v_q_j.strides[0]) )) + __pyx_t_77)) )) = (pow((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_reference_embedding.data + __pyx_t_72 * __pyx_v_reference_embedding.strides[0]) )) + __pyx_t_73)) ))), 2.0) + pow((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_reference_embedding.data + __pyx_t_74 * __pyx_v_reference_embedding.strides[0]) )) + __pyx_t_75)) ))), 2.0));
   }
 
-  /* "fastTSNE/_tsne.pyx":979
+  /* "fastTSNE/_tsne.pyx":848
  *     # Compute the relative position of each reference point in its box
  *     cdef:
  *         double[::1] reference_x_in_box = np.empty(n_reference_samples, dtype=float)             # <<<<<<<<<<<<<<
  *         double[::1] reference_y_in_box = np.empty(n_reference_samples, dtype=float)
  *         double y_min, x_min
  */
-  __pyx_t_38 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 979, __pyx_L1_error)
+  __pyx_t_38 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 848, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_38);
-  __pyx_t_37 = __Pyx_PyObject_GetAttrStr(__pyx_t_38, __pyx_n_s_empty); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 979, __pyx_L1_error)
+  __pyx_t_37 = __Pyx_PyObject_GetAttrStr(__pyx_t_38, __pyx_n_s_empty); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 848, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_37);
   __Pyx_DECREF(__pyx_t_38); __pyx_t_38 = 0;
-  __pyx_t_38 = PyInt_FromSsize_t(__pyx_v_n_reference_samples); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 979, __pyx_L1_error)
+  __pyx_t_38 = PyInt_FromSsize_t(__pyx_v_n_reference_samples); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 848, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_38);
-  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 979, __pyx_L1_error)
+  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 848, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_39);
   __Pyx_GIVEREF(__pyx_t_38);
   PyTuple_SET_ITEM(__pyx_t_39, 0, __pyx_t_38);
   __pyx_t_38 = 0;
-  __pyx_t_38 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 979, __pyx_L1_error)
+  __pyx_t_38 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 848, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_38);
-  if (PyDict_SetItem(__pyx_t_38, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 979, __pyx_L1_error)
-  __pyx_t_40 = __Pyx_PyObject_Call(__pyx_t_37, __pyx_t_39, __pyx_t_38); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 979, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_38, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 848, __pyx_L1_error)
+  __pyx_t_40 = __Pyx_PyObject_Call(__pyx_t_37, __pyx_t_39, __pyx_t_38); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 848, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_40);
   __Pyx_DECREF(__pyx_t_37); __pyx_t_37 = 0;
   __Pyx_DECREF(__pyx_t_39); __pyx_t_39 = 0;
   __Pyx_DECREF(__pyx_t_38); __pyx_t_38 = 0;
-  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_40, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 979, __pyx_L1_error)
+  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_40, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 848, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_40); __pyx_t_40 = 0;
   __pyx_v_reference_x_in_box = __pyx_t_41;
   __pyx_t_41.memview = NULL;
   __pyx_t_41.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":980
+  /* "fastTSNE/_tsne.pyx":849
  *     cdef:
  *         double[::1] reference_x_in_box = np.empty(n_reference_samples, dtype=float)
  *         double[::1] reference_y_in_box = np.empty(n_reference_samples, dtype=float)             # <<<<<<<<<<<<<<
  *         double y_min, x_min
  * 
  */
-  __pyx_t_40 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 980, __pyx_L1_error)
+  __pyx_t_40 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 849, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_40);
-  __pyx_t_38 = __Pyx_PyObject_GetAttrStr(__pyx_t_40, __pyx_n_s_empty); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 980, __pyx_L1_error)
+  __pyx_t_38 = __Pyx_PyObject_GetAttrStr(__pyx_t_40, __pyx_n_s_empty); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 849, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_38);
   __Pyx_DECREF(__pyx_t_40); __pyx_t_40 = 0;
-  __pyx_t_40 = PyInt_FromSsize_t(__pyx_v_n_reference_samples); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 980, __pyx_L1_error)
+  __pyx_t_40 = PyInt_FromSsize_t(__pyx_v_n_reference_samples); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 849, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_40);
-  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 980, __pyx_L1_error)
+  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 849, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_39);
   __Pyx_GIVEREF(__pyx_t_40);
   PyTuple_SET_ITEM(__pyx_t_39, 0, __pyx_t_40);
   __pyx_t_40 = 0;
-  __pyx_t_40 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 980, __pyx_L1_error)
+  __pyx_t_40 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 849, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_40);
-  if (PyDict_SetItem(__pyx_t_40, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 980, __pyx_L1_error)
-  __pyx_t_37 = __Pyx_PyObject_Call(__pyx_t_38, __pyx_t_39, __pyx_t_40); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 980, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_40, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 849, __pyx_L1_error)
+  __pyx_t_37 = __Pyx_PyObject_Call(__pyx_t_38, __pyx_t_39, __pyx_t_40); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 849, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_37);
   __Pyx_DECREF(__pyx_t_38); __pyx_t_38 = 0;
   __Pyx_DECREF(__pyx_t_39); __pyx_t_39 = 0;
   __Pyx_DECREF(__pyx_t_40); __pyx_t_40 = 0;
-  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_37, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 980, __pyx_L1_error)
+  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_37, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 849, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_37); __pyx_t_37 = 0;
   __pyx_v_reference_y_in_box = __pyx_t_41;
   __pyx_t_41.memview = NULL;
   __pyx_t_41.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":983
+  /* "fastTSNE/_tsne.pyx":852
  *         double y_min, x_min
  * 
  *     for i in range(n_reference_samples):             # <<<<<<<<<<<<<<
@@ -13368,7 +11902,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":984
+    /* "fastTSNE/_tsne.pyx":853
  * 
  *     for i in range(n_reference_samples):
  *         box_idx = reference_point_box_idx[i]             # <<<<<<<<<<<<<<
@@ -13377,7 +11911,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
     __pyx_v_box_idx = (__pyx_v_reference_point_box_idx[__pyx_v_i]);
 
-    /* "fastTSNE/_tsne.pyx":985
+    /* "fastTSNE/_tsne.pyx":854
  *     for i in range(n_reference_samples):
  *         box_idx = reference_point_box_idx[i]
  *         x_min = box_x_lower_bounds[box_idx]             # <<<<<<<<<<<<<<
@@ -13387,7 +11921,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_78 = __pyx_v_box_idx;
     __pyx_v_x_min = (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_box_x_lower_bounds.data) + __pyx_t_78)) )));
 
-    /* "fastTSNE/_tsne.pyx":986
+    /* "fastTSNE/_tsne.pyx":855
  *         box_idx = reference_point_box_idx[i]
  *         x_min = box_x_lower_bounds[box_idx]
  *         y_min = box_y_lower_bounds[box_idx]             # <<<<<<<<<<<<<<
@@ -13397,7 +11931,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_79 = __pyx_v_box_idx;
     __pyx_v_y_min = (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_box_y_lower_bounds.data) + __pyx_t_79)) )));
 
-    /* "fastTSNE/_tsne.pyx":987
+    /* "fastTSNE/_tsne.pyx":856
  *         x_min = box_x_lower_bounds[box_idx]
  *         y_min = box_y_lower_bounds[box_idx]
  *         reference_x_in_box[i] = (reference_embedding[i, 0] - x_min) / box_width             # <<<<<<<<<<<<<<
@@ -13409,7 +11943,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_82 = __pyx_v_i;
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_reference_x_in_box.data) + __pyx_t_82)) )) = (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_reference_embedding.data + __pyx_t_80 * __pyx_v_reference_embedding.strides[0]) )) + __pyx_t_81)) ))) - __pyx_v_x_min) / __pyx_v_box_width);
 
-    /* "fastTSNE/_tsne.pyx":988
+    /* "fastTSNE/_tsne.pyx":857
  *         y_min = box_y_lower_bounds[box_idx]
  *         reference_x_in_box[i] = (reference_embedding[i, 0] - x_min) / box_width
  *         reference_y_in_box[i] = (reference_embedding[i, 1] - y_min) / box_width             # <<<<<<<<<<<<<<
@@ -13422,31 +11956,31 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_reference_y_in_box.data) + __pyx_t_85)) )) = (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_reference_embedding.data + __pyx_t_83 * __pyx_v_reference_embedding.strides[0]) )) + __pyx_t_84)) ))) - __pyx_v_y_min) / __pyx_v_box_width);
   }
 
-  /* "fastTSNE/_tsne.pyx":991
+  /* "fastTSNE/_tsne.pyx":860
  * 
  *     # Interpolate kernel using Lagrange polynomials
  *     cdef double[:, ::1] reference_x_interpolated_values = interpolate(reference_x_in_box, y_tilde)             # <<<<<<<<<<<<<<
  *     cdef double[:, ::1] reference_y_interpolated_values = interpolate(reference_y_in_box, y_tilde)
  * 
  */
-  __pyx_t_61 = __pyx_f_8fastTSNE_5_tsne_interpolate(__pyx_v_reference_x_in_box, __pyx_v_y_tilde); if (unlikely(!__pyx_t_61.memview)) __PYX_ERR(0, 991, __pyx_L1_error)
+  __pyx_t_61 = __pyx_f_8fastTSNE_5_tsne_interpolate(__pyx_v_reference_x_in_box, __pyx_v_y_tilde); if (unlikely(!__pyx_t_61.memview)) __PYX_ERR(0, 860, __pyx_L1_error)
   __pyx_v_reference_x_interpolated_values = __pyx_t_61;
   __pyx_t_61.memview = NULL;
   __pyx_t_61.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":992
+  /* "fastTSNE/_tsne.pyx":861
  *     # Interpolate kernel using Lagrange polynomials
  *     cdef double[:, ::1] reference_x_interpolated_values = interpolate(reference_x_in_box, y_tilde)
  *     cdef double[:, ::1] reference_y_interpolated_values = interpolate(reference_y_in_box, y_tilde)             # <<<<<<<<<<<<<<
  * 
  *     # Actually compute w_{ij}s
  */
-  __pyx_t_61 = __pyx_f_8fastTSNE_5_tsne_interpolate(__pyx_v_reference_y_in_box, __pyx_v_y_tilde); if (unlikely(!__pyx_t_61.memview)) __PYX_ERR(0, 992, __pyx_L1_error)
+  __pyx_t_61 = __pyx_f_8fastTSNE_5_tsne_interpolate(__pyx_v_reference_y_in_box, __pyx_v_y_tilde); if (unlikely(!__pyx_t_61.memview)) __PYX_ERR(0, 861, __pyx_L1_error)
   __pyx_v_reference_y_interpolated_values = __pyx_t_61;
   __pyx_t_61.memview = NULL;
   __pyx_t_61.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":996
+  /* "fastTSNE/_tsne.pyx":865
  *     # Actually compute w_{ij}s
  *     cdef:
  *         int total_interpolation_points = n_total_boxes * n_interpolation_points ** 2             # <<<<<<<<<<<<<<
@@ -13455,23 +11989,23 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
   __pyx_v_total_interpolation_points = (__pyx_v_n_total_boxes * __Pyx_pow_Py_ssize_t(__pyx_v_n_interpolation_points, 2));
 
-  /* "fastTSNE/_tsne.pyx":997
+  /* "fastTSNE/_tsne.pyx":866
  *     cdef:
  *         int total_interpolation_points = n_total_boxes * n_interpolation_points ** 2
  *         double[:, ::1] w_coefficients = np.zeros((total_interpolation_points, n_terms), dtype=float)             # <<<<<<<<<<<<<<
  *         Py_ssize_t box_i, box_j, interp_i, interp_j, idx
  * 
  */
-  __pyx_t_37 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 997, __pyx_L1_error)
+  __pyx_t_37 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 866, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_37);
-  __pyx_t_40 = __Pyx_PyObject_GetAttrStr(__pyx_t_37, __pyx_n_s_zeros); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 997, __pyx_L1_error)
+  __pyx_t_40 = __Pyx_PyObject_GetAttrStr(__pyx_t_37, __pyx_n_s_zeros); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 866, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_40);
   __Pyx_DECREF(__pyx_t_37); __pyx_t_37 = 0;
-  __pyx_t_37 = __Pyx_PyInt_From_int(__pyx_v_total_interpolation_points); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 997, __pyx_L1_error)
+  __pyx_t_37 = __Pyx_PyInt_From_int(__pyx_v_total_interpolation_points); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 866, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_37);
-  __pyx_t_39 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 997, __pyx_L1_error)
+  __pyx_t_39 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 866, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_39);
-  __pyx_t_38 = PyTuple_New(2); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 997, __pyx_L1_error)
+  __pyx_t_38 = PyTuple_New(2); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 866, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_38);
   __Pyx_GIVEREF(__pyx_t_37);
   PyTuple_SET_ITEM(__pyx_t_38, 0, __pyx_t_37);
@@ -13479,26 +12013,26 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
   PyTuple_SET_ITEM(__pyx_t_38, 1, __pyx_t_39);
   __pyx_t_37 = 0;
   __pyx_t_39 = 0;
-  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 997, __pyx_L1_error)
+  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 866, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_39);
   __Pyx_GIVEREF(__pyx_t_38);
   PyTuple_SET_ITEM(__pyx_t_39, 0, __pyx_t_38);
   __pyx_t_38 = 0;
-  __pyx_t_38 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 997, __pyx_L1_error)
+  __pyx_t_38 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 866, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_38);
-  if (PyDict_SetItem(__pyx_t_38, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 997, __pyx_L1_error)
-  __pyx_t_37 = __Pyx_PyObject_Call(__pyx_t_40, __pyx_t_39, __pyx_t_38); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 997, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_38, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 866, __pyx_L1_error)
+  __pyx_t_37 = __Pyx_PyObject_Call(__pyx_t_40, __pyx_t_39, __pyx_t_38); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 866, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_37);
   __Pyx_DECREF(__pyx_t_40); __pyx_t_40 = 0;
   __Pyx_DECREF(__pyx_t_39); __pyx_t_39 = 0;
   __Pyx_DECREF(__pyx_t_38); __pyx_t_38 = 0;
-  __pyx_t_61 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_37, PyBUF_WRITABLE); if (unlikely(!__pyx_t_61.memview)) __PYX_ERR(0, 997, __pyx_L1_error)
+  __pyx_t_61 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_37, PyBUF_WRITABLE); if (unlikely(!__pyx_t_61.memview)) __PYX_ERR(0, 866, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_37); __pyx_t_37 = 0;
   __pyx_v_w_coefficients = __pyx_t_61;
   __pyx_t_61.memview = NULL;
   __pyx_t_61.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":1000
+  /* "fastTSNE/_tsne.pyx":869
  *         Py_ssize_t box_i, box_j, interp_i, interp_j, idx
  * 
  *     for i in range(n_reference_samples):             # <<<<<<<<<<<<<<
@@ -13510,7 +12044,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":1001
+    /* "fastTSNE/_tsne.pyx":870
  * 
  *     for i in range(n_reference_samples):
  *         box_idx = reference_point_box_idx[i]             # <<<<<<<<<<<<<<
@@ -13519,7 +12053,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
     __pyx_v_box_idx = (__pyx_v_reference_point_box_idx[__pyx_v_i]);
 
-    /* "fastTSNE/_tsne.pyx":1002
+    /* "fastTSNE/_tsne.pyx":871
  *     for i in range(n_reference_samples):
  *         box_idx = reference_point_box_idx[i]
  *         box_i = box_idx % n_boxes_1d             # <<<<<<<<<<<<<<
@@ -13528,7 +12062,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
     __pyx_v_box_i = (__pyx_v_box_idx % __pyx_v_n_boxes_1d);
 
-    /* "fastTSNE/_tsne.pyx":1003
+    /* "fastTSNE/_tsne.pyx":872
  *         box_idx = reference_point_box_idx[i]
  *         box_i = box_idx % n_boxes_1d
  *         box_j = box_idx // n_boxes_1d             # <<<<<<<<<<<<<<
@@ -13537,7 +12071,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
     __pyx_v_box_j = (__pyx_v_box_idx / __pyx_v_n_boxes_1d);
 
-    /* "fastTSNE/_tsne.pyx":1004
+    /* "fastTSNE/_tsne.pyx":873
  *         box_i = box_idx % n_boxes_1d
  *         box_j = box_idx // n_boxes_1d
  *         for interp_i in range(n_interpolation_points):             # <<<<<<<<<<<<<<
@@ -13549,7 +12083,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     for (__pyx_t_88 = 0; __pyx_t_88 < __pyx_t_87; __pyx_t_88+=1) {
       __pyx_v_interp_i = __pyx_t_88;
 
-      /* "fastTSNE/_tsne.pyx":1005
+      /* "fastTSNE/_tsne.pyx":874
  *         box_j = box_idx // n_boxes_1d
  *         for interp_i in range(n_interpolation_points):
  *             for interp_j in range(n_interpolation_points):             # <<<<<<<<<<<<<<
@@ -13561,7 +12095,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
       for (__pyx_t_91 = 0; __pyx_t_91 < __pyx_t_90; __pyx_t_91+=1) {
         __pyx_v_interp_j = __pyx_t_91;
 
-        /* "fastTSNE/_tsne.pyx":1008
+        /* "fastTSNE/_tsne.pyx":877
  *                 idx = (box_i * n_interpolation_points + interp_i) * \
  *                       (n_boxes_1d * n_interpolation_points) + \
  *                       (box_j * n_interpolation_points) + \             # <<<<<<<<<<<<<<
@@ -13570,7 +12104,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
         __pyx_v_idx = (((((__pyx_v_box_i * __pyx_v_n_interpolation_points) + __pyx_v_interp_i) * (__pyx_v_n_boxes_1d * __pyx_v_n_interpolation_points)) + (__pyx_v_box_j * __pyx_v_n_interpolation_points)) + __pyx_v_interp_j);
 
-        /* "fastTSNE/_tsne.pyx":1010
+        /* "fastTSNE/_tsne.pyx":879
  *                       (box_j * n_interpolation_points) + \
  *                       interp_j
  *                 for d in range(n_terms):             # <<<<<<<<<<<<<<
@@ -13582,7 +12116,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
         for (__pyx_t_92 = 0; __pyx_t_92 < __pyx_t_43; __pyx_t_92+=1) {
           __pyx_v_d = __pyx_t_92;
 
-          /* "fastTSNE/_tsne.pyx":1012
+          /* "fastTSNE/_tsne.pyx":881
  *                 for d in range(n_terms):
  *                     w_coefficients[idx, d] += \
  *                         reference_x_interpolated_values[i, interp_i] * \             # <<<<<<<<<<<<<<
@@ -13592,7 +12126,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
           __pyx_t_93 = __pyx_v_i;
           __pyx_t_94 = __pyx_v_interp_i;
 
-          /* "fastTSNE/_tsne.pyx":1013
+          /* "fastTSNE/_tsne.pyx":882
  *                     w_coefficients[idx, d] += \
  *                         reference_x_interpolated_values[i, interp_i] * \
  *                         reference_y_interpolated_values[i, interp_j] * \             # <<<<<<<<<<<<<<
@@ -13602,7 +12136,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
           __pyx_t_95 = __pyx_v_i;
           __pyx_t_96 = __pyx_v_interp_j;
 
-          /* "fastTSNE/_tsne.pyx":1014
+          /* "fastTSNE/_tsne.pyx":883
  *                         reference_x_interpolated_values[i, interp_i] * \
  *                         reference_y_interpolated_values[i, interp_j] * \
  *                         q_j[i, d]             # <<<<<<<<<<<<<<
@@ -13612,7 +12146,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
           __pyx_t_97 = __pyx_v_i;
           __pyx_t_98 = __pyx_v_d;
 
-          /* "fastTSNE/_tsne.pyx":1011
+          /* "fastTSNE/_tsne.pyx":880
  *                       interp_j
  *                 for d in range(n_terms):
  *                     w_coefficients[idx, d] += \             # <<<<<<<<<<<<<<
@@ -13627,85 +12161,85 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     }
   }
 
-  /* "fastTSNE/_tsne.pyx":1017
+  /* "fastTSNE/_tsne.pyx":886
  * 
  *     # STEP 2: Compute the kernel values evaluated at the interpolation nodes
  *     cdef double[:, ::1] y_tilde_values = matrix_multiply_fft_2d(kernel_tilde, w_coefficients)             # <<<<<<<<<<<<<<
  * 
  *     # STEP 3: Compute the potentials \tilde{\phi(y_i)}
  */
-  __pyx_t_61 = __pyx_f_8fastTSNE_5_tsne_matrix_multiply_fft_2d(__pyx_v_kernel_tilde, __pyx_v_w_coefficients); if (unlikely(!__pyx_t_61.memview)) __PYX_ERR(0, 1017, __pyx_L1_error)
+  __pyx_t_61 = __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_multiply_fft_2d(__pyx_v_kernel_tilde, __pyx_v_w_coefficients); if (unlikely(!__pyx_t_61.memview)) __PYX_ERR(0, 886, __pyx_L1_error)
   __pyx_v_y_tilde_values = __pyx_t_61;
   __pyx_t_61.memview = NULL;
   __pyx_t_61.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":1022
+  /* "fastTSNE/_tsne.pyx":891
  *     # Compute the relative position of each new embedding point in its box
  *     cdef:
  *         double[::1] x_in_box = np.empty(n_samples, dtype=float)             # <<<<<<<<<<<<<<
  *         double[::1] y_in_box = np.empty(n_samples, dtype=float)
  * 
  */
-  __pyx_t_37 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 1022, __pyx_L1_error)
+  __pyx_t_37 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 891, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_37);
-  __pyx_t_38 = __Pyx_PyObject_GetAttrStr(__pyx_t_37, __pyx_n_s_empty); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 1022, __pyx_L1_error)
+  __pyx_t_38 = __Pyx_PyObject_GetAttrStr(__pyx_t_37, __pyx_n_s_empty); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 891, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_38);
   __Pyx_DECREF(__pyx_t_37); __pyx_t_37 = 0;
-  __pyx_t_37 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 1022, __pyx_L1_error)
+  __pyx_t_37 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 891, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_37);
-  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 1022, __pyx_L1_error)
+  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 891, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_39);
   __Pyx_GIVEREF(__pyx_t_37);
   PyTuple_SET_ITEM(__pyx_t_39, 0, __pyx_t_37);
   __pyx_t_37 = 0;
-  __pyx_t_37 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 1022, __pyx_L1_error)
+  __pyx_t_37 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 891, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_37);
-  if (PyDict_SetItem(__pyx_t_37, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 1022, __pyx_L1_error)
-  __pyx_t_40 = __Pyx_PyObject_Call(__pyx_t_38, __pyx_t_39, __pyx_t_37); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 1022, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_37, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 891, __pyx_L1_error)
+  __pyx_t_40 = __Pyx_PyObject_Call(__pyx_t_38, __pyx_t_39, __pyx_t_37); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 891, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_40);
   __Pyx_DECREF(__pyx_t_38); __pyx_t_38 = 0;
   __Pyx_DECREF(__pyx_t_39); __pyx_t_39 = 0;
   __Pyx_DECREF(__pyx_t_37); __pyx_t_37 = 0;
-  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_40, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 1022, __pyx_L1_error)
+  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_40, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 891, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_40); __pyx_t_40 = 0;
   __pyx_v_x_in_box = __pyx_t_41;
   __pyx_t_41.memview = NULL;
   __pyx_t_41.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":1023
+  /* "fastTSNE/_tsne.pyx":892
  *     cdef:
  *         double[::1] x_in_box = np.empty(n_samples, dtype=float)
  *         double[::1] y_in_box = np.empty(n_samples, dtype=float)             # <<<<<<<<<<<<<<
  * 
  *     for i in range(n_samples):
  */
-  __pyx_t_40 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 1023, __pyx_L1_error)
+  __pyx_t_40 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 892, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_40);
-  __pyx_t_37 = __Pyx_PyObject_GetAttrStr(__pyx_t_40, __pyx_n_s_empty); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 1023, __pyx_L1_error)
+  __pyx_t_37 = __Pyx_PyObject_GetAttrStr(__pyx_t_40, __pyx_n_s_empty); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 892, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_37);
   __Pyx_DECREF(__pyx_t_40); __pyx_t_40 = 0;
-  __pyx_t_40 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 1023, __pyx_L1_error)
+  __pyx_t_40 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 892, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_40);
-  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 1023, __pyx_L1_error)
+  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 892, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_39);
   __Pyx_GIVEREF(__pyx_t_40);
   PyTuple_SET_ITEM(__pyx_t_39, 0, __pyx_t_40);
   __pyx_t_40 = 0;
-  __pyx_t_40 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 1023, __pyx_L1_error)
+  __pyx_t_40 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 892, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_40);
-  if (PyDict_SetItem(__pyx_t_40, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 1023, __pyx_L1_error)
-  __pyx_t_38 = __Pyx_PyObject_Call(__pyx_t_37, __pyx_t_39, __pyx_t_40); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 1023, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_40, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 892, __pyx_L1_error)
+  __pyx_t_38 = __Pyx_PyObject_Call(__pyx_t_37, __pyx_t_39, __pyx_t_40); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 892, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_38);
   __Pyx_DECREF(__pyx_t_37); __pyx_t_37 = 0;
   __Pyx_DECREF(__pyx_t_39); __pyx_t_39 = 0;
   __Pyx_DECREF(__pyx_t_40); __pyx_t_40 = 0;
-  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_38, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 1023, __pyx_L1_error)
+  __pyx_t_41 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_38, PyBUF_WRITABLE); if (unlikely(!__pyx_t_41.memview)) __PYX_ERR(0, 892, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_38); __pyx_t_38 = 0;
   __pyx_v_y_in_box = __pyx_t_41;
   __pyx_t_41.memview = NULL;
   __pyx_t_41.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":1025
+  /* "fastTSNE/_tsne.pyx":894
  *         double[::1] y_in_box = np.empty(n_samples, dtype=float)
  * 
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -13717,7 +12251,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":1026
+    /* "fastTSNE/_tsne.pyx":895
  * 
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i]             # <<<<<<<<<<<<<<
@@ -13726,7 +12260,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
     __pyx_v_box_idx = (__pyx_v_point_box_idx[__pyx_v_i]);
 
-    /* "fastTSNE/_tsne.pyx":1027
+    /* "fastTSNE/_tsne.pyx":896
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i]
  *         x_min = box_x_lower_bounds[box_idx]             # <<<<<<<<<<<<<<
@@ -13736,7 +12270,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_101 = __pyx_v_box_idx;
     __pyx_v_x_min = (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_box_x_lower_bounds.data) + __pyx_t_101)) )));
 
-    /* "fastTSNE/_tsne.pyx":1028
+    /* "fastTSNE/_tsne.pyx":897
  *         box_idx = point_box_idx[i]
  *         x_min = box_x_lower_bounds[box_idx]
  *         y_min = box_y_lower_bounds[box_idx]             # <<<<<<<<<<<<<<
@@ -13746,7 +12280,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_102 = __pyx_v_box_idx;
     __pyx_v_y_min = (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_box_y_lower_bounds.data) + __pyx_t_102)) )));
 
-    /* "fastTSNE/_tsne.pyx":1029
+    /* "fastTSNE/_tsne.pyx":898
  *         x_min = box_x_lower_bounds[box_idx]
  *         y_min = box_y_lower_bounds[box_idx]
  *         x_in_box[i] = (embedding[i, 0] - x_min) / box_width             # <<<<<<<<<<<<<<
@@ -13758,7 +12292,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_105 = __pyx_v_i;
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_x_in_box.data) + __pyx_t_105)) )) = (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_103 * __pyx_v_embedding.strides[0]) )) + __pyx_t_104)) ))) - __pyx_v_x_min) / __pyx_v_box_width);
 
-    /* "fastTSNE/_tsne.pyx":1030
+    /* "fastTSNE/_tsne.pyx":899
  *         y_min = box_y_lower_bounds[box_idx]
  *         x_in_box[i] = (embedding[i, 0] - x_min) / box_width
  *         y_in_box[i] = (embedding[i, 1] - y_min) / box_width             # <<<<<<<<<<<<<<
@@ -13771,47 +12305,47 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_y_in_box.data) + __pyx_t_108)) )) = (((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_106 * __pyx_v_embedding.strides[0]) )) + __pyx_t_107)) ))) - __pyx_v_y_min) / __pyx_v_box_width);
   }
 
-  /* "fastTSNE/_tsne.pyx":1033
+  /* "fastTSNE/_tsne.pyx":902
  * 
  *     # Interpolate kernel using Lagrange polynomials
  *     cdef double[:, ::1] x_interpolated_values = interpolate(x_in_box, y_tilde)             # <<<<<<<<<<<<<<
  *     cdef double[:, ::1] y_interpolated_values = interpolate(y_in_box, y_tilde)
  * 
  */
-  __pyx_t_61 = __pyx_f_8fastTSNE_5_tsne_interpolate(__pyx_v_x_in_box, __pyx_v_y_tilde); if (unlikely(!__pyx_t_61.memview)) __PYX_ERR(0, 1033, __pyx_L1_error)
+  __pyx_t_61 = __pyx_f_8fastTSNE_5_tsne_interpolate(__pyx_v_x_in_box, __pyx_v_y_tilde); if (unlikely(!__pyx_t_61.memview)) __PYX_ERR(0, 902, __pyx_L1_error)
   __pyx_v_x_interpolated_values = __pyx_t_61;
   __pyx_t_61.memview = NULL;
   __pyx_t_61.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":1034
+  /* "fastTSNE/_tsne.pyx":903
  *     # Interpolate kernel using Lagrange polynomials
  *     cdef double[:, ::1] x_interpolated_values = interpolate(x_in_box, y_tilde)
  *     cdef double[:, ::1] y_interpolated_values = interpolate(y_in_box, y_tilde)             # <<<<<<<<<<<<<<
  * 
  *     # Actually compute \tilde{\phi(y_i)}
  */
-  __pyx_t_61 = __pyx_f_8fastTSNE_5_tsne_interpolate(__pyx_v_y_in_box, __pyx_v_y_tilde); if (unlikely(!__pyx_t_61.memview)) __PYX_ERR(0, 1034, __pyx_L1_error)
+  __pyx_t_61 = __pyx_f_8fastTSNE_5_tsne_interpolate(__pyx_v_y_in_box, __pyx_v_y_tilde); if (unlikely(!__pyx_t_61.memview)) __PYX_ERR(0, 903, __pyx_L1_error)
   __pyx_v_y_interpolated_values = __pyx_t_61;
   __pyx_t_61.memview = NULL;
   __pyx_t_61.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":1037
+  /* "fastTSNE/_tsne.pyx":906
  * 
  *     # Actually compute \tilde{\phi(y_i)}
  *     cdef double[:, ::1] phi = np.zeros((n_samples, n_terms), dtype=float)             # <<<<<<<<<<<<<<
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i]
  */
-  __pyx_t_38 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 1037, __pyx_L1_error)
+  __pyx_t_38 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 906, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_38);
-  __pyx_t_40 = __Pyx_PyObject_GetAttrStr(__pyx_t_38, __pyx_n_s_zeros); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 1037, __pyx_L1_error)
+  __pyx_t_40 = __Pyx_PyObject_GetAttrStr(__pyx_t_38, __pyx_n_s_zeros); if (unlikely(!__pyx_t_40)) __PYX_ERR(0, 906, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_40);
   __Pyx_DECREF(__pyx_t_38); __pyx_t_38 = 0;
-  __pyx_t_38 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 1037, __pyx_L1_error)
+  __pyx_t_38 = PyInt_FromSsize_t(__pyx_v_n_samples); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 906, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_38);
-  __pyx_t_39 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 1037, __pyx_L1_error)
+  __pyx_t_39 = __Pyx_PyInt_From_int(__pyx_v_n_terms); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 906, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_39);
-  __pyx_t_37 = PyTuple_New(2); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 1037, __pyx_L1_error)
+  __pyx_t_37 = PyTuple_New(2); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 906, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_37);
   __Pyx_GIVEREF(__pyx_t_38);
   PyTuple_SET_ITEM(__pyx_t_37, 0, __pyx_t_38);
@@ -13819,26 +12353,26 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
   PyTuple_SET_ITEM(__pyx_t_37, 1, __pyx_t_39);
   __pyx_t_38 = 0;
   __pyx_t_39 = 0;
-  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 1037, __pyx_L1_error)
+  __pyx_t_39 = PyTuple_New(1); if (unlikely(!__pyx_t_39)) __PYX_ERR(0, 906, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_39);
   __Pyx_GIVEREF(__pyx_t_37);
   PyTuple_SET_ITEM(__pyx_t_39, 0, __pyx_t_37);
   __pyx_t_37 = 0;
-  __pyx_t_37 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 1037, __pyx_L1_error)
+  __pyx_t_37 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 906, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_37);
-  if (PyDict_SetItem(__pyx_t_37, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 1037, __pyx_L1_error)
-  __pyx_t_38 = __Pyx_PyObject_Call(__pyx_t_40, __pyx_t_39, __pyx_t_37); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 1037, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_37, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 906, __pyx_L1_error)
+  __pyx_t_38 = __Pyx_PyObject_Call(__pyx_t_40, __pyx_t_39, __pyx_t_37); if (unlikely(!__pyx_t_38)) __PYX_ERR(0, 906, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_38);
   __Pyx_DECREF(__pyx_t_40); __pyx_t_40 = 0;
   __Pyx_DECREF(__pyx_t_39); __pyx_t_39 = 0;
   __Pyx_DECREF(__pyx_t_37); __pyx_t_37 = 0;
-  __pyx_t_61 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_38, PyBUF_WRITABLE); if (unlikely(!__pyx_t_61.memview)) __PYX_ERR(0, 1037, __pyx_L1_error)
+  __pyx_t_61 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_38, PyBUF_WRITABLE); if (unlikely(!__pyx_t_61.memview)) __PYX_ERR(0, 906, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_38); __pyx_t_38 = 0;
   __pyx_v_phi = __pyx_t_61;
   __pyx_t_61.memview = NULL;
   __pyx_t_61.data = NULL;
 
-  /* "fastTSNE/_tsne.pyx":1038
+  /* "fastTSNE/_tsne.pyx":907
  *     # Actually compute \tilde{\phi(y_i)}
  *     cdef double[:, ::1] phi = np.zeros((n_samples, n_terms), dtype=float)
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -13850,7 +12384,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":1039
+    /* "fastTSNE/_tsne.pyx":908
  *     cdef double[:, ::1] phi = np.zeros((n_samples, n_terms), dtype=float)
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i]             # <<<<<<<<<<<<<<
@@ -13859,7 +12393,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
     __pyx_v_box_idx = (__pyx_v_point_box_idx[__pyx_v_i]);
 
-    /* "fastTSNE/_tsne.pyx":1040
+    /* "fastTSNE/_tsne.pyx":909
  *     for i in range(n_samples):
  *         box_idx = point_box_idx[i]
  *         box_i = box_idx % n_boxes_1d             # <<<<<<<<<<<<<<
@@ -13868,7 +12402,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
     __pyx_v_box_i = (__pyx_v_box_idx % __pyx_v_n_boxes_1d);
 
-    /* "fastTSNE/_tsne.pyx":1041
+    /* "fastTSNE/_tsne.pyx":910
  *         box_idx = point_box_idx[i]
  *         box_i = box_idx % n_boxes_1d
  *         box_j = box_idx // n_boxes_1d             # <<<<<<<<<<<<<<
@@ -13877,7 +12411,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
     __pyx_v_box_j = (__pyx_v_box_idx / __pyx_v_n_boxes_1d);
 
-    /* "fastTSNE/_tsne.pyx":1042
+    /* "fastTSNE/_tsne.pyx":911
  *         box_i = box_idx % n_boxes_1d
  *         box_j = box_idx // n_boxes_1d
  *         for interp_i in range(n_interpolation_points):             # <<<<<<<<<<<<<<
@@ -13889,7 +12423,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     for (__pyx_t_88 = 0; __pyx_t_88 < __pyx_t_87; __pyx_t_88+=1) {
       __pyx_v_interp_i = __pyx_t_88;
 
-      /* "fastTSNE/_tsne.pyx":1043
+      /* "fastTSNE/_tsne.pyx":912
  *         box_j = box_idx // n_boxes_1d
  *         for interp_i in range(n_interpolation_points):
  *             for interp_j in range(n_interpolation_points):             # <<<<<<<<<<<<<<
@@ -13901,7 +12435,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
       for (__pyx_t_91 = 0; __pyx_t_91 < __pyx_t_90; __pyx_t_91+=1) {
         __pyx_v_interp_j = __pyx_t_91;
 
-        /* "fastTSNE/_tsne.pyx":1046
+        /* "fastTSNE/_tsne.pyx":915
  *                 idx = (box_i * n_interpolation_points + interp_i) * \
  *                       (n_boxes_1d * n_interpolation_points) + \
  *                       (box_j * n_interpolation_points) + \             # <<<<<<<<<<<<<<
@@ -13910,7 +12444,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
         __pyx_v_idx = (((((__pyx_v_box_i * __pyx_v_n_interpolation_points) + __pyx_v_interp_i) * (__pyx_v_n_boxes_1d * __pyx_v_n_interpolation_points)) + (__pyx_v_box_j * __pyx_v_n_interpolation_points)) + __pyx_v_interp_j);
 
-        /* "fastTSNE/_tsne.pyx":1048
+        /* "fastTSNE/_tsne.pyx":917
  *                       (box_j * n_interpolation_points) + \
  *                       interp_j
  *                 for d in range(n_terms):             # <<<<<<<<<<<<<<
@@ -13922,7 +12456,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
         for (__pyx_t_92 = 0; __pyx_t_92 < __pyx_t_43; __pyx_t_92+=1) {
           __pyx_v_d = __pyx_t_92;
 
-          /* "fastTSNE/_tsne.pyx":1049
+          /* "fastTSNE/_tsne.pyx":918
  *                       interp_j
  *                 for d in range(n_terms):
  *                     phi[i, d] += x_interpolated_values[i, interp_i] * \             # <<<<<<<<<<<<<<
@@ -13932,7 +12466,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
           __pyx_t_109 = __pyx_v_i;
           __pyx_t_110 = __pyx_v_interp_i;
 
-          /* "fastTSNE/_tsne.pyx":1050
+          /* "fastTSNE/_tsne.pyx":919
  *                 for d in range(n_terms):
  *                     phi[i, d] += x_interpolated_values[i, interp_i] * \
  *                                  y_interpolated_values[i, interp_j] * \             # <<<<<<<<<<<<<<
@@ -13942,7 +12476,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
           __pyx_t_111 = __pyx_v_i;
           __pyx_t_112 = __pyx_v_interp_j;
 
-          /* "fastTSNE/_tsne.pyx":1051
+          /* "fastTSNE/_tsne.pyx":920
  *                     phi[i, d] += x_interpolated_values[i, interp_i] * \
  *                                  y_interpolated_values[i, interp_j] * \
  *                                  y_tilde_values[idx, d]             # <<<<<<<<<<<<<<
@@ -13952,7 +12486,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
           __pyx_t_113 = __pyx_v_idx;
           __pyx_t_114 = __pyx_v_d;
 
-          /* "fastTSNE/_tsne.pyx":1049
+          /* "fastTSNE/_tsne.pyx":918
  *                       interp_j
  *                 for d in range(n_terms):
  *                     phi[i, d] += x_interpolated_values[i, interp_i] * \             # <<<<<<<<<<<<<<
@@ -13967,7 +12501,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     }
   }
 
-  /* "fastTSNE/_tsne.pyx":1053
+  /* "fastTSNE/_tsne.pyx":922
  *                                  y_tilde_values[idx, d]
  * 
  *     PyMem_Free(reference_point_box_idx)             # <<<<<<<<<<<<<<
@@ -13976,7 +12510,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
   PyMem_Free(__pyx_v_reference_point_box_idx);
 
-  /* "fastTSNE/_tsne.pyx":1054
+  /* "fastTSNE/_tsne.pyx":923
  * 
  *     PyMem_Free(reference_point_box_idx)
  *     PyMem_Free(point_box_idx)             # <<<<<<<<<<<<<<
@@ -13985,7 +12519,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
   PyMem_Free(__pyx_v_point_box_idx);
 
-  /* "fastTSNE/_tsne.pyx":1058
+  /* "fastTSNE/_tsne.pyx":927
  *     # Compute the normalization term Z or sum of q_{ij}s, this is not described
  *     # in the paper, but can be worked out
  *     cdef double sum_Q = 0, y1, y2             # <<<<<<<<<<<<<<
@@ -13994,7 +12528,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
   __pyx_v_sum_Q = 0.0;
 
-  /* "fastTSNE/_tsne.pyx":1059
+  /* "fastTSNE/_tsne.pyx":928
  *     # in the paper, but can be worked out
  *     cdef double sum_Q = 0, y1, y2
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -14006,7 +12540,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":1060
+    /* "fastTSNE/_tsne.pyx":929
  *     cdef double sum_Q = 0, y1, y2
  *     for i in range(n_samples):
  *         y1 = embedding[i, 0]             # <<<<<<<<<<<<<<
@@ -14017,7 +12551,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_118 = 0;
     __pyx_v_y1 = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_117 * __pyx_v_embedding.strides[0]) )) + __pyx_t_118)) )));
 
-    /* "fastTSNE/_tsne.pyx":1061
+    /* "fastTSNE/_tsne.pyx":930
  *     for i in range(n_samples):
  *         y1 = embedding[i, 0]
  *         y2 = embedding[i, 1]             # <<<<<<<<<<<<<<
@@ -14028,7 +12562,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_120 = 1;
     __pyx_v_y2 = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_119 * __pyx_v_embedding.strides[0]) )) + __pyx_t_120)) )));
 
-    /* "fastTSNE/_tsne.pyx":1063
+    /* "fastTSNE/_tsne.pyx":932
  *         y2 = embedding[i, 1]
  * 
  *         sum_Q += (1 + y1 ** 2 + y2 ** 2) * phi[i, 0] - \             # <<<<<<<<<<<<<<
@@ -14038,7 +12572,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_121 = __pyx_v_i;
     __pyx_t_122 = 0;
 
-    /* "fastTSNE/_tsne.pyx":1064
+    /* "fastTSNE/_tsne.pyx":933
  * 
  *         sum_Q += (1 + y1 ** 2 + y2 ** 2) * phi[i, 0] - \
  *                  2 * (y1 * phi[i, 1] + y2 * phi[i, 2]) + \             # <<<<<<<<<<<<<<
@@ -14050,7 +12584,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_125 = __pyx_v_i;
     __pyx_t_126 = 2;
 
-    /* "fastTSNE/_tsne.pyx":1065
+    /* "fastTSNE/_tsne.pyx":934
  *         sum_Q += (1 + y1 ** 2 + y2 ** 2) * phi[i, 0] - \
  *                  2 * (y1 * phi[i, 1] + y2 * phi[i, 2]) + \
  *                  phi[i, 3]             # <<<<<<<<<<<<<<
@@ -14060,7 +12594,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_127 = __pyx_v_i;
     __pyx_t_128 = 3;
 
-    /* "fastTSNE/_tsne.pyx":1063
+    /* "fastTSNE/_tsne.pyx":932
  *         y2 = embedding[i, 1]
  * 
  *         sum_Q += (1 + y1 ** 2 + y2 ** 2) * phi[i, 0] - \             # <<<<<<<<<<<<<<
@@ -14070,7 +12604,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_v_sum_Q = (__pyx_v_sum_Q + (((((1.0 + pow(__pyx_v_y1, 2.0)) + pow(__pyx_v_y2, 2.0)) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_121 * __pyx_v_phi.strides[0]) )) + __pyx_t_122)) )))) - (2.0 * ((__pyx_v_y1 * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_123 * __pyx_v_phi.strides[0]) )) + __pyx_t_124)) )))) + (__pyx_v_y2 * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_125 * __pyx_v_phi.strides[0]) )) + __pyx_t_126)) ))))))) + (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_127 * __pyx_v_phi.strides[0]) )) + __pyx_t_128)) )))));
   }
 
-  /* "fastTSNE/_tsne.pyx":1066
+  /* "fastTSNE/_tsne.pyx":935
  *                  2 * (y1 * phi[i, 1] + y2 * phi[i, 2]) + \
  *                  phi[i, 3]
  *     sum_Q -= n_samples             # <<<<<<<<<<<<<<
@@ -14079,7 +12613,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
  */
   __pyx_v_sum_Q = (__pyx_v_sum_Q - __pyx_v_n_samples);
 
-  /* "fastTSNE/_tsne.pyx":1070
+  /* "fastTSNE/_tsne.pyx":939
  *     # Compute the gradient using a slight variation on the formula provided in
  *     # the paper
  *     for i in range(n_samples):             # <<<<<<<<<<<<<<
@@ -14091,7 +12625,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "fastTSNE/_tsne.pyx":1071
+    /* "fastTSNE/_tsne.pyx":940
  *     # the paper
  *     for i in range(n_samples):
  *         gradient[i, 0] -= (embedding[i, 0] * phi[i, 0] - phi[i, 1]) / sum_Q             # <<<<<<<<<<<<<<
@@ -14108,7 +12642,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     __pyx_t_136 = 0;
     *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_gradient.data + __pyx_t_135 * __pyx_v_gradient.strides[0]) )) + __pyx_t_136)) )) -= ((((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_129 * __pyx_v_embedding.strides[0]) )) + __pyx_t_130)) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_131 * __pyx_v_phi.strides[0]) )) + __pyx_t_132)) )))) - (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_133 * __pyx_v_phi.strides[0]) )) + __pyx_t_134)) )))) / __pyx_v_sum_Q);
 
-    /* "fastTSNE/_tsne.pyx":1072
+    /* "fastTSNE/_tsne.pyx":941
  *     for i in range(n_samples):
  *         gradient[i, 0] -= (embedding[i, 0] * phi[i, 0] - phi[i, 1]) / sum_Q
  *         gradient[i, 1] -= (embedding[i, 1] * phi[i, 0] - phi[i, 2]) / sum_Q             # <<<<<<<<<<<<<<
@@ -14126,7 +12660,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
     *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_gradient.data + __pyx_t_143 * __pyx_v_gradient.strides[0]) )) + __pyx_t_144)) )) -= ((((*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_embedding.data + __pyx_t_137 * __pyx_v_embedding.strides[0]) )) + __pyx_t_138)) ))) * (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_139 * __pyx_v_phi.strides[0]) )) + __pyx_t_140)) )))) - (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_phi.data + __pyx_t_141 * __pyx_v_phi.strides[0]) )) + __pyx_t_142)) )))) / __pyx_v_sum_Q);
   }
 
-  /* "fastTSNE/_tsne.pyx":1074
+  /* "fastTSNE/_tsne.pyx":943
  *         gradient[i, 1] -= (embedding[i, 1] * phi[i, 0] - phi[i, 2]) / sum_Q
  * 
  *     return sum_Q             # <<<<<<<<<<<<<<
@@ -14134,7 +12668,7 @@ static double __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_re
   __pyx_r = __pyx_v_sum_Q;
   goto __pyx_L0;
 
-  /* "fastTSNE/_tsne.pyx":870
+  /* "fastTSNE/_tsne.pyx":739
  * 
  * 
  * cpdef double estimate_negative_gradient_fft_2d_with_reference(             # <<<<<<<<<<<<<<
@@ -14219,13 +12753,13 @@ static PyObject *__pyx_pw_8fastTSNE_5_tsne_13estimate_negative_gradient_fft_2d_w
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_reference_embedding)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_fft_2d_with_reference", 0, 3, 6, 1); __PYX_ERR(0, 870, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_fft_2d_with_reference", 0, 3, 6, 1); __PYX_ERR(0, 739, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_gradient)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_fft_2d_with_reference", 0, 3, 6, 2); __PYX_ERR(0, 870, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_fft_2d_with_reference", 0, 3, 6, 2); __PYX_ERR(0, 739, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
@@ -14247,7 +12781,7 @@ static PyObject *__pyx_pw_8fastTSNE_5_tsne_13estimate_negative_gradient_fft_2d_w
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "estimate_negative_gradient_fft_2d_with_reference") < 0)) __PYX_ERR(0, 870, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "estimate_negative_gradient_fft_2d_with_reference") < 0)) __PYX_ERR(0, 739, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -14264,28 +12798,28 @@ static PyObject *__pyx_pw_8fastTSNE_5_tsne_13estimate_negative_gradient_fft_2d_w
         default: goto __pyx_L5_argtuple_error;
       }
     }
-    __pyx_v_embedding = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_embedding.memview)) __PYX_ERR(0, 871, __pyx_L3_error)
-    __pyx_v_reference_embedding = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_reference_embedding.memview)) __PYX_ERR(0, 872, __pyx_L3_error)
-    __pyx_v_gradient = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_gradient.memview)) __PYX_ERR(0, 873, __pyx_L3_error)
+    __pyx_v_embedding = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_embedding.memview)) __PYX_ERR(0, 740, __pyx_L3_error)
+    __pyx_v_reference_embedding = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_reference_embedding.memview)) __PYX_ERR(0, 741, __pyx_L3_error)
+    __pyx_v_gradient = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_gradient.memview)) __PYX_ERR(0, 742, __pyx_L3_error)
     if (values[3]) {
-      __pyx_v_n_interpolation_points = __Pyx_PyIndex_AsSsize_t(values[3]); if (unlikely((__pyx_v_n_interpolation_points == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 874, __pyx_L3_error)
+      __pyx_v_n_interpolation_points = __Pyx_PyIndex_AsSsize_t(values[3]); if (unlikely((__pyx_v_n_interpolation_points == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 743, __pyx_L3_error)
     } else {
       __pyx_v_n_interpolation_points = ((Py_ssize_t)3);
     }
     if (values[4]) {
-      __pyx_v_min_num_intervals = __Pyx_PyIndex_AsSsize_t(values[4]); if (unlikely((__pyx_v_min_num_intervals == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 875, __pyx_L3_error)
+      __pyx_v_min_num_intervals = __Pyx_PyIndex_AsSsize_t(values[4]); if (unlikely((__pyx_v_min_num_intervals == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 744, __pyx_L3_error)
     } else {
       __pyx_v_min_num_intervals = ((Py_ssize_t)10);
     }
     if (values[5]) {
-      __pyx_v_ints_in_interval = __pyx_PyFloat_AsDouble(values[5]); if (unlikely((__pyx_v_ints_in_interval == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 876, __pyx_L3_error)
+      __pyx_v_ints_in_interval = __pyx_PyFloat_AsDouble(values[5]); if (unlikely((__pyx_v_ints_in_interval == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 745, __pyx_L3_error)
     } else {
       __pyx_v_ints_in_interval = ((double)1.0);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_fft_2d_with_reference", 0, 3, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 870, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("estimate_negative_gradient_fft_2d_with_reference", 0, 3, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 739, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("fastTSNE._tsne.estimate_negative_gradient_fft_2d_with_reference", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -14306,14 +12840,14 @@ static PyObject *__pyx_pf_8fastTSNE_5_tsne_12estimate_negative_gradient_fft_2d_w
   struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_reference __pyx_t_2;
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("estimate_negative_gradient_fft_2d_with_reference", 0);
-  __Pyx_TraceCall("estimate_negative_gradient_fft_2d_with_reference (wrapper)", __pyx_f[0], 870, 0, __PYX_ERR(0, 870, __pyx_L1_error));
+  __Pyx_TraceCall("estimate_negative_gradient_fft_2d_with_reference (wrapper)", __pyx_f[0], 739, 0, __PYX_ERR(0, 739, __pyx_L1_error));
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_2.__pyx_n = 3;
   __pyx_t_2.n_interpolation_points = __pyx_v_n_interpolation_points;
   __pyx_t_2.min_num_intervals = __pyx_v_min_num_intervals;
   __pyx_t_2.ints_in_interval = __pyx_v_ints_in_interval;
   __pyx_t_1 = __pyx_f_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_reference(__pyx_v_embedding, __pyx_v_reference_embedding, __pyx_v_gradient, 0, &__pyx_t_2); 
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 870, __pyx_L1_error)
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 739, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_r = __pyx_t_3;
   __pyx_t_3 = 0;
@@ -30868,7 +29402,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_enumerate, __pyx_k_enumerate, sizeof(__pyx_k_enumerate), 0, 0, 1, 1},
   {&__pyx_n_s_eps, __pyx_k_eps, sizeof(__pyx_k_eps), 0, 0, 1, 1},
   {&__pyx_n_s_error, __pyx_k_error, sizeof(__pyx_k_error), 0, 0, 1, 1},
-  {&__pyx_n_s_fft, __pyx_k_fft, sizeof(__pyx_k_fft), 0, 0, 1, 1},
   {&__pyx_n_s_finfo, __pyx_k_finfo, sizeof(__pyx_k_finfo), 0, 0, 1, 1},
   {&__pyx_n_s_flags, __pyx_k_flags, sizeof(__pyx_k_flags), 0, 0, 1, 1},
   {&__pyx_n_s_float64, __pyx_k_float64, sizeof(__pyx_k_float64), 0, 0, 1, 1},
@@ -30879,12 +29412,10 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_got_differing_extents_in_dimensi, __pyx_k_got_differing_extents_in_dimensi, sizeof(__pyx_k_got_differing_extents_in_dimensi), 0, 0, 1, 0},
   {&__pyx_n_s_gradient, __pyx_k_gradient, sizeof(__pyx_k_gradient), 0, 0, 1, 1},
   {&__pyx_n_s_id, __pyx_k_id, sizeof(__pyx_k_id), 0, 0, 1, 1},
-  {&__pyx_n_s_ifft, __pyx_k_ifft, sizeof(__pyx_k_ifft), 0, 0, 1, 1},
   {&__pyx_n_s_import, __pyx_k_import, sizeof(__pyx_k_import), 0, 0, 1, 1},
   {&__pyx_n_s_indices, __pyx_k_indices, sizeof(__pyx_k_indices), 0, 0, 1, 1},
   {&__pyx_n_s_indptr, __pyx_k_indptr, sizeof(__pyx_k_indptr), 0, 0, 1, 1},
   {&__pyx_n_s_ints_in_interval, __pyx_k_ints_in_interval, sizeof(__pyx_k_ints_in_interval), 0, 0, 1, 1},
-  {&__pyx_n_s_irfft2, __pyx_k_irfft2, sizeof(__pyx_k_irfft2), 0, 0, 1, 1},
   {&__pyx_n_s_itemsize, __pyx_k_itemsize, sizeof(__pyx_k_itemsize), 0, 0, 1, 1},
   {&__pyx_kp_s_itemsize_0_for_cython_array, __pyx_k_itemsize_0_for_cython_array, sizeof(__pyx_k_itemsize_0_for_cython_array), 0, 0, 1, 0},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
@@ -30892,7 +29423,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_memview, __pyx_k_memview, sizeof(__pyx_k_memview), 0, 0, 1, 1},
   {&__pyx_n_s_min_num_intervals, __pyx_k_min_num_intervals, sizeof(__pyx_k_min_num_intervals), 0, 0, 1, 1},
   {&__pyx_n_s_mode, __pyx_k_mode, sizeof(__pyx_k_mode), 0, 0, 1, 1},
-  {&__pyx_n_s_multiply, __pyx_k_multiply, sizeof(__pyx_k_multiply), 0, 0, 1, 1},
   {&__pyx_n_s_n_interpolation_points, __pyx_k_n_interpolation_points, sizeof(__pyx_k_n_interpolation_points), 0, 0, 1, 1},
   {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
   {&__pyx_n_s_name_2, __pyx_k_name_2, sizeof(__pyx_k_name_2), 0, 0, 1, 1},
@@ -30921,12 +29451,10 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_pyx_unpickle_Enum, __pyx_k_pyx_unpickle_Enum, sizeof(__pyx_k_pyx_unpickle_Enum), 0, 0, 1, 1},
   {&__pyx_n_s_pyx_vtable, __pyx_k_pyx_vtable, sizeof(__pyx_k_pyx_vtable), 0, 0, 1, 1},
   {&__pyx_n_s_range, __pyx_k_range, sizeof(__pyx_k_range), 0, 0, 1, 1},
-  {&__pyx_n_s_real, __pyx_k_real, sizeof(__pyx_k_real), 0, 0, 1, 1},
   {&__pyx_n_s_reduce, __pyx_k_reduce, sizeof(__pyx_k_reduce), 0, 0, 1, 1},
   {&__pyx_n_s_reduce_cython, __pyx_k_reduce_cython, sizeof(__pyx_k_reduce_cython), 0, 0, 1, 1},
   {&__pyx_n_s_reduce_ex, __pyx_k_reduce_ex, sizeof(__pyx_k_reduce_ex), 0, 0, 1, 1},
   {&__pyx_n_s_reference_embedding, __pyx_k_reference_embedding, sizeof(__pyx_k_reference_embedding), 0, 0, 1, 1},
-  {&__pyx_n_s_rfft2, __pyx_k_rfft2, sizeof(__pyx_k_rfft2), 0, 0, 1, 1},
   {&__pyx_n_s_setstate, __pyx_k_setstate, sizeof(__pyx_k_setstate), 0, 0, 1, 1},
   {&__pyx_n_s_setstate_cython, __pyx_k_setstate_cython, sizeof(__pyx_k_setstate_cython), 0, 0, 1, 1},
   {&__pyx_n_s_shape, __pyx_k_shape, sizeof(__pyx_k_shape), 0, 0, 1, 1},
@@ -30953,8 +29481,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 52, __pyx_L1_error)
-  __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(0, 114, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 54, __pyx_L1_error)
+  __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(0, 116, __pyx_L1_error)
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(1, 229, __pyx_L1_error)
   __pyx_builtin_RuntimeError = __Pyx_GetBuiltinName(__pyx_n_s_RuntimeError); if (!__pyx_builtin_RuntimeError) __PYX_ERR(1, 810, __pyx_L1_error)
   __pyx_builtin_ImportError = __Pyx_GetBuiltinName(__pyx_n_s_ImportError); if (!__pyx_builtin_ImportError) __PYX_ERR(1, 1000, __pyx_L1_error)
@@ -31528,15 +30056,21 @@ static int __Pyx_modinit_variable_import_code(void) {
 static int __Pyx_modinit_function_import_code(void) {
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
   __Pyx_RefNannySetupContext("__Pyx_modinit_function_import_code", 0);
   /*--- Function import code ---*/
   __pyx_t_1 = __Pyx_ImportModule("fastTSNE.quad_tree"); if (!__pyx_t_1) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportFunction(__pyx_t_1, "is_duplicate", (void (**)(void))&__pyx_f_8fastTSNE_9quad_tree_is_duplicate, "int (__pyx_t_8fastTSNE_9quad_tree_Node *, double *, struct __pyx_opt_args_8fastTSNE_9quad_tree_is_duplicate *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = __Pyx_ImportModule("fastTSNE._matrix_mul.matrix_mul"); if (!__pyx_t_2) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_2, "matrix_multiply_fft_1d", (void (**)(void))&__pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_multiply_fft_1d, "__Pyx_memviewslice (__Pyx_memviewslice, __Pyx_memviewslice)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_2, "matrix_multiply_fft_2d", (void (**)(void))&__pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_multiply_fft_2d, "__Pyx_memviewslice (__Pyx_memviewslice, __Pyx_memviewslice)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  Py_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
   __Pyx_RefNannyFinishContext();
   return -1;
 }
@@ -31724,39 +30258,39 @@ if (!__Pyx_RefNanny) {
  * # cython: warn.undeclared=True
  * cimport numpy as np
  * import numpy as np             # <<<<<<<<<<<<<<
- * from .quad_tree cimport QuadTree, Node, is_duplicate
  * from cython.parallel import prange, parallel
+ * from cpython.mem cimport PyMem_Malloc, PyMem_Free
  */
   __pyx_t_1 = __Pyx_Import(__pyx_n_s_numpy, 0, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 8, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) __PYX_ERR(0, 8, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "fastTSNE/_tsne.pyx":15
+  /* "fastTSNE/_tsne.pyx":17
  * 
  * 
  * cdef double EPSILON = np.finfo(np.float64).eps             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 15, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_finfo); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 15, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_finfo); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 15, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_float64); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 15, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_float64); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 15, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_eps); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 15, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_eps); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_4 = __pyx_PyFloat_AsDouble(__pyx_t_3); if (unlikely((__pyx_t_4 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 15, __pyx_L1_error)
+  __pyx_t_4 = __pyx_PyFloat_AsDouble(__pyx_t_3); if (unlikely((__pyx_t_4 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_8fastTSNE_5_tsne_EPSILON = __pyx_t_4;
 
@@ -34166,161 +32700,6 @@ __pyx_capsule_create(void *p, CYTHON_UNUSED const char *sig)
     return cobj;
 }
 
-/* Declarations */
-      #if CYTHON_CCOMPLEX
-  #ifdef __cplusplus
-    static CYTHON_INLINE __pyx_t_double_complex __pyx_t_double_complex_from_parts(double x, double y) {
-      return ::std::complex< double >(x, y);
-    }
-  #else
-    static CYTHON_INLINE __pyx_t_double_complex __pyx_t_double_complex_from_parts(double x, double y) {
-      return x + y*(__pyx_t_double_complex)_Complex_I;
-    }
-  #endif
-#else
-    static CYTHON_INLINE __pyx_t_double_complex __pyx_t_double_complex_from_parts(double x, double y) {
-      __pyx_t_double_complex z;
-      z.real = x;
-      z.imag = y;
-      return z;
-    }
-#endif
-
-/* Arithmetic */
-      #if CYTHON_CCOMPLEX
-#else
-    static CYTHON_INLINE int __Pyx_c_eq_double(__pyx_t_double_complex a, __pyx_t_double_complex b) {
-       return (a.real == b.real) && (a.imag == b.imag);
-    }
-    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_sum_double(__pyx_t_double_complex a, __pyx_t_double_complex b) {
-        __pyx_t_double_complex z;
-        z.real = a.real + b.real;
-        z.imag = a.imag + b.imag;
-        return z;
-    }
-    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_diff_double(__pyx_t_double_complex a, __pyx_t_double_complex b) {
-        __pyx_t_double_complex z;
-        z.real = a.real - b.real;
-        z.imag = a.imag - b.imag;
-        return z;
-    }
-    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_prod_double(__pyx_t_double_complex a, __pyx_t_double_complex b) {
-        __pyx_t_double_complex z;
-        z.real = a.real * b.real - a.imag * b.imag;
-        z.imag = a.real * b.imag + a.imag * b.real;
-        return z;
-    }
-    #if 1
-    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_quot_double(__pyx_t_double_complex a, __pyx_t_double_complex b) {
-        if (b.imag == 0) {
-            return __pyx_t_double_complex_from_parts(a.real / b.real, a.imag / b.real);
-        } else if (fabs(b.real) >= fabs(b.imag)) {
-            if (b.real == 0 && b.imag == 0) {
-                return __pyx_t_double_complex_from_parts(a.real / b.real, a.imag / b.imag);
-            } else {
-                double r = b.imag / b.real;
-                double s = 1.0 / (b.real + b.imag * r);
-                return __pyx_t_double_complex_from_parts(
-                    (a.real + a.imag * r) * s, (a.imag - a.real * r) * s);
-            }
-        } else {
-            double r = b.real / b.imag;
-            double s = 1.0 / (b.imag + b.real * r);
-            return __pyx_t_double_complex_from_parts(
-                (a.real * r + a.imag) * s, (a.imag * r - a.real) * s);
-        }
-    }
-    #else
-    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_quot_double(__pyx_t_double_complex a, __pyx_t_double_complex b) {
-        if (b.imag == 0) {
-            return __pyx_t_double_complex_from_parts(a.real / b.real, a.imag / b.real);
-        } else {
-            double denom = b.real * b.real + b.imag * b.imag;
-            return __pyx_t_double_complex_from_parts(
-                (a.real * b.real + a.imag * b.imag) / denom,
-                (a.imag * b.real - a.real * b.imag) / denom);
-        }
-    }
-    #endif
-    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_neg_double(__pyx_t_double_complex a) {
-        __pyx_t_double_complex z;
-        z.real = -a.real;
-        z.imag = -a.imag;
-        return z;
-    }
-    static CYTHON_INLINE int __Pyx_c_is_zero_double(__pyx_t_double_complex a) {
-       return (a.real == 0) && (a.imag == 0);
-    }
-    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_conj_double(__pyx_t_double_complex a) {
-        __pyx_t_double_complex z;
-        z.real =  a.real;
-        z.imag = -a.imag;
-        return z;
-    }
-    #if 1
-        static CYTHON_INLINE double __Pyx_c_abs_double(__pyx_t_double_complex z) {
-          #if !defined(HAVE_HYPOT) || defined(_MSC_VER)
-            return sqrt(z.real*z.real + z.imag*z.imag);
-          #else
-            return hypot(z.real, z.imag);
-          #endif
-        }
-        static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_pow_double(__pyx_t_double_complex a, __pyx_t_double_complex b) {
-            __pyx_t_double_complex z;
-            double r, lnr, theta, z_r, z_theta;
-            if (b.imag == 0 && b.real == (int)b.real) {
-                if (b.real < 0) {
-                    double denom = a.real * a.real + a.imag * a.imag;
-                    a.real = a.real / denom;
-                    a.imag = -a.imag / denom;
-                    b.real = -b.real;
-                }
-                switch ((int)b.real) {
-                    case 0:
-                        z.real = 1;
-                        z.imag = 0;
-                        return z;
-                    case 1:
-                        return a;
-                    case 2:
-                        z = __Pyx_c_prod_double(a, a);
-                        return __Pyx_c_prod_double(a, a);
-                    case 3:
-                        z = __Pyx_c_prod_double(a, a);
-                        return __Pyx_c_prod_double(z, a);
-                    case 4:
-                        z = __Pyx_c_prod_double(a, a);
-                        return __Pyx_c_prod_double(z, z);
-                }
-            }
-            if (a.imag == 0) {
-                if (a.real == 0) {
-                    return a;
-                } else if (b.imag == 0) {
-                    z.real = pow(a.real, b.real);
-                    z.imag = 0;
-                    return z;
-                } else if (a.real > 0) {
-                    r = a.real;
-                    theta = 0;
-                } else {
-                    r = -a.real;
-                    theta = atan2(0, -1);
-                }
-            } else {
-                r = __Pyx_c_abs_double(a);
-                theta = atan2(a.imag, a.real);
-            }
-            lnr = log(r);
-            z_r = exp(lnr * b.real - theta * b.imag);
-            z_theta = theta * b.real + lnr * b.imag;
-            z.real = z_r * cos(z_theta);
-            z.imag = z_r * sin(z_theta);
-            return z;
-        }
-    #endif
-#endif
-
 /* IsLittleEndian */
       static CYTHON_INLINE int __Pyx_Is_Little_Endian(void)
 {
@@ -35215,32 +33594,6 @@ static CYTHON_INLINE int __pyx_memview_set_double(const char *itemp, PyObject *o
     }
 }
 
-/* FromPy */
-        static __pyx_t_double_complex __Pyx_PyComplex_As___pyx_t_double_complex(PyObject* o) {
-    Py_complex cval;
-#if !CYTHON_COMPILING_IN_PYPY
-    if (PyComplex_CheckExact(o))
-        cval = ((PyComplexObject *)o)->cval;
-    else
-#endif
-        cval = PyComplex_AsCComplex(o);
-    return __pyx_t_double_complex_from_parts(
-               (double)cval.real,
-               (double)cval.imag);
-}
-
-/* MemviewDtypeToObject */
-        static CYTHON_INLINE PyObject *__pyx_memview_get___pyx_t_double_complex(const char *itemp) {
-    return (PyObject *) __pyx_PyComplex_FromComplex(*(__pyx_t_double_complex *) itemp);
-}
-static CYTHON_INLINE int __pyx_memview_set___pyx_t_double_complex(const char *itemp, PyObject *obj) {
-    __pyx_t_double_complex value = __Pyx_PyComplex_As___pyx_t_double_complex(obj);
-    if (PyErr_Occurred())
-        return 0;
-    *(__pyx_t_double_complex *) itemp = value;
-    return 1;
-}
-
 /* None */
         static CYTHON_INLINE long __Pyx_pow_long(long b, long e) {
     long t = b;
@@ -35445,6 +33798,161 @@ static CYTHON_INLINE int __pyx_memview_set___pyx_t_double_complex(const char *it
             z_theta = theta * b.real + lnr * b.imag;
             z.real = z_r * cosf(z_theta);
             z.imag = z_r * sinf(z_theta);
+            return z;
+        }
+    #endif
+#endif
+
+/* Declarations */
+        #if CYTHON_CCOMPLEX
+  #ifdef __cplusplus
+    static CYTHON_INLINE __pyx_t_double_complex __pyx_t_double_complex_from_parts(double x, double y) {
+      return ::std::complex< double >(x, y);
+    }
+  #else
+    static CYTHON_INLINE __pyx_t_double_complex __pyx_t_double_complex_from_parts(double x, double y) {
+      return x + y*(__pyx_t_double_complex)_Complex_I;
+    }
+  #endif
+#else
+    static CYTHON_INLINE __pyx_t_double_complex __pyx_t_double_complex_from_parts(double x, double y) {
+      __pyx_t_double_complex z;
+      z.real = x;
+      z.imag = y;
+      return z;
+    }
+#endif
+
+/* Arithmetic */
+        #if CYTHON_CCOMPLEX
+#else
+    static CYTHON_INLINE int __Pyx_c_eq_double(__pyx_t_double_complex a, __pyx_t_double_complex b) {
+       return (a.real == b.real) && (a.imag == b.imag);
+    }
+    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_sum_double(__pyx_t_double_complex a, __pyx_t_double_complex b) {
+        __pyx_t_double_complex z;
+        z.real = a.real + b.real;
+        z.imag = a.imag + b.imag;
+        return z;
+    }
+    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_diff_double(__pyx_t_double_complex a, __pyx_t_double_complex b) {
+        __pyx_t_double_complex z;
+        z.real = a.real - b.real;
+        z.imag = a.imag - b.imag;
+        return z;
+    }
+    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_prod_double(__pyx_t_double_complex a, __pyx_t_double_complex b) {
+        __pyx_t_double_complex z;
+        z.real = a.real * b.real - a.imag * b.imag;
+        z.imag = a.real * b.imag + a.imag * b.real;
+        return z;
+    }
+    #if 1
+    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_quot_double(__pyx_t_double_complex a, __pyx_t_double_complex b) {
+        if (b.imag == 0) {
+            return __pyx_t_double_complex_from_parts(a.real / b.real, a.imag / b.real);
+        } else if (fabs(b.real) >= fabs(b.imag)) {
+            if (b.real == 0 && b.imag == 0) {
+                return __pyx_t_double_complex_from_parts(a.real / b.real, a.imag / b.imag);
+            } else {
+                double r = b.imag / b.real;
+                double s = 1.0 / (b.real + b.imag * r);
+                return __pyx_t_double_complex_from_parts(
+                    (a.real + a.imag * r) * s, (a.imag - a.real * r) * s);
+            }
+        } else {
+            double r = b.real / b.imag;
+            double s = 1.0 / (b.imag + b.real * r);
+            return __pyx_t_double_complex_from_parts(
+                (a.real * r + a.imag) * s, (a.imag * r - a.real) * s);
+        }
+    }
+    #else
+    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_quot_double(__pyx_t_double_complex a, __pyx_t_double_complex b) {
+        if (b.imag == 0) {
+            return __pyx_t_double_complex_from_parts(a.real / b.real, a.imag / b.real);
+        } else {
+            double denom = b.real * b.real + b.imag * b.imag;
+            return __pyx_t_double_complex_from_parts(
+                (a.real * b.real + a.imag * b.imag) / denom,
+                (a.imag * b.real - a.real * b.imag) / denom);
+        }
+    }
+    #endif
+    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_neg_double(__pyx_t_double_complex a) {
+        __pyx_t_double_complex z;
+        z.real = -a.real;
+        z.imag = -a.imag;
+        return z;
+    }
+    static CYTHON_INLINE int __Pyx_c_is_zero_double(__pyx_t_double_complex a) {
+       return (a.real == 0) && (a.imag == 0);
+    }
+    static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_conj_double(__pyx_t_double_complex a) {
+        __pyx_t_double_complex z;
+        z.real =  a.real;
+        z.imag = -a.imag;
+        return z;
+    }
+    #if 1
+        static CYTHON_INLINE double __Pyx_c_abs_double(__pyx_t_double_complex z) {
+          #if !defined(HAVE_HYPOT) || defined(_MSC_VER)
+            return sqrt(z.real*z.real + z.imag*z.imag);
+          #else
+            return hypot(z.real, z.imag);
+          #endif
+        }
+        static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_pow_double(__pyx_t_double_complex a, __pyx_t_double_complex b) {
+            __pyx_t_double_complex z;
+            double r, lnr, theta, z_r, z_theta;
+            if (b.imag == 0 && b.real == (int)b.real) {
+                if (b.real < 0) {
+                    double denom = a.real * a.real + a.imag * a.imag;
+                    a.real = a.real / denom;
+                    a.imag = -a.imag / denom;
+                    b.real = -b.real;
+                }
+                switch ((int)b.real) {
+                    case 0:
+                        z.real = 1;
+                        z.imag = 0;
+                        return z;
+                    case 1:
+                        return a;
+                    case 2:
+                        z = __Pyx_c_prod_double(a, a);
+                        return __Pyx_c_prod_double(a, a);
+                    case 3:
+                        z = __Pyx_c_prod_double(a, a);
+                        return __Pyx_c_prod_double(z, a);
+                    case 4:
+                        z = __Pyx_c_prod_double(a, a);
+                        return __Pyx_c_prod_double(z, z);
+                }
+            }
+            if (a.imag == 0) {
+                if (a.real == 0) {
+                    return a;
+                } else if (b.imag == 0) {
+                    z.real = pow(a.real, b.real);
+                    z.imag = 0;
+                    return z;
+                } else if (a.real > 0) {
+                    r = a.real;
+                    theta = 0;
+                } else {
+                    r = -a.real;
+                    theta = atan2(0, -1);
+                }
+            } else {
+                r = __Pyx_c_abs_double(a);
+                theta = atan2(a.imag, a.real);
+            }
+            lnr = log(r);
+            z_r = exp(lnr * b.real - theta * b.imag);
+            z_theta = theta * b.real + lnr * b.imag;
+            z.real = z_r * cos(z_theta);
+            z.imag = z_r * sin(z_theta);
             return z;
         }
     #endif
@@ -36166,52 +34674,6 @@ raise_neg_overflow:
     PyErr_SetString(PyExc_OverflowError,
         "can't convert negative value to char");
     return (char) -1;
-}
-
-/* ObjectToMemviewSlice */
-        static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dc___pyx_t_double_complex(PyObject *obj, int writable_flag) {
-    __Pyx_memviewslice result = { 0, 0, { 0 }, { 0 }, { 0 } };
-    __Pyx_BufFmt_StackElem stack[1];
-    int axes_specs[] = { (__Pyx_MEMVIEW_DIRECT | __Pyx_MEMVIEW_CONTIG) };
-    int retcode;
-    if (obj == Py_None) {
-        result.memview = (struct __pyx_memoryview_obj *) Py_None;
-        return result;
-    }
-    retcode = __Pyx_ValidateAndInit_memviewslice(axes_specs, __Pyx_IS_C_CONTIG,
-                                                 (PyBUF_C_CONTIGUOUS | PyBUF_FORMAT) | writable_flag, 1,
-                                                 &__Pyx_TypeInfo___pyx_t_double_complex, stack,
-                                                 &result, obj);
-    if (unlikely(retcode == -1))
-        goto __pyx_fail;
-    return result;
-__pyx_fail:
-    result.memview = NULL;
-    result.data = NULL;
-    return result;
-}
-
-/* ObjectToMemviewSlice */
-        static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dsds___pyx_t_double_complex(PyObject *obj, int writable_flag) {
-    __Pyx_memviewslice result = { 0, 0, { 0 }, { 0 }, { 0 } };
-    __Pyx_BufFmt_StackElem stack[1];
-    int axes_specs[] = { (__Pyx_MEMVIEW_DIRECT | __Pyx_MEMVIEW_STRIDED), (__Pyx_MEMVIEW_DIRECT | __Pyx_MEMVIEW_STRIDED) };
-    int retcode;
-    if (obj == Py_None) {
-        result.memview = (struct __pyx_memoryview_obj *) Py_None;
-        return result;
-    }
-    retcode = __Pyx_ValidateAndInit_memviewslice(axes_specs, 0,
-                                                 PyBUF_RECORDS_RO | writable_flag, 2,
-                                                 &__Pyx_TypeInfo___pyx_t_double_complex, stack,
-                                                 &result, obj);
-    if (unlikely(retcode == -1))
-        goto __pyx_fail;
-    return result;
-__pyx_fail:
-    result.memview = NULL;
-    result.data = NULL;
-    return result;
 }
 
 /* CheckBinaryVersion */
