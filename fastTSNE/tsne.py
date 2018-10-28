@@ -789,7 +789,7 @@ class TSNE:
             pca = PCA(n_components=self.n_components, random_state=self.random_state)
             embedding = pca.fit_transform(X)
             # The PCA embedding may have high variance, which leads to poor convergence
-            normalization = np.std(embedding, axis=0) * 100
+            normalization = np.std(embedding[:, 0]) * 100
             embedding /= normalization
 
             return embedding
