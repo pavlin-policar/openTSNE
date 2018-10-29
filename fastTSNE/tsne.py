@@ -5,6 +5,7 @@ from types import SimpleNamespace
 
 import numpy as np
 from scipy.sparse import csr_matrix
+from sklearn.base import BaseEstimator
 
 from . import _tsne
 from . import initialization as initialization_scheme
@@ -124,6 +125,8 @@ class PartialTSNEEmbedding(np.ndarray):
     """
 
     def __new__(cls, embedding, reference_embedding, P, gradient_descent_params):
+        init_checks.num_samples(embedding.shape[0], P.shape[0])
+
         obj = np.asarray(embedding, dtype=np.float64, order='C').view(PartialTSNEEmbedding)
 
         obj.reference_embedding = reference_embedding
@@ -207,8 +210,6 @@ class TSNEEmbedding(np.ndarray):
         An affinity index which can be used to compute the affinities of new
         points to the points in the existing embedding. The affinity index also
         contains the affinity matrix :math:`P` used during optimization.
-    gradient_descent_params: dict
-        Specifies all the parameters to use for gradient descent.
     random_state: Optional[Union[int, RandomState]]
         The random state parameter follows the convention used in scikit-learn.
         If the value is an int, random_state is the seed used by the random
@@ -427,7 +428,7 @@ class TSNEEmbedding(np.ndarray):
         )
 
 
-class TSNE:
+class TSNE(BaseEstimator):
     """t-Distributed Stochastic Neighbor Embedding
 
     Parameters
@@ -608,7 +609,7 @@ class TSNE:
 
         Parameters
         ----------
-        X : np.ndarray
+        X: np.ndarray
             The data matrix to be embedded.
 
         Returns
@@ -641,11 +642,11 @@ class TSNE:
         return embedding
 
     def prepare_initial(self, X):
-        """Prepare the initial embedding which can be optimized.
+        """Prepare the initial embedding which can be optimized as needed.
 
         Parameters
         ----------
-        X : np.ndarray
+        X: np.ndarray
             The data matrix to be embedded.
 
         Returns
@@ -808,54 +809,54 @@ def gradient_descent(embedding, P, n_iter, objective_function,
         from 1 to 1000. Setting the learning rate too low or too high may result
         in the points forming a "ball". This is also known as the crowding
         problem.
-    momentum : float
+    momentum: float
         Momentum accounts for gradient directions from previous iterations and
         resulting in faster convergence.
-    exaggeration : float
+    exaggeration: float
         The exaggeration term is used to increase the attractive forces of
         nearby points.
     dof: float
         Degrees of freedom of the Student's t-distribution.
-    min_gain : float
+    min_gain: float
         Minimum individual gain for each parameter.
-    min_grad_norm : float
+    min_grad_norm: float
         If the gradient norm is below this threshold, the optimization will be
         stopped.
-    theta : float
+    theta: float
         This is the trade-off parameter between speed and accuracy of the
         Barnes-Hut approximation of the negative forces. Setting a lower value
         will produce more accurate results, while setting a higher value will
         search through less of the space providing a rougher approximation.
         Scikit-learn recommends values between 0.2-0.8. This value is ignored
         unless the Barnes-Hut algorithm is used for gradients.
-    n_interpolation_points : int
+    n_interpolation_points: int
         The number of interpolation points to use for FFT accelerated
         interpolation based tSNE. It is recommended leaving this value at the
         default=3 as otherwise the interpolation may suffer from the Runge
         phenomenon. This value is ignored unless the interpolation based
         algorithm is used.
-    min_num_intervals : int
+    min_num_intervals: int
         The minimum number of intervals into which we split our embedding. A
         larger value will produce better embeddings at the cost of performance.
         This value is ignored unless the interpolation based algorithm is used.
-    ints_in_interval : float
+    ints_in_interval: float
         Since the coordinate range of the embedding will certainly change
         during optimization, this value tells us how many integer values should
         appear in a single interval. This number of intervals affect the
         embedding quality at the cost of performance. Less ints per interval
         will incur a larger number of intervals.
-    reference_embedding : Optional[np.ndarray]
+    reference_embedding: Optional[np.ndarray]
         If we are adding points to an existing embedding, we have to compute
         the gradients and errors w.r.t. the existing embedding.
-    n_jobs : int
+    n_jobs: int
         Number of threads.
-    use_callbacks : bool
-    callbacks : Callable[[int, float, np.ndarray] -> bool]
+    use_callbacks: bool
+    callbacks: Callable[[int, float, np.ndarray] -> bool]
         The callback should accept three parameters, the first is the current
         iteration, the second is the current KL divergence error and the last
         is the current embedding. The callback should return a boolean value
         indicating whether or not to stop optimization i.e. True to stop.
-    callbacks_every_iters : int
+    callbacks_every_iters: int
         How often should the callback be called.
 
     Returns

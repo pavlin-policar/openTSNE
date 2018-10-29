@@ -8,7 +8,8 @@ import numpy as np
 
 from fastTSNE.affinity import NearestNeighborAffinities
 from fastTSNE.nearest_neighbors import VALID_METRICS
-from fastTSNE.tsne import TSNE, kl_divergence_bh, kl_divergence_fft, gradient_descent
+from fastTSNE.tsne import TSNE, kl_divergence_bh, kl_divergence_fft
+from fastTSNE import tsne
 
 np.random.seed(42)
 
@@ -499,7 +500,7 @@ class TestDefaultParameterSettings(unittest.TestCase):
 
         # The relevant gradient descent parameters are passed down directly to
         # `gradient_descent`
-        mismatching = get_mismatching_default_values(TSNE, gradient_descent)
+        mismatching = get_mismatching_default_values(tsne.TSNE, tsne.gradient_descent)
         mismatching = list(filter(lambda x: x[0] not in ('n_iter',), mismatching))
         self.assertEqual(mismatching, [])
 
