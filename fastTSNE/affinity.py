@@ -74,7 +74,7 @@ class NearestNeighborAffinities(Affinities):
 
     """
 
-    def __init__(self, data, perplexity=30, method='approx', metric='euclidean',
+    def __init__(self, data, perplexity=30, method='exact', metric='euclidean',
                  metric_params=None, symmetrize=True, n_jobs=1, random_state=None):
         self.n_samples = data.shape[0]
 
@@ -198,7 +198,7 @@ def joint_probabilities_nn(neighbors, distances, perplexity, symmetrize=True,
 
 class FixedSigmaAffinities(Affinities):
 
-    def __init__(self, data, sigma, k=30, method='approx', metric='euclidean',
+    def __init__(self, data, sigma, k=30, method='exact', metric='euclidean',
                  metric_params=None, symmetrize=True, n_jobs=1, random_state=None):
         self.n_samples = n_samples = data.shape[0]
 

@@ -1,3 +1,4 @@
+import inspect
 import unittest
 from functools import wraps
 from typing import Callable, Any, Tuple
@@ -5,8 +6,9 @@ from unittest.mock import patch, MagicMock
 
 import numpy as np
 
+from fastTSNE.affinity import NearestNeighborAffinities
 from fastTSNE.nearest_neighbors import VALID_METRICS
-from fastTSNE.tsne import TSNE, kl_divergence_bh, kl_divergence_fft
+from fastTSNE.tsne import TSNE, kl_divergence_bh, kl_divergence_fft, gradient_descent
 
 np.random.seed(42)
 
@@ -490,3 +492,53 @@ class TestRandomState(unittest.TestCase):
 
         np.testing.assert_array_equal(partial1, partial2,
                                       'Same random state produced different partial embeddings')
+
+
+class TestDefaultParameterSettings(unittest.TestCase):
+    def test_default_params_simple_vs_complex_flow(self):
+        # Relevant affinity parameters are passed to the affinity object
+        mismatching = get_mismatching_default_values(
+            TSNE, NearestNeighborAffinities, {'neighbors': 'method'})
+        self.assertEqual(mismatching, [])
+
+        # The relevant gradient descent parameters are passed down directly to
+        # `gradient_descent`
+        mismatching = get_mismatching_default_values(TSNE, gradient_descent)
+        mismatching = list(filter(lambda x: x[0] not in ('n_iter',), mismatching))
+        self.assertEqual(mismatching, [])
+
+
+def get_shared_parameters(f1, f2):
+    """Get the names of shared parameters from two function signatures."""
+    params1 = inspect.signature(f1).parameters
+    params2 = inspect.signature(f2).parameters
+
+    return set(params1.keys()) & set(params2.keys())
+
+
+def get_mismatching_default_values(f1, f2, mapping=None):
+    """Check that two functions have the same default values for shared parameters."""
+    # Additional mappings from f1 parameters to f2 parameters may be provided
+    if mapping is None:
+        mapping = {}
+
+    params1 = inspect.signature(f1).parameters
+    params2 = inspect.signature(f2).parameters
+
+    mismatch = []
+    for f1_param_name in params1:
+        # If the param is named differently in f2, rename
+        f2_param_name = mapping[f1_param_name] if f1_param_name in mapping else f1_param_name
+
+        # If the parameter does not appear in the signature of f2, there's
+        # nothing to do
+        if f2_param_name not in params2:
+            continue
+
+        val1 = params1[f1_param_name].default
+        val2 = params2[f2_param_name].default
+
+        if val1 != val2:
+            mismatch.append((f1_param_name, val1, f2_param_name, val2))
+
+    return mismatch
