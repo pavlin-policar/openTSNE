@@ -6,7 +6,7 @@ from unittest.mock import patch, MagicMock
 
 import numpy as np
 
-from fastTSNE.affinity import NearestNeighborAffinities
+from fastTSNE.affinity import PerplexityBasedNN
 from fastTSNE.nearest_neighbors import VALID_METRICS
 from fastTSNE.tsne import TSNE, kl_divergence_bh, kl_divergence_fft
 from fastTSNE import tsne
@@ -495,7 +495,7 @@ class TestDefaultParameterSettings(unittest.TestCase):
     def test_default_params_simple_vs_complex_flow(self):
         # Relevant affinity parameters are passed to the affinity object
         mismatching = get_mismatching_default_values(
-            TSNE, NearestNeighborAffinities, {'neighbors': 'method'})
+            TSNE, PerplexityBasedNN, {'neighbors': 'method'})
         self.assertEqual(mismatching, [])
 
         # The relevant gradient descent parameters are passed down directly to

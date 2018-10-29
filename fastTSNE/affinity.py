@@ -36,7 +36,7 @@ class Affinities:
         """
 
 
-class NearestNeighborAffinities(Affinities):
+class PerplexityBasedNN(Affinities):
     """Compute affinities using the nearest neighbors defined by perplexity.
 
     Parameters
@@ -179,7 +179,7 @@ def joint_probabilities_nn(neighbors, distances, perplexity, symmetrize=True,
 
     # Compute asymmetric pairwise input similarities
     conditional_P = _tsne.compute_gaussian_perplexity(
-        distances, perplexity, num_threads=n_jobs)
+        distances, np.array([perplexity], dtype=float), num_threads=n_jobs)
     conditional_P = np.asarray(conditional_P)
 
     P = csr_matrix((conditional_P.ravel(), neighbors.ravel(),
@@ -196,7 +196,7 @@ def joint_probabilities_nn(neighbors, distances, perplexity, symmetrize=True,
     return P
 
 
-class FixedSigmaAffinities(Affinities):
+class FixedSigmaNN(Affinities):
 
     def __init__(self, data, sigma, k=30, method='exact', metric='euclidean',
                  metric_params=None, symmetrize=True, n_jobs=1, random_state=None):

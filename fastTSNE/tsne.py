@@ -9,7 +9,7 @@ from sklearn.base import BaseEstimator
 
 from . import _tsne
 from . import initialization as initialization_scheme
-from .affinity import Affinities, NearestNeighborAffinities
+from .affinity import Affinities, PerplexityBasedNN
 from .quad_tree import QuadTree
 
 EPSILON = np.finfo(np.float64).eps
@@ -681,7 +681,7 @@ class TSNE(BaseEstimator):
         else:
             raise ValueError('Unrecognized initialization scheme `%s`.' % self.initialization)
 
-        affinities = NearestNeighborAffinities(
+        affinities = PerplexityBasedNN(
             X, self.perplexity, method=self.neighbors_method,
             metric=self.metric, metric_params=self.metric_params, n_jobs=self.n_jobs,
         )
