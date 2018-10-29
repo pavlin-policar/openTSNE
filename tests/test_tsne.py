@@ -93,9 +93,8 @@ class TestTSNEParameterFlow(unittest.TestCase):
         'early_exaggeration': [4, 12],
         'initial_momentum': [0.2, 0.5, 0.8],
         'n_iter': [50, 100],
+        'exaggeration': [None, 2],
         'final_momentum': [0.2, 0.5, 0.8],
-        'late_exaggeration_iter': [50, 100],
-        'late_exaggeration': [None, 2],
     }})
     @patch('fastTSNE.tsne.gradient_descent')
     def test_constructor(self, param_name, param_value, gradient_descent):
@@ -107,18 +106,15 @@ class TestTSNEParameterFlow(unittest.TestCase):
         if param_name in ('early_exaggeration_iter', 'early_exaggeration', 'initial_momentum'):
             call_idx = 0
         # Main training loop
-        elif param_name in ('n_iter', 'final_momentum'):
+        elif param_name in ('n_iter', 'exaggeration', 'final_momentum'):
             call_idx = 1
-        # Late exaggeration training loop
-        elif param_name in ('late_exaggeration_iter', 'late_exaggeration'):
-            call_idx = 2
         # If general parameter, should be applied to every call
         else:
             call_idx = 0
 
         TSNE(**{param_name: param_value}).fit(self.x)
 
-        self.assertEqual(3, gradient_descent.call_count)
+        self.assertEqual(2, gradient_descent.call_count)
         check_call_contains_kwargs(
             gradient_descent.mock_calls[call_idx],
             {param_name: param_value},
@@ -145,13 +141,13 @@ class TestTSNEParameterFlow(unittest.TestCase):
         self.assertEqual(1, gradient_descent.call_count)
         check_call_contains_kwargs(gradient_descent.mock_calls[0], params)
 
-    @check_params({**grad_descent_params, **{
+    @check_params({
         'early_exaggeration_iter': [50, 100],
         'early_exaggeration': [4, 12],
         'initial_momentum': [0.2, 0.5, 0.8],
         'n_iter': [50, 100],
         'final_momentum': [0.2, 0.5, 0.8],
-    }})
+    })
     @patch('fastTSNE.tsne.gradient_descent')
     def test_embedding_transform(self, param_name, param_value, gradient_descent):
         # type: (str, Any, MagicMock) -> None
@@ -396,24 +392,6 @@ class TestTSNECallbackParams(unittest.TestCase):
         embedding.optimize(1, callbacks=[callback], callbacks_every_iters=1)
         self.assertEqual(callback.call_count, 1)
 
-    def test_can_pass_callbacks_to_embedding_transform(self):
-        embedding = self.tsne.prepare_initial(self.x)
-
-        # We don't the callback to be iterable
-        callback = MagicMock()
-        del callback.__iter__
-
-        # Should be able to pass a single callback
-        embedding.transform(self.x_test, early_exaggeration_iter=0, n_iter=1,
-                            callbacks=callback, callbacks_every_iters=1)
-        self.assertEqual(callback.call_count, 1)
-
-        # Should be able to pass a list callbacks
-        callback.reset_mock()
-        embedding.transform(self.x_test, early_exaggeration_iter=0, n_iter=1,
-                            callbacks=[callback], callbacks_every_iters=1)
-        self.assertEqual(callback.call_count, 1)
-
     def test_can_pass_callbacks_to_partial_embedding_optimize(self):
         embedding = self.tsne.prepare_initial(self.x)
 
@@ -451,6 +429,24 @@ class TSNEInitialization(unittest.TestCase):
             embedding = tsne.prepare_initial(self.x)
             np.testing.assert_array_less(np.var(embedding, axis=0), allowed,
                                          'using the `%s` initialization' % init)
+
+    def test_mismatching_embedding_dimensions_simple_api(self):
+        # Fit
+        tsne = TSNE(n_components=2, initialization=self.x[:10, :2])
+        with self.assertRaises(ValueError, msg='fit::ncorrect number of points'):
+            tsne.fit(self.x[:25])
+
+        with self.assertRaises(ValueError, msg='fit::ncorrect number of dimensions'):
+            TSNE(n_components=2, initialization=self.x[:10, :4])
+
+        # Transform
+        tsne = TSNE(n_components=2, initialization='random')
+        embedding = tsne.fit(self.x)
+        with self.assertRaises(ValueError, msg='transform::incorrect number of points'):
+            embedding.transform(X=self.x[:5], initialization=self.x[:10, :2])
+
+        with self.assertRaises(ValueError, msg='transform::incorrect number of dimensions'):
+            embedding.transform(X=self.x, initialization=self.x[:, :4])
 
 
 class TestRandomState(unittest.TestCase):
