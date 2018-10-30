@@ -9,7 +9,7 @@ from .quad_tree cimport QuadTree
 
 cpdef double[:, ::1] compute_gaussian_perplexity(
     double[:, :] distances,
-    double desired_perplexity,
+    double[:] desired_perplexities,
     double perplexity_tol=*,
     Py_ssize_t max_iter=*,
     Py_ssize_t num_threads=*,

@@ -29,57 +29,72 @@ cdef extern from 'math.h':
 
 cpdef double[:, ::1] compute_gaussian_perplexity(
     double[:, :] distances,
-    double desired_perplexity,
+    double[:] desired_perplexities,
     double perplexity_tol=1e-8,
     Py_ssize_t max_iter=200,
     Py_ssize_t num_threads=1,
 ):
     cdef:
-        Py_ssize_t n_new_points = distances.shape[0]
-        Py_ssize_t n_existing_points = distances.shape[1]
+        Py_ssize_t n_samples = distances.shape[0]
+        Py_ssize_t n_scales = desired_perplexities.shape[0]
+        Py_ssize_t k_neighbors = distances.shape[1]
         double[:, ::1] P = np.zeros_like(distances, dtype=float, order='C')
-        double[:] beta = np.ones(n_new_points)
+        double[:, :, ::1] multiscale_P = np.zeros((n_samples, n_scales, k_neighbors))
+        double[:, ::1] tau = np.ones((n_samples, n_scales))
 
-        Py_ssize_t i, j, iteration
-        double desired_entropy = log(desired_perplexity)
+        Py_ssize_t i, j, h, iteration
+        double[:] desired_entropies = np.log(desired_perplexities)
 
-        double min_beta, max_beta, sum_Pi, entropy, entropy_diff
+        double min_tau, max_tau, sum_Pi, sum_PiDj, entropy, entropy_diff, sqrt_tau
 
     if num_threads < 1:
         num_threads = 1
 
-    for i in prange(n_new_points, nogil=True, schedule='guided', num_threads=num_threads):
-        min_beta, max_beta = -INFINITY, INFINITY
+    for i in prange(n_samples, nogil=True, schedule='guided', num_threads=num_threads):
+        min_tau, max_tau = -INFINITY, INFINITY
 
-        for iteration in range(max_iter):
-            sum_Pi, entropy = 0, 0
-            for j in range(n_existing_points):
-                P[i, j] = exp(-distances[i, j] * beta[i])
-                entropy = entropy + distances[i, j] * P[i, j]
-                sum_Pi = sum_Pi + P[i, j]
+        # For every scale find a precision tau that fits the perplexity
+        for h in range(n_scales):
+            for iteration in range(max_iter):
+                sum_Pi, sum_PiDj = 0, 0
+                sqrt_tau = sqrt(tau[i, h])
 
-            sum_Pi = sum_Pi + EPSILON
+                for j in range(k_neighbors):
+                    multiscale_P[i, h, j] = sqrt_tau * exp(-distances[i, j] ** 2 * tau[i, h] / 2)
+                    sum_Pi = sum_Pi + multiscale_P[i, h, j]
+                sum_Pi = sum_Pi + EPSILON
 
-            entropy = log(sum_Pi) + beta[i] * entropy / sum_Pi
-            entropy_diff = entropy - desired_entropy
+                for j in range(k_neighbors):
+                    sum_PiDj = sum_PiDj + multiscale_P[i, h, j] / sum_Pi * distances[i, j] ** 2
 
-            if fabs(entropy_diff) <= perplexity_tol:
-                break
+                entropy = tau[i, h] / 2 * sum_PiDj + log(sum_Pi) - log(tau[i, h]) / 2
+                entropy_diff = entropy - desired_entropies[h]
 
-            if entropy_diff > 0:
-                min_beta = beta[i]
-                if isinf(max_beta):
-                    beta[i] *= 2
+                if fabs(entropy_diff) <= perplexity_tol:
+                    break
+
+                if entropy_diff > 0:
+                    min_tau = tau[i, h]
+                    if isinf(max_tau):
+                        tau[i, h] *= 2
+                    else:
+                        tau[i, h] = (tau[i, h] + max_tau) / 2
                 else:
-                    beta[i] = (beta[i] + max_beta) / 2
-            else:
-                max_beta = beta[i]
-                if isinf(min_beta):
-                    beta[i] /= 2
-                else:
-                    beta[i] = (beta[i] + min_beta) / 2
+                    max_tau = tau[i, h]
+                    if isinf(min_tau):
+                        tau[i, h] /= 2
+                    else:
+                        tau[i, h] = (tau[i, h] + min_tau) / 2
 
-        for j in range(n_existing_points):
+        # Get the probability of the mixture of Gaussians with different precisions
+        sum_Pi = 0
+        for j in range(k_neighbors):
+            for h in range(n_scales):
+                P[i, j] = P[i, j] + multiscale_P[i, h, j]
+                sum_Pi = sum_Pi + multiscale_P[i, h, j]
+
+        # Perform row-normalization
+        for j in range(k_neighbors):
             P[i, j] /= sum_Pi
 
     return P

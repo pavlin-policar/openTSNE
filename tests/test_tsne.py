@@ -1,12 +1,15 @@
+import inspect
 import unittest
 from functools import wraps
-from typing import Callable, Any, Tuple
+from typing import Callable, Any, Tuple, Optional
 from unittest.mock import patch, MagicMock
 
 import numpy as np
 
+from fastTSNE.affinity import PerplexityBasedNN
 from fastTSNE.nearest_neighbors import VALID_METRICS
 from fastTSNE.tsne import TSNE, kl_divergence_bh, kl_divergence_fft
+from fastTSNE import tsne
 
 np.random.seed(42)
 
@@ -26,13 +29,33 @@ def check_params(params: dict) -> Callable:
     return _decorator
 
 
-def check_call_contains_kwargs(call: Tuple, params: dict) -> None:
+def check_call_contains_kwargs(
+        call: Tuple,
+        params: dict,
+        param_mapping: Optional[dict] = None,
+) -> None:
     """Check whether a `call` object was called with some params, but also some
     others we don't care about"""
+    _param_mapping = {'negative_gradient_method': 'objective_function',
+                      'early_exaggeration_iter': 'n_iter',
+                      'late_exaggeration_iter': 'n_iter',
+                      'early_exaggeration': 'exaggeration',
+                      'late_exaggeration': 'exaggeration',
+                      'initial_momentum': 'momentum',
+                      'final_momentum': 'momentum'}
+    if param_mapping is not None:
+        _param_mapping.update(param_mapping)
+
     name, args, kwargs = call
     for key in params:
+        # If a parameter isn't named the same way in the call
+        if key in _param_mapping:
+            kwargs_key = _param_mapping[key]
+        else:
+            kwargs_key = key
+
         expected_value = params[key]
-        actual_value = kwargs.get(key, None)
+        actual_value = kwargs.get(kwargs_key, None)
         if expected_value != actual_value:
             raise AssertionError(
                 'Mock not called with `%s=%s`. Called with `%s`' %
@@ -72,9 +95,8 @@ class TestTSNEParameterFlow(unittest.TestCase):
         'early_exaggeration': [4, 12],
         'initial_momentum': [0.2, 0.5, 0.8],
         'n_iter': [50, 100],
+        'exaggeration': [None, 2],
         'final_momentum': [0.2, 0.5, 0.8],
-        'late_exaggeration_iter': [50, 100],
-        'late_exaggeration': [None, 2],
     }})
     @patch('fastTSNE.tsne.gradient_descent')
     def test_constructor(self, param_name, param_value, gradient_descent):
@@ -83,40 +105,22 @@ class TestTSNEParameterFlow(unittest.TestCase):
         gradient_descent.return_value = (1, MagicMock())
 
         # Early exaggeration training loop
-        if param_name == 'early_exaggeration_iter':
-            check_param_name = 'n_iter'
-            call_idx = 0
-        elif param_name == 'early_exaggeration':
-            check_param_name = 'exaggeration'
-            call_idx = 0
-        elif param_name == 'initial_momentum':
-            check_param_name = 'momentum'
+        if param_name in ('early_exaggeration_iter', 'early_exaggeration', 'initial_momentum'):
             call_idx = 0
         # Main training loop
-        elif param_name == 'n_iter':
-            check_param_name = param_name
+        elif param_name in ('n_iter', 'exaggeration', 'final_momentum'):
             call_idx = 1
-        elif param_name == 'final_momentum':
-            check_param_name = 'momentum'
-            call_idx = 1
-        # Early exaggeration training loop
-        elif param_name == 'late_exaggeration_iter':
-            check_param_name = 'n_iter'
-            call_idx = 2
-        elif param_name == 'late_exaggeration':
-            check_param_name = 'exaggeration'
-            call_idx = 2
-
         # If general parameter, should be applied to every call
         else:
-            check_param_name = param_name
             call_idx = 0
 
         TSNE(**{param_name: param_value}).fit(self.x)
 
-        self.assertEqual(3, gradient_descent.call_count)
-        check_call_contains_kwargs(gradient_descent.mock_calls[call_idx],
-                                   {check_param_name: param_value})
+        self.assertEqual(2, gradient_descent.call_count)
+        check_call_contains_kwargs(
+            gradient_descent.mock_calls[call_idx],
+            {param_name: param_value},
+        )
 
     @check_params({**grad_descent_params, **{
         'n_iter': [50, 100, 150],
@@ -139,13 +143,13 @@ class TestTSNEParameterFlow(unittest.TestCase):
         self.assertEqual(1, gradient_descent.call_count)
         check_call_contains_kwargs(gradient_descent.mock_calls[0], params)
 
-    @check_params({**grad_descent_params, **{
+    @check_params({
         'early_exaggeration_iter': [50, 100],
         'early_exaggeration': [4, 12],
         'initial_momentum': [0.2, 0.5, 0.8],
         'n_iter': [50, 100],
         'final_momentum': [0.2, 0.5, 0.8],
-    }})
+    })
     @patch('fastTSNE.tsne.gradient_descent')
     def test_embedding_transform(self, param_name, param_value, gradient_descent):
         # type: (str, Any, MagicMock) -> None
@@ -160,31 +164,21 @@ class TestTSNEParameterFlow(unittest.TestCase):
         embedding.transform(self.x_test, **{param_name: param_value})
 
         # Early exaggeration training loop
-        if param_name == 'early_exaggeration_iter':
-            check_param_name = 'n_iter'
-            call_idx = 0
-        elif param_name == 'early_exaggeration':
-            check_param_name = 'exaggeration'
-            call_idx = 0
-        elif param_name == 'initial_momentum':
-            check_param_name = 'momentum'
+        if param_name in ('early_exaggeration_iter', 'early_exaggeration'):
             call_idx = 0
         # Main training loop
-        elif param_name == 'n_iter':
-            check_param_name = param_name
-            call_idx = 1
-        elif param_name == 'final_momentum':
-            check_param_name = 'momentum'
+        elif param_name in ('n_iter', 'final_momentum'):
             call_idx = 1
 
         # If general parameter, should be applied to every call
         else:
-            check_param_name = param_name
             call_idx = 0
 
         self.assertEqual(2, gradient_descent.call_count)
-        check_call_contains_kwargs(gradient_descent.mock_calls[call_idx],
-                                   {check_param_name: param_value})
+        check_call_contains_kwargs(
+            gradient_descent.mock_calls[call_idx],
+            {param_name: param_value},
+        )
 
     @check_params({**grad_descent_params, **{
         'n_iter': [50, 100, 150],
@@ -400,24 +394,6 @@ class TestTSNECallbackParams(unittest.TestCase):
         embedding.optimize(1, callbacks=[callback], callbacks_every_iters=1)
         self.assertEqual(callback.call_count, 1)
 
-    def test_can_pass_callbacks_to_embedding_transform(self):
-        embedding = self.tsne.prepare_initial(self.x)
-
-        # We don't the callback to be iterable
-        callback = MagicMock()
-        del callback.__iter__
-
-        # Should be able to pass a single callback
-        embedding.transform(self.x_test, early_exaggeration_iter=0, n_iter=1,
-                            callbacks=callback, callbacks_every_iters=1)
-        self.assertEqual(callback.call_count, 1)
-
-        # Should be able to pass a list callbacks
-        callback.reset_mock()
-        embedding.transform(self.x_test, early_exaggeration_iter=0, n_iter=1,
-                            callbacks=[callback], callbacks_every_iters=1)
-        self.assertEqual(callback.call_count, 1)
-
     def test_can_pass_callbacks_to_partial_embedding_optimize(self):
         embedding = self.tsne.prepare_initial(self.x)
 
@@ -455,6 +431,24 @@ class TSNEInitialization(unittest.TestCase):
             embedding = tsne.prepare_initial(self.x)
             np.testing.assert_array_less(np.var(embedding, axis=0), allowed,
                                          'using the `%s` initialization' % init)
+
+    def test_mismatching_embedding_dimensions_simple_api(self):
+        # Fit
+        tsne = TSNE(n_components=2, initialization=self.x[:10, :2])
+        with self.assertRaises(ValueError, msg='fit::ncorrect number of points'):
+            tsne.fit(self.x[:25])
+
+        with self.assertRaises(ValueError, msg='fit::ncorrect number of dimensions'):
+            TSNE(n_components=2, initialization=self.x[:10, :4])
+
+        # Transform
+        tsne = TSNE(n_components=2, initialization='random')
+        embedding = tsne.fit(self.x)
+        with self.assertRaises(ValueError, msg='transform::incorrect number of points'):
+            embedding.transform(X=self.x[:5], initialization=self.x[:10, :2])
+
+        with self.assertRaises(ValueError, msg='transform::incorrect number of dimensions'):
+            embedding.transform(X=self.x, initialization=self.x[:, :4])
 
 
 class TestRandomState(unittest.TestCase):
@@ -496,3 +490,53 @@ class TestRandomState(unittest.TestCase):
 
         np.testing.assert_array_equal(partial1, partial2,
                                       'Same random state produced different partial embeddings')
+
+
+class TestDefaultParameterSettings(unittest.TestCase):
+    def test_default_params_simple_vs_complex_flow(self):
+        # Relevant affinity parameters are passed to the affinity object
+        mismatching = get_mismatching_default_values(
+            TSNE, PerplexityBasedNN, {'neighbors': 'method'})
+        self.assertEqual(mismatching, [])
+
+        # The relevant gradient descent parameters are passed down directly to
+        # `gradient_descent`
+        mismatching = get_mismatching_default_values(tsne.TSNE, tsne.gradient_descent)
+        mismatching = list(filter(lambda x: x[0] not in ('n_iter',), mismatching))
+        self.assertEqual(mismatching, [])
+
+
+def get_shared_parameters(f1, f2):
+    """Get the names of shared parameters from two function signatures."""
+    params1 = inspect.signature(f1).parameters
+    params2 = inspect.signature(f2).parameters
+
+    return set(params1.keys()) & set(params2.keys())
+
+
+def get_mismatching_default_values(f1, f2, mapping=None):
+    """Check that two functions have the same default values for shared parameters."""
+    # Additional mappings from f1 parameters to f2 parameters may be provided
+    if mapping is None:
+        mapping = {}
+
+    params1 = inspect.signature(f1).parameters
+    params2 = inspect.signature(f2).parameters
+
+    mismatch = []
+    for f1_param_name in params1:
+        # If the param is named differently in f2, rename
+        f2_param_name = mapping[f1_param_name] if f1_param_name in mapping else f1_param_name
+
+        # If the parameter does not appear in the signature of f2, there's
+        # nothing to do
+        if f2_param_name not in params2:
+            continue
+
+        val1 = params1[f1_param_name].default
+        val2 = params2[f2_param_name].default
+
+        if val1 != val2:
+            mismatch.append((f1_param_name, val1, f2_param_name, val2))
+
+    return mismatch

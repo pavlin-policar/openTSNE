@@ -8,19 +8,18 @@ from sklearn.neighbors import KNeighborsClassifier
 from fastTSNE.callbacks import VerifyExaggerationError
 from fastTSNE.tsne import TSNE, TSNEEmbedding
 
-np.random.seed(42)
-
 
 class TestTSNECorrectness(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.tsne = TSNE(early_exaggeration_iter=20, n_iter=100)
         # Set up two modalities, if we want to viually inspect test results
+        random_state = np.random.RandomState(0)
         cls.x = np.vstack((
-            np.random.normal(+1, 1, (100, 4)),
-            np.random.normal(-1, 1, (100, 4)),
+            random_state.normal(+1, 1, (100, 4)),
+            random_state.normal(-1, 1, (100, 4)),
         ))
-        cls.x_test = np.random.normal(0, 1, (25, 4))
+        cls.x_test = random_state.normal(0, 1, (25, 4))
 
     def test_basic_flow(self):
         """Verify that the basic flow does not crash."""
@@ -57,8 +56,8 @@ class TestTSNECorrectness(unittest.TestCase):
         x, y = iris['data'], iris['target']
 
         # Evaluate tSNE optimization using a KNN classifier
-        knn = KNeighborsClassifier(n_neighbors=5)
-        tsne = TSNE(perplexity=30, initialization='random')
+        knn = KNeighborsClassifier(n_neighbors=10)
+        tsne = TSNE(perplexity=30, initialization='random', random_state=0)
 
         # Prepare a random initialization
         embedding = tsne.prepare_initial(x)

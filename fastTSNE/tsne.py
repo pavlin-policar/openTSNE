@@ -1,14 +1,15 @@
 import logging
 import multiprocessing
 from collections import Iterable
+from types import SimpleNamespace
 
 import numpy as np
 from scipy.sparse import csr_matrix
-from sklearn.decomposition import PCA
-from sklearn.utils import check_random_state
+from sklearn.base import BaseEstimator
 
 from . import _tsne
-from .affinity import Affinities, NearestNeighborAffinities
+from . import initialization as initialization_scheme
+from .affinity import Affinities, PerplexityBasedNN
 from .quad_tree import QuadTree
 
 EPSILON = np.finfo(np.float64).eps
@@ -39,7 +40,7 @@ def _handle_nice_params(optim_params: dict) -> None:
     optim_params['use_callbacks'] = optim_params['callbacks'] is not None
 
     # Handle negative gradient method
-    negative_gradient_method = optim_params['negative_gradient_method']
+    negative_gradient_method = optim_params.pop('negative_gradient_method')
     if callable(negative_gradient_method):
         negative_gradient_method = negative_gradient_method
     elif negative_gradient_method in {'bh', 'BH', 'barnes-hut'}:
@@ -49,7 +50,8 @@ def _handle_nice_params(optim_params: dict) -> None:
     else:
         raise ValueError('Unrecognized gradient method. Please choose one of '
                          'the supported methods or provide a valid callback.')
-    optim_params['negative_gradient_method'] = negative_gradient_method
+    # `gradient_descent` uses the more informative name `objective_function`
+    optim_params['objective_function'] = negative_gradient_method
 
     # Handle number of jobs
     n_jobs = optim_params['n_jobs']
@@ -67,6 +69,30 @@ def _handle_nice_params(optim_params: dict) -> None:
         n_jobs = 1
 
     optim_params['n_jobs'] = n_jobs
+
+
+def __check_init_num_samples(num_samples, required_num_samples):
+    if num_samples != required_num_samples:
+        raise ValueError(
+            'The provided initialization contains a different number '
+            'of points (%d) than the data provided (%d).' % (
+                num_samples, required_num_samples)
+        )
+
+
+def __check_init_num_dimensions(num_dimensions, required_num_dimensions):
+    if num_dimensions != required_num_dimensions:
+        raise ValueError(
+            'The provided initialization contains a different number '
+            'of components (%d) than the embedding (%d).' % (
+                num_dimensions, required_num_dimensions)
+        )
+
+
+init_checks = SimpleNamespace(
+    num_samples=__check_init_num_samples,
+    num_dimensions=__check_init_num_dimensions,
+)
 
 
 class OptimizationInterrupt(InterruptedError):
@@ -99,6 +125,8 @@ class PartialTSNEEmbedding(np.ndarray):
     """
 
     def __new__(cls, embedding, reference_embedding, P, gradient_descent_params):
+        init_checks.num_samples(embedding.shape[0], P.shape[0])
+
         obj = np.asarray(embedding, dtype=np.float64, order='C').view(PartialTSNEEmbedding)
 
         obj.reference_embedding = reference_embedding
@@ -176,12 +204,12 @@ class TSNEEmbedding(np.ndarray):
 
     Parameters
     ----------
+    embedding: np.ndarray
+        Initial positions for each data point.
     affinities: Affinities
         An affinity index which can be used to compute the affinities of new
         points to the points in the existing embedding. The affinity index also
         contains the affinity matrix :math:`P` used during optimization.
-    gradient_descent_params: dict
-        Specifies all the parameters to use for gradient descent.
     random_state: Optional[Union[int, RandomState]]
         The random state parameter follows the convention used in scikit-learn.
         If the value is an int, random_state is the seed used by the random
@@ -196,7 +224,9 @@ class TSNEEmbedding(np.ndarray):
 
     """
 
-    def __new__(cls, embedding, affinities, gradient_descent_params, random_state=None):
+    def __new__(cls, embedding, affinities, random_state=None, **gradient_descent_params):
+        init_checks.num_samples(embedding.shape[0], affinities.P.shape[0])
+
         obj = np.asarray(embedding, dtype=np.float64, order='C').view(TSNEEmbedding)
 
         obj.affinities = affinities  # type: Affinities
@@ -242,8 +272,10 @@ class TSNEEmbedding(np.ndarray):
         if inplace:
             embedding = self
         else:
-            embedding = TSNEEmbedding(np.copy(self), self.affinities,
-                                      self.gradient_descent_params)
+            embedding = TSNEEmbedding(
+                np.copy(self), self.affinities, random_state=self.random_state,
+                **self.gradient_descent_params,
+            )
 
         # If optimization parameters were passed to this funciton, prefer those
         # over the defaults specified in the TSNE object
@@ -254,7 +286,8 @@ class TSNEEmbedding(np.ndarray):
 
         try:
             error, embedding = gradient_descent(
-                embedding=embedding, P=self.affinities.P, **optim_params)
+                embedding=embedding, P=self.affinities.P, **optim_params,
+            )
 
         except OptimizationInterrupt as ex:
             log.info('Optimization was interrupted with callback.')
@@ -266,10 +299,9 @@ class TSNEEmbedding(np.ndarray):
 
         return embedding
 
-    def transform(self, X, perplexity=None, initialization='weighted',
+    def transform(self, X, perplexity=None, initialization='median',
                   early_exaggeration=2, early_exaggeration_iter=100,
-                  initial_momentum=0.2, n_iter=300, final_momentum=0.4,
-                  **gradient_descent_params):
+                  initial_momentum=0.2, n_iter=100, final_momentum=0.4):
         """Embed new points into the existing embedding.
 
         This procedure optimizes each point only with respect to the existing
@@ -306,9 +338,6 @@ class TSNEEmbedding(np.ndarray):
             As in regular t-SNE, optimization uses momentum for faster
             convergence. This value controls the momentum used during the normal
             regime and*late exaggeration* phase.
-        **gradient_descent_params: dict
-            Any parameters accepted by :func:`gradient_descent` can be specified
-            here for finer control of the optimization process.
 
         Returns
         -------
@@ -318,22 +347,20 @@ class TSNEEmbedding(np.ndarray):
         """
         embedding = self.prepare_partial(X, perplexity=perplexity, initialization=initialization)
 
-        optim_params = dict(gradient_descent_params)
-
         try:
             # Early exaggeration with lower momentum to allow points to find more
             # easily move around and find their neighbors
-            optim_params['momentum'] = initial_momentum
-            optim_params['exaggeration'] = early_exaggeration
-            optim_params['n_iter'] = early_exaggeration_iter
-            embedding.optimize(inplace=True, propagate_exception=True, **optim_params)
+            embedding.optimize(
+                n_iter=early_exaggeration_iter, exaggeration=early_exaggeration,
+                momentum=initial_momentum, inplace=True, propagate_exception=True,
+            )
 
             # Restore actual affinity probabilities and increase momentum to get
             # final, optimized embedding
-            optim_params['momentum'] = final_momentum
-            optim_params['exaggeration'] = None
-            optim_params['n_iter'] = n_iter
-            embedding.optimize(inplace=True, propagate_exception=True, **optim_params)
+            embedding.optimize(
+                n_iter=n_iter, exaggeration=None, momentum=final_momentum,
+                inplace=True, propagate_exception=True,
+            )
 
         except OptimizationInterrupt as ex:
             log.info('Optimization was interrupted with callback.')
@@ -341,12 +368,8 @@ class TSNEEmbedding(np.ndarray):
 
         return embedding
 
-    def prepare_partial(self, X, initialization='median', perplexity=None):
+    def prepare_partial(self, X, initialization='median', **affinity_params):
         """Prepare the partial embedding which can be optimized.
-
-        In addition to generating initial coordinates via
-        :meth:`generate_partial_coordinates`, this also precomputes the affinity
-        matrix :math:`P`, which is used throughout the optimization.
 
         Parameters
         ----------
@@ -363,10 +386,8 @@ class TSNEEmbedding(np.ndarray):
 
             ``random`` positions all new points in the center of the embedding
             and should be used for demonstration only.
-        perplexity: float
-            Perplexity can be thought of as the continuous k number of neighbors
-            to consider for each data point. To avoid confusion, note that
-            perplexity linearly impacts runtime.
+        **affinity_params: dict
+            Additional params to be passed to the ``Affinity.to_new`` method.
 
         Returns
         -------
@@ -375,7 +396,7 @@ class TSNEEmbedding(np.ndarray):
             optimization.
 
         """
-        P = self.affinities.to_new(X, perplexity=perplexity)
+        P = self.affinities.to_new(X, **affinity_params)
 
         # Extract neighbor indices and their affinities as a dense matrix from P
         # so they can be used in weighted initialization schemes
@@ -384,91 +405,30 @@ class TSNEEmbedding(np.ndarray):
         neighbors = P.indices.copy().reshape((P.shape[0], k_neighbors))
         distances = P.data.copy().reshape((P.shape[0], k_neighbors))
 
-        embedding = self.generate_partial_coordinates(
-            X, initialization, neighbors, distances,
-        )
+        # If initial positions are given in an array, use a copy of that
+        if isinstance(initialization, np.ndarray):
+            init_checks.num_samples(initialization.shape[0], X.shape[0])
+            init_checks.num_dimensions(initialization.shape[1], self.shape[1])
+
+            embedding = np.array(initialization)
+
+        # Random initialization with isotropic normal distribution
+        elif initialization == 'random':
+            embedding = initialization_scheme.random(X.shape[0], self.shape[1], self.random_state)
+        elif initialization == 'weighted':
+            embedding = initialization_scheme.weighted_mean(X, self, neighbors, distances)
+        elif initialization == 'median':
+            embedding = initialization_scheme.median(self, neighbors)
+        else:
+            raise ValueError('Unrecognized initialization scheme `%s`.' % initialization)
 
         return PartialTSNEEmbedding(
             embedding, reference_embedding=self, P=P,
             gradient_descent_params=self.gradient_descent_params,
         )
 
-    def generate_partial_coordinates(self, X, initialization, neighbors, distances):
-        """Generate initial coordinates for each data point.
 
-        Unlike :meth:`prepare_partial`, this returns the initial coordinates in
-        a :class:`np.ndarray` object.
-
-        Parameters
-        ----------
-        X : np.ndarray
-            The data matrix to be added to the existing embedding.
-        initialization: Union[np.ndarray, str]
-            The initial point positions to be used in the embedding space. Can
-            be a precomputed numpy array, ``random`` or ``weighted``. In all
-            cases, ``weighted`` should be preferred. It positions each point in
-            the weighted mean position of it's nearest neighbors in the existing
-            embedding. Typically, few optimization steps are needed for good
-            embeddings. ``random`` positions all new points in the center of the
-            embedding and should be used for demonstration only.
-        neighbors: np.ndarray
-            For every new point to be added in the embedding, we need to know
-            the indices of its nearest neighbor points in the existing
-            embedding. This is the typical format returned by scikit-learn's
-            nearest neighbor methods. This is needed when
-            ``initialization='weighted'``.
-        distances: np.ndarray
-            For every new point to be added in the embedding, we need to know
-            the distance to its nearest neighbor points in the existing
-            embedding. This is the typical format returned by scikit-learn's
-            nearest neighbor methods. This is needed when
-            ``initialization='weighted'``.
-
-        Returns
-        -------
-        np.ndarray
-            Initial positions for each data point.
-
-        """
-        n_samples = X.shape[0]
-        n_components = self.shape[1]
-
-        # If initial positions are given in an array, use a copy of that
-        if isinstance(initialization, np.ndarray):
-            if initialization.shape[0] != n_samples:
-                raise ValueError(
-                    'The provided initialization contains a different number'
-                    'of samples (%d) than the data provided (%d).' % (
-                        initialization.shape[0], n_samples)
-                )
-            if initialization.shape[1] != n_components:
-                raise ValueError(
-                    'The provided initialization contains a different number '
-                    'of components (%d) than the embedding (%d).' % (
-                        initialization.shape[1], n_components)
-                )
-            embedding = np.array(initialization)
-
-        # Random initialization with isotropic normal distribution
-        elif initialization == 'random':
-            random_state = check_random_state(self.random_state)
-            embedding = random_state.normal(0, 1e-2, (n_samples, n_components))
-
-        elif initialization == 'weighted':
-            embedding = np.zeros((n_samples, n_components))
-            for i in range(n_samples):
-                embedding[i] = np.average(self[neighbors[i]], axis=0, weights=distances[i])
-
-        elif initialization == 'median':
-            embedding = np.median(self[neighbors], axis=1)
-
-        else:
-            raise ValueError('Unrecognized initialization scheme `%s`.' % initialization)
-
-        return embedding
-
-
-class TSNE:
+class TSNE(BaseEstimator):
     """t-Distributed Stochastic Neighbor Embedding
 
     Parameters
@@ -493,12 +453,12 @@ class TSNE:
         details.
     n_iter: int
         The number of iterations to run in the normal optimization regime.
-    late_exaggeration_iter: int
-        The number of iterations to run in the *late exaggeration* phase. This
-        last phase of the optimization can improve separability of clusters, but
-        is rarely used in practice. See Linderman et al. [4]_ for more details.
-    late_exaggeration: float
-        The late exaggeration factor. See Linderman et al. [4]_ for more details.
+    exaggeration: Optional[int]
+        The exaggeration factor to be used during the normal optmimization
+        phase. Standard implementation don't use this exaggeration and it
+        typically isn't necessary for smaller data sets, but it has been shown
+        that for larger data sets, using some exaggeration is necessary in order
+        to obtain good embeddings.
     theta: float
         Only used when ``negative_gradient_method='bh'`` or its other aliases.
         This is the trade-off parameter between speed and accuracy of the tree
@@ -605,7 +565,7 @@ class TSNE:
 
     def __init__(self, n_components=2, perplexity=30, learning_rate=100,
                  early_exaggeration_iter=250, early_exaggeration=12,
-                 n_iter=750, late_exaggeration_iter=0, late_exaggeration=1.2,
+                 n_iter=750, exaggeration=None,
                  theta=0.5, n_interpolation_points=3, min_num_intervals=10,
                  ints_in_interval=1, initialization='pca', metric='euclidean',
                  metric_params=None, initial_momentum=0.5, final_momentum=0.8,
@@ -617,13 +577,17 @@ class TSNE:
         self.early_exaggeration = early_exaggeration
         self.early_exaggeration_iter = early_exaggeration_iter
         self.n_iter = n_iter
-        self.late_exaggeration = late_exaggeration
-        self.late_exaggeration_iter = late_exaggeration_iter
+        self.exaggeration = exaggeration
         self.theta = theta
         self.n_interpolation_points = n_interpolation_points
         self.min_num_intervals = min_num_intervals
         self.ints_in_interval = ints_in_interval
+
+        # Check if the number of components match the initialization dimension
+        if isinstance(initialization, np.ndarray):
+            init_checks.num_dimensions(initialization.shape[1], n_components)
         self.initialization = initialization
+
         self.metric = metric
         self.metric_params = metric_params
         self.initial_momentum = initial_momentum
@@ -641,12 +605,11 @@ class TSNE:
         """Fit a t-SNE embedding for a given data set.
 
         Runs the standard t-SNE optimization, consisting of the early
-        exaggeration phase, normal optimization phase and, optionally, the late
-        exaggeration phase.
+        exaggeration phase and a normal optimization phase.
 
         Parameters
         ----------
-        X : np.ndarray
+        X: np.ndarray
             The data matrix to be embedded.
 
         Returns
@@ -668,14 +631,7 @@ class TSNE:
             # Restore actual affinity probabilities and increase momentum to get
             # final, optimized embedding
             embedding.optimize(
-                n_iter=self.n_iter, momentum=self.final_momentum, inplace=True,
-                propagate_exception=True,
-            )
-
-            # Use the trick described in [4]_ to get more separated clusters of
-            # points by applying a late exaggeration phase
-            embedding.optimize(
-                n_iter=self.late_exaggeration_iter, exaggeration=self.late_exaggeration,
+                n_iter=self.n_iter, exaggeration=self.exaggeration,
                 momentum=self.final_momentum, inplace=True, propagate_exception=True,
             )
 
@@ -685,22 +641,13 @@ class TSNE:
 
         return embedding
 
-    def prepare_initial(self, X, initialization=None):
-        """Prepare the initial embedding which can be optimized.
-
-        In addition to generating initial coordinates via
-        :meth:`generate_initial_coordinates`, this also precomputes the affinity
-        matrix :math:`P`, which is used throughout the optimization.
+    def prepare_initial(self, X):
+        """Prepare the initial embedding which can be optimized as needed.
 
         Parameters
         ----------
-        X : np.ndarray
+        X: np.ndarray
             The data matrix to be embedded.
-        initialization : Optional[Union[np.ndarray, str]]
-            Initial positions for each data point. Note that the initialization
-            must contain the same number of samples as X and must have the
-            correct number of components. If the initialization method is not
-            specified, the value passed to the constructor will be used.
 
         Returns
         -------
@@ -709,11 +656,32 @@ class TSNE:
             optimization.
 
         """
-        # Get some initial coordinates for the embedding
-        y_coords = self.generate_initial_coordinates(X, initialization=initialization)
+        # If initial positions are given in an array, use a copy of that
+        if isinstance(self.initialization, np.ndarray):
+            init_checks.num_samples(self.initialization.shape[0], X.shape[0])
+            init_checks.num_dimensions(self.initialization.shape[1], self.n_components)
 
-        # Compute the affinities for the input data
-        affinities = NearestNeighborAffinities(
+            embedding = np.array(self.initialization)
+
+            variance = np.var(embedding, axis=0)
+            if any(variance > 1e-4):
+                log.warning(
+                    'Variance of embedding is greater than 0.0001. Initial '
+                    'embeddings with high variance may have display poor convergence.'
+                )
+
+        elif self.initialization == 'pca':
+            embedding = initialization_scheme.pca(
+                X, self.n_components, scale_down=True, random_state=self.random_state,
+            )
+        elif self.initialization == 'random':
+            embedding = initialization_scheme.random(
+                X.shape[0], self.n_components, random_state=self.random_state,
+            )
+        else:
+            raise ValueError('Unrecognized initialization scheme `%s`.' % self.initialization)
+
+        affinities = PerplexityBasedNN(
             X, self.perplexity, method=self.neighbors_method,
             metric=self.metric, metric_params=self.metric_params, n_jobs=self.n_jobs,
         )
@@ -741,77 +709,7 @@ class TSNE:
             'callbacks_every_iters': self.callbacks_every_iters,
         }
 
-        return TSNEEmbedding(y_coords, affinities, gradient_descent_params, self.random_state)
-
-    def generate_initial_coordinates(self, X, initialization=None):
-        """Generate initial coordinates for each data point.
-
-        Unlike :meth:`prepare_initial`, this returns the initial coordinates in
-        a :class:`np.ndarray` object.
-
-        Parameters
-        ----------
-        X : np.ndarray
-            The data matrix to be embedded.
-        initialization : Optional[Union[np.ndarray, str]]
-            Initial positions for each data point. Note that the initialization
-            must contain the same number of samples as X and must have the
-            correct number of components. If the initialization method is not
-            specified, the value passed to the constructor will be used.
-
-        Returns
-        -------
-        np.ndarray
-            Initial positions for each data point.
-
-        """
-        if initialization is None:
-            initialization = self.initialization
-
-        # If initial positions are given in an array, use a copy of that
-        if isinstance(initialization, np.ndarray):
-            if initialization.shape[0] != X.shape[0]:
-                raise ValueError(
-                    'The provided initialization contains a different number '
-                    'of samples (%d) than the data provided (%d).' % (
-                        initialization.shape[0], X.shape[0])
-                )
-            if initialization.shape[1] != self.n_components:
-                raise ValueError(
-                    'The provided initialization contains a different number '
-                    'of components (%d) than the embedding (%d).' % (
-                        initialization.shape[1], self.n_components)
-                )
-
-            embedding = np.array(initialization)
-
-            variance = np.var(embedding, axis=0)
-            if any(variance > 1e-4):
-                log.warning(
-                    'Variance of embedding is greater than 0.0001. Initial '
-                    'embeddings with high variance may have display poor convergence.'
-                )
-
-            return embedding
-
-        # Initialize the embedding using a PCA projection into the desired
-        # number of components
-        elif initialization == 'pca':
-            pca = PCA(n_components=self.n_components, random_state=self.random_state)
-            embedding = pca.fit_transform(X)
-            # The PCA embedding may have high variance, which leads to poor convergence
-            normalization = np.std(embedding[:, 0]) * 100
-            embedding /= normalization
-
-            return embedding
-
-        # Random initialization with isotropic normal distribution
-        elif initialization == 'random':
-            random_state = check_random_state(self.random_state)
-            return random_state.normal(0, 1e-2, (X.shape[0], self.n_components))
-
-        else:
-            raise ValueError('Unrecognized initialization scheme `%s`.' % initialization)
+        return TSNEEmbedding(embedding, affinities, self.random_state, **gradient_descent_params)
 
 
 def kl_divergence_bh(embedding, P, dof, bh_params, reference_embedding=None,
@@ -886,79 +784,79 @@ def kl_divergence_fft(embedding, P, dof, fft_params, reference_embedding=None,
     return kl_divergence_, gradient
 
 
-def gradient_descent(embedding, P, dof, n_iter, negative_gradient_method,
-                     learning_rate, momentum, exaggeration=None, min_gain=0.01,
-                     min_grad_norm=1e-8, theta=0.5, n_interpolation_points=3,
-                     min_num_intervals=10, ints_in_interval=10,
-                     reference_embedding=None, n_jobs=1, use_callbacks=False,
-                     callbacks=None, callbacks_every_iters=50):
+def gradient_descent(embedding, P, n_iter, objective_function,
+                     learning_rate=100, momentum=0.5, exaggeration=None, dof=1,
+                     min_gain=0.01, min_grad_norm=1e-8, theta=0.5,
+                     n_interpolation_points=3, min_num_intervals=10,
+                     ints_in_interval=1, reference_embedding=None, n_jobs=1,
+                     use_callbacks=False, callbacks=None,
+                     callbacks_every_iters=50):
     """Perform batch gradient descent with momentum and gains.
 
     Parameters
     ----------
-    embedding : np.ndarray
-        The current embedding Y in the desired space.
-    P : csr_matrix
-        Joint probability matrix :math:`P_{ij}`.
-    dof : float
+    embedding: np.ndarray
+        The embedding :math:`Y`.
+    P: csr_matrix
+        Joint probability matrix :math:`P`.
+    n_iter: int
+        The number of iterations to run for.
+    objective_function: Callable[..., Tuple[float, np.ndarray]]
+        A callable that evaluates the error and gradient for the current
+        embedding.
+    learning_rate: float
+        The learning rate for the t-SNE optimization steps. Typical values range
+        from 1 to 1000. Setting the learning rate too low or too high may result
+        in the points forming a "ball". This is also known as the crowding
+        problem.
+    momentum: float
+        Momentum accounts for gradient directions from previous iterations and
+        resulting in faster convergence.
+    exaggeration: float
+        The exaggeration term is used to increase the attractive forces of
+        nearby points.
+    dof: float
         Degrees of freedom of the Student's t-distribution.
-    n_iter : int
-        Number of iterations to run the optimization for.
-    negative_gradient_method : Callable[..., Tuple[float, np.ndarray]]
-        The callable takes the embedding as arguments and returns the (or an
-        approximation to) KL divergence of the current embedding and the
-        gradient of the embedding, with which to update the point locations.
-    learning_rate : float
-        The learning rate for t-SNE. Typical values range from 1 to 1000.
-        Setting the learning rate too high will result in the crowding problem
-        where all the points form a ball in the center of the space.
-    momentum : float
-        The momentum generates a weight for previous gradients that decays
-        exponentially.
-    exaggeration : float
-        The exaggeration term is used to increase the attractive forces during
-        the first steps of the optimization. This enables points to move more
-        easily through others, helping find their true neighbors quicker.
-    min_gain : float
+    min_gain: float
         Minimum individual gain for each parameter.
-    min_grad_norm : float
+    min_grad_norm: float
         If the gradient norm is below this threshold, the optimization will be
-        stopped. In practice, this almost never happens.
-    theta : float
+        stopped.
+    theta: float
         This is the trade-off parameter between speed and accuracy of the
         Barnes-Hut approximation of the negative forces. Setting a lower value
         will produce more accurate results, while setting a higher value will
         search through less of the space providing a rougher approximation.
         Scikit-learn recommends values between 0.2-0.8. This value is ignored
         unless the Barnes-Hut algorithm is used for gradients.
-    n_interpolation_points : int
+    n_interpolation_points: int
         The number of interpolation points to use for FFT accelerated
         interpolation based tSNE. It is recommended leaving this value at the
         default=3 as otherwise the interpolation may suffer from the Runge
         phenomenon. This value is ignored unless the interpolation based
         algorithm is used.
-    min_num_intervals : int
+    min_num_intervals: int
         The minimum number of intervals into which we split our embedding. A
         larger value will produce better embeddings at the cost of performance.
         This value is ignored unless the interpolation based algorithm is used.
-    ints_in_interval : float
+    ints_in_interval: float
         Since the coordinate range of the embedding will certainly change
         during optimization, this value tells us how many integer values should
         appear in a single interval. This number of intervals affect the
         embedding quality at the cost of performance. Less ints per interval
         will incur a larger number of intervals.
-    reference_embedding : Optional[np.ndarray]
+    reference_embedding: Optional[np.ndarray]
         If we are adding points to an existing embedding, we have to compute
         the gradients and errors w.r.t. the existing embedding.
-    n_jobs : int
+    n_jobs: int
         Number of threads.
-    use_callbacks : bool
-    callbacks : Callable[[int, float, np.ndarray] -> bool]
+    use_callbacks: bool
+    callbacks: Callable[[int, float, np.ndarray] -> bool]
         The callback should accept three parameters, the first is the current
         iteration, the second is the current KL divergence error and the last
         is the current embedding. The callback should return a boolean value
         indicating whether or not to stop optimization i.e. True to stop.
-    callbacks_every_iters : int
+    callbacks_every_iters: int
         How often should the callback be called.
 
     Returns
@@ -1008,7 +906,7 @@ def gradient_descent(embedding, P, dof, n_iter, negative_gradient_method,
         should_call_callback = use_callbacks and (iteration + 1) % callbacks_every_iters == 0
         should_eval_error = should_call_callback
 
-        error, gradient = negative_gradient_method(
+        error, gradient = objective_function(
             embedding, P, dof=dof, bh_params=bh_params, fft_params=fft_params,
             reference_embedding=reference_embedding, n_jobs=n_jobs,
             should_eval_error=should_eval_error,
@@ -1049,7 +947,7 @@ def gradient_descent(embedding, P, dof, n_iter, negative_gradient_method,
     # The error from the loop is the one for the previous, non-updated
     # embedding. We need to return the error for the actual final embedding, so
     # compute that at the end before returning
-    error, _ = negative_gradient_method(
+    error, _ = objective_function(
         embedding, P, dof=dof, bh_params=bh_params, fft_params=fft_params,
         reference_embedding=reference_embedding, n_jobs=n_jobs,
         should_eval_error=True,

@@ -191,6 +191,49 @@ Like the Barnes-Hut variant, this method becomes very inefficient for higher dim
 
 \section{Implementation details}
 
+\subsection{Perplexity}
+
+The following section explains how perplexity is formulated so the code can run efficiently. Perplexity is defined as
+
+\begin{align}
+\text{Perplexity}(P_i) &= 2^{H(P_i)}
+\intertext{where $H$ is the Shannon entropy of a discrete distribution}
+H(P_i) = -\sum_i p_{j \mid i} \log_2 (p_{j \mid i})
+\intertext{In code, the following is more practical to avoid computing $2^{x}$ whereas perplexity stays fixed:}
+\log(\text{Perplexity}(P_i)) &= -\sum_i p_{j \mid i} \log (p_{j \mid i})
+\end{align}
+
+Remember that $P_i$ is just a Gaussian distribution centered on point $i$, given by
+\begin{align}
+p_i(d_i) &= \frac{1}{\sqrt{2 \pi} \sigma} \exp \left ( -\frac{d_{ij}^2}{2 \sigma^2} \right )
+\intertext{however, since we'll be performing row-normalization by hand, something proportional is sufficient}
+&\sim \exp \left ( -\frac{d_{ij}^2}{2 \sigma^2} \right )
+\end{align}
+
+In most implementations this Gaussian is parameterized with $\beta = 1 / 2\sigma^2$ and therefore we compute $\exp \left ( -d_{ij}^2 \beta \right )$ in practice. In our case, we actually compute $ \frac{1}{\sigma} \exp \left ( -d_{ij}^2 \beta \right )$ because we allow a multiscale approach, which mixes several Gaussians together. We also reparameterize our distribution to use the more interpretable precision $\tau = 1 / \sigma^2$ instead of $\beta$. Therefore our probability density is given by
+
+\begin{equation}
+p_i(d_i) \sim \sqrt{\tau} \exp \left ( -\frac{d_{ij}^2 \tau}{2} \right )
+\end{equation}
+
+We now plug in our parametrization into the entropy and arrive at a convenient form which can be coded efficiently.
+
+\begin{align}
+H_i &= -\sum_j \frac{\sqrt{\tau} \exp \left ( -d_{ij}^2 \tau / 2 \right ) }{\sum_k \sqrt{\tau} \exp \left ( -d_{ik}^2 \tau / 2 \right )} \log \left ( \frac{\sqrt{\tau} \exp \left ( -d_{ij}^2 \tau / 2 \right ) }{\sum_k \sqrt{\tau} \exp \left ( -d_{ik}^2 \tau / 2 \right )} \right ) \\
+\intertext{The first term is just $p_{j\mid i}$ and we can split up the log into two parts}
+&= -\sum_j p_{j\mid i} \left [ \log \left ( \sqrt{\tau} \exp \left ( -d_{ij}^2 \tau / 2 \right ) \right ) - \log \left ( \sum_k \sqrt{\tau} \exp \left ( -d_{ik}^2 \tau / 2 \right ) \right ) \right ]
+\intertext{Notice now that the first term in the square brackets almost has the form $\log (\exp (x))$. For clarity, we will also denote the normalization sum as $Z$.}
+&= -\sum_j \left [ p_{j\mid i} \left ( \frac{1}{2} \log \tau - d_{ij}^2 \tau / 2 \right ) \right ] + \sum_j p_{j\mid i} \log Z \\
+&= -\frac{1}{2} \log \tau \sum_j p_{j\mid i} + \frac{\tau}{2} \sum_j p_{j\mid i} d_{ij}^2 + \sum_j p_{j\mid i} \log Z
+\intertext{We move the first term to the end to make the sign unmissable. Since $p_i$ is a proper probability distribution, its elements sum up to 1, leaving us with}
+&= \frac{\tau}{2} \sum_j p_{j\mid i} d_{ij}^2 + \log Z-\frac{1}{2} \log \tau
+\end{align}
+
+This can be computed in two passes over the data. The first pass computes the unnormalized probabilities $\tilde{p}_{j\mid i}$ and accumulate the normalization constant $Z$. In the second pass, the first term can be computed.
+
+In other implementation e.g. scikit-learn, the expression is computed without $\sqrt{\tau}$. It's easy to see that the result will be similar (and indeed, this is used in their code), but without the $-1/2 \log \tau$ term and parameterized with $\beta = \tau / 2$.
+
+
 \subsection{Fast KL Divergence}
 
 During computation of negative gradients, we do not know the value of the normalization term $Z$ during intermediate steps. Therefore, in order to compute the KL divergence of the embedding, we would need at least two passes over the data points, first to compute the unnormalized $q_{ij}$s, and secondly to normalize them and compute the KL divergence. By rewriting the KL divergence in terms of unnormalized $q_{ij}$s, we can compute the entire error with a single pass over the data points by accumulating the $\sum_{ij} p_{ij}$ and $\sum_{ij}q_{ij}$ in the first pass.
