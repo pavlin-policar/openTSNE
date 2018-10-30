@@ -77,19 +77,41 @@ class PerplexityBasedNN(Affinities):
     def __init__(self, data, perplexity=30, method='exact', metric='euclidean',
                  metric_params=None, symmetrize=True, n_jobs=1, random_state=None):
         self.n_samples = data.shape[0]
+        self.perplexity = self.check_perplexity(perplexity)
 
-        perplexity = self.check_perplexity(perplexity)
-        k_neighbors = min(self.n_samples - 1, int(3 * perplexity))
+        self.knn_index = build_knn_index(data, method, metric, metric_params, n_jobs, random_state)
 
-        knn_index = build_knn_index(data, method, metric, metric_params, n_jobs, random_state)
-        neighbors, distances = knn_index.query_train(data, k=k_neighbors)
+        # Find and store the nearest neighbors so we can reuse them if the
+        # perplexity is ever lowered
+        k_neighbors = min(self.n_samples - 1, int(3 * self.perplexity))
+        self.__neighbors, self.__distances = self.knn_index.query_train(data, k=k_neighbors)
 
-        self.perplexity = perplexity
-        self.knn_index = knn_index
-        self.P = joint_probabilities_nn(neighbors, distances, [perplexity],
+        self.P = joint_probabilities_nn(self.__neighbors, self.__distances, [self.perplexity],
                                         symmetrize=symmetrize, n_jobs=n_jobs)
 
         self.n_jobs = n_jobs
+
+    def set_perplexity(self, new_perplexity):
+        # If the value hasn't changed, there's nothing to do
+        if new_perplexity == self.perplexity:
+            return
+        # Verify that the perplexity isn't too large
+        new_perplexity = self.check_perplexity(new_perplexity)
+        # Recompute the affinity matrix
+        k_neighbors = min(self.n_samples - 1, int(3 * new_perplexity))
+        if k_neighbors > self.__neighbors.shape[1]:
+            raise RuntimeError(
+                'The desired perplexity `%.2f` is larger than the initial one '
+                'used. This would need to recompute the nearest neighbors, '
+                'which is not efficient. Please create a new `%s` instance '
+                'with the increased perplexity.' % (
+                    new_perplexity, self.__class__.__name__))
+
+        self.perplexity = new_perplexity
+        self.P = joint_probabilities_nn(
+            self.__neighbors[:, :k_neighbors], self.__distances[:, :k_neighbors],
+            [self.perplexity], symmetrize=True, n_jobs=self.n_jobs,
+        )
 
     def to_new(self, data, perplexity=None, return_distances=False):
         perplexity = perplexity if perplexity is not None else self.perplexity
@@ -110,6 +132,9 @@ class PerplexityBasedNN(Affinities):
 
     def check_perplexity(self, perplexity):
         """Check for valid perplexity value."""
+        if perplexity <= 0:
+            raise ValueError('Perplexity must be >=0. %.2f given' % perplexity)
+
         if self.n_samples - 1 < 3 * perplexity:
             old_perplexity, perplexity = perplexity, (self.n_samples - 1) / 3
             log.warning('Perplexity value %d is too high. Using perplexity '
