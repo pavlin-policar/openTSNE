@@ -98,7 +98,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         'exaggeration': [None, 2],
         'final_momentum': [0.2, 0.5, 0.8],
     }})
-    @patch('fastTSNE.tsne.gradient_descent')
+    @patch('fastTSNE.tsne.gradient_descent.__call__')
     def test_constructor(self, param_name, param_value, gradient_descent):
         # type: (str, Any, MagicMock) -> None
         # Make sure mock still conforms to signature
@@ -127,7 +127,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         'exaggeration': [None, 2, 5],
         'momentum': [0.2, 0.5, 0.8],
     }})
-    @patch('fastTSNE.tsne.gradient_descent')
+    @patch('fastTSNE.tsne.gradient_descent.__call__')
     def test_embedding_optimize(self, param_name, param_value, gradient_descent):
         # type: (str, Any, MagicMock) -> None
         # Make sure mock still conforms to signature
@@ -150,7 +150,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         'n_iter': [50, 100],
         'final_momentum': [0.2, 0.5, 0.8],
     })
-    @patch('fastTSNE.tsne.gradient_descent')
+    @patch('fastTSNE.tsne.gradient_descent.__call__')
     def test_embedding_transform(self, param_name, param_value, gradient_descent):
         # type: (str, Any, MagicMock) -> None
         # Make sure mock still conforms to signature
@@ -185,7 +185,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         'exaggeration': [None, 2, 5],
         'momentum': [0.2, 0.5, 0.8],
     }})
-    @patch('fastTSNE.tsne.gradient_descent')
+    @patch('fastTSNE.tsne.gradient_descent.__call__')
     def test_partial_embedding_optimize(self, param_name, param_value, gradient_descent):
         # type: (str, Any, MagicMock) -> None
         # Make sure mock still conforms to signature
@@ -499,9 +499,13 @@ class TestDefaultParameterSettings(unittest.TestCase):
             TSNE, PerplexityBasedNN, {'neighbors': 'method'})
         self.assertEqual(mismatching, [])
 
+        assert len(get_shared_parameters(tsne.TSNE, tsne.gradient_descent.__call__)) > 0, \
+            '`TSNE` and `gradient_descent` have no shared parameters. Have you ' \
+            'changed the signature or usage?'
+
         # The relevant gradient descent parameters are passed down directly to
         # `gradient_descent`
-        mismatching = get_mismatching_default_values(tsne.TSNE, tsne.gradient_descent)
+        mismatching = get_mismatching_default_values(tsne.TSNE, tsne.gradient_descent.__call__)
         mismatching = list(filter(lambda x: x[0] not in ('n_iter',), mismatching))
         self.assertEqual(mismatching, [])
 
@@ -540,3 +544,102 @@ def get_mismatching_default_values(f1, f2, mapping=None):
             mismatch.append((f1_param_name, val1, f2_param_name, val2))
 
     return mismatch
+
+
+class TestGradientDescentOptimizer(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.tsne = TSNE()
+        random_state = np.random.RandomState(42)
+        cls.x = random_state.randn(100, 4)
+        cls.x_test = random_state.randn(25, 4)
+
+    def test_optimizer_being_passed_to_subsequent_embeddings(self):
+        embedding = self.tsne.prepare_initial(self.x)
+
+        self.assertIsNone(embedding.optimizer.gains,
+                          'Optimizer should be initialized with no gains')
+
+        # Check the switch from no gains to some gains
+        embedding1 = embedding.optimize(10)
+        self.assertIsNone(
+            embedding.optimizer.gains,
+            'Gains changed on initial optimizer even though we did not do '
+            'inplace optimization.')
+        self.assertIsNotNone(
+            embedding1.optimizer.gains,
+            'Gains were not properly set in new embedding.')
+        self.assertIsNot(
+            embedding.optimizer, embedding1.optimizer,
+            'The embedding and new embedding optimizer are the same instance '
+            'even we did not do inplace optimization.')
+
+        # Check switch from existing gains to new gains
+        embedding2 = embedding1.optimize(10)
+        self.assertIsNot(
+            embedding1.optimizer, embedding2.optimizer,
+            'The embedding and new embedding optimizer are the same instance '
+            'even we did not do inplace optimization.')
+        self.assertFalse(
+            np.allclose(embedding1.optimizer.gains, embedding2.optimizer.gains),
+            'The gains in the new embedding did not change at all from the old '
+            'embedding.'
+        )
+
+    def test_optimizer_being_passed_to_partial_embeddings(self):
+        embedding = self.tsne.prepare_initial(self.x)
+        embedding.optimize(10, inplace=True)
+
+        # Partial embeddings get their own optimizer instance
+        partial = embedding.prepare_partial(self.x_test)
+        self.assertIsNot(
+            embedding.optimizer, partial.optimizer,
+            'Embedding and partial embedding optimizers are the same instance.')
+        self.assertIsNone(
+            partial.optimizer.gains,
+            'Partial embedding was not initialized with no gains')
+
+        # Check the switch from no gains to some gains
+        partial1 = partial.optimize(10)
+        self.assertIsNone(
+            partial.optimizer.gains,
+            'Gains on initial optimizer changed even though we did not do '
+            'inplace optimization.')
+        self.assertIsNotNone(
+            partial1.optimizer.gains,
+            'Gains were not properly set in new partial embedding.')
+
+        # Check switch from existing gains to new gains
+        partial2 = partial1.optimize(10)
+        self.assertIsNot(
+            partial1.optimizer, partial2.optimizer,
+            'The embedding and new embedding optimizer are the same instance '
+            'even we did not do inplace optimization.')
+        self.assertFalse(
+            np.allclose(partial1.optimizer.gains, partial2.optimizer.gains),
+            'The gains in the new embedding did not change at all from the old '
+            'embedding.'
+        )
+
+    def test_embedding_optimizer_inplace(self):
+        embedding0 = self.tsne.prepare_initial(self.x)
+
+        # Assign only so the references are clear
+        embedding1 = embedding0.optimize(10, inplace=True)
+        embedding2 = embedding1.optimize(10, inplace=True)
+
+        self.assertIs(embedding0.optimizer, embedding1.optimizer)
+        self.assertIs(embedding1.optimizer, embedding2.optimizer)
+
+    def test_partial_embedding_optimizer_inplace(self):
+        embedding = self.tsne.prepare_initial(self.x)
+        embedding.optimize(10, inplace=True)
+        partial0 = embedding.prepare_partial(self.x_test)
+
+        # Assign only so the references are clear
+        partial1 = partial0.optimize(10, inplace=True)
+        partial2 = partial1.optimize(10, inplace=True)
+
+        self.assertIs(partial0.optimizer, partial1.optimizer)
+        self.assertIs(partial1.optimizer, partial2.optimizer)
+

@@ -124,7 +124,7 @@ class PartialTSNEEmbedding(np.ndarray):
 
     """
 
-    def __new__(cls, embedding, reference_embedding, P, gradient_descent_params):
+    def __new__(cls, embedding, reference_embedding, P, gradient_descent_params, optimizer=None):
         init_checks.num_samples(embedding.shape[0], P.shape[0])
 
         obj = np.asarray(embedding, dtype=np.float64, order='C').view(PartialTSNEEmbedding)
@@ -132,6 +132,13 @@ class PartialTSNEEmbedding(np.ndarray):
         obj.reference_embedding = reference_embedding
         obj.P = P
         obj.gradient_descent_params = gradient_descent_params
+
+        if optimizer is None:
+            optimizer = gradient_descent()
+        elif not isinstance(optimizer, gradient_descent):
+            raise TypeError('`optimizer` must be an instance of `%s`, but got `%s`.' % (
+                gradient_descent.__class__.__name__, type(optimizer)))
+        obj.optimizer = optimizer
 
         obj.kl_divergence = None
 
@@ -174,6 +181,7 @@ class PartialTSNEEmbedding(np.ndarray):
         else:
             embedding = PartialTSNEEmbedding(
                 np.copy(self), self.reference_embedding, self.P, self.gradient_descent_params,
+                optimizer=self.optimizer.copy(),
             )
 
         # If optimization parameters were passed to this funciton, prefer those
@@ -184,9 +192,12 @@ class PartialTSNEEmbedding(np.ndarray):
         optim_params['n_iter'] = n_iter
 
         try:
-            error, embedding = gradient_descent(
+            # Run gradient descent with the embedding optimizer so gains are
+            # properly updated and kept
+            error, embedding = embedding.optimizer(
                 embedding=embedding, reference_embedding=self.reference_embedding,
-                P=self.P, **optim_params)
+                P=self.P, **optim_params,
+            )
 
         except OptimizationInterrupt as ex:
             log.info('Optimization was interrupted with callback.')
@@ -224,7 +235,8 @@ class TSNEEmbedding(np.ndarray):
 
     """
 
-    def __new__(cls, embedding, affinities, random_state=None, **gradient_descent_params):
+    def __new__(cls, embedding, affinities, random_state=None, optimizer=None,
+                **gradient_descent_params):
         init_checks.num_samples(embedding.shape[0], affinities.P.shape[0])
 
         obj = np.asarray(embedding, dtype=np.float64, order='C').view(TSNEEmbedding)
@@ -232,6 +244,13 @@ class TSNEEmbedding(np.ndarray):
         obj.affinities = affinities  # type: Affinities
         obj.gradient_descent_params = gradient_descent_params  # type: dict
         obj.random_state = random_state
+
+        if optimizer is None:
+            optimizer = gradient_descent()
+        elif not isinstance(optimizer, gradient_descent):
+            raise TypeError('`optimizer` must be an instance of `%s`, but got `%s`.' % (
+                gradient_descent.__class__.__name__, type(optimizer)))
+        obj.optimizer = optimizer
 
         obj.kl_divergence = None
 
@@ -274,7 +293,7 @@ class TSNEEmbedding(np.ndarray):
         else:
             embedding = TSNEEmbedding(
                 np.copy(self), self.affinities, random_state=self.random_state,
-                **self.gradient_descent_params,
+                optimizer=self.optimizer.copy(), **self.gradient_descent_params,
             )
 
         # If optimization parameters were passed to this funciton, prefer those
@@ -285,7 +304,9 @@ class TSNEEmbedding(np.ndarray):
         optim_params['n_iter'] = n_iter
 
         try:
-            error, embedding = gradient_descent(
+            # Run gradient descent with the embedding optimizer so gains are
+            # properly updated and kept
+            error, embedding = embedding.optimizer(
                 embedding=embedding, P=self.affinities.P, **optim_params,
             )
 
@@ -784,173 +805,182 @@ def kl_divergence_fft(embedding, P, dof, fft_params, reference_embedding=None,
     return kl_divergence_, gradient
 
 
-def gradient_descent(embedding, P, n_iter, objective_function,
-                     learning_rate=100, momentum=0.5, exaggeration=None, dof=1,
-                     min_gain=0.01, min_grad_norm=1e-8, theta=0.5,
-                     n_interpolation_points=3, min_num_intervals=10,
-                     ints_in_interval=1, reference_embedding=None, n_jobs=1,
-                     use_callbacks=False, callbacks=None,
-                     callbacks_every_iters=50):
-    """Perform batch gradient descent with momentum and gains.
+class gradient_descent:
+    def __init__(self):
+        self.gains = None
 
-    Parameters
-    ----------
-    embedding: np.ndarray
-        The embedding :math:`Y`.
-    P: csr_matrix
-        Joint probability matrix :math:`P`.
-    n_iter: int
-        The number of iterations to run for.
-    objective_function: Callable[..., Tuple[float, np.ndarray]]
-        A callable that evaluates the error and gradient for the current
-        embedding.
-    learning_rate: float
-        The learning rate for the t-SNE optimization steps. Typical values range
-        from 1 to 1000. Setting the learning rate too low or too high may result
-        in the points forming a "ball". This is also known as the crowding
-        problem.
-    momentum: float
-        Momentum accounts for gradient directions from previous iterations and
-        resulting in faster convergence.
-    exaggeration: float
-        The exaggeration term is used to increase the attractive forces of
-        nearby points.
-    dof: float
-        Degrees of freedom of the Student's t-distribution.
-    min_gain: float
-        Minimum individual gain for each parameter.
-    min_grad_norm: float
-        If the gradient norm is below this threshold, the optimization will be
-        stopped.
-    theta: float
-        This is the trade-off parameter between speed and accuracy of the
-        Barnes-Hut approximation of the negative forces. Setting a lower value
-        will produce more accurate results, while setting a higher value will
-        search through less of the space providing a rougher approximation.
-        Scikit-learn recommends values between 0.2-0.8. This value is ignored
-        unless the Barnes-Hut algorithm is used for gradients.
-    n_interpolation_points: int
-        The number of interpolation points to use for FFT accelerated
-        interpolation based tSNE. It is recommended leaving this value at the
-        default=3 as otherwise the interpolation may suffer from the Runge
-        phenomenon. This value is ignored unless the interpolation based
-        algorithm is used.
-    min_num_intervals: int
-        The minimum number of intervals into which we split our embedding. A
-        larger value will produce better embeddings at the cost of performance.
-        This value is ignored unless the interpolation based algorithm is used.
-    ints_in_interval: float
-        Since the coordinate range of the embedding will certainly change
-        during optimization, this value tells us how many integer values should
-        appear in a single interval. This number of intervals affect the
-        embedding quality at the cost of performance. Less ints per interval
-        will incur a larger number of intervals.
-    reference_embedding: Optional[np.ndarray]
-        If we are adding points to an existing embedding, we have to compute
-        the gradients and errors w.r.t. the existing embedding.
-    n_jobs: int
-        Number of threads.
-    use_callbacks: bool
-    callbacks: Callable[[int, float, np.ndarray] -> bool]
-        The callback should accept three parameters, the first is the current
-        iteration, the second is the current KL divergence error and the last
-        is the current embedding. The callback should return a boolean value
-        indicating whether or not to stop optimization i.e. True to stop.
-    callbacks_every_iters: int
-        How often should the callback be called.
+    def copy(self):
+        optimizer = self.__class__()
+        if self.gains is not None:
+            optimizer.gains = np.copy(self.gains)
+        return optimizer
 
-    Returns
-    -------
-    float
-        The KL divergence of the optimized embedding.
-    np.ndarray
-        The optimized embedding Y.
+    def __call__(self, embedding, P, n_iter, objective_function, learning_rate=100,
+                 momentum=0.5, exaggeration=None, dof=1, min_gain=0.01,
+                 min_grad_norm=1e-8, theta=0.5, n_interpolation_points=3,
+                 min_num_intervals=10, ints_in_interval=1, reference_embedding=None,
+                 n_jobs=1, use_callbacks=False, callbacks=None, callbacks_every_iters=50):
+        """Perform batch gradient descent with momentum and gains.
 
-    Raises
-    ------
-    OptimizationInterrupt
-        If the provided callback interrupts the optimization, this is raised.
+        Parameters
+        ----------
+        embedding: np.ndarray
+            The embedding :math:`Y`.
+        P: csr_matrix
+            Joint probability matrix :math:`P`.
+        n_iter: int
+            The number of iterations to run for.
+        objective_function: Callable[..., Tuple[float, np.ndarray]]
+            A callable that evaluates the error and gradient for the current
+            embedding.
+        learning_rate: float
+            The learning rate for the t-SNE optimization steps. Typical values range
+            from 1 to 1000. Setting the learning rate too low or too high may result
+            in the points forming a "ball". This is also known as the crowding
+            problem.
+        momentum: float
+            Momentum accounts for gradient directions from previous iterations and
+            resulting in faster convergence.
+        exaggeration: float
+            The exaggeration term is used to increase the attractive forces of
+            nearby points.
+        dof: float
+            Degrees of freedom of the Student's t-distribution.
+        min_gain: float
+            Minimum individual gain for each parameter.
+        min_grad_norm: float
+            If the gradient norm is below this threshold, the optimization will be
+            stopped.
+        theta: float
+            This is the trade-off parameter between speed and accuracy of the
+            Barnes-Hut approximation of the negative forces. Setting a lower value
+            will produce more accurate results, while setting a higher value will
+            search through less of the space providing a rougher approximation.
+            Scikit-learn recommends values between 0.2-0.8. This value is ignored
+            unless the Barnes-Hut algorithm is used for gradients.
+        n_interpolation_points: int
+            The number of interpolation points to use for FFT accelerated
+            interpolation based tSNE. It is recommended leaving this value at the
+            default=3 as otherwise the interpolation may suffer from the Runge
+            phenomenon. This value is ignored unless the interpolation based
+            algorithm is used.
+        min_num_intervals: int
+            The minimum number of intervals into which we split our embedding. A
+            larger value will produce better embeddings at the cost of performance.
+            This value is ignored unless the interpolation based algorithm is used.
+        ints_in_interval: float
+            Since the coordinate range of the embedding will certainly change
+            during optimization, this value tells us how many integer values should
+            appear in a single interval. This number of intervals affect the
+            embedding quality at the cost of performance. Less ints per interval
+            will incur a larger number of intervals.
+        reference_embedding: Optional[np.ndarray]
+            If we are adding points to an existing embedding, we have to compute
+            the gradients and errors w.r.t. the existing embedding.
+        n_jobs: int
+            Number of threads.
+        use_callbacks: bool
+        callbacks: Callable[[int, float, np.ndarray] -> bool]
+            The callback should accept three parameters, the first is the current
+            iteration, the second is the current KL divergence error and the last
+            is the current embedding. The callback should return a boolean value
+            indicating whether or not to stop optimization i.e. True to stop.
+        callbacks_every_iters: int
+            How often should the callback be called.
 
-    """
-    assert isinstance(embedding, np.ndarray), \
-        '`embedding` must be an instance of `np.ndarray`. Got `%s` instead' \
-        % type(embedding)
+        Returns
+        -------
+        float
+            The KL divergence of the optimized embedding.
+        np.ndarray
+            The optimized embedding Y.
 
-    if reference_embedding is not None:
-        assert isinstance(reference_embedding, np.ndarray), \
-            '`reference_embedding` must be an instance of `np.ndarray`. Got ' \
-            '`%s` instead' % type(reference_embedding)
+        Raises
+        ------
+        OptimizationInterrupt
+            If the provided callback interrupts the optimization, this is raised.
 
-    update = np.zeros_like(embedding)
-    gains = np.ones_like(embedding)
+        """
+        assert isinstance(embedding, np.ndarray), \
+            '`embedding` must be an instance of `np.ndarray`. Got `%s` instead' \
+            % type(embedding)
 
-    bh_params = {'theta': theta}
-    fft_params = {'n_interpolation_points': n_interpolation_points,
-                  'min_num_intervals': min_num_intervals,
-                  'ints_in_interval': ints_in_interval}
+        if reference_embedding is not None:
+            assert isinstance(reference_embedding, np.ndarray), \
+                '`reference_embedding` must be an instance of `np.ndarray`. Got ' \
+                '`%s` instead' % type(reference_embedding)
 
-    # Lie about the P values for bigger attraction forces
-    if exaggeration is None:
-        exaggeration = 1
+        update = np.zeros_like(embedding)
+        if self.gains is None:
+            self.gains = np.ones_like(embedding)
 
-    if exaggeration != 1:
-        P *= exaggeration
+        bh_params = {'theta': theta}
+        fft_params = {'n_interpolation_points': n_interpolation_points,
+                      'min_num_intervals': min_num_intervals,
+                      'ints_in_interval': ints_in_interval}
 
-    # Notify the callbacks that the optimization is about to start
-    if isinstance(callbacks, Iterable):
-        for callback in callbacks:
-            # Only call function if present on object
-            getattr(callback, 'optimzation_about_to_start', lambda: ...)()
+        # Lie about the P values for bigger attraction forces
+        if exaggeration is None:
+            exaggeration = 1
 
-    for iteration in range(n_iter):
-        should_call_callback = use_callbacks and (iteration + 1) % callbacks_every_iters == 0
-        should_eval_error = should_call_callback
+        if exaggeration != 1:
+            P *= exaggeration
 
-        error, gradient = objective_function(
+        # Notify the callbacks that the optimization is about to start
+        if isinstance(callbacks, Iterable):
+            for callback in callbacks:
+                # Only call function if present on object
+                getattr(callback, 'optimzation_about_to_start', lambda: ...)()
+
+        for iteration in range(n_iter):
+            should_call_callback = use_callbacks and (iteration + 1) % callbacks_every_iters == 0
+            should_eval_error = should_call_callback
+
+            error, gradient = objective_function(
+                embedding, P, dof=dof, bh_params=bh_params, fft_params=fft_params,
+                reference_embedding=reference_embedding, n_jobs=n_jobs,
+                should_eval_error=should_eval_error,
+            )
+
+            # Correct the KL divergence w.r.t. the exaggeration if needed
+            if should_eval_error and exaggeration != 1:
+                error = error / exaggeration - np.log(exaggeration)
+
+            if should_call_callback:
+                # Continue only if all the callbacks say so
+                should_stop = any((bool(c(iteration + 1, error, embedding)) for c in callbacks))
+                if should_stop:
+                    # Make sure to un-exaggerate P so it's not corrupted in future runs
+                    if exaggeration != 1:
+                        P /= exaggeration
+                    raise OptimizationInterrupt(error=error, final_embedding=embedding)
+
+            # Update the embedding using the gradient
+            grad_direction_flipped = np.sign(update) != np.sign(gradient)
+            grad_direction_same = np.invert(grad_direction_flipped)
+            self.gains[grad_direction_flipped] += 0.2
+            self.gains[grad_direction_same] = self.gains[grad_direction_same] * 0.8 + min_gain
+            update = momentum * update - learning_rate * self.gains * gradient
+            embedding += update
+
+            # Zero-mean the embedding
+            embedding -= np.mean(embedding, axis=0)
+
+            if np.linalg.norm(gradient) < min_grad_norm:
+                log.info('Gradient norm eps reached. Finished.')
+                break
+
+        # Make sure to un-exaggerate P so it's not corrupted in future runs
+        if exaggeration != 1:
+            P /= exaggeration
+
+        # The error from the loop is the one for the previous, non-updated
+        # embedding. We need to return the error for the actual final embedding, so
+        # compute that at the end before returning
+        error, _ = objective_function(
             embedding, P, dof=dof, bh_params=bh_params, fft_params=fft_params,
             reference_embedding=reference_embedding, n_jobs=n_jobs,
-            should_eval_error=should_eval_error,
+            should_eval_error=True,
         )
 
-        # Correct the KL divergence w.r.t. the exaggeration if needed
-        if should_eval_error and exaggeration != 1:
-            error = error / exaggeration - np.log(exaggeration)
-
-        if should_call_callback:
-            # Continue only if all the callbacks say so
-            should_stop = any((bool(c(iteration + 1, error, embedding)) for c in callbacks))
-            if should_stop:
-                # Make sure to un-exaggerate P so it's not corrupted in future runs
-                if exaggeration != 1:
-                    P /= exaggeration
-                raise OptimizationInterrupt(error=error, final_embedding=embedding)
-
-        # Update the embedding using the gradient
-        grad_direction_flipped = np.sign(update) != np.sign(gradient)
-        grad_direction_same = np.invert(grad_direction_flipped)
-        gains[grad_direction_flipped] += 0.2
-        gains[grad_direction_same] = gains[grad_direction_same] * 0.8 + min_gain
-        update = momentum * update - learning_rate * gains * gradient
-        embedding += update
-
-        # Zero-mean the embedding
-        embedding -= np.mean(embedding, axis=0)
-
-        if np.linalg.norm(gradient) < min_grad_norm:
-            log.info('Gradient norm eps reached. Finished.')
-            break
-
-    # Make sure to un-exaggerate P so it's not corrupted in future runs
-    if exaggeration != 1:
-        P /= exaggeration
-
-    # The error from the loop is the one for the previous, non-updated
-    # embedding. We need to return the error for the actual final embedding, so
-    # compute that at the end before returning
-    error, _ = objective_function(
-        embedding, P, dof=dof, bh_params=bh_params, fft_params=fft_params,
-        reference_embedding=reference_embedding, n_jobs=n_jobs,
-        should_eval_error=True,
-    )
-
-    return error, embedding
+        return error, embedding
