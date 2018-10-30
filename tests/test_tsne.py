@@ -1,7 +1,7 @@
 import inspect
 import unittest
 from functools import wraps
-from typing import Callable, Any, Tuple
+from typing import Callable, Any, Tuple, Optional
 from unittest.mock import patch, MagicMock
 
 import numpy as np
@@ -32,7 +32,7 @@ def check_params(params: dict) -> Callable:
 def check_call_contains_kwargs(
         call: Tuple,
         params: dict,
-        param_mapping={},
+        param_mapping: Optional[dict] = None,
 ) -> None:
     """Check whether a `call` object was called with some params, but also some
     others we don't care about"""
@@ -43,7 +43,8 @@ def check_call_contains_kwargs(
                       'late_exaggeration': 'exaggeration',
                       'initial_momentum': 'momentum',
                       'final_momentum': 'momentum'}
-    _param_mapping.update(param_mapping)
+    if param_mapping is not None:
+        _param_mapping.update(param_mapping)
 
     name, args, kwargs = call
     for key in params:
