@@ -36,7 +36,7 @@ def _handle_nice_params(optim_params: dict) -> None:
     """Convert the user friendly params into something the optimizer can
     understand."""
     # Handle callbacks
-    optim_params['callbacks'] = _check_callbacks(optim_params['callbacks'])
+    optim_params['callbacks'] = _check_callbacks(optim_params.get('callbacks'))
     optim_params['use_callbacks'] = optim_params['callbacks'] is not None
 
     # Handle negative gradient method
