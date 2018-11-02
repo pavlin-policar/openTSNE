@@ -1,5 +1,6 @@
 import sys
 
+import numpy as np
 from sklearn import neighbors
 from sklearn.utils import check_random_state
 
@@ -73,9 +74,15 @@ class BallTree(KNNIndex):
 class NNDescent(KNNIndex):
     def build(self, data):
         random_state = check_random_state(self.random_state)
+
+        # These values were taken from UMAP, which we assume to be sensible defaults
+        n_trees = 5 + int(round((data.shape[0]) ** 0.5 / 20))
+        n_iters = max(5, int(round(np.log2(data.shape[0]))))
+
         self.index = pynndescent.NNDescent(
             data, metric=self.metric, metric_kwds=self.metric_params,
-            n_neighbors=5, random_state=random_state,
+            random_state=random_state, n_trees=n_trees, n_iters=n_iters,
+            algorithm='alternative', max_candidates=60,
         )
 
     def query_train(self, data, k):
