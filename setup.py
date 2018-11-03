@@ -111,7 +111,7 @@ setup(
     license='BSD-3-Clause',
     author='Pavlin Poličar',
     author_email='pavlin.g.p@gmail.com',
-    version='0.2.10',
+    version='0.2.11',
     url='https://github.com/pavlin-policar/fastTSNE',
     packages=setuptools.find_packages(),
     ext_modules=extensions,
