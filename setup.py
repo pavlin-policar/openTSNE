@@ -118,7 +118,7 @@ setup(
     install_requires=[
         'numpy>1.14',
         'numba>=0.38.1',
-        'scikit-learn>=0.19,<0.19.99',
+        'scikit-learn>=0.20',
         'scipy',
     ],
 )
