@@ -20,8 +20,16 @@ USE_CYTHON = os.environ.get('USE_CYTHON', False)
 ext = 'pyx' if USE_CYTHON else 'c'
 
 IS_WINDOWS = sys.platform.startswith('win')
-openmp_opt = '/openmp' if IS_WINDOWS else '-fopenmp'
-optim_opt = '/Ox' if IS_WINDOWS else '-O3'
+IS_MAC = sys.platform.startswith('darwin')
+if IS_WINDOWS:
+    openmp_opt = '/openmp'
+    optim_opt = '/Ox'
+elif IS_MAC:
+    openmp_opt = ''
+    optim_opt = '-O3'
+else:
+    openmp_opt = '-fopenmp'
+    optim_opt = '-O3'
 
 
 def has_c_library(library, extension='.c'):
