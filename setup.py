@@ -1,7 +1,8 @@
 import os
-import sys
 import tempfile
+import warnings
 from distutils import ccompiler
+from distutils.command.build_ext import build_ext
 from distutils.errors import CompileError, LinkError
 from os.path import join
 
@@ -18,18 +19,6 @@ import numpy as np
 
 USE_CYTHON = os.environ.get('USE_CYTHON', False)
 ext = 'pyx' if USE_CYTHON else 'c'
-
-IS_WINDOWS = sys.platform.startswith('win')
-IS_MAC = sys.platform.startswith('darwin')
-if IS_WINDOWS:
-    openmp_opt = '/openmp'
-    optim_opt = '/Ox'
-elif IS_MAC:
-    openmp_opt = ''
-    optim_opt = '-O3'
-else:
-    openmp_opt = '-fopenmp'
-    optim_opt = '-O3'
 
 
 def has_c_library(library, extension='.c'):
@@ -51,7 +40,7 @@ def has_c_library(library, extension='.c'):
 
     """
     with tempfile.TemporaryDirectory(dir='.') as directory:
-        name = join(directory, '%s.%s' % (library, extension))
+        name = join(directory, '%s%s' % (library, extension))
         with open(name, 'w') as f:
             f.write('#include <%s.h>\n' % library)
             f.write('int main() {}\n')
@@ -68,65 +57,104 @@ def has_c_library(library, extension='.c'):
             return False
 
 
+class CythonBuildExt(build_ext):
+
+    COMPILER_FLAGS = {
+        'unix': {'openmp': '-fopenmp',
+                 'optimize': '-O3',
+                 'fastmath': '-ffast-math',
+                 'fftw': '-lfftw3',
+                 'math': '-lm',
+                 },
+        'msvc': {'openmp': '/openmp',
+                 'optimize': '/Ox',
+                 'fastmath': '/fp:fast',
+                 'fftw': '/lfftw3',
+                 'math': '/lm'
+                 },
+    }
+
+    def build_extensions(self):
+        # Optimization compiler/linker flags are added appropriately
+        flags = self.COMPILER_FLAGS[self.compiler.compiler_type]
+        compile_flags = [flags['optimize'], flags['fastmath']]
+        link_flags = [flags['optimize'], flags['fastmath']]
+
+        # Map any existing compile/link flags into compiler specific ones
+        def map_flags(ls):
+            return list(map(lambda flag: flags.get(flag, flag), ls))
+
+        for extension in extensions:
+            extension.extra_compile_args = map_flags(extension.extra_compile_args)
+            extension.extra_link_args = map_flags(extension.extra_link_args)
+
+        # We will disable openmp flags if the compiler doesn't support it. This
+        # is only really an issue with OSX clang
+        if has_c_library('omp'):
+            compile_flags.append(flags['openmp']), link_flags.append(flags['openmp'])
+        else:
+            warnings.warn(
+                'You appear to be using a compiler which does not support '
+                'openMP, meaning that the library will not be able to run on '
+                'multiple cores. Please install/enable openMP to use multiple '
+                'cores.')
+
+        for extension in self.extensions:
+            extension.extra_compile_args.extend(compile_flags)
+            extension.extra_link_args.extend(link_flags)
+
+        # We typically use numpy includes in our Cython files, so we'll add the
+        # appropriate headers here
+        for extension in self.extensions:
+            extension.include_dirs.append(np.get_include())
+
+        super().build_extensions()
+
+
 extensions = [
-    Extension('fastTSNE.quad_tree', ['fastTSNE/quad_tree.%s' % ext],
-              extra_compile_args=[openmp_opt, optim_opt],
-              extra_link_args=[openmp_opt, optim_opt],
-              include_dirs=[np.get_include()],
-              ),
-    Extension('fastTSNE._tsne', ['fastTSNE/_tsne.%s' % ext],
-              extra_compile_args=[openmp_opt, optim_opt],
-              extra_link_args=[openmp_opt, optim_opt],
-              include_dirs=[np.get_include()],
-              ),
-    Extension('fastTSNE.kl_divergence', ['fastTSNE/kl_divergence.%s' % ext],
-              extra_compile_args=[openmp_opt, optim_opt],
-              extra_link_args=[openmp_opt, optim_opt],
-              include_dirs=[np.get_include()],
-              ),
+    Extension('fastTSNE.quad_tree', ['fastTSNE/quad_tree.%s' % ext]),
+    Extension('fastTSNE._tsne', ['fastTSNE/_tsne.%s' % ext]),
+    Extension('fastTSNE.kl_divergence', ['fastTSNE/kl_divergence.%s' % ext]),
 ]
 
 # Check if we have access to FFTW3 and if so, use that implementation
 if has_c_library('fftw3'):
-    lm_opt = '/lm' if IS_WINDOWS else '-lm'
-    fftw3_opt = '/lfftw3' if IS_WINDOWS else '-lfftw3'
     extensions.append(
         Extension('fastTSNE._matrix_mul.matrix_mul',
                   ['fastTSNE/_matrix_mul/matrix_mul_fftw3.%s' % ext],
-                  extra_compile_args=[openmp_opt, optim_opt, fftw3_opt, lm_opt],
-                  extra_link_args=[openmp_opt, optim_opt, fftw3_opt, lm_opt],
-                  include_dirs=[np.get_include()],
+                  extra_compile_args=['fftw', 'math'],
+                  extra_link_args=['fftw', 'math'],
                   )
         )
 else:
     extensions.append(
         Extension('fastTSNE._matrix_mul.matrix_mul',
-                  ['fastTSNE/_matrix_mul/matrix_mul_numpy.%s' % ext],
-                  extra_compile_args=[openmp_opt, optim_opt],
-                  extra_link_args=[openmp_opt, optim_opt],
-                  include_dirs=[np.get_include()],
-                  )
+                  ['fastTSNE/_matrix_mul/matrix_mul_numpy.%s' % ext])
     )
+
 
 if USE_CYTHON:
     from Cython.Build import cythonize
-
     extensions = cythonize(extensions)
 
 setup(
     name='fastTSNE',
     description='',
+    version='0.2.13',
     license='BSD-3-Clause',
+
     author='Pavlin Poličar',
     author_email='pavlin.g.p@gmail.com',
-    version='0.2.13',
     url='https://github.com/pavlin-policar/fastTSNE',
+
     packages=setuptools.find_packages(),
-    ext_modules=extensions,
     install_requires=[
         'numpy>1.14',
         'numba>=0.38.1',
         'scikit-learn>=0.20',
         'scipy',
     ],
+
+    ext_modules=extensions,
+    cmdclass={'build_ext': CythonBuildExt},
 )
