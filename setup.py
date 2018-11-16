@@ -146,6 +146,27 @@ setup(
     author='Pavlin Poličar',
     author_email='pavlin.g.p@gmail.com',
     url='https://github.com/pavlin-policar/fastTSNE',
+    project_urls={
+        'Documentation': 'https://fasttsne.readthedocs.io/',
+        'Source': 'https://github.com/pavlin-policar/fastTSNE',
+        'Issue Tracker': 'https://github.com/pavlin-policar/fastTSNE/issues',
+    },
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Science/Research',
+        'Intended Audience :: Developers',
+        'Topic :: Software Development',
+        'Topic :: Scientific/Engineering',
+        'Operating System :: Microsoft :: Windows',
+        'Operating System :: POSIX',
+        'Operating System :: Unix',
+        'Operating System :: MacOS',
+        'License :: OSI Approved',
+        'Programming Language :: Python :: 3',
+        'Topic :: Scientific/Engineering :: Artificial Intelligence',
+        'Topic :: Scientific/Engineering :: Visualization',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+    ],
 
     packages=setuptools.find_packages(),
     install_requires=[
