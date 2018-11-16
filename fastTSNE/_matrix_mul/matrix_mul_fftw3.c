@@ -3,26 +3,14 @@
 /* BEGIN: Cython Metadata
 {
     "distutils": {
-        "depends": [
-            "/home/pavlin/miniconda3/envs/tsne/lib/python3.6/site-packages/numpy/core/include/numpy/arrayobject.h",
-            "/home/pavlin/miniconda3/envs/tsne/lib/python3.6/site-packages/numpy/core/include/numpy/ufuncobject.h"
-        ],
+        "depends": [],
         "extra_compile_args": [
-            "-fopenmp",
-            "-O3",
-            "-lfftw3",
-            "-lfftw3_omp",
-            "-lm"
+            "fftw",
+            "math"
         ],
         "extra_link_args": [
-            "-fopenmp",
-            "-O3",
-            "-lfftw3",
-            "-lfftw3_omp",
-            "-lm"
-        ],
-        "include_dirs": [
-            "/home/pavlin/miniconda3/envs/tsne/lib/python3.6/site-packages/numpy/core/include"
+            "fftw",
+            "math"
         ],
         "name": "fastTSNE._matrix_mul.matrix_mul",
         "sources": [
