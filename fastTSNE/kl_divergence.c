@@ -3,21 +3,7 @@
 /* BEGIN: Cython Metadata
 {
     "distutils": {
-        "depends": [
-            "/home/pavlin/miniconda3/envs/tsne/lib/python3.6/site-packages/numpy/core/include/numpy/arrayobject.h",
-            "/home/pavlin/miniconda3/envs/tsne/lib/python3.6/site-packages/numpy/core/include/numpy/ufuncobject.h"
-        ],
-        "extra_compile_args": [
-            "-fopenmp",
-            "-O3"
-        ],
-        "extra_link_args": [
-            "-fopenmp",
-            "-O3"
-        ],
-        "include_dirs": [
-            "/home/pavlin/miniconda3/envs/tsne/lib/python3.6/site-packages/numpy/core/include"
-        ],
+        "depends": [],
         "name": "fastTSNE.kl_divergence",
         "sources": [
             "fastTSNE/kl_divergence.pyx"

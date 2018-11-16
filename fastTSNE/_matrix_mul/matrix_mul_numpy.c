@@ -3,21 +3,7 @@
 /* BEGIN: Cython Metadata
 {
     "distutils": {
-        "depends": [
-            "/home/pavlin/miniconda3/envs/tsne/lib/python3.6/site-packages/numpy/core/include/numpy/arrayobject.h",
-            "/home/pavlin/miniconda3/envs/tsne/lib/python3.6/site-packages/numpy/core/include/numpy/ufuncobject.h"
-        ],
-        "extra_compile_args": [
-            "-fopenmp",
-            "-O3"
-        ],
-        "extra_link_args": [
-            "-fopenmp",
-            "-O3"
-        ],
-        "include_dirs": [
-            "/home/pavlin/miniconda3/envs/tsne/lib/python3.6/site-packages/numpy/core/include"
-        ],
+        "depends": [],
         "name": "fastTSNE._matrix_mul.matrix_mul",
         "sources": [
             "fastTSNE/_matrix_mul/matrix_mul_numpy.pyx"
@@ -2217,6 +2203,10 @@ static PyObject *__pyx_memoryview_assign_item_from_object(struct __pyx_memoryvie
 static PyObject *__pyx_memoryviewslice_convert_item_to_object(struct __pyx_memoryviewslice_obj *__pyx_v_self, char *__pyx_v_itemp); /* proto*/
 static PyObject *__pyx_memoryviewslice_assign_item_from_object(struct __pyx_memoryviewslice_obj *__pyx_v_self, char *__pyx_v_itemp, PyObject *__pyx_v_value); /* proto*/
 
+/* Module declarations from 'fastTSNE._matrix_mul' */
+
+/* Module declarations from 'fastTSNE' */
+
 /* Module declarations from 'cpython.buffer' */
 
 /* Module declarations from 'libc.string' */
@@ -2245,10 +2235,6 @@ static PyTypeObject *__pyx_ptype_5numpy_broadcast = 0;
 static PyTypeObject *__pyx_ptype_5numpy_ndarray = 0;
 static PyTypeObject *__pyx_ptype_5numpy_ufunc = 0;
 static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *, char *, char *, int *); /*proto*/
-
-/* Module declarations from 'fastTSNE._matrix_mul' */
-
-/* Module declarations from 'fastTSNE' */
 
 /* Module declarations from 'fastTSNE._matrix_mul.matrix_mul' */
 static PyTypeObject *__pyx_array_type = 0;
