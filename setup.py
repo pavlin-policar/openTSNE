@@ -62,13 +62,11 @@ class CythonBuildExt(build_ext):
     COMPILER_FLAGS = {
         'unix': {'openmp': '-fopenmp',
                  'optimize': '-O3',
-                 'fastmath': '-ffast-math',
                  'fftw': '-lfftw3',
                  'math': '-lm',
                  },
         'msvc': {'openmp': '/openmp',
                  'optimize': '/Ox',
-                 'fastmath': '/fp:fast',
                  'fftw': '/lfftw3',
                  'math': '/lm'
                  },
@@ -77,8 +75,8 @@ class CythonBuildExt(build_ext):
     def build_extensions(self):
         # Optimization compiler/linker flags are added appropriately
         flags = self.COMPILER_FLAGS[self.compiler.compiler_type]
-        compile_flags = [flags['optimize'], flags['fastmath']]
-        link_flags = [flags['optimize'], flags['fastmath']]
+        compile_flags = [flags['optimize']]
+        link_flags = [flags['optimize']]
 
         # Map any existing compile/link flags into compiler specific ones
         def map_flags(ls):
