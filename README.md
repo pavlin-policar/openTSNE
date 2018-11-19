@@ -66,10 +66,10 @@ iris = datasets.load_iris()
 x, y = iris['data'], iris['target']
 
 tsne = TSNE(
-	n_components=2, perplexity=30, learning_rate=200,
-	n_jobs=4, angle=0.5, initialization='pca', metric='euclidean',
-	early_exaggeration_iter=250, early_exaggeration=12, n_iter=750,
-	neighbors='exact', negative_gradient_method='bh',
+    n_components=2, perplexity=30, learning_rate=200,
+    n_jobs=4, angle=0.5, initialization='pca', metric='euclidean',
+    early_exaggeration_iter=250, early_exaggeration=12, n_iter=750,
+    neighbors='exact', negative_gradient_method='bh',
 )
 
 embedding = tsne.fit(x)
