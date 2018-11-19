@@ -1,7 +1,7 @@
 import inspect
 import logging
 import unittest
-from functools import wraps
+from functools import wraps, partial
 from typing import Callable, Any, Tuple, Optional
 from unittest.mock import patch, MagicMock
 
@@ -11,10 +11,12 @@ from fastTSNE import affinity
 from fastTSNE import tsne
 from fastTSNE.affinity import PerplexityBasedNN
 from fastTSNE.nearest_neighbors import VALID_METRICS
-from fastTSNE.tsne import TSNE, kl_divergence_bh, kl_divergence_fft
+from fastTSNE.tsne import kl_divergence_bh, kl_divergence_fft
 
 np.random.seed(42)
 affinity.log.setLevel(logging.ERROR)
+
+TSNE = partial(tsne.TSNE, neighbors='exact', negative_gradient_method='bh')
 
 
 def check_params(params: dict) -> Callable:
@@ -499,7 +501,7 @@ class TestDefaultParameterSettings(unittest.TestCase):
     def test_default_params_simple_vs_complex_flow(self):
         # Relevant affinity parameters are passed to the affinity object
         mismatching = get_mismatching_default_values(
-            TSNE, PerplexityBasedNN, {'neighbors': 'method'})
+            tsne.TSNE, PerplexityBasedNN, {'neighbors': 'method'})
         self.assertEqual(mismatching, [])
 
         assert len(get_shared_parameters(tsne.TSNE, tsne.gradient_descent.__call__)) > 0, \

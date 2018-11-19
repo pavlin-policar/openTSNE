@@ -1,12 +1,16 @@
 import unittest
+from functools import partial
 
 import numpy as np
 from sklearn import datasets
 from sklearn.metrics import accuracy_score
 from sklearn.neighbors import KNeighborsClassifier
 
+from fastTSNE import tsne
 from fastTSNE.callbacks import VerifyExaggerationError
-from fastTSNE.tsne import TSNE, TSNEEmbedding
+from fastTSNE.tsne import TSNEEmbedding
+
+TSNE = partial(tsne.TSNE, neighbors='exact', negative_gradient_method='bh')
 
 
 class TestTSNECorrectness(unittest.TestCase):

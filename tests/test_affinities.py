@@ -1,12 +1,15 @@
 import logging
 import unittest
+from functools import partial
 
 import numpy as np
 
 from fastTSNE import affinity
-from fastTSNE.affinity import Multiscale, PerplexityBasedNN
 
 affinity.log.setLevel(logging.ERROR)
+
+Multiscale = partial(affinity.Multiscale, method='exact')
+PerplexityBasedNN = partial(affinity.PerplexityBasedNN, method='exact')
 
 
 class TestPerplexityBased(unittest.TestCase):
