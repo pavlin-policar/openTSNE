@@ -250,7 +250,7 @@ class FixedSigmaNN(Affinities):
             P = (P + P.T) / 2
 
         # Convert weights to probabilities
-        P /= np.sum(conditional_P)
+        P /= np.sum(P)
 
         self.sigma = sigma
         self.k = k
