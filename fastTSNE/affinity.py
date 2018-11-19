@@ -1,4 +1,6 @@
 import logging
+import operator
+from functools import reduce
 
 import numpy as np
 from scipy.sparse import csr_matrix
@@ -288,7 +290,15 @@ class FixedSigmaNN(Affinities):
         return P
 
 
-class Multiscale(Affinities):
+class MultiscaleMixture(Affinities):
+    """Calculate affinities using a Gaussian mixture kernel.
+
+    Instead of using a single perplexity to compute the affinities between data
+    points, we can use a multiscale Gaussian kernel instead. This allows us to
+    incorporate long range interactions, if used properly.
+
+    """
+
     def __init__(self, data, perplexities, method='exact', metric='euclidean',
                  metric_params=None, symmetrize=True, n_jobs=1, random_state=None):
         self.n_samples = data.shape[0]
@@ -303,11 +313,25 @@ class Multiscale(Affinities):
         self.__neighbors, self.__distances = knn_index.query_train(data, k=k_neighbors)
 
         self.knn_index = knn_index
-        self.P = joint_probabilities_nn(self.__neighbors, self.__distances, perplexities,
-                                        symmetrize=symmetrize, n_jobs=n_jobs)
+        self.P = self._calculate_P(self.__neighbors, self.__distances, perplexities,
+                                   symmetrize=symmetrize, n_jobs=n_jobs)
 
         self.perplexities = perplexities
         self.n_jobs = n_jobs
+
+    @staticmethod
+    def _calculate_P(
+            neighbors,
+            distances,
+            perplexities,
+            symmetrize=True,
+            n_reference_samples=None,
+            n_jobs=1,
+    ):
+        return joint_probabilities_nn(
+            neighbors, distances, perplexities, symmetrize=symmetrize,
+            n_reference_samples=n_reference_samples, n_jobs=n_jobs,
+        )
 
     def set_perplexities(self, new_perplexities):
         if np.array_equal(self.perplexities, new_perplexities):
@@ -326,7 +350,7 @@ class Multiscale(Affinities):
                     max_perplexity, self.__class__.__name__))
 
         self.perplexities = new_perplexities
-        self.P = joint_probabilities_nn(
+        self.P = self._calculate_P(
             self.__neighbors[:, :k_neighbors], self.__distances[:, :k_neighbors],
             self.perplexities, symmetrize=True, n_jobs=self.n_jobs,
         )
@@ -340,7 +364,7 @@ class Multiscale(Affinities):
 
         neighbors, distances = self.knn_index.query(data, k_neighbors)
 
-        P = joint_probabilities_nn(
+        P = self._calculate_P(
             neighbors, distances, perplexities, symmetrize=False,
             n_reference_samples=self.n_samples, n_jobs=self.n_jobs,
         )
@@ -375,3 +399,35 @@ class Multiscale(Affinities):
                 usable_perplexities.append(perplexity)
 
         return usable_perplexities
+
+
+class Multiscale(MultiscaleMixture):
+    """Calculate affinities using averaged Gaussian perplexities.
+
+    In contrast to :class:`MultiscaleMixture`, which uses a Gaussian mixture
+    kernel, here, we first compute single scale Gaussian kernels, convert them
+    to probability distributions, then average them out between scales.
+
+    """
+
+    @staticmethod
+    def _calculate_P(
+            neighbors,
+            distances,
+            perplexities,
+            symmetrize=True,
+            n_reference_samples=None,
+            n_jobs=1,
+    ):
+        # Compute normalized probabilities for each perplexity
+        partial_Ps = [
+            joint_probabilities_nn(
+                neighbors, distances, [perplexity], symmetrize=symmetrize,
+                n_reference_samples=n_reference_samples, n_jobs=n_jobs,
+            ) for perplexity in perplexities
+        ]
+        # Sum them together, then normalize
+        P = reduce(operator.add, partial_Ps, 0)
+        P /= np.sum(P)
+
+        return P
