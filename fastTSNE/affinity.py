@@ -300,14 +300,36 @@ class Multiscale(Affinities):
         k_neighbors = min(self.n_samples - 1, int(3 * max_perplexity))
 
         knn_index = build_knn_index(data, method, metric, metric_params, n_jobs, random_state)
-        neighbors, distances = knn_index.query_train(data, k=k_neighbors)
+        self.__neighbors, self.__distances = knn_index.query_train(data, k=k_neighbors)
 
         self.knn_index = knn_index
-        self.P = joint_probabilities_nn(neighbors, distances, perplexities,
+        self.P = joint_probabilities_nn(self.__neighbors, self.__distances, perplexities,
                                         symmetrize=symmetrize, n_jobs=n_jobs)
 
         self.perplexities = perplexities
         self.n_jobs = n_jobs
+
+    def set_perplexities(self, new_perplexities):
+        if np.array_equal(self.perplexities, new_perplexities):
+            return
+
+        new_perplexities = self.check_perplexities(new_perplexities)
+        max_perplexity = np.max(new_perplexities)
+        k_neighbors = min(self.n_samples - 1, int(3 * max_perplexity))
+
+        if k_neighbors > self.__neighbors.shape[1]:
+            raise RuntimeError(
+                'The largest perplexity `%.2f` is larger than the initial one '
+                'used. This would need to recompute the nearest neighbors, '
+                'which is not efficient. Please create a new `%s` instance '
+                'with the increased perplexity.' % (
+                    max_perplexity, self.__class__.__name__))
+
+        self.perplexities = new_perplexities
+        self.P = joint_probabilities_nn(
+            self.__neighbors[:, :k_neighbors], self.__distances[:, :k_neighbors],
+            self.perplexities, symmetrize=True, n_jobs=self.n_jobs,
+        )
 
     def to_new(self, data, perplexities=None, return_distances=False):
         perplexities = perplexities if perplexities is not None else self.perplexities
@@ -348,7 +370,7 @@ class Multiscale(Affinities):
                 else:
                     usable_perplexities.append(new_perplexity)
                     log.warning('Perplexity value %d is too high. Using '
-                                'perplexity %.2f instaed' % (perplexity, new_perplexity))
+                                'perplexity %.2f instead' % (perplexity, new_perplexity))
             else:
                 usable_perplexities.append(perplexity)
 
