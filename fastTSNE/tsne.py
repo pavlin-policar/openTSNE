@@ -590,7 +590,7 @@ class TSNE(BaseEstimator):
                  theta=0.5, n_interpolation_points=3, min_num_intervals=10,
                  ints_in_interval=1, initialization='pca', metric='euclidean',
                  metric_params=None, initial_momentum=0.5, final_momentum=0.8,
-                 n_jobs=1, neighbors='exact', negative_gradient_method='bh',
+                 n_jobs=1, neighbors='approx', negative_gradient_method='fft',
                  callbacks=None, callbacks_every_iters=50, random_state=None):
         self.n_components = n_components
         self.perplexity = perplexity

@@ -76,7 +76,7 @@ class PerplexityBasedNN(Affinities):
 
     """
 
-    def __init__(self, data, perplexity=30, method='exact', metric='euclidean',
+    def __init__(self, data, perplexity=30, method='approx', metric='euclidean',
                  metric_params=None, symmetrize=True, n_jobs=1, random_state=None):
         self.n_samples = data.shape[0]
         self.perplexity = self.check_perplexity(perplexity)
@@ -225,7 +225,7 @@ def joint_probabilities_nn(neighbors, distances, perplexities, symmetrize=True,
 
 class FixedSigmaNN(Affinities):
 
-    def __init__(self, data, sigma, k=30, method='exact', metric='euclidean',
+    def __init__(self, data, sigma, k=30, method='approx', metric='euclidean',
                  metric_params=None, symmetrize=True, n_jobs=1, random_state=None):
         self.n_samples = n_samples = data.shape[0]
 
@@ -299,7 +299,7 @@ class MultiscaleMixture(Affinities):
 
     """
 
-    def __init__(self, data, perplexities, method='exact', metric='euclidean',
+    def __init__(self, data, perplexities, method='approx', metric='euclidean',
                  metric_params=None, symmetrize=True, n_jobs=1, random_state=None):
         self.n_samples = data.shape[0]
 
