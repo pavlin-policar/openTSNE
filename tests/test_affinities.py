@@ -79,3 +79,34 @@ class TestMultiscale(unittest.TestCase):
             ms.perplexities, [20, 30],
             'Did not drop duplicate corrected perplexity.'
         )
+
+    def test_handles_changing_perplexities(self):
+        perplexities = [15, 25]
+        k_neighbors = perplexities[-1] * 3
+
+        ms = Multiscale(self.x, perplexities=perplexities)
+        np.testing.assert_equal(ms.perplexities, perplexities)
+
+        # Check that the initial `P` matrix is allright
+        n_samples = self.x.shape[0]
+        original_P = ms.P.copy()
+        # Can't check for equality because the matrix is symmetrized therefore
+        # each point may have non-zero values in more than just the k neighbors
+        self.assertTrue(original_P.nnz >= n_samples * k_neighbors)
+
+        # Check that lowering the perplexity properly changes affinity matrix
+        new_perplexities = [10, 20]
+        k_neighbors = new_perplexities[-1] * 3
+        ms.set_perplexities(new_perplexities)
+        np.testing.assert_equal(ms.perplexities, new_perplexities)
+
+        reduced_P = ms.P.copy()
+        self.assertTrue(reduced_P.nnz >= n_samples * k_neighbors)
+        self.assertTrue(reduced_P.nnz < original_P.nnz,
+                        'Lower perplexities should consider less neighbors, '
+                        'resulting in a sparser affinity matrix')
+
+        # Raising the perplexity above the initial value would need to recompute
+        # the nearest neighbors, so it should raise an error
+        with self.assertRaises(RuntimeError):
+            ms.set_perplexities([20, 30])
