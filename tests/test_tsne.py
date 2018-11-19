@@ -1,4 +1,5 @@
 import inspect
+import logging
 import unittest
 from functools import wraps
 from typing import Callable, Any, Tuple, Optional
@@ -6,12 +7,14 @@ from unittest.mock import patch, MagicMock
 
 import numpy as np
 
+from fastTSNE import affinity
+from fastTSNE import tsne
 from fastTSNE.affinity import PerplexityBasedNN
 from fastTSNE.nearest_neighbors import VALID_METRICS
 from fastTSNE.tsne import TSNE, kl_divergence_bh, kl_divergence_fft
-from fastTSNE import tsne
 
 np.random.seed(42)
+affinity.log.setLevel(logging.ERROR)
 
 
 def check_params(params: dict) -> Callable:
