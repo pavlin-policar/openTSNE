@@ -584,7 +584,7 @@ class TSNE(BaseEstimator):
 
     """
 
-    def __init__(self, n_components=2, perplexity=30, learning_rate=100,
+    def __init__(self, n_components=2, perplexity=30, learning_rate=200,
                  early_exaggeration_iter=250, early_exaggeration=12,
                  n_iter=750, exaggeration=None,
                  theta=0.5, n_interpolation_points=3, min_num_intervals=10,
@@ -815,7 +815,7 @@ class gradient_descent:
             optimizer.gains = np.copy(self.gains)
         return optimizer
 
-    def __call__(self, embedding, P, n_iter, objective_function, learning_rate=100,
+    def __call__(self, embedding, P, n_iter, objective_function, learning_rate=200,
                  momentum=0.5, exaggeration=None, dof=1, min_gain=0.01,
                  min_grad_norm=1e-8, theta=0.5, n_interpolation_points=3,
                  min_num_intervals=10, ints_in_interval=1, reference_embedding=None,
