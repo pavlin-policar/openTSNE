@@ -166,7 +166,7 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
 
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(include=['fastTSNE.*']),
     install_requires=[
         'numpy>1.14',
         'numba>=0.38.1',
