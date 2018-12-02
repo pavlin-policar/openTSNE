@@ -110,6 +110,7 @@ class CythonBuildExt(build_ext):
 
 
 extensions = [
+    Extension('fastTSNE.vptree', ['fastTSNE/vptree.%s' % ext], language='c++'),
     Extension('fastTSNE.quad_tree', ['fastTSNE/quad_tree.%s' % ext]),
     Extension('fastTSNE._tsne', ['fastTSNE/_tsne.%s' % ext]),
     Extension('fastTSNE.kl_divergence', ['fastTSNE/kl_divergence.%s' % ext]),

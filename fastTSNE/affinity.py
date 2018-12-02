@@ -6,7 +6,7 @@ import numpy as np
 from scipy.sparse import csr_matrix
 
 from . import _tsne
-from .nearest_neighbors import BallTree, NNDescent, KNNIndex, VALID_METRICS
+from .nearest_neighbors import VPTree, BallTree, NNDescent, KNNIndex, VALID_METRICS
 
 log = logging.getLogger(__name__)
 
@@ -146,7 +146,7 @@ class PerplexityBasedNN(Affinities):
 
 
 def build_knn_index(data, method, metric, metric_params=None, n_jobs=1, random_state=None):
-    methods = {'exact': BallTree, 'approx': NNDescent}
+    methods = {'exact': VPTree, 'exact_slow': BallTree, 'approx': NNDescent}
     if isinstance(method, KNNIndex):
         knn_index = method
 

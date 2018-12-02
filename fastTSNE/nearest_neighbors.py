@@ -3,6 +3,7 @@ import sys
 import numpy as np
 from sklearn import neighbors
 from sklearn.utils import check_random_state
+from fastTSNE.vptree import VPTree as c_vptree
 
 # In case we're running on a 32bit system, we have to properly handle numba's
 # ``parallel`` directive, which throws a ``RuntimeError``. It is important to
@@ -69,6 +70,21 @@ class BallTree(KNNIndex):
     def query(self, query, k):
         distances, neighbors = self.index.kneighbors(query, n_neighbors=k)
         return neighbors, distances
+
+
+class VPTree(KNNIndex):
+    def build(self, data):
+        data = np.ascontiguousarray(data, dtype=np.float64)
+        self.index = c_vptree(data)
+
+    def query_train(self, data, k):
+        data = np.ascontiguousarray(data, dtype=np.float64)
+        indices, distances = self.index.search(data, k, num_threads=self.n_jobs)
+        return indices[:, 1:], distances[:, 1:]
+
+    def query(self, query, k):
+        query = np.ascontiguousarray(query, dtype=np.float64)
+        return self.index.query(query, k, num_threads=self.n_jobs)
 
 
 class NNDescent(KNNIndex):
