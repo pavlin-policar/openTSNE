@@ -5,10 +5,10 @@ from sklearn import neighbors
 from sklearn.utils import check_random_state
 from fastTSNE.vptree import VPTree as c_vptree
 
-# In case we're running on a 32bit system, we have to properly handle numba's
+# In case we"re running on a 32bit system, we have to properly handle numba's
 # ``parallel`` directive, which throws a ``RuntimeError``. It is important to
 # patch this before importing ``pynndescent`` which heavily relies on numba
-uns1 = sys.platform.startswith('win32') and sys.version_info[:2] == (2, 7)
+uns1 = sys.platform.startswith("win32") and sys.version_info[:2] == (2, 7)
 uns2 = sys.maxsize <= 2 ** 32
 if uns1 or uns2:
     import numba
@@ -30,7 +30,7 @@ if uns1 or uns2:
 
 from . import pynndescent
 
-# To keep things simple and consistent, we'll only support distances that are
+# To keep things simple and consistent, we"ll only support distances that are
 # included in both exact and approximation nearest neighbor search libraries
 __ball_tree_metrics = set(neighbors.BallTree.valid_metrics)
 __nndescent_metrics = set(pynndescent.distances.named_distances)
@@ -58,7 +58,7 @@ class KNNIndex:
 class BallTree(KNNIndex):
     def build(self, data):
         self.index = neighbors.NearestNeighbors(
-            algorithm='ball_tree', metric=self.metric,
+            algorithm="ball_tree", metric=self.metric,
             metric_params=self.metric_params, n_jobs=self.n_jobs,
         )
         self.index.fit(data)
@@ -98,7 +98,7 @@ class NNDescent(KNNIndex):
         self.index = pynndescent.NNDescent(
             data, metric=self.metric, metric_kwds=self.metric_params,
             random_state=random_state, n_trees=n_trees, n_iters=n_iters,
-            algorithm='alternative', max_candidates=60,
+            algorithm="alternative", max_candidates=60,
         )
 
     def query_train(self, data, k):

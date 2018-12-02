@@ -76,7 +76,7 @@ class PerplexityBasedNN(Affinities):
 
     """
 
-    def __init__(self, data, perplexity=30, method='approx', metric='euclidean',
+    def __init__(self, data, perplexity=30, method="approx", metric="euclidean",
                  metric_params=None, symmetrize=True, n_jobs=1, random_state=None):
         self.n_samples = data.shape[0]
         self.perplexity = self.check_perplexity(perplexity)
@@ -94,19 +94,19 @@ class PerplexityBasedNN(Affinities):
         self.n_jobs = n_jobs
 
     def set_perplexity(self, new_perplexity):
-        # If the value hasn't changed, there's nothing to do
+        # If the value hasn"t changed, there's nothing to do
         if new_perplexity == self.perplexity:
             return
-        # Verify that the perplexity isn't too large
+        # Verify that the perplexity isn"t too large
         new_perplexity = self.check_perplexity(new_perplexity)
         # Recompute the affinity matrix
         k_neighbors = min(self.n_samples - 1, int(3 * new_perplexity))
         if k_neighbors > self.__neighbors.shape[1]:
             raise RuntimeError(
-                'The desired perplexity `%.2f` is larger than the initial one '
-                'used. This would need to recompute the nearest neighbors, '
-                'which is not efficient. Please create a new `%s` instance '
-                'with the increased perplexity.' % (
+                "The desired perplexity `%.2f` is larger than the initial one "
+                "used. This would need to recompute the nearest neighbors, "
+                "which is not efficient. Please create a new `%s` instance "
+                "with the increased perplexity." % (
                     new_perplexity, self.__class__.__name__))
 
         self.perplexity = new_perplexity
@@ -135,29 +135,29 @@ class PerplexityBasedNN(Affinities):
     def check_perplexity(self, perplexity):
         """Check for valid perplexity value."""
         if perplexity <= 0:
-            raise ValueError('Perplexity must be >=0. %.2f given' % perplexity)
+            raise ValueError("Perplexity must be >=0. %.2f given" % perplexity)
 
         if self.n_samples - 1 < 3 * perplexity:
             old_perplexity, perplexity = perplexity, (self.n_samples - 1) / 3
-            log.warning('Perplexity value %d is too high. Using perplexity '
-                        '%.2f instead' % (old_perplexity, perplexity))
+            log.warning("Perplexity value %d is too high. Using perplexity "
+                        "%.2f instead" % (old_perplexity, perplexity))
 
         return perplexity
 
 
 def build_knn_index(data, method, metric, metric_params=None, n_jobs=1, random_state=None):
-    methods = {'exact': VPTree, 'exact_slow': BallTree, 'approx': NNDescent}
+    methods = {"exact": VPTree, "exact_slow": BallTree, "approx": NNDescent}
     if isinstance(method, KNNIndex):
         knn_index = method
 
     elif method not in methods:
-        raise ValueError('Unrecognized nearest neighbor algorithm `%s`. '
-                         'Please choose one of the supported methods or '
-                         'provide a valid `KNNIndex` instance.' % method)
+        raise ValueError("Unrecognized nearest neighbor algorithm `%s`. "
+                         "Please choose one of the supported methods or "
+                         "provide a valid `KNNIndex` instance." % method)
     else:
         if metric not in VALID_METRICS:
-            raise ValueError('Unrecognized distance metric `%s`. Please '
-                             'choose one of the supported methods.' % metric)
+            raise ValueError("Unrecognized distance metric `%s`. Please "
+                             "choose one of the supported methods." % metric)
         knn_index = methods[method](metric=metric, metric_params=metric_params,
                                     n_jobs=n_jobs, random_state=random_state)
 
@@ -176,7 +176,7 @@ def joint_probabilities_nn(neighbors, distances, perplexities, symmetrize=True,
     ----------
     neighbors: np.ndarray
         A `n_samples * k_neighbors` matrix containing the indices to each
-        points' nearest neighbors in descending order.
+        points" nearest neighbors in descending order.
     distances: np.ndarray
         A `n_samples * k_neighbors` matrix containing the distances to the
         neighbors at indices defined in the neighbors parameter.
@@ -225,12 +225,12 @@ def joint_probabilities_nn(neighbors, distances, perplexities, symmetrize=True,
 
 class FixedSigmaNN(Affinities):
 
-    def __init__(self, data, sigma, k=30, method='approx', metric='euclidean',
+    def __init__(self, data, sigma, k=30, method="approx", metric="euclidean",
                  metric_params=None, symmetrize=True, n_jobs=1, random_state=None):
         self.n_samples = n_samples = data.shape[0]
 
         if k >= self.n_samples:
-            raise ValueError('`k` (%d) cannot be larger than N-1 (%d).' % (k, self.n_samples))
+            raise ValueError("`k` (%d) cannot be larger than N-1 (%d)." % (k, self.n_samples))
 
         knn_index = build_knn_index(data, method, metric, metric_params, n_jobs, random_state)
         neighbors, distances = knn_index.query_train(data, k=k)
@@ -264,8 +264,8 @@ class FixedSigmaNN(Affinities):
         if k is None:
             k = self.k
         elif k >= n_reference_samples:
-            raise ValueError('`k` (%d) cannot be larger than the number of '
-                             'reference samples (%d).' % (k, self.n_samples))
+            raise ValueError("`k` (%d) cannot be larger than the number of "
+                             "reference samples (%d)." % (k, self.n_samples))
 
         if sigma is None:
             sigma = self.sigma
@@ -299,7 +299,7 @@ class MultiscaleMixture(Affinities):
 
     """
 
-    def __init__(self, data, perplexities, method='approx', metric='euclidean',
+    def __init__(self, data, perplexities, method="approx", metric="euclidean",
                  metric_params=None, symmetrize=True, n_jobs=1, random_state=None):
         self.n_samples = data.shape[0]
 
@@ -343,10 +343,10 @@ class MultiscaleMixture(Affinities):
 
         if k_neighbors > self.__neighbors.shape[1]:
             raise RuntimeError(
-                'The largest perplexity `%.2f` is larger than the initial one '
-                'used. This would need to recompute the nearest neighbors, '
-                'which is not efficient. Please create a new `%s` instance '
-                'with the increased perplexity.' % (
+                "The largest perplexity `%.2f` is larger than the initial one "
+                "used. This would need to recompute the nearest neighbors, "
+                "which is not efficient. Please create a new `%s` instance "
+                "with the increased perplexity." % (
                     max_perplexity, self.__class__.__name__))
 
         self.perplexities = new_perplexities
@@ -379,7 +379,7 @@ class MultiscaleMixture(Affinities):
 
         If a perplexity is too large, it is corrected to the largest allowed
         value. It is then inserted into the list of perplexities only if that
-        value doesn't already exist in the list.
+        value doesn"t already exist in the list.
 
         """
         usable_perplexities = []
@@ -388,13 +388,13 @@ class MultiscaleMixture(Affinities):
                 new_perplexity = (self.n_samples - 1) / 3
 
                 if new_perplexity in usable_perplexities:
-                    log.warning('Perplexity value %d is too high. Dropping '
-                                'because the max perplexity is already in the '
-                                'list.' % perplexity)
+                    log.warning("Perplexity value %d is too high. Dropping "
+                                "because the max perplexity is already in the "
+                                "list." % perplexity)
                 else:
                     usable_perplexities.append(new_perplexity)
-                    log.warning('Perplexity value %d is too high. Using '
-                                'perplexity %.2f instead' % (perplexity, new_perplexity))
+                    log.warning("Perplexity value %d is too high. Using "
+                                "perplexity %.2f instead" % (perplexity, new_perplexity))
             else:
                 usable_perplexities.append(perplexity)
 

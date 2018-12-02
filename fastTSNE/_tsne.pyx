@@ -17,7 +17,7 @@ from ._matrix_mul.matrix_mul cimport matrix_multiply_fft_1d, matrix_multiply_fft
 cdef double EPSILON = np.finfo(np.float64).eps
 
 
-cdef extern from 'math.h':
+cdef extern from "math.h":
     double sqrt(double x) nogil
     double log(double x) nogil
     double exp(double x) nogil
@@ -38,7 +38,7 @@ cpdef double[:, ::1] compute_gaussian_perplexity(
         Py_ssize_t n_samples = distances.shape[0]
         Py_ssize_t n_scales = desired_perplexities.shape[0]
         Py_ssize_t k_neighbors = distances.shape[1]
-        double[:, ::1] P = np.zeros_like(distances, dtype=float, order='C')
+        double[:, ::1] P = np.zeros_like(distances, dtype=float, order="C")
         double[:, :, ::1] multiscale_P = np.zeros((n_samples, n_scales, k_neighbors))
         double[:, ::1] tau = np.ones((n_samples, n_scales))
 
@@ -50,7 +50,7 @@ cpdef double[:, ::1] compute_gaussian_perplexity(
     if num_threads < 1:
         num_threads = 1
 
-    for i in prange(n_samples, nogil=True, schedule='guided', num_threads=num_threads):
+    for i in prange(n_samples, nogil=True, schedule="guided", num_threads=num_threads):
         min_tau, max_tau = -INFINITY, INFINITY
 
         # For every scale find a precision tau that fits the perplexity
@@ -123,14 +123,14 @@ cpdef tuple estimate_positive_gradient_nn(
         num_threads = 1
 
     with nogil, parallel(num_threads=num_threads):
-        # Use `malloc` here instead of `PyMem_Malloc` because we're in a
-        # `nogil` clause and we won't be allocating much memory
+        # Use `malloc` here instead of `PyMem_Malloc` because we"re in a
+        # `nogil` clause and we won"t be allocating much memory
         diff = <double *>malloc(n_dims * sizeof(double))
         if not diff:
             with gil:
                 raise MemoryError()
 
-        for i in prange(n_samples, schedule='guided'):
+        for i in prange(n_samples, schedule="guided"):
             # Iterate over all the neighbors `j` and sum up their contribution
             for k in range(indptr[i], indptr[i + 1]):
                 j = indices[k]
@@ -190,8 +190,8 @@ cpdef double estimate_negative_gradient_bh(
         num_threads = 1
 
     # In order to run gradient estimation in parallel, we need to pass each
-    # worker it's own memory slot to write sum_Qs
-    for i in prange(num_points, nogil=True, num_threads=num_threads, schedule='guided'):
+    # worker it"s own memory slot to write sum_Qs
+    for i in prange(num_points, nogil=True, num_threads=num_threads, schedule="guided"):
         _estimate_negative_gradient_single(
             &tree.root, &embedding[i, 0], &gradient[i, 0], &sum_Qi[i], theta, dof)
 

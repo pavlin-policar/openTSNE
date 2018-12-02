@@ -36,7 +36,7 @@ class ErrorLogger(Callback):
         n_iters = iteration - self.iter_count
         self.iter_count = iteration
 
-        print('Iteration % 4d, KL divergence % 6.4f, %d iterations in %.4f sec' % (
+        print("Iteration % 4d, KL divergence % 6.4f, %d iterations in %.4f sec" % (
             iteration, error, n_iters, duration))
 
 
@@ -50,26 +50,26 @@ class VerifyExaggerationError(Callback):
 
     def __call__(self, iteration: int, corrected_error: float, embedding: TSNEEmbedding):
         params = self.embedding.gradient_descent_params
-        method = params['negative_gradient_method']
+        method = params["negative_gradient_method"]
 
         if np.sum(embedding.affinities.P) <= 1:
-            log.warning('Are you sure you are testing an exaggerated P matrix?')
+            log.warning("Are you sure you are testing an exaggerated P matrix?")
 
-        if method == 'fft':
+        if method == "fft":
             f = partial(kl_divergence.kl_divergence_approx_fft,
-                        n_interpolation_points=params['n_interpolation_points'],
-                        min_num_intervals=params['min_num_intervals'],
-                        ints_in_interval=params['ints_in_interval'])
-        elif method == 'bh':
-            f = partial(kl_divergence.kl_divergence_approx_bh, theta=params['theta'])
+                        n_interpolation_points=params["n_interpolation_points"],
+                        min_num_intervals=params["min_num_intervals"],
+                        ints_in_interval=params["ints_in_interval"])
+        elif method == "bh":
+            f = partial(kl_divergence.kl_divergence_approx_bh, theta=params["theta"])
 
         P = self.P
 
         true_error = f(P.indices, P.indptr, P.data, embedding)
         if abs(true_error - corrected_error) > 1e-8:
-            raise RuntimeError('Correction term is wrong.')
+            raise RuntimeError("Correction term is wrong.")
         else:
-            log.info('Corrected: %.4f - True %.4f [eps %.4f]' % (
+            log.info("Corrected: %.4f - True %.4f [eps %.4f]" % (
                 corrected_error, true_error, abs(true_error - corrected_error)))
 
 
@@ -99,9 +99,9 @@ class ErrorApproximations(Callback):
         fft_errors = np.array(self.fft_errors)
 
         bh_diff = bh_errors - exact_errors
-        print('Barnes-Hut: mean difference %.4f (±%.4f)' % (
+        print("Barnes-Hut: mean difference %.4f (±%.4f)" % (
             np.mean(bh_diff), np.std(bh_diff)))
 
         fft_diff = fft_errors - exact_errors
-        print('Interpolation: mean difference %.4f (±%.4f)' % (
+        print("Interpolation: mean difference %.4f (±%.4f)" % (
             np.mean(fft_diff), np.std(fft_diff)))

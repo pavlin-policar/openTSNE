@@ -22,12 +22,12 @@ def _check_callbacks(callbacks):
         # If list was passed, make sure all of them are actually callable
         if isinstance(callbacks, Iterable):
             if any(not callable(c) for c in callbacks):
-                raise ValueError('`callbacks` must contain callable objects!')
+                raise ValueError("`callbacks` must contain callable objects!")
         # The gradient descent method deals with lists
         elif callable(callbacks):
             callbacks = (callbacks,)
         else:
-            raise ValueError('`callbacks` must be a callable object!')
+            raise ValueError("`callbacks` must be a callable object!")
 
     return callbacks
 
@@ -36,25 +36,25 @@ def _handle_nice_params(optim_params: dict) -> None:
     """Convert the user friendly params into something the optimizer can
     understand."""
     # Handle callbacks
-    optim_params['callbacks'] = _check_callbacks(optim_params.get('callbacks'))
-    optim_params['use_callbacks'] = optim_params['callbacks'] is not None
+    optim_params["callbacks"] = _check_callbacks(optim_params.get("callbacks"))
+    optim_params["use_callbacks"] = optim_params["callbacks"] is not None
 
     # Handle negative gradient method
-    negative_gradient_method = optim_params.pop('negative_gradient_method')
+    negative_gradient_method = optim_params.pop("negative_gradient_method")
     if callable(negative_gradient_method):
         negative_gradient_method = negative_gradient_method
-    elif negative_gradient_method in {'bh', 'BH', 'barnes-hut'}:
+    elif negative_gradient_method in {"bh", "BH", "barnes-hut"}:
         negative_gradient_method = kl_divergence_bh
-    elif negative_gradient_method in {'fft', 'FFT', 'interpolation'}:
+    elif negative_gradient_method in {"fft", "FFT", "interpolation"}:
         negative_gradient_method = kl_divergence_fft
     else:
-        raise ValueError('Unrecognized gradient method. Please choose one of '
-                         'the supported methods or provide a valid callback.')
+        raise ValueError("Unrecognized gradient method. Please choose one of "
+                         "the supported methods or provide a valid callback.")
     # `gradient_descent` uses the more informative name `objective_function`
-    optim_params['objective_function'] = negative_gradient_method
+    optim_params["objective_function"] = negative_gradient_method
 
     # Handle number of jobs
-    n_jobs = optim_params['n_jobs']
+    n_jobs = optim_params["n_jobs"]
     if n_jobs < 0:
         n_cores = multiprocessing.cpu_count()
         # Add negative number of n_jobs to the number of cores, but increment by
@@ -62,20 +62,20 @@ def _handle_nice_params(optim_params: dict) -> None:
         n_jobs = n_cores + n_jobs + 1
 
     # If the number of jobs, after this correction is still <= 0, then the user
-    # probably thought they had more cores, so we'll default to 1
+    # probably thought they had more cores, so we"ll default to 1
     if n_jobs <= 0:
-        log.warning('`n_jobs` receieved value %d but only %d cores are available. '
-                    'Defaulting to single job.' % (optim_params['n_jobs'], n_cores))
+        log.warning("`n_jobs` receieved value %d but only %d cores are available. "
+                    "Defaulting to single job." % (optim_params["n_jobs"], n_cores))
         n_jobs = 1
 
-    optim_params['n_jobs'] = n_jobs
+    optim_params["n_jobs"] = n_jobs
 
 
 def __check_init_num_samples(num_samples, required_num_samples):
     if num_samples != required_num_samples:
         raise ValueError(
-            'The provided initialization contains a different number '
-            'of points (%d) than the data provided (%d).' % (
+            "The provided initialization contains a different number "
+            "of points (%d) than the data provided (%d)." % (
                 num_samples, required_num_samples)
         )
 
@@ -83,8 +83,8 @@ def __check_init_num_samples(num_samples, required_num_samples):
 def __check_init_num_dimensions(num_dimensions, required_num_dimensions):
     if num_dimensions != required_num_dimensions:
         raise ValueError(
-            'The provided initialization contains a different number '
-            'of components (%d) than the embedding (%d).' % (
+            "The provided initialization contains a different number "
+            "of components (%d) than the embedding (%d)." % (
                 num_dimensions, required_num_dimensions)
         )
 
@@ -127,7 +127,7 @@ class PartialTSNEEmbedding(np.ndarray):
     def __new__(cls, embedding, reference_embedding, P, gradient_descent_params, optimizer=None):
         init_checks.num_samples(embedding.shape[0], P.shape[0])
 
-        obj = np.asarray(embedding, dtype=np.float64, order='C').view(PartialTSNEEmbedding)
+        obj = np.asarray(embedding, dtype=np.float64, order="C").view(PartialTSNEEmbedding)
 
         obj.reference_embedding = reference_embedding
         obj.P = P
@@ -136,7 +136,7 @@ class PartialTSNEEmbedding(np.ndarray):
         if optimizer is None:
             optimizer = gradient_descent()
         elif not isinstance(optimizer, gradient_descent):
-            raise TypeError('`optimizer` must be an instance of `%s`, but got `%s`.' % (
+            raise TypeError("`optimizer` must be an instance of `%s`, but got `%s`." % (
                 gradient_descent.__class__.__name__, type(optimizer)))
         obj.optimizer = optimizer
 
@@ -189,7 +189,7 @@ class PartialTSNEEmbedding(np.ndarray):
         optim_params = dict(self.gradient_descent_params)
         optim_params.update(gradient_descent_params)
         _handle_nice_params(optim_params)
-        optim_params['n_iter'] = n_iter
+        optim_params["n_iter"] = n_iter
 
         try:
             # Run gradient descent with the embedding optimizer so gains are
@@ -200,7 +200,7 @@ class PartialTSNEEmbedding(np.ndarray):
             )
 
         except OptimizationInterrupt as ex:
-            log.info('Optimization was interrupted with callback.')
+            log.info("Optimization was interrupted with callback.")
             if propagate_exception:
                 raise ex
             error, embedding = ex.error, ex.final_embedding
@@ -239,7 +239,7 @@ class TSNEEmbedding(np.ndarray):
                 **gradient_descent_params):
         init_checks.num_samples(embedding.shape[0], affinities.P.shape[0])
 
-        obj = np.asarray(embedding, dtype=np.float64, order='C').view(TSNEEmbedding)
+        obj = np.asarray(embedding, dtype=np.float64, order="C").view(TSNEEmbedding)
 
         obj.affinities = affinities  # type: Affinities
         obj.gradient_descent_params = gradient_descent_params  # type: dict
@@ -248,7 +248,7 @@ class TSNEEmbedding(np.ndarray):
         if optimizer is None:
             optimizer = gradient_descent()
         elif not isinstance(optimizer, gradient_descent):
-            raise TypeError('`optimizer` must be an instance of `%s`, but got `%s`.' % (
+            raise TypeError("`optimizer` must be an instance of `%s`, but got `%s`." % (
                 gradient_descent.__class__.__name__, type(optimizer)))
         obj.optimizer = optimizer
 
@@ -301,7 +301,7 @@ class TSNEEmbedding(np.ndarray):
         optim_params = dict(self.gradient_descent_params)
         optim_params.update(gradient_descent_params)
         _handle_nice_params(optim_params)
-        optim_params['n_iter'] = n_iter
+        optim_params["n_iter"] = n_iter
 
         try:
             # Run gradient descent with the embedding optimizer so gains are
@@ -311,7 +311,7 @@ class TSNEEmbedding(np.ndarray):
             )
 
         except OptimizationInterrupt as ex:
-            log.info('Optimization was interrupted with callback.')
+            log.info("Optimization was interrupted with callback.")
             if propagate_exception:
                 raise ex
             error, embedding = ex.error, ex.final_embedding
@@ -320,7 +320,7 @@ class TSNEEmbedding(np.ndarray):
 
         return embedding
 
-    def transform(self, X, perplexity=None, initialization='median',
+    def transform(self, X, perplexity=None, initialization="median",
                   early_exaggeration=2, early_exaggeration_iter=100,
                   initial_momentum=0.2, n_iter=100, final_momentum=0.4):
         """Embed new points into the existing embedding.
@@ -384,12 +384,12 @@ class TSNEEmbedding(np.ndarray):
             )
 
         except OptimizationInterrupt as ex:
-            log.info('Optimization was interrupted with callback.')
+            log.info("Optimization was interrupted with callback.")
             embedding = ex.final_embedding
 
         return embedding
 
-    def prepare_partial(self, X, initialization='median', **affinity_params):
+    def prepare_partial(self, X, initialization="median", **affinity_params):
         """Prepare the partial embedding which can be optimized.
 
         Parameters
@@ -434,14 +434,14 @@ class TSNEEmbedding(np.ndarray):
             embedding = np.array(initialization)
 
         # Random initialization with isotropic normal distribution
-        elif initialization == 'random':
+        elif initialization == "random":
             embedding = initialization_scheme.random(X.shape[0], self.shape[1], self.random_state)
-        elif initialization == 'weighted':
+        elif initialization == "weighted":
             embedding = initialization_scheme.weighted_mean(X, self, neighbors, distances)
-        elif initialization == 'median':
+        elif initialization == "median":
             embedding = initialization_scheme.median(self, neighbors)
         else:
-            raise ValueError('Unrecognized initialization scheme `%s`.' % initialization)
+            raise ValueError("Unrecognized initialization scheme `%s`." % initialization)
 
         return PartialTSNEEmbedding(
             embedding, reference_embedding=self, P=P,
@@ -476,18 +476,18 @@ class TSNE(BaseEstimator):
         The number of iterations to run in the normal optimization regime.
     exaggeration: Optional[int]
         The exaggeration factor to be used during the normal optmimization
-        phase. Standard implementation don't use this exaggeration and it
-        typically isn't necessary for smaller data sets, but it has been shown
+        phase. Standard implementation don"t use this exaggeration and it
+        typically isn"t necessary for smaller data sets, but it has been shown
         that for larger data sets, using some exaggeration is necessary in order
         to obtain good embeddings.
     theta: float
-        Only used when ``negative_gradient_method='bh'`` or its other aliases.
+        Only used when ``negative_gradient_method="bh"`` or its other aliases.
         This is the trade-off parameter between speed and accuracy of the tree
         approximation method. Typical values range from 0.2 to 0.8. The value 0
         indicates that no approximation is to be made and produces exact results
         also producing longer runtime. See [2]_ for more details.
     n_interpolation_points: int
-        Only used when ``negative_gradient_method='fft'`` or its other aliases.
+        Only used when ``negative_gradient_method="fft"`` or its other aliases.
         The number of interpolation points to use within each grid cell for
         interpolation based t-SNE. It is highly recommended leaving this value
         at the default 3 as otherwise the interpolation may suffer from the
@@ -497,7 +497,7 @@ class TSNE(BaseEstimator):
         Runge phenomenon and should always be preferred. This is described in
         detail by Linderman [2]_.
     min_num_intervals: int
-        Only used when ``negative_gradient_method='fft'`` or its other aliases.
+        Only used when ``negative_gradient_method="fft"`` or its other aliases.
         The interpolation approximation method splits the embedding space into a
         grid, where the number of grid cells is governed by
         ``ints_in_interval``. Sometimes, especially during early stages of
@@ -506,7 +506,7 @@ class TSNE(BaseEstimator):
         number specified here. Note that larger values will produce more precise
         approximations but will have longer runtime.
     ints_in_interval: float
-        Only used when ``negative_gradient_method='fft'`` or its other aliases.
+        Only used when ``negative_gradient_method="fft"`` or its other aliases.
         Since the coordinate range of the embedding changes during optimization,
         this value tells us how many integers should appear in a single e.g.
         setting this value to 3 means that the intervals will appear as follows:
@@ -588,9 +588,9 @@ class TSNE(BaseEstimator):
                  early_exaggeration_iter=250, early_exaggeration=12,
                  n_iter=750, exaggeration=None,
                  theta=0.5, n_interpolation_points=3, min_num_intervals=10,
-                 ints_in_interval=1, initialization='pca', metric='euclidean',
+                 ints_in_interval=1, initialization="pca", metric="euclidean",
                  metric_params=None, initial_momentum=0.5, final_momentum=0.8,
-                 n_jobs=1, neighbors='approx', negative_gradient_method='fft',
+                 n_jobs=1, neighbors="approx", negative_gradient_method="fft",
                  callbacks=None, callbacks_every_iters=50, random_state=None):
         self.n_components = n_components
         self.perplexity = perplexity
@@ -657,7 +657,7 @@ class TSNE(BaseEstimator):
             )
 
         except OptimizationInterrupt as ex:
-            log.info('Optimization was interrupted with callback.')
+            log.info("Optimization was interrupted with callback.")
             embedding = ex.final_embedding
 
         return embedding
@@ -687,20 +687,20 @@ class TSNE(BaseEstimator):
             variance = np.var(embedding, axis=0)
             if any(variance > 1e-4):
                 log.warning(
-                    'Variance of embedding is greater than 0.0001. Initial '
-                    'embeddings with high variance may have display poor convergence.'
+                    "Variance of embedding is greater than 0.0001. Initial "
+                    "embeddings with high variance may have display poor convergence."
                 )
 
-        elif self.initialization == 'pca':
+        elif self.initialization == "pca":
             embedding = initialization_scheme.pca(
                 X, self.n_components, scale_down=True, random_state=self.random_state,
             )
-        elif self.initialization == 'random':
+        elif self.initialization == "random":
             embedding = initialization_scheme.random(
                 X.shape[0], self.n_components, random_state=self.random_state,
             )
         else:
-            raise ValueError('Unrecognized initialization scheme `%s`.' % self.initialization)
+            raise ValueError("Unrecognized initialization scheme `%s`." % self.initialization)
 
         affinities = PerplexityBasedNN(
             X, self.perplexity, method=self.neighbors_method,
@@ -710,24 +710,24 @@ class TSNE(BaseEstimator):
         gradient_descent_params = {
             # Degrees of freedom of the Student's t-distribution. The
             # suggestion degrees_of_freedom = n_components - 1 comes from [3]_.
-            'dof':  max(self.n_components - 1, 1),
+            "dof":  max(self.n_components - 1, 1),
 
-            'negative_gradient_method': self.negative_gradient_method,
-            'learning_rate': self.learning_rate,
+            "negative_gradient_method": self.negative_gradient_method,
+            "learning_rate": self.learning_rate,
             # By default, use the momentum used in unexaggerated phase
-            'momentum': self.final_momentum,
+            "momentum": self.final_momentum,
 
             # Barnes-Hut params
-            'theta': self.theta,
+            "theta": self.theta,
             # Interpolation params
-            'n_interpolation_points': self.n_interpolation_points,
-            'min_num_intervals': self.min_num_intervals,
-            'ints_in_interval': self.ints_in_interval,
+            "n_interpolation_points": self.n_interpolation_points,
+            "min_num_intervals": self.min_num_intervals,
+            "ints_in_interval": self.ints_in_interval,
 
-            'n_jobs': self.n_jobs,
+            "n_jobs": self.n_jobs,
             # Callback params
-            'callbacks': self.callbacks,
-            'callbacks_every_iters': self.callbacks_every_iters,
+            "callbacks": self.callbacks,
+            "callbacks_every_iters": self.callbacks_every_iters,
         }
 
         return TSNEEmbedding(embedding, affinities, self.random_state, **gradient_descent_params)
@@ -735,7 +735,7 @@ class TSNE(BaseEstimator):
 
 def kl_divergence_bh(embedding, P, dof, bh_params, reference_embedding=None,
                      should_eval_error=False, n_jobs=1, **_):
-    gradient = np.zeros_like(embedding, dtype=np.float64, order='C')
+    gradient = np.zeros_like(embedding, dtype=np.float64, order="C")
 
     # In the event that we wish to embed new points into an existing embedding
     # using simple optimization, we compute optimize the new embedding points
@@ -767,7 +767,7 @@ def kl_divergence_bh(embedding, P, dof, bh_params, reference_embedding=None,
 
 def kl_divergence_fft(embedding, P, dof, fft_params, reference_embedding=None,
                       should_eval_error=False, n_jobs=1, **_):
-    gradient = np.zeros_like(embedding, dtype=np.float64, order='C')
+    gradient = np.zeros_like(embedding, dtype=np.float64, order="C")
 
     # Compute negative gradient.
     if embedding.ndim == 1 or embedding.shape[1] == 1:
@@ -785,8 +785,8 @@ def kl_divergence_fft(embedding, P, dof, fft_params, reference_embedding=None,
             sum_Q = _tsne.estimate_negative_gradient_fft_2d(
                 embedding, gradient, **fft_params)
     else:
-        raise RuntimeError('Interpolation based t-SNE for >2 dimensions is '
-                           'currently unsupported (and generally a bad idea)')
+        raise RuntimeError("Interpolation based t-SNE for >2 dimensions is "
+                           "currently unsupported (and generally a bad idea)")
 
     # The positive gradient function needs a reference embedding always
     if reference_embedding is None:
@@ -902,22 +902,22 @@ class gradient_descent:
 
         """
         assert isinstance(embedding, np.ndarray), \
-            '`embedding` must be an instance of `np.ndarray`. Got `%s` instead' \
+            "`embedding` must be an instance of `np.ndarray`. Got `%s` instead" \
             % type(embedding)
 
         if reference_embedding is not None:
             assert isinstance(reference_embedding, np.ndarray), \
-                '`reference_embedding` must be an instance of `np.ndarray`. Got ' \
-                '`%s` instead' % type(reference_embedding)
+                "`reference_embedding` must be an instance of `np.ndarray`. Got " \
+                "`%s` instead" % type(reference_embedding)
 
         update = np.zeros_like(embedding)
         if self.gains is None:
             self.gains = np.ones_like(embedding)
 
-        bh_params = {'theta': theta}
-        fft_params = {'n_interpolation_points': n_interpolation_points,
-                      'min_num_intervals': min_num_intervals,
-                      'ints_in_interval': ints_in_interval}
+        bh_params = {"theta": theta}
+        fft_params = {"n_interpolation_points": n_interpolation_points,
+                      "min_num_intervals": min_num_intervals,
+                      "ints_in_interval": ints_in_interval}
 
         # Lie about the P values for bigger attraction forces
         if exaggeration is None:
@@ -930,7 +930,7 @@ class gradient_descent:
         if isinstance(callbacks, Iterable):
             for callback in callbacks:
                 # Only call function if present on object
-                getattr(callback, 'optimzation_about_to_start', lambda: ...)()
+                getattr(callback, "optimzation_about_to_start", lambda: ...)()
 
         for iteration in range(n_iter):
             should_call_callback = use_callbacks and (iteration + 1) % callbacks_every_iters == 0
@@ -967,7 +967,7 @@ class gradient_descent:
             embedding -= np.mean(embedding, axis=0)
 
             if np.linalg.norm(gradient) < min_grad_norm:
-                log.info('Gradient norm eps reached. Finished.')
+                log.info("Gradient norm eps reached. Finished.")
                 break
 
         # Make sure to un-exaggerate P so it's not corrupted in future runs
