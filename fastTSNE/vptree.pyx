@@ -50,7 +50,7 @@ cdef class VPTree:
     def query(self, double[:, ::1] query, int K, Py_ssize_t num_threads=1):
         cdef Py_ssize_t i, j, N = query.shape[0], n_dim = query.shape[1]
         # Define objects to be returned to python
-        cdef Py_ssize_t[:, ::1] indices = np.empty((N, K), dtype=np.int64)
+        cdef np.int64_t[:, ::1] indices = np.empty((N, K), dtype=np.int64)
         cdef double[:, ::1] distances = np.empty((N, K), dtype=np.float64)
         # Define objects to be used internally in vptree
         cdef vector[DataPoint]* indices_
@@ -73,4 +73,4 @@ cdef class VPTree:
 
             del indices_, distances_
 
-        return np.asarray(indices), np.asarray(distances)
+        return np.asarray(indices, dtype=np.int64), np.asarray(distances, dtype=np.float64)
