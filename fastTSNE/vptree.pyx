@@ -45,7 +45,7 @@ cdef class VPTree:
 
         self.tree.create(data_points)
 
-    def search(self, double[:, ::1] query, int K, Py_ssize_t num_threads=1):
+    def query(self, double[:, ::1] query, int K, Py_ssize_t num_threads=1):
         cdef Py_ssize_t i, j, N = query.shape[0], n_dim = query.shape[1]
         # Define objects to be returned to python
         cdef Py_ssize_t[:, ::1] indices = np.empty((N, K), dtype=np.int64)

@@ -2599,7 +2599,7 @@ static PyObject *__pyx_n_s_update;
 static int __pyx_pf_8fastTSNE_6vptree_6VPTree___cinit__(struct __pyx_obj_8fastTSNE_6vptree_VPTree *__pyx_v_self); /* proto */
 static void __pyx_pf_8fastTSNE_6vptree_6VPTree_2__dealloc__(struct __pyx_obj_8fastTSNE_6vptree_VPTree *__pyx_v_self); /* proto */
 static int __pyx_pf_8fastTSNE_6vptree_6VPTree_4__init__(struct __pyx_obj_8fastTSNE_6vptree_VPTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_data); /* proto */
-static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6search(struct __pyx_obj_8fastTSNE_6vptree_VPTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_query, int __pyx_v_K, Py_ssize_t __pyx_v_num_threads); /* proto */
+static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fastTSNE_6vptree_VPTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_query, int __pyx_v_K, Py_ssize_t __pyx_v_num_threads); /* proto */
 static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_8__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_8fastTSNE_6vptree_VPTree *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_10__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_8fastTSNE_6vptree_VPTree *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
 static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
@@ -2988,7 +2988,7 @@ static PyObject *__pyx_f_8fastTSNE_6vptree_6VPTree_create(struct __pyx_obj_8fast
  * 
  *         self.tree.create(data_points)             # <<<<<<<<<<<<<<
  * 
- *     def search(self, double[:, ::1] query, int K, Py_ssize_t num_threads=1):
+ *     def query(self, double[:, ::1] query, int K, Py_ssize_t num_threads=1):
  */
   __pyx_v_self->tree->create(__pyx_v_data_points);
 
@@ -3016,20 +3016,20 @@ static PyObject *__pyx_f_8fastTSNE_6vptree_6VPTree_create(struct __pyx_obj_8fast
 /* "fastTSNE/vptree.pyx":48
  *         self.tree.create(data_points)
  * 
- *     def search(self, double[:, ::1] query, int K, Py_ssize_t num_threads=1):             # <<<<<<<<<<<<<<
+ *     def query(self, double[:, ::1] query, int K, Py_ssize_t num_threads=1):             # <<<<<<<<<<<<<<
  *         cdef Py_ssize_t i, j, N = query.shape[0], n_dim = query.shape[1]
  *         # Define objects to be returned to python
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8fastTSNE_6vptree_6VPTree_7search(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_pw_8fastTSNE_6vptree_6VPTree_7search(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8fastTSNE_6vptree_6VPTree_7query(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_8fastTSNE_6vptree_6VPTree_7query(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   __Pyx_memviewslice __pyx_v_query = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_v_K;
   Py_ssize_t __pyx_v_num_threads;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("search (wrapper)", 0);
+  __Pyx_RefNannySetupContext("query (wrapper)", 0);
   {
     static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_query,&__pyx_n_s_K,&__pyx_n_s_num_threads,0};
     PyObject* values[3] = {0,0,0};
@@ -3055,7 +3055,7 @@ static PyObject *__pyx_pw_8fastTSNE_6vptree_6VPTree_7search(PyObject *__pyx_v_se
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_K)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("search", 0, 2, 3, 1); __PYX_ERR(0, 48, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("query", 0, 2, 3, 1); __PYX_ERR(0, 48, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -3065,7 +3065,7 @@ static PyObject *__pyx_pw_8fastTSNE_6vptree_6VPTree_7search(PyObject *__pyx_v_se
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "search") < 0)) __PYX_ERR(0, 48, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "query") < 0)) __PYX_ERR(0, 48, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -3087,20 +3087,20 @@ static PyObject *__pyx_pw_8fastTSNE_6vptree_6VPTree_7search(PyObject *__pyx_v_se
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("search", 0, 2, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 48, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("query", 0, 2, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 48, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("fastTSNE.vptree.VPTree.search", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("fastTSNE.vptree.VPTree.query", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8fastTSNE_6vptree_6VPTree_6search(((struct __pyx_obj_8fastTSNE_6vptree_VPTree *)__pyx_v_self), __pyx_v_query, __pyx_v_K, __pyx_v_num_threads);
+  __pyx_r = __pyx_pf_8fastTSNE_6vptree_6VPTree_6query(((struct __pyx_obj_8fastTSNE_6vptree_VPTree *)__pyx_v_self), __pyx_v_query, __pyx_v_K, __pyx_v_num_threads);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6search(struct __pyx_obj_8fastTSNE_6vptree_VPTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_query, int __pyx_v_K, Py_ssize_t __pyx_v_num_threads) {
+static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fastTSNE_6vptree_VPTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_query, int __pyx_v_K, Py_ssize_t __pyx_v_num_threads) {
   Py_ssize_t __pyx_v_i;
   Py_ssize_t __pyx_v_j;
   Py_ssize_t __pyx_v_N;
@@ -3139,12 +3139,12 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6search(struct __pyx_obj_8fa
   Py_ssize_t __pyx_t_24;
   Py_ssize_t __pyx_t_25;
   PyObject *__pyx_t_26 = NULL;
-  __Pyx_RefNannySetupContext("search", 0);
-  __Pyx_TraceCall("search", __pyx_f[0], 48, 0, __PYX_ERR(0, 48, __pyx_L1_error));
+  __Pyx_RefNannySetupContext("query", 0);
+  __Pyx_TraceCall("query", __pyx_f[0], 48, 0, __PYX_ERR(0, 48, __pyx_L1_error));
 
   /* "fastTSNE/vptree.pyx":49
  * 
- *     def search(self, double[:, ::1] query, int K, Py_ssize_t num_threads=1):
+ *     def query(self, double[:, ::1] query, int K, Py_ssize_t num_threads=1):
  *         cdef Py_ssize_t i, j, N = query.shape[0], n_dim = query.shape[1]             # <<<<<<<<<<<<<<
  *         # Define objects to be returned to python
  *         cdef Py_ssize_t[:, ::1] indices = np.empty((N, K), dtype=np.int64)
@@ -3719,7 +3719,7 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6search(struct __pyx_obj_8fa
   /* "fastTSNE/vptree.pyx":48
  *         self.tree.create(data_points)
  * 
- *     def search(self, double[:, ::1] query, int K, Py_ssize_t num_threads=1):             # <<<<<<<<<<<<<<
+ *     def query(self, double[:, ::1] query, int K, Py_ssize_t num_threads=1):             # <<<<<<<<<<<<<<
  *         cdef Py_ssize_t i, j, N = query.shape[0], n_dim = query.shape[1]
  *         # Define objects to be returned to python
  */
@@ -3734,7 +3734,7 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6search(struct __pyx_obj_8fa
   __PYX_XDEC_MEMVIEW(&__pyx_t_6, 1);
   __PYX_XDEC_MEMVIEW(&__pyx_t_7, 1);
   __Pyx_XDECREF(__pyx_t_26);
-  __Pyx_AddTraceback("fastTSNE.vptree.VPTree.search", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("fastTSNE.vptree.VPTree.query", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __PYX_XDEC_MEMVIEW(&__pyx_v_indices, 1);
@@ -19665,7 +19665,7 @@ static void __pyx_tp_dealloc_8fastTSNE_6vptree_VPTree(PyObject *o) {
 }
 
 static PyMethodDef __pyx_methods_8fastTSNE_6vptree_VPTree[] = {
-  {"search", (PyCFunction)__pyx_pw_8fastTSNE_6vptree_6VPTree_7search, METH_VARARGS|METH_KEYWORDS, 0},
+  {"query", (PyCFunction)__pyx_pw_8fastTSNE_6vptree_6VPTree_7query, METH_VARARGS|METH_KEYWORDS, 0},
   {"__reduce_cython__", (PyCFunction)__pyx_pw_8fastTSNE_6vptree_6VPTree_9__reduce_cython__, METH_NOARGS, 0},
   {"__setstate_cython__", (PyCFunction)__pyx_pw_8fastTSNE_6vptree_6VPTree_11__setstate_cython__, METH_O, 0},
   {0, 0, 0, 0}

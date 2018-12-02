@@ -79,7 +79,7 @@ class VPTree(KNNIndex):
 
     def query_train(self, data, k):
         data = np.ascontiguousarray(data, dtype=np.float64)
-        indices, distances = self.index.search(data, k, num_threads=self.n_jobs)
+        indices, distances = self.index.query(data, k, num_threads=self.n_jobs)
         return indices[:, 1:], distances[:, 1:]
 
     def query(self, query, k):
