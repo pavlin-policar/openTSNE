@@ -2521,7 +2521,7 @@ static CYTHON_INLINE void __pyx_f_8fastTSNE_9quad_tree_update_center_of_mass(__p
  * 
  * 
  * cdef void add_point_to(Node * node, double * point):             # <<<<<<<<<<<<<<
- *     # If the node is a leaf node and empty, we're done
+ *     # If the node is a leaf node and empty, we"re done
  *     if node.is_leaf and node.num_points == 0 or is_duplicate(node, point):
  */
 
@@ -2536,7 +2536,7 @@ static void __pyx_f_8fastTSNE_9quad_tree_add_point_to(__pyx_t_8fastTSNE_9quad_tr
 
   /* "fastTSNE/quad_tree.pyx":81
  * cdef void add_point_to(Node * node, double * point):
- *     # If the node is a leaf node and empty, we're done
+ *     # If the node is a leaf node and empty, we"re done
  *     if node.is_leaf and node.num_points == 0 or is_duplicate(node, point):             # <<<<<<<<<<<<<<
  *         update_center_of_mass(node, point)
  *         return
@@ -2559,7 +2559,7 @@ static void __pyx_f_8fastTSNE_9quad_tree_add_point_to(__pyx_t_8fastTSNE_9quad_tr
   if (__pyx_t_1) {
 
     /* "fastTSNE/quad_tree.pyx":82
- *     # If the node is a leaf node and empty, we're done
+ *     # If the node is a leaf node and empty, we"re done
  *     if node.is_leaf and node.num_points == 0 or is_duplicate(node, point):
  *         update_center_of_mass(node, point)             # <<<<<<<<<<<<<<
  *         return
@@ -2578,7 +2578,7 @@ static void __pyx_f_8fastTSNE_9quad_tree_add_point_to(__pyx_t_8fastTSNE_9quad_tr
 
     /* "fastTSNE/quad_tree.pyx":81
  * cdef void add_point_to(Node * node, double * point):
- *     # If the node is a leaf node and empty, we're done
+ *     # If the node is a leaf node and empty, we"re done
  *     if node.is_leaf and node.num_points == 0 or is_duplicate(node, point):             # <<<<<<<<<<<<<<
  *         update_center_of_mass(node, point)
  *         return
@@ -2662,7 +2662,7 @@ static void __pyx_f_8fastTSNE_9quad_tree_add_point_to(__pyx_t_8fastTSNE_9quad_tr
  * 
  * 
  * cdef void add_point_to(Node * node, double * point):             # <<<<<<<<<<<<<<
- *     # If the node is a leaf node and empty, we're done
+ *     # If the node is a leaf node and empty, we"re done
  *     if node.is_leaf and node.num_points == 0 or is_duplicate(node, point):
  */
 

@@ -17,9 +17,6 @@ except ImportError:
 
 import numpy as np
 
-USE_CYTHON = os.environ.get("USE_CYTHON", False)
-ext = "pyx" if USE_CYTHON else "c"
-
 
 def has_c_library(library, extension=".c"):
     """Check whether a C/C++ library is available on the system to the compiler.
@@ -73,6 +70,16 @@ class CythonBuildExt(build_ext):
     }
 
     def build_extensions(self):
+        # Automatically append the file extension based on language.
+        # ``cythonize`` does this for us automatically, so it's not necessary if
+        # that was run
+        if not HAS_CYTHON:
+            for extension in self.extensions:
+                for idx, source in enumerate(extension.sources):
+                    base, ext = os.path.splitext(source)
+                    base += ".cpp" if extension.language == "c++" else ".c"
+                    extension.sources[idx] = base
+
         # Optimization compiler/linker flags are added appropriately
         flags = self.COMPILER_FLAGS[self.compiler.compiler_type]
         compile_flags = [flags["optimize"]]
@@ -82,7 +89,7 @@ class CythonBuildExt(build_ext):
         def map_flags(ls):
             return list(map(lambda flag: flags.get(flag, flag), ls))
 
-        for extension in extensions:
+        for extension in self.extensions:
             extension.extra_compile_args = map_flags(extension.extra_compile_args)
             extension.extra_link_args = map_flags(extension.extra_link_args)
 
@@ -110,17 +117,17 @@ class CythonBuildExt(build_ext):
 
 
 extensions = [
-    Extension("fastTSNE.vptree", ["fastTSNE/vptree.%s" % ext], language="c++"),
-    Extension("fastTSNE.quad_tree", ["fastTSNE/quad_tree.%s" % ext]),
-    Extension("fastTSNE._tsne", ["fastTSNE/_tsne.%s" % ext]),
-    Extension("fastTSNE.kl_divergence", ["fastTSNE/kl_divergence.%s" % ext]),
+    Extension("fastTSNE.vptree", ["fastTSNE/vptree.pyx"], language="c++"),
+    Extension("fastTSNE.quad_tree", ["fastTSNE/quad_tree.pyx"]),
+    Extension("fastTSNE._tsne", ["fastTSNE/_tsne.pyx"]),
+    Extension("fastTSNE.kl_divergence", ["fastTSNE/kl_divergence.pyx"]),
 ]
 
 # Check if we have access to FFTW3 and if so, use that implementation
 if has_c_library("fftw3"):
     extensions.append(
         Extension("fastTSNE._matrix_mul.matrix_mul",
-                  ["fastTSNE/_matrix_mul/matrix_mul_fftw3.%s" % ext],
+                  ["fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx"],
                   extra_compile_args=["fftw", "math"],
                   extra_link_args=["fftw", "math"],
                   )
@@ -128,13 +135,15 @@ if has_c_library("fftw3"):
 else:
     extensions.append(
         Extension("fastTSNE._matrix_mul.matrix_mul",
-                  ["fastTSNE/_matrix_mul/matrix_mul_numpy.%s" % ext])
+                  ["fastTSNE/_matrix_mul/matrix_mul_numpy.pyx"])
     )
 
-
-if USE_CYTHON:
+try:
     from Cython.Build import cythonize
     extensions = cythonize(extensions)
+    HAS_CYTHON = True
+except ImportError:
+    HAS_CYTHON = False
 
 setup(
     name="fastTSNE",
