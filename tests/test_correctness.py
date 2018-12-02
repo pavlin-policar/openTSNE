@@ -10,7 +10,7 @@ from fastTSNE import tsne
 from fastTSNE.callbacks import VerifyExaggerationError
 from fastTSNE.tsne import TSNEEmbedding
 
-TSNE = partial(tsne.TSNE, neighbors='exact', negative_gradient_method='bh')
+TSNE = partial(tsne.TSNE, neighbors="exact", negative_gradient_method="bh")
 
 
 class TestTSNECorrectness(unittest.TestCase):
@@ -57,11 +57,11 @@ class TestTSNECorrectness(unittest.TestCase):
 
     def test_iris(self):
         iris = datasets.load_iris()
-        x, y = iris['data'], iris['target']
+        x, y = iris["data"], iris["target"]
 
         # Evaluate tSNE optimization using a KNN classifier
         knn = KNeighborsClassifier(n_neighbors=10)
-        tsne = TSNE(perplexity=30, initialization='random', random_state=0)
+        tsne = TSNE(perplexity=30, initialization="random", random_state=0)
 
         # Prepare a random initialization
         embedding = tsne.prepare_initial(x)

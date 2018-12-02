@@ -62,7 +62,7 @@ def _handle_nice_params(optim_params: dict) -> None:
         n_jobs = n_cores + n_jobs + 1
 
     # If the number of jobs, after this correction is still <= 0, then the user
-    # probably thought they had more cores, so we"ll default to 1
+    # probably thought they had more cores, so we'll default to 1
     if n_jobs <= 0:
         log.warning("`n_jobs` receieved value %d but only %d cores are available. "
                     "Defaulting to single job." % (optim_params["n_jobs"], n_cores))
@@ -476,8 +476,8 @@ class TSNE(BaseEstimator):
         The number of iterations to run in the normal optimization regime.
     exaggeration: Optional[int]
         The exaggeration factor to be used during the normal optmimization
-        phase. Standard implementation don"t use this exaggeration and it
-        typically isn"t necessary for smaller data sets, but it has been shown
+        phase. Standard implementation don't use this exaggeration and it
+        typically isn't necessary for smaller data sets, but it has been shown
         that for larger data sets, using some exaggeration is necessary in order
         to obtain good embeddings.
     theta: float

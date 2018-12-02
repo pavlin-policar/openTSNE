@@ -8,8 +8,8 @@ from fastTSNE import affinity
 
 affinity.log.setLevel(logging.ERROR)
 
-Multiscale = partial(affinity.Multiscale, method='exact')
-PerplexityBasedNN = partial(affinity.PerplexityBasedNN, method='exact')
+Multiscale = partial(affinity.Multiscale, method="exact")
+PerplexityBasedNN = partial(affinity.PerplexityBasedNN, method="exact")
 
 
 class TestPerplexityBased(unittest.TestCase):
@@ -44,8 +44,8 @@ class TestPerplexityBased(unittest.TestCase):
         reduced_P = aff.P.copy()
         self.assertTrue(reduced_P.nnz >= n_samples * k_neighbors)
         self.assertTrue(reduced_P.nnz < original_P.nnz,
-                        'Lower perplexities should consider less neighbors, '
-                        'resulting in a sparser affinity matrix')
+                        "Lower perplexities should consider less neighbors, "
+                        "resulting in a sparser affinity matrix")
 
         # Raising the perplexity above the initial value would need to recompute
         # the nearest neighbors, so it should raise an error
@@ -66,25 +66,25 @@ class TestMultiscale(unittest.TestCase):
         ms = Multiscale(self.x, perplexities=[20])
         np.testing.assert_array_equal(
             ms.perplexities, [20],
-            'Incorrectly changed perplexity that was within a valid range',
+            "Incorrectly changed perplexity that was within a valid range",
         )
 
         ms = Multiscale(self.x, perplexities=[20, 40])
         np.testing.assert_array_equal(
             ms.perplexities, [20, 30],
-            'Did not lower large perplexity.'
+            "Did not lower large perplexity."
         )
 
         ms = Multiscale(self.x, perplexities=[20, 40, 60])
         np.testing.assert_array_equal(
             ms.perplexities, [20, 30],
-            'Did not drop large perplexities when more than one was too large.'
+            "Did not drop large perplexities when more than one was too large."
         )
 
         ms = Multiscale(self.x, perplexities=[20, 30, 40, 60])
         np.testing.assert_array_equal(
             ms.perplexities, [20, 30],
-            'Did not drop duplicate corrected perplexity.'
+            "Did not drop duplicate corrected perplexity."
         )
 
     def test_handles_changing_perplexities(self):
@@ -110,8 +110,8 @@ class TestMultiscale(unittest.TestCase):
         reduced_P = ms.P.copy()
         self.assertTrue(reduced_P.nnz >= n_samples * k_neighbors)
         self.assertTrue(reduced_P.nnz < original_P.nnz,
-                        'Lower perplexities should consider less neighbors, '
-                        'resulting in a sparser affinity matrix')
+                        "Lower perplexities should consider less neighbors, "
+                        "resulting in a sparser affinity matrix")
 
         # Raising the perplexity above the initial value would need to recompute
         # the nearest neighbors, so it should raise an error

@@ -94,10 +94,10 @@ class PerplexityBasedNN(Affinities):
         self.n_jobs = n_jobs
 
     def set_perplexity(self, new_perplexity):
-        # If the value hasn"t changed, there's nothing to do
+        # If the value hasn't changed, there's nothing to do
         if new_perplexity == self.perplexity:
             return
-        # Verify that the perplexity isn"t too large
+        # Verify that the perplexity isn't too large
         new_perplexity = self.check_perplexity(new_perplexity)
         # Recompute the affinity matrix
         k_neighbors = min(self.n_samples - 1, int(3 * new_perplexity))
@@ -379,7 +379,7 @@ class MultiscaleMixture(Affinities):
 
         If a perplexity is too large, it is corrected to the largest allowed
         value. It is then inserted into the list of perplexities only if that
-        value doesn"t already exist in the list.
+        value doesn't already exist in the list.
 
         """
         usable_perplexities = []
