@@ -9,6 +9,8 @@ from cython.parallel import prange
 import numpy as np
 cimport numpy as np
 
+cdef extern from *:
+    ctypedef int euclidean_distance_t "euclidean_distance"
 
 cdef extern from "vptree.h":
     cdef cppclass DataPoint:
@@ -17,19 +19,19 @@ cdef extern from "vptree.h":
         DataPoint(DataPoint&) nogil
         int index() nogil
 
-    cdef cppclass VpTree[T]:
+    cdef cppclass VpTree[T, F]:
         VpTree() nogil except +
         void create(vector[T]&) nogil
         void search(T, int, vector[T]*, vector[double]*) nogil
 
 
 cdef class VPTree:
-    cdef VpTree[DataPoint]* tree
+    cdef VpTree[DataPoint, euclidean_distance_t]* tree
 
     valid_metrics = ["euclidean"]
 
     def __cinit__(self):
-        self.tree = new VpTree[DataPoint]()
+        self.tree = new VpTree[DataPoint, euclidean_distance_t]()
 
     def __dealloc__(self):
         del self.tree

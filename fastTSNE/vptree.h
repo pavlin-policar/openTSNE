@@ -74,7 +74,7 @@ inline double euclidean_distance(const DataPoint &t1, const DataPoint &t2) {
 }
 
 
-template<typename T>
+template<typename T, double (*distance)( const DataPoint&, const DataPoint&)>
 class VpTree
 {
 public:
@@ -157,7 +157,7 @@ private:
         const T& item;
         explicit DistanceComparator(const T& item) : item(item) {}
         bool operator()(const T& a, const T& b) {
-            return euclidean_distance(item, a) < euclidean_distance(item, b);
+            return distance(item, a) < distance(item, b);
         }
     };
 
@@ -186,7 +186,7 @@ private:
                              DistanceComparator(_items[lower]));
 
             // Threshold of the new node will be the distance to the median
-            node->threshold = euclidean_distance(_items[lower], _items[median]);
+            node->threshold = distance(_items[lower], _items[median]);
 
             // Recursively build tree
             node->index = lower;
@@ -204,7 +204,7 @@ private:
         if (node == NULL) return;    // indicates that we're done here
 
         // Compute distance between target and current node
-        double dist = euclidean_distance(_items[node->index], target);
+        double dist = distance(_items[node->index], target);
 
         // If current node within radius tau
         if (dist < tau) {
