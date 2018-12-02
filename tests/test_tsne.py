@@ -229,25 +229,6 @@ class TestTSNEParameterFlow(unittest.TestCase):
         self.assertEqual(nndescent.call_count, 1)
         check_call_contains_kwargs(nndescent.mock_calls[0], {"metric": metric})
 
-    @patch("fastTSNE.pynndescent.NNDescent")
-    def test_nndescent_mahalanobis_distance(self, nndescent: MagicMock):
-        """Distance metrics and additional params should be correctly passed down to NN descent"""
-        metric = "mahalanobis"
-        C = np.cov(self.x)
-
-        tsne = TSNE(metric=metric, metric_params={"V": C}, neighbors="approx")
-
-        # We don't care about what happens later, just that the NN method is
-        # properly called
-        nndescent.side_effect = InterruptedError()
-        try:
-            tsne.prepare_initial(self.x)
-        except InterruptedError:
-            pass
-
-        self.assertEqual(nndescent.call_count, 1)
-        check_call_contains_kwargs(nndescent.mock_calls[0], {"metric": metric})
-
     def test_raises_error_on_unrecognized_metric(self):
         """Unknown distance metric should raise error"""
         tsne = TSNE(metric="imaginary", neighbors="exact")

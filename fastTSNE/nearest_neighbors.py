@@ -32,9 +32,9 @@ from . import pynndescent
 
 # To keep things simple and consistent, we'll only support distances that are
 # included in both exact and approximation nearest neighbor search libraries
-__ball_tree_metrics = set(neighbors.BallTree.valid_metrics)
+__vptree_metrics = set(c_vptree.valid_metrics)
 __nndescent_metrics = set(pynndescent.distances.named_distances)
-VALID_METRICS = sorted(list(__ball_tree_metrics & __nndescent_metrics))
+VALID_METRICS = sorted(list(__vptree_metrics & __nndescent_metrics))
 
 
 class KNNIndex:

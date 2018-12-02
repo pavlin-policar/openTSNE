@@ -2435,6 +2435,7 @@ static const char __pyx_k_pyx_type[] = "__pyx_type";
 static const char __pyx_k_setstate[] = "__setstate__";
 static const char __pyx_k_TypeError[] = "TypeError";
 static const char __pyx_k_enumerate[] = "enumerate";
+static const char __pyx_k_euclidean[] = "euclidean";
 static const char __pyx_k_pyx_state[] = "__pyx_state";
 static const char __pyx_k_reduce_ex[] = "__reduce_ex__";
 static const char __pyx_k_IndexError[] = "IndexError";
@@ -2450,6 +2451,7 @@ static const char __pyx_k_pyx_checksum[] = "__pyx_checksum";
 static const char __pyx_k_stringsource[] = "stringsource";
 static const char __pyx_k_pyx_getbuffer[] = "__pyx_getbuffer";
 static const char __pyx_k_reduce_cython[] = "__reduce_cython__";
+static const char __pyx_k_valid_metrics[] = "valid_metrics";
 static const char __pyx_k_View_MemoryView[] = "View.MemoryView";
 static const char __pyx_k_allocate_buffer[] = "allocate_buffer";
 static const char __pyx_k_dtype_is_object[] = "dtype_is_object";
@@ -2535,6 +2537,7 @@ static PyObject *__pyx_n_s_empty;
 static PyObject *__pyx_n_s_encode;
 static PyObject *__pyx_n_s_enumerate;
 static PyObject *__pyx_n_s_error;
+static PyObject *__pyx_n_s_euclidean;
 static PyObject *__pyx_n_s_flags;
 static PyObject *__pyx_n_s_float64;
 static PyObject *__pyx_n_s_format;
@@ -2596,6 +2599,7 @@ static PyObject *__pyx_kp_s_unable_to_allocate_shape_and_str;
 static PyObject *__pyx_kp_u_unknown_dtype_code_in_numpy_pxd;
 static PyObject *__pyx_n_s_unpack;
 static PyObject *__pyx_n_s_update;
+static PyObject *__pyx_n_s_valid_metrics;
 static int __pyx_pf_8fastTSNE_6vptree_6VPTree___cinit__(struct __pyx_obj_8fastTSNE_6vptree_VPTree *__pyx_v_self); /* proto */
 static void __pyx_pf_8fastTSNE_6vptree_6VPTree_2__dealloc__(struct __pyx_obj_8fastTSNE_6vptree_VPTree *__pyx_v_self); /* proto */
 static int __pyx_pf_8fastTSNE_6vptree_6VPTree_4__init__(struct __pyx_obj_8fastTSNE_6vptree_VPTree *__pyx_v_self, __Pyx_memviewslice __pyx_v_data); /* proto */
@@ -2696,8 +2700,8 @@ static PyObject *__pyx_tuple__39;
 static PyObject *__pyx_codeobj__33;
 /* Late includes */
 
-/* "fastTSNE/vptree.pyx":29
- *     cdef VpTree[DataPoint]* tree
+/* "fastTSNE/vptree.pyx":31
+ *     valid_metrics = ["euclidean"]
  * 
  *     def __cinit__(self):             # <<<<<<<<<<<<<<
  *         self.tree = new VpTree[DataPoint]()
@@ -2726,9 +2730,9 @@ static int __pyx_pf_8fastTSNE_6vptree_6VPTree___cinit__(struct __pyx_obj_8fastTS
   __Pyx_RefNannyDeclarations
   VpTree<DataPoint>  *__pyx_t_1;
   __Pyx_RefNannySetupContext("__cinit__", 0);
-  __Pyx_TraceCall("__cinit__", __pyx_f[0], 29, 0, __PYX_ERR(0, 29, __pyx_L1_error));
+  __Pyx_TraceCall("__cinit__", __pyx_f[0], 31, 0, __PYX_ERR(0, 31, __pyx_L1_error));
 
-  /* "fastTSNE/vptree.pyx":30
+  /* "fastTSNE/vptree.pyx":32
  * 
  *     def __cinit__(self):
  *         self.tree = new VpTree[DataPoint]()             # <<<<<<<<<<<<<<
@@ -2739,12 +2743,12 @@ static int __pyx_pf_8fastTSNE_6vptree_6VPTree___cinit__(struct __pyx_obj_8fastTS
     __pyx_t_1 = new VpTree<DataPoint> ();
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 30, __pyx_L1_error)
+    __PYX_ERR(0, 32, __pyx_L1_error)
   }
   __pyx_v_self->tree = __pyx_t_1;
 
-  /* "fastTSNE/vptree.pyx":29
- *     cdef VpTree[DataPoint]* tree
+  /* "fastTSNE/vptree.pyx":31
+ *     valid_metrics = ["euclidean"]
  * 
  *     def __cinit__(self):             # <<<<<<<<<<<<<<
  *         self.tree = new VpTree[DataPoint]()
@@ -2763,7 +2767,7 @@ static int __pyx_pf_8fastTSNE_6vptree_6VPTree___cinit__(struct __pyx_obj_8fastTS
   return __pyx_r;
 }
 
-/* "fastTSNE/vptree.pyx":32
+/* "fastTSNE/vptree.pyx":34
  *         self.tree = new VpTree[DataPoint]()
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -2786,9 +2790,9 @@ static void __pyx_pf_8fastTSNE_6vptree_6VPTree_2__dealloc__(struct __pyx_obj_8fa
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__dealloc__", 0);
-  __Pyx_TraceCall("__dealloc__", __pyx_f[0], 32, 0, __PYX_ERR(0, 32, __pyx_L1_error));
+  __Pyx_TraceCall("__dealloc__", __pyx_f[0], 34, 0, __PYX_ERR(0, 34, __pyx_L1_error));
 
-  /* "fastTSNE/vptree.pyx":33
+  /* "fastTSNE/vptree.pyx":35
  * 
  *     def __dealloc__(self):
  *         del self.tree             # <<<<<<<<<<<<<<
@@ -2797,7 +2801,7 @@ static void __pyx_pf_8fastTSNE_6vptree_6VPTree_2__dealloc__(struct __pyx_obj_8fa
  */
   delete __pyx_v_self->tree;
 
-  /* "fastTSNE/vptree.pyx":32
+  /* "fastTSNE/vptree.pyx":34
  *         self.tree = new VpTree[DataPoint]()
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -2814,7 +2818,7 @@ static void __pyx_pf_8fastTSNE_6vptree_6VPTree_2__dealloc__(struct __pyx_obj_8fa
   __Pyx_RefNannyFinishContext();
 }
 
-/* "fastTSNE/vptree.pyx":35
+/* "fastTSNE/vptree.pyx":37
  *         del self.tree
  * 
  *     def __init__(self, double[:, ::1] data):             # <<<<<<<<<<<<<<
@@ -2848,18 +2852,18 @@ static int __pyx_pw_8fastTSNE_6vptree_6VPTree_5__init__(PyObject *__pyx_v_self, 
         else goto __pyx_L5_argtuple_error;
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 35, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 37, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 1) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
     }
-    __pyx_v_data = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_data.memview)) __PYX_ERR(0, 35, __pyx_L3_error)
+    __pyx_v_data = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_data.memview)) __PYX_ERR(0, 37, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 1, 1, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 35, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 1, 1, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 37, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("fastTSNE.vptree.VPTree.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -2878,20 +2882,20 @@ static int __pyx_pf_8fastTSNE_6vptree_6VPTree_4__init__(struct __pyx_obj_8fastTS
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__init__", 0);
-  __Pyx_TraceCall("__init__", __pyx_f[0], 35, 0, __PYX_ERR(0, 35, __pyx_L1_error));
+  __Pyx_TraceCall("__init__", __pyx_f[0], 37, 0, __PYX_ERR(0, 37, __pyx_L1_error));
 
-  /* "fastTSNE/vptree.pyx":36
+  /* "fastTSNE/vptree.pyx":38
  * 
  *     def __init__(self, double[:, ::1] data):
  *         self.create(data)             # <<<<<<<<<<<<<<
  * 
  *     cdef create(self, double[:, ::1] data):
  */
-  __pyx_t_1 = ((struct __pyx_vtabstruct_8fastTSNE_6vptree_VPTree *)__pyx_v_self->__pyx_vtab)->create(__pyx_v_self, __pyx_v_data); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 36, __pyx_L1_error)
+  __pyx_t_1 = ((struct __pyx_vtabstruct_8fastTSNE_6vptree_VPTree *)__pyx_v_self->__pyx_vtab)->create(__pyx_v_self, __pyx_v_data); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 38, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "fastTSNE/vptree.pyx":35
+  /* "fastTSNE/vptree.pyx":37
  *         del self.tree
  * 
  *     def __init__(self, double[:, ::1] data):             # <<<<<<<<<<<<<<
@@ -2913,7 +2917,7 @@ static int __pyx_pf_8fastTSNE_6vptree_6VPTree_4__init__(struct __pyx_obj_8fastTS
   return __pyx_r;
 }
 
-/* "fastTSNE/vptree.pyx":38
+/* "fastTSNE/vptree.pyx":40
  *         self.create(data)
  * 
  *     cdef create(self, double[:, ::1] data):             # <<<<<<<<<<<<<<
@@ -2936,9 +2940,9 @@ static PyObject *__pyx_f_8fastTSNE_6vptree_6VPTree_create(struct __pyx_obj_8fast
   Py_ssize_t __pyx_t_5;
   DataPoint __pyx_t_6;
   __Pyx_RefNannySetupContext("create", 0);
-  __Pyx_TraceCall("create", __pyx_f[0], 38, 0, __PYX_ERR(0, 38, __pyx_L1_error));
+  __Pyx_TraceCall("create", __pyx_f[0], 40, 0, __PYX_ERR(0, 40, __pyx_L1_error));
 
-  /* "fastTSNE/vptree.pyx":41
+  /* "fastTSNE/vptree.pyx":43
  *         # Put the data into a vector of ``DataPoint`` instances
  *         cdef vector[DataPoint] data_points
  *         cdef Py_ssize_t idx, N = data.shape[0], n_dim = data.shape[1]             # <<<<<<<<<<<<<<
@@ -2948,7 +2952,7 @@ static PyObject *__pyx_f_8fastTSNE_6vptree_6VPTree_create(struct __pyx_obj_8fast
   __pyx_v_N = (__pyx_v_data.shape[0]);
   __pyx_v_n_dim = (__pyx_v_data.shape[1]);
 
-  /* "fastTSNE/vptree.pyx":43
+  /* "fastTSNE/vptree.pyx":45
  *         cdef Py_ssize_t idx, N = data.shape[0], n_dim = data.shape[1]
  * 
  *         for idx in range(N):             # <<<<<<<<<<<<<<
@@ -2960,7 +2964,7 @@ static PyObject *__pyx_f_8fastTSNE_6vptree_6VPTree_create(struct __pyx_obj_8fast
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_idx = __pyx_t_3;
 
-    /* "fastTSNE/vptree.pyx":44
+    /* "fastTSNE/vptree.pyx":46
  * 
  *         for idx in range(N):
  *             data_points.push_back(DataPoint(n_dim, idx, &data[idx, 0]))             # <<<<<<<<<<<<<<
@@ -2973,17 +2977,17 @@ static PyObject *__pyx_f_8fastTSNE_6vptree_6VPTree_create(struct __pyx_obj_8fast
       __pyx_t_6 = DataPoint(__pyx_v_n_dim, __pyx_v_idx, (&(*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_data.data + __pyx_t_4 * __pyx_v_data.strides[0]) )) + __pyx_t_5)) )))));
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 44, __pyx_L1_error)
+      __PYX_ERR(0, 46, __pyx_L1_error)
     }
     try {
       __pyx_v_data_points.push_back(__pyx_t_6);
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 44, __pyx_L1_error)
+      __PYX_ERR(0, 46, __pyx_L1_error)
     }
   }
 
-  /* "fastTSNE/vptree.pyx":46
+  /* "fastTSNE/vptree.pyx":48
  *             data_points.push_back(DataPoint(n_dim, idx, &data[idx, 0]))
  * 
  *         self.tree.create(data_points)             # <<<<<<<<<<<<<<
@@ -2992,7 +2996,7 @@ static PyObject *__pyx_f_8fastTSNE_6vptree_6VPTree_create(struct __pyx_obj_8fast
  */
   __pyx_v_self->tree->create(__pyx_v_data_points);
 
-  /* "fastTSNE/vptree.pyx":38
+  /* "fastTSNE/vptree.pyx":40
  *         self.create(data)
  * 
  *     cdef create(self, double[:, ::1] data):             # <<<<<<<<<<<<<<
@@ -3013,7 +3017,7 @@ static PyObject *__pyx_f_8fastTSNE_6vptree_6VPTree_create(struct __pyx_obj_8fast
   return __pyx_r;
 }
 
-/* "fastTSNE/vptree.pyx":48
+/* "fastTSNE/vptree.pyx":50
  *         self.tree.create(data_points)
  * 
  *     def query(self, double[:, ::1] query, int K, Py_ssize_t num_threads=1):             # <<<<<<<<<<<<<<
@@ -3055,7 +3059,7 @@ static PyObject *__pyx_pw_8fastTSNE_6vptree_6VPTree_7query(PyObject *__pyx_v_sel
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_K)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("query", 0, 2, 3, 1); __PYX_ERR(0, 48, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("query", 0, 2, 3, 1); __PYX_ERR(0, 50, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -3065,7 +3069,7 @@ static PyObject *__pyx_pw_8fastTSNE_6vptree_6VPTree_7query(PyObject *__pyx_v_sel
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "query") < 0)) __PYX_ERR(0, 48, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "query") < 0)) __PYX_ERR(0, 50, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -3077,17 +3081,17 @@ static PyObject *__pyx_pw_8fastTSNE_6vptree_6VPTree_7query(PyObject *__pyx_v_sel
         default: goto __pyx_L5_argtuple_error;
       }
     }
-    __pyx_v_query = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_query.memview)) __PYX_ERR(0, 48, __pyx_L3_error)
-    __pyx_v_K = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_K == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 48, __pyx_L3_error)
+    __pyx_v_query = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_query.memview)) __PYX_ERR(0, 50, __pyx_L3_error)
+    __pyx_v_K = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_K == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 50, __pyx_L3_error)
     if (values[2]) {
-      __pyx_v_num_threads = __Pyx_PyIndex_AsSsize_t(values[2]); if (unlikely((__pyx_v_num_threads == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 48, __pyx_L3_error)
+      __pyx_v_num_threads = __Pyx_PyIndex_AsSsize_t(values[2]); if (unlikely((__pyx_v_num_threads == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 50, __pyx_L3_error)
     } else {
       __pyx_v_num_threads = ((Py_ssize_t)1);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("query", 0, 2, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 48, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("query", 0, 2, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 50, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("fastTSNE.vptree.VPTree.query", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -3140,9 +3144,9 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fas
   Py_ssize_t __pyx_t_25;
   PyObject *__pyx_t_26 = NULL;
   __Pyx_RefNannySetupContext("query", 0);
-  __Pyx_TraceCall("query", __pyx_f[0], 48, 0, __PYX_ERR(0, 48, __pyx_L1_error));
+  __Pyx_TraceCall("query", __pyx_f[0], 50, 0, __PYX_ERR(0, 50, __pyx_L1_error));
 
-  /* "fastTSNE/vptree.pyx":49
+  /* "fastTSNE/vptree.pyx":51
  * 
  *     def query(self, double[:, ::1] query, int K, Py_ssize_t num_threads=1):
  *         cdef Py_ssize_t i, j, N = query.shape[0], n_dim = query.shape[1]             # <<<<<<<<<<<<<<
@@ -3152,23 +3156,23 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fas
   __pyx_v_N = (__pyx_v_query.shape[0]);
   __pyx_v_n_dim = (__pyx_v_query.shape[1]);
 
-  /* "fastTSNE/vptree.pyx":51
+  /* "fastTSNE/vptree.pyx":53
  *         cdef Py_ssize_t i, j, N = query.shape[0], n_dim = query.shape[1]
  *         # Define objects to be returned to python
  *         cdef Py_ssize_t[:, ::1] indices = np.empty((N, K), dtype=np.int64)             # <<<<<<<<<<<<<<
  *         cdef double[:, ::1] distances = np.empty((N, K), dtype=np.float64)
  *         # Define objects to be used internally in vptree
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 53, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 53, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_N); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_N); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 53, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_K); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_K); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 53, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 53, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
@@ -3176,48 +3180,48 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fas
   PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_3);
   __pyx_t_1 = 0;
   __pyx_t_3 = 0;
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 53, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 53, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 53, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_int64); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_int64); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 53, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_5) < 0) __PYX_ERR(0, 51, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_5) < 0) __PYX_ERR(0, 53, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 53, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_Py_ssize_t(__pyx_t_5, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_Py_ssize_t(__pyx_t_5, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 53, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_v_indices = __pyx_t_6;
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "fastTSNE/vptree.pyx":52
+  /* "fastTSNE/vptree.pyx":54
  *         # Define objects to be returned to python
  *         cdef Py_ssize_t[:, ::1] indices = np.empty((N, K), dtype=np.int64)
  *         cdef double[:, ::1] distances = np.empty((N, K), dtype=np.float64)             # <<<<<<<<<<<<<<
  *         # Define objects to be used internally in vptree
  *         cdef vector[DataPoint]* indices_
  */
-  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_empty); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_empty); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = PyInt_FromSsize_t(__pyx_v_N); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __pyx_t_5 = PyInt_FromSsize_t(__pyx_v_N); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_K); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_K); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_5);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_5);
@@ -3225,32 +3229,32 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fas
   PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_t_3);
   __pyx_t_5 = 0;
   __pyx_t_3 = 0;
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_float64); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_float64); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(0, 52, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_distances = __pyx_t_7;
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "fastTSNE/vptree.pyx":58
+  /* "fastTSNE/vptree.pyx":60
  *         cdef DataPoint query_point
  * 
  *         if num_threads < 1:             # <<<<<<<<<<<<<<
@@ -3260,7 +3264,7 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fas
   __pyx_t_8 = ((__pyx_v_num_threads < 1) != 0);
   if (__pyx_t_8) {
 
-    /* "fastTSNE/vptree.pyx":59
+    /* "fastTSNE/vptree.pyx":61
  * 
  *         if num_threads < 1:
  *             num_threads = 1             # <<<<<<<<<<<<<<
@@ -3269,7 +3273,7 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fas
  */
     __pyx_v_num_threads = 1;
 
-    /* "fastTSNE/vptree.pyx":58
+    /* "fastTSNE/vptree.pyx":60
  *         cdef DataPoint query_point
  * 
  *         if num_threads < 1:             # <<<<<<<<<<<<<<
@@ -3278,7 +3282,7 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fas
  */
   }
 
-  /* "fastTSNE/vptree.pyx":61
+  /* "fastTSNE/vptree.pyx":63
  *             num_threads = 1
  * 
  *         for i in prange(N, nogil=True, schedule="guided", num_threads=num_threads):             # <<<<<<<<<<<<<<
@@ -3335,7 +3339,7 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fas
                             __pyx_v_indices_ = ((std::vector<DataPoint>  *)1);
                             __pyx_v_j = ((Py_ssize_t)0xbad0bad0);
 
-                            /* "fastTSNE/vptree.pyx":62
+                            /* "fastTSNE/vptree.pyx":64
  * 
  *         for i in prange(N, nogil=True, schedule="guided", num_threads=num_threads):
  *             query_point = DataPoint(n_dim, i, &query[i, 0])             # <<<<<<<<<<<<<<
@@ -3354,11 +3358,11 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fas
                               #ifdef WITH_THREAD
                               __Pyx_PyGILState_Release(__pyx_gilstate_save);
                               #endif
-                              __PYX_ERR(0, 62, __pyx_L9_error)
+                              __PYX_ERR(0, 64, __pyx_L9_error)
                             }
                             __pyx_v_query_point = __pyx_t_14;
 
-                            /* "fastTSNE/vptree.pyx":63
+                            /* "fastTSNE/vptree.pyx":65
  *         for i in prange(N, nogil=True, schedule="guided", num_threads=num_threads):
  *             query_point = DataPoint(n_dim, i, &query[i, 0])
  *             indices_ = new vector[DataPoint]()             # <<<<<<<<<<<<<<
@@ -3375,11 +3379,11 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fas
                               #ifdef WITH_THREAD
                               __Pyx_PyGILState_Release(__pyx_gilstate_save);
                               #endif
-                              __PYX_ERR(0, 63, __pyx_L9_error)
+                              __PYX_ERR(0, 65, __pyx_L9_error)
                             }
                             __pyx_v_indices_ = __pyx_t_15;
 
-                            /* "fastTSNE/vptree.pyx":64
+                            /* "fastTSNE/vptree.pyx":66
  *             query_point = DataPoint(n_dim, i, &query[i, 0])
  *             indices_ = new vector[DataPoint]()
  *             distances_ = new vector[double]()             # <<<<<<<<<<<<<<
@@ -3396,11 +3400,11 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fas
                               #ifdef WITH_THREAD
                               __Pyx_PyGILState_Release(__pyx_gilstate_save);
                               #endif
-                              __PYX_ERR(0, 64, __pyx_L9_error)
+                              __PYX_ERR(0, 66, __pyx_L9_error)
                             }
                             __pyx_v_distances_ = __pyx_t_16;
 
-                            /* "fastTSNE/vptree.pyx":66
+                            /* "fastTSNE/vptree.pyx":68
  *             distances_ = new vector[double]()
  * 
  *             self.tree.search(query_point, K, indices_, distances_)             # <<<<<<<<<<<<<<
@@ -3409,7 +3413,7 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fas
  */
                             __pyx_v_self->tree->search(__pyx_v_query_point, __pyx_v_K, __pyx_v_indices_, __pyx_v_distances_);
 
-                            /* "fastTSNE/vptree.pyx":68
+                            /* "fastTSNE/vptree.pyx":70
  *             self.tree.search(query_point, K, indices_, distances_)
  * 
  *             for j in range(K):             # <<<<<<<<<<<<<<
@@ -3421,7 +3425,7 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fas
                             for (__pyx_t_19 = 0; __pyx_t_19 < __pyx_t_18; __pyx_t_19+=1) {
                               __pyx_v_j = __pyx_t_19;
 
-                              /* "fastTSNE/vptree.pyx":69
+                              /* "fastTSNE/vptree.pyx":71
  * 
  *             for j in range(K):
  *                 indices[i, j] = indices_.at(j).index()             # <<<<<<<<<<<<<<
@@ -3438,13 +3442,13 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fas
                                 #ifdef WITH_THREAD
                                 __Pyx_PyGILState_Release(__pyx_gilstate_save);
                                 #endif
-                                __PYX_ERR(0, 69, __pyx_L9_error)
+                                __PYX_ERR(0, 71, __pyx_L9_error)
                               }
                               __pyx_t_21 = __pyx_v_i;
                               __pyx_t_22 = __pyx_v_j;
                               *((Py_ssize_t *) ( /* dim=1 */ ((char *) (((Py_ssize_t *) ( /* dim=0 */ (__pyx_v_indices.data + __pyx_t_21 * __pyx_v_indices.strides[0]) )) + __pyx_t_22)) )) = __pyx_t_20->index();
 
-                              /* "fastTSNE/vptree.pyx":70
+                              /* "fastTSNE/vptree.pyx":72
  *             for j in range(K):
  *                 indices[i, j] = indices_.at(j).index()
  *                 distances[i, j] = distances_.at(j)             # <<<<<<<<<<<<<<
@@ -3461,14 +3465,14 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fas
                                 #ifdef WITH_THREAD
                                 __Pyx_PyGILState_Release(__pyx_gilstate_save);
                                 #endif
-                                __PYX_ERR(0, 70, __pyx_L9_error)
+                                __PYX_ERR(0, 72, __pyx_L9_error)
                               }
                               __pyx_t_24 = __pyx_v_i;
                               __pyx_t_25 = __pyx_v_j;
                               *((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_distances.data + __pyx_t_24 * __pyx_v_distances.strides[0]) )) + __pyx_t_25)) )) = __pyx_t_23;
                             }
 
-                            /* "fastTSNE/vptree.pyx":72
+                            /* "fastTSNE/vptree.pyx":74
  *                 distances[i, j] = distances_.at(j)
  * 
  *             del indices_, distances_             # <<<<<<<<<<<<<<
@@ -3566,7 +3570,7 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fas
         #endif
       }
 
-      /* "fastTSNE/vptree.pyx":61
+      /* "fastTSNE/vptree.pyx":63
  *             num_threads = 1
  * 
  *         for i in prange(N, nogil=True, schedule="guided", num_threads=num_threads):             # <<<<<<<<<<<<<<
@@ -3592,18 +3596,18 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fas
       }
   }
 
-  /* "fastTSNE/vptree.pyx":74
+  /* "fastTSNE/vptree.pyx":76
  *             del indices_, distances_
  * 
  *         return np.asarray(indices), np.asarray(distances)             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 74, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 76, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_asarray); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 74, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_asarray); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 76, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_v_indices, 2, (PyObject *(*)(char *)) __pyx_memview_get_Py_ssize_t, (int (*)(char *, PyObject *)) __pyx_memview_set_Py_ssize_t, 0);; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 74, __pyx_L1_error)
+  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_v_indices, 2, (PyObject *(*)(char *)) __pyx_memview_get_Py_ssize_t, (int (*)(char *, PyObject *)) __pyx_memview_set_Py_ssize_t, 0);; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 76, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_4 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
@@ -3616,14 +3620,14 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fas
     }
   }
   if (!__pyx_t_4) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 74, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 76, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_3)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_2};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 74, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 76, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -3632,31 +3636,31 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fas
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_2};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 74, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 76, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     } else
     #endif
     {
-      __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 74, __pyx_L1_error)
+      __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 76, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_4); __pyx_t_4 = NULL;
       __Pyx_GIVEREF(__pyx_t_2);
       PyTuple_SET_ITEM(__pyx_t_5, 0+1, __pyx_t_2);
       __pyx_t_2 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 74, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 76, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     }
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 74, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 76, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_asarray); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 74, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_asarray); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 76, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __pyx_memoryview_fromslice(__pyx_v_distances, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 74, __pyx_L1_error)
+  __pyx_t_5 = __pyx_memoryview_fromslice(__pyx_v_distances, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 76, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_t_4 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_2))) {
@@ -3669,14 +3673,14 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fas
     }
   }
   if (!__pyx_t_4) {
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 74, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 76, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_GOTREF(__pyx_t_3);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_5};
-      __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 74, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 76, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -3685,26 +3689,26 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fas
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_5};
-      __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 74, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 76, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     } else
     #endif
     {
-      __pyx_t_26 = PyTuple_New(1+1); if (unlikely(!__pyx_t_26)) __PYX_ERR(0, 74, __pyx_L1_error)
+      __pyx_t_26 = PyTuple_New(1+1); if (unlikely(!__pyx_t_26)) __PYX_ERR(0, 76, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_26);
       __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_26, 0, __pyx_t_4); __pyx_t_4 = NULL;
       __Pyx_GIVEREF(__pyx_t_5);
       PyTuple_SET_ITEM(__pyx_t_26, 0+1, __pyx_t_5);
       __pyx_t_5 = 0;
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_26, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 74, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_26, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 76, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_26); __pyx_t_26 = 0;
     }
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 74, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 76, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
@@ -3716,7 +3720,7 @@ static PyObject *__pyx_pf_8fastTSNE_6vptree_6VPTree_6query(struct __pyx_obj_8fas
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "fastTSNE/vptree.pyx":48
+  /* "fastTSNE/vptree.pyx":50
  *         self.tree.create(data_points)
  * 
  *     def query(self, double[:, ::1] query, int K, Py_ssize_t num_threads=1):             # <<<<<<<<<<<<<<
@@ -20483,6 +20487,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_encode, __pyx_k_encode, sizeof(__pyx_k_encode), 0, 0, 1, 1},
   {&__pyx_n_s_enumerate, __pyx_k_enumerate, sizeof(__pyx_k_enumerate), 0, 0, 1, 1},
   {&__pyx_n_s_error, __pyx_k_error, sizeof(__pyx_k_error), 0, 0, 1, 1},
+  {&__pyx_n_s_euclidean, __pyx_k_euclidean, sizeof(__pyx_k_euclidean), 0, 0, 1, 1},
   {&__pyx_n_s_flags, __pyx_k_flags, sizeof(__pyx_k_flags), 0, 0, 1, 1},
   {&__pyx_n_s_float64, __pyx_k_float64, sizeof(__pyx_k_float64), 0, 0, 1, 1},
   {&__pyx_n_s_format, __pyx_k_format, sizeof(__pyx_k_format), 0, 0, 1, 1},
@@ -20544,10 +20549,11 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_u_unknown_dtype_code_in_numpy_pxd, __pyx_k_unknown_dtype_code_in_numpy_pxd, sizeof(__pyx_k_unknown_dtype_code_in_numpy_pxd), 0, 1, 0, 0},
   {&__pyx_n_s_unpack, __pyx_k_unpack, sizeof(__pyx_k_unpack), 0, 0, 1, 1},
   {&__pyx_n_s_update, __pyx_k_update, sizeof(__pyx_k_update), 0, 0, 1, 1},
+  {&__pyx_n_s_valid_metrics, __pyx_k_valid_metrics, sizeof(__pyx_k_valid_metrics), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}
 };
 static int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 43, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 45, __pyx_L1_error)
   __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(1, 2, __pyx_L1_error)
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(2, 229, __pyx_L1_error)
   __pyx_builtin_RuntimeError = __Pyx_GetBuiltinName(__pyx_n_s_RuntimeError); if (!__pyx_builtin_RuntimeError) __PYX_ERR(2, 810, __pyx_L1_error)
@@ -21324,6 +21330,22 @@ if (!__Pyx_RefNanny) {
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "fastTSNE/vptree.pyx":29
+ *     cdef VpTree[DataPoint]* tree
+ * 
+ *     valid_metrics = ["euclidean"]             # <<<<<<<<<<<<<<
+ * 
+ *     def __cinit__(self):
+ */
+  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 29, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_INCREF(__pyx_n_s_euclidean);
+  __Pyx_GIVEREF(__pyx_n_s_euclidean);
+  PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s_euclidean);
+  if (PyDict_SetItem((PyObject *)__pyx_ptype_8fastTSNE_6vptree_VPTree->tp_dict, __pyx_n_s_valid_metrics, __pyx_t_1) < 0) __PYX_ERR(0, 29, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  PyType_Modified(__pyx_ptype_8fastTSNE_6vptree_VPTree);
 
   /* "fastTSNE/vptree.pyx":1
  * # cython: profile=True             # <<<<<<<<<<<<<<

@@ -26,6 +26,8 @@ cdef extern from "vptree.h":
 cdef class VPTree:
     cdef VpTree[DataPoint]* tree
 
+    valid_metrics = ["euclidean"]
+
     def __cinit__(self):
         self.tree = new VpTree[DataPoint]()
 
