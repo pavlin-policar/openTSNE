@@ -96,14 +96,13 @@ public:
     // Function that uses the tree to find the k nearest neighbors of target
     void search(const T& target, int k, std::vector<T>* results, std::vector<double>* distances)
     {
-
         // Use a priority queue to store intermediate results on
         std::priority_queue<HeapItem> heap;
 
         // Variable that tracks the distance to the farthest point in our results
         double tau = DBL_MAX;
 
-        // Perform the searcg
+        // Perform the search
         search(_root, target, k, heap, tau);
 
         // Gather final results
