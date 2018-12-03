@@ -81,7 +81,7 @@ cdef class VPTree:
 
         return np.asarray(indices, dtype=np.int64), np.asarray(distances, np.float64)
 
-    cdef __query(
+    cdef void __query(
             self,
             vector[DataPoint] query,
             int k,
@@ -97,8 +97,7 @@ cdef class VPTree:
         if num_threads < 1:
             num_threads = 1
 
-        # for i in prange(N, nogil=True, schedule="guided", num_threads=num_threads):
-        for i in range(N):
+        for i in prange(N, nogil=True, schedule="guided", num_threads=num_threads):
             indices_ = new vector[DataPoint]()
             distances_ = new vector[double]()
 
