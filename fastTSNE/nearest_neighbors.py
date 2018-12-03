@@ -64,7 +64,7 @@ class BallTree(KNNIndex):
         self.index.fit(data)
 
     def query_train(self, data, k):
-        distances, neighbors = self.index.kneighbors(n_neighbors=k)
+        distances, neighbors = self.index.kneighbors(n_neighbors=k + 1)
         return neighbors, distances
 
     def query(self, query, k):
@@ -78,8 +78,7 @@ class VPTree(KNNIndex):
         self.index = c_vptree(data)
 
     def query_train(self, data, k):
-        data = np.ascontiguousarray(data, dtype=np.float64)
-        indices, distances = self.index.query(data, k, num_threads=self.n_jobs)
+        indices, distances = self.index.query_train(k + 1, num_threads=self.n_jobs)
         return indices[:, 1:], distances[:, 1:]
 
     def query(self, query, k):
