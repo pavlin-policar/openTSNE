@@ -1,8 +1,19 @@
+import logging
 import unittest
+from functools import partial
 
 import numpy as np
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
 
-from fastTSNE.affinity import Multiscale, PerplexityBasedNN
+from fastTSNE import affinity
+
+affinity.log.setLevel(logging.ERROR)
+
+Multiscale = partial(affinity.Multiscale, method="exact")
+MultiscaleMixture = partial(affinity.MultiscaleMixture, method="exact")
+PerplexityBasedNN = partial(affinity.PerplexityBasedNN, method="exact")
+FixedSigmaNN = partial(affinity.FixedSigmaNN, method="exact")
 
 
 class TestPerplexityBased(unittest.TestCase):
@@ -37,8 +48,8 @@ class TestPerplexityBased(unittest.TestCase):
         reduced_P = aff.P.copy()
         self.assertTrue(reduced_P.nnz >= n_samples * k_neighbors)
         self.assertTrue(reduced_P.nnz < original_P.nnz,
-                        'Lower perplexities should consider less neighbors, '
-                        'resulting in a sparser affinity matrix')
+                        "Lower perplexities should consider less neighbors, "
+                        "resulting in a sparser affinity matrix")
 
         # Raising the perplexity above the initial value would need to recompute
         # the nearest neighbors, so it should raise an error
@@ -59,25 +70,25 @@ class TestMultiscale(unittest.TestCase):
         ms = Multiscale(self.x, perplexities=[20])
         np.testing.assert_array_equal(
             ms.perplexities, [20],
-            'Incorrectly changed perplexity that was within a valid range',
+            "Incorrectly changed perplexity that was within a valid range",
         )
 
         ms = Multiscale(self.x, perplexities=[20, 40])
         np.testing.assert_array_equal(
             ms.perplexities, [20, 30],
-            'Did not lower large perplexity.'
+            "Did not lower large perplexity."
         )
 
         ms = Multiscale(self.x, perplexities=[20, 40, 60])
         np.testing.assert_array_equal(
             ms.perplexities, [20, 30],
-            'Did not drop large perplexities when more than one was too large.'
+            "Did not drop large perplexities when more than one was too large."
         )
 
         ms = Multiscale(self.x, perplexities=[20, 30, 40, 60])
         np.testing.assert_array_equal(
             ms.perplexities, [20, 30],
-            'Did not drop duplicate corrected perplexity.'
+            "Did not drop duplicate corrected perplexity."
         )
 
     def test_handles_changing_perplexities(self):
@@ -103,10 +114,41 @@ class TestMultiscale(unittest.TestCase):
         reduced_P = ms.P.copy()
         self.assertTrue(reduced_P.nnz >= n_samples * k_neighbors)
         self.assertTrue(reduced_P.nnz < original_P.nnz,
-                        'Lower perplexities should consider less neighbors, '
-                        'resulting in a sparser affinity matrix')
+                        "Lower perplexities should consider less neighbors, "
+                        "resulting in a sparser affinity matrix")
 
         # Raising the perplexity above the initial value would need to recompute
         # the nearest neighbors, so it should raise an error
         with self.assertRaises(RuntimeError):
             ms.set_perplexities([20, 30])
+
+
+class TestAffinityMatrixCorrectness(unittest.TestCase):
+    affinity_classes = [
+        ("PerplexityBasedNN", PerplexityBasedNN),
+        ("FixedSigmaNN", partial(FixedSigmaNN, sigma=1)),
+        ("MultiscaleMixture", partial(MultiscaleMixture, perplexities=[10, 20])),
+        ("Multiscale", partial(Multiscale, perplexities=[10, 20])),
+    ]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.iris = datasets.load_iris().data
+
+    def test_that_regular_matrix_sums_to_one(self):
+        for method_name, cls in self.affinity_classes:
+            aff: affinity.Affinities = cls(self.iris)
+            self.assertAlmostEqual(np.sum(aff.P), 1, msg=method_name)
+
+    def test_that_to_new_transform_matrix_treats_each_datapoint_separately(self):
+        x_train, x_test = train_test_split(self.iris, test_size=0.33, random_state=42)
+
+        for method_name, cls in self.affinity_classes:
+            aff: affinity.Affinities = cls(x_train)
+            P = aff.to_new(x_test)
+            np.testing.assert_allclose(
+                np.asarray(np.sum(P, axis=1)).ravel(),
+                np.ones(len(x_test)),
+                err_msg=method_name,
+            )
+

@@ -37,7 +37,7 @@ import numpy as np
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
 
 
-cdef extern from 'math.h':
+cdef extern from "math.h":
     double fabs(double x) nogil
 
 
@@ -77,7 +77,7 @@ cdef inline void update_center_of_mass(Node * node, double * point) nogil:
 
 
 cdef void add_point_to(Node * node, double * point):
-    # If the node is a leaf node and empty, we're done
+    # If the node is a leaf node and empty, we"re done
     if node.is_leaf and node.num_points == 0 or is_duplicate(node, point):
         update_center_of_mass(node, point)
         return

@@ -3370,7 +3370,7 @@ static double __pyx_f_8fastTSNE_13kl_divergence_kl_divergence_approx_bh(__Pyx_me
  *         Py_ssize_t i, j
  * 
  *         QuadTree tree = QuadTree(embedding)             # <<<<<<<<<<<<<<
- *         # We don't actually care about the gradient, so don't waste time
+ *         # We don"t actually care about the gradient, so don"t waste time
  *         # initializing memory
  */
   __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_embedding, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 73, __pyx_L1_error)
@@ -3382,7 +3382,7 @@ static double __pyx_f_8fastTSNE_13kl_divergence_kl_divergence_approx_bh(__Pyx_me
   __pyx_t_2 = 0;
 
   /* "fastTSNE/kl_divergence.pyx":76
- *         # We don't actually care about the gradient, so don't waste time
+ *         # We don"t actually care about the gradient, so don"t waste time
  *         # initializing memory
  *         double[:, ::1] gradient = np.empty_like(embedding, dtype=float)             # <<<<<<<<<<<<<<
  * 
@@ -3835,7 +3835,7 @@ static double __pyx_f_8fastTSNE_13kl_divergence_kl_divergence_approx_fft(__Pyx_m
   __pyx_v_n_dims = (__pyx_v_embedding.shape[1]);
 
   /* "fastTSNE/kl_divergence.pyx":108
- *         # We don't actually care about the gradient, so don't waste time
+ *         # We don"t actually care about the gradient, so don"t waste time
  *         # initializing memory
  *         double[:, ::1] gradient = np.empty_like(embedding, dtype=float)             # <<<<<<<<<<<<<<
  * 
@@ -21745,7 +21745,7 @@ if (!__Pyx_RefNanny) {
 
   /* "fastTSNE/kl_divergence.pyx":16
  * )
- * # This returns a tuple, and can't be called from C
+ * # This returns a tuple, and can"t be called from C
  * from ._tsne import estimate_positive_gradient_nn             # <<<<<<<<<<<<<<
  * 
  * 
@@ -21769,7 +21769,7 @@ if (!__Pyx_RefNanny) {
  * 
  * cdef double EPSILON = np.finfo(np.float64).eps             # <<<<<<<<<<<<<<
  * 
- * cdef extern from 'math.h':
+ * cdef extern from "math.h":
  */
   __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 19, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);

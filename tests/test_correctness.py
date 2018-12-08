@@ -1,12 +1,20 @@
 import unittest
+from functools import partial
 
 import numpy as np
 from sklearn import datasets
 from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 
+import fastTSNE
+import fastTSNE.affinity
+import fastTSNE.initialization
+from fastTSNE import tsne
 from fastTSNE.callbacks import VerifyExaggerationError
-from fastTSNE.tsne import TSNE, TSNEEmbedding
+from fastTSNE.tsne import TSNEEmbedding
+
+TSNE = partial(tsne.TSNE, neighbors="exact", negative_gradient_method="bh")
 
 
 class TestTSNECorrectness(unittest.TestCase):
@@ -20,6 +28,7 @@ class TestTSNECorrectness(unittest.TestCase):
             random_state.normal(-1, 1, (100, 4)),
         ))
         cls.x_test = random_state.normal(0, 1, (25, 4))
+        cls.iris = datasets.load_iris()
 
     def test_basic_flow(self):
         """Verify that the basic flow does not crash."""
@@ -53,11 +62,11 @@ class TestTSNECorrectness(unittest.TestCase):
 
     def test_iris(self):
         iris = datasets.load_iris()
-        x, y = iris['data'], iris['target']
+        x, y = iris["data"], iris["target"]
 
         # Evaluate tSNE optimization using a KNN classifier
         knn = KNeighborsClassifier(n_neighbors=10)
-        tsne = TSNE(perplexity=30, initialization='random', random_state=0)
+        tsne = TSNE(perplexity=30, initialization="random", random_state=0)
 
         # Prepare a random initialization
         embedding = tsne.prepare_initial(x)
@@ -74,3 +83,39 @@ class TestTSNECorrectness(unittest.TestCase):
         knn.fit(embedding, y)
         predictions = knn.predict(embedding)
         self.assertTrue(accuracy_score(predictions, y) > .95)
+
+    def test_bh_transform_with_point_subsets_using_perplexity_nn(self):
+        x_train, x_test = train_test_split(self.iris.data, test_size=0.33, random_state=42)
+
+        # Set up the initial embedding
+        init = fastTSNE.initialization.pca(x_train)
+        affinity = fastTSNE.affinity.PerplexityBasedNN(x_train, method="exact")
+        embedding = fastTSNE.TSNEEmbedding(
+            init, affinity, negative_gradient_method="bh", random_state=42
+        )
+        embedding.optimize(n_iter=50, inplace=True)
+
+        # The test set contains 50 samples, so let's verify on half of those
+        transform_params = dict(early_exaggeration_iter=0, n_iter=0)
+        new_embedding_1 = embedding.transform(x_test, **transform_params)[:25]
+        new_embedding_2 = embedding.transform(x_test[:25], **transform_params)
+
+        np.testing.assert_equal(new_embedding_1, new_embedding_2)
+
+    def test_fft_transform_with_point_subsets_using_perplexity_nn(self):
+        x_train, x_test = train_test_split(self.iris.data, test_size=0.33, random_state=42)
+
+        # Set up the initial embedding
+        init = fastTSNE.initialization.pca(x_train)
+        affinity = fastTSNE.affinity.PerplexityBasedNN(x_train, method="exact")
+        embedding = fastTSNE.TSNEEmbedding(
+            init, affinity, negative_gradient_method="fft", random_state=42
+        )
+        embedding.optimize(n_iter=50, inplace=True)
+
+        # The test set contains 50 samples, so let's verify on half of those
+        transform_params = dict(early_exaggeration_iter=0, n_iter=0)
+        new_embedding_1 = embedding.transform(x_test, **transform_params)[:25]
+        new_embedding_2 = embedding.transform(x_test[:25], **transform_params)
+
+        np.testing.assert_equal(new_embedding_1, new_embedding_2)

@@ -1,17 +1,25 @@
 import inspect
+import logging
 import unittest
-from functools import wraps
+from functools import wraps, partial
 from typing import Callable, Any, Tuple, Optional
 from unittest.mock import patch, MagicMock
 
 import numpy as np
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
 
+import fastTSNE
+from fastTSNE import affinity
+from fastTSNE import tsne
 from fastTSNE.affinity import PerplexityBasedNN
 from fastTSNE.nearest_neighbors import VALID_METRICS
-from fastTSNE.tsne import TSNE, kl_divergence_bh, kl_divergence_fft
-from fastTSNE import tsne
+from fastTSNE.tsne import kl_divergence_bh, kl_divergence_fft
 
 np.random.seed(42)
+affinity.log.setLevel(logging.ERROR)
+
+TSNE = partial(tsne.TSNE, neighbors="exact", negative_gradient_method="bh")
 
 
 def check_params(params: dict) -> Callable:
@@ -36,13 +44,13 @@ def check_call_contains_kwargs(
 ) -> None:
     """Check whether a `call` object was called with some params, but also some
     others we don't care about"""
-    _param_mapping = {'negative_gradient_method': 'objective_function',
-                      'early_exaggeration_iter': 'n_iter',
-                      'late_exaggeration_iter': 'n_iter',
-                      'early_exaggeration': 'exaggeration',
-                      'late_exaggeration': 'exaggeration',
-                      'initial_momentum': 'momentum',
-                      'final_momentum': 'momentum'}
+    _param_mapping = {"negative_gradient_method": "objective_function",
+                      "early_exaggeration_iter": "n_iter",
+                      "late_exaggeration_iter": "n_iter",
+                      "early_exaggeration": "exaggeration",
+                      "late_exaggeration": "exaggeration",
+                      "initial_momentum": "momentum",
+                      "final_momentum": "momentum"}
     if param_mapping is not None:
         _param_mapping.update(param_mapping)
 
@@ -58,7 +66,7 @@ def check_call_contains_kwargs(
         actual_value = kwargs.get(kwargs_key, None)
         if expected_value != actual_value:
             raise AssertionError(
-                'Mock not called with `%s=%s`. Called with `%s`' %
+                "Mock not called with `%s=%s`. Called with `%s`" %
                 (key, expected_value, actual_value)
             )
 
@@ -71,18 +79,18 @@ def check_mock_called_with_kwargs(mock: MagicMock, params: dict) -> None:
 
 
 class TestTSNEParameterFlow(unittest.TestCase):
-    """Test that the optimization parameters get properly propagated."""
+    """est that the optimization parameters get properly propagated."""
 
     grad_descent_params = {
-        'negative_gradient_method': [kl_divergence_bh, kl_divergence_fft],
-        'learning_rate': [1, 10, 100],
-        'theta': [0.2, 0.5, 0.8],
-        'n_interpolation_points': [3, 5],
-        'min_num_intervals': [10, 20, 30],
-        'ints_in_interval': [1, 2, 5],
-        'n_jobs': [1, 2, 4],
-        'callbacks': [None, [lambda *args, **kwargs: ...]],
-        'callbacks_every_iters': [25, 50],
+        "negative_gradient_method": [kl_divergence_bh, kl_divergence_fft],
+        "learning_rate": [1, 10, 100],
+        "theta": [0.2, 0.5, 0.8],
+        "n_interpolation_points": [3, 5],
+        "min_num_intervals": [10, 20, 30],
+        "ints_in_interval": [1, 2, 5],
+        "n_jobs": [1, 2, 4],
+        "callbacks": [None, [lambda *args, **kwargs: ...]],
+        "callbacks_every_iters": [25, 50],
     }
 
     @classmethod
@@ -91,24 +99,24 @@ class TestTSNEParameterFlow(unittest.TestCase):
         cls.x_test = np.random.randn(25, 4)
 
     @check_params({**grad_descent_params, **{
-        'early_exaggeration_iter': [50, 100],
-        'early_exaggeration': [4, 12],
-        'initial_momentum': [0.2, 0.5, 0.8],
-        'n_iter': [50, 100],
-        'exaggeration': [None, 2],
-        'final_momentum': [0.2, 0.5, 0.8],
+        "early_exaggeration_iter": [50, 100],
+        "early_exaggeration": [4, 12],
+        "initial_momentum": [0.2, 0.5, 0.8],
+        "n_iter": [50, 100],
+        "exaggeration": [None, 2],
+        "final_momentum": [0.2, 0.5, 0.8],
     }})
-    @patch('fastTSNE.tsne.gradient_descent.__call__')
+    @patch("fastTSNE.tsne.gradient_descent.__call__")
     def test_constructor(self, param_name, param_value, gradient_descent):
         # type: (str, Any, MagicMock) -> None
         # Make sure mock still conforms to signature
         gradient_descent.return_value = (1, MagicMock())
 
         # Early exaggeration training loop
-        if param_name in ('early_exaggeration_iter', 'early_exaggeration', 'initial_momentum'):
+        if param_name in ("early_exaggeration_iter", "early_exaggeration", "initial_momentum"):
             call_idx = 0
         # Main training loop
-        elif param_name in ('n_iter', 'exaggeration', 'final_momentum'):
+        elif param_name in ("n_iter", "exaggeration", "final_momentum"):
             call_idx = 1
         # If general parameter, should be applied to every call
         else:
@@ -123,18 +131,18 @@ class TestTSNEParameterFlow(unittest.TestCase):
         )
 
     @check_params({**grad_descent_params, **{
-        'n_iter': [50, 100, 150],
-        'exaggeration': [None, 2, 5],
-        'momentum': [0.2, 0.5, 0.8],
+        "n_iter": [50, 100, 150],
+        "exaggeration": [None, 2, 5],
+        "momentum": [0.2, 0.5, 0.8],
     }})
-    @patch('fastTSNE.tsne.gradient_descent.__call__')
+    @patch("fastTSNE.tsne.gradient_descent.__call__")
     def test_embedding_optimize(self, param_name, param_value, gradient_descent):
         # type: (str, Any, MagicMock) -> None
         # Make sure mock still conforms to signature
         gradient_descent.return_value = (1, MagicMock())
 
         # `optimize` requires us to specify the `n_iter`
-        params = {'n_iter': 50, param_name: param_value}
+        params = {"n_iter": 50, param_name: param_value}
 
         tsne = TSNE()
         embedding = tsne.prepare_initial(self.x)
@@ -144,13 +152,13 @@ class TestTSNEParameterFlow(unittest.TestCase):
         check_call_contains_kwargs(gradient_descent.mock_calls[0], params)
 
     @check_params({
-        'early_exaggeration_iter': [50, 100],
-        'early_exaggeration': [4, 12],
-        'initial_momentum': [0.2, 0.5, 0.8],
-        'n_iter': [50, 100],
-        'final_momentum': [0.2, 0.5, 0.8],
+        "early_exaggeration_iter": [50, 100],
+        "early_exaggeration": [4, 12],
+        "initial_momentum": [0.2, 0.5, 0.8],
+        "n_iter": [50, 100],
+        "final_momentum": [0.2, 0.5, 0.8],
     })
-    @patch('fastTSNE.tsne.gradient_descent.__call__')
+    @patch("fastTSNE.tsne.gradient_descent.__call__")
     def test_embedding_transform(self, param_name, param_value, gradient_descent):
         # type: (str, Any, MagicMock) -> None
         # Make sure mock still conforms to signature
@@ -164,10 +172,10 @@ class TestTSNEParameterFlow(unittest.TestCase):
         embedding.transform(self.x_test, **{param_name: param_value})
 
         # Early exaggeration training loop
-        if param_name in ('early_exaggeration_iter', 'early_exaggeration'):
+        if param_name in ("early_exaggeration_iter", "early_exaggeration"):
             call_idx = 0
         # Main training loop
-        elif param_name in ('n_iter', 'final_momentum'):
+        elif param_name in ("n_iter", "final_momentum"):
             call_idx = 1
 
         # If general parameter, should be applied to every call
@@ -181,11 +189,11 @@ class TestTSNEParameterFlow(unittest.TestCase):
         )
 
     @check_params({**grad_descent_params, **{
-        'n_iter': [50, 100, 150],
-        'exaggeration': [None, 2, 5],
-        'momentum': [0.2, 0.5, 0.8],
+        "n_iter": [50, 100, 150],
+        "exaggeration": [None, 2, 5],
+        "momentum": [0.2, 0.5, 0.8],
     }})
-    @patch('fastTSNE.tsne.gradient_descent.__call__')
+    @patch("fastTSNE.tsne.gradient_descent.__call__")
     def test_partial_embedding_optimize(self, param_name, param_value, gradient_descent):
         # type: (str, Any, MagicMock) -> None
         # Make sure mock still conforms to signature
@@ -197,7 +205,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         gradient_descent.reset_mock()
 
         # `optimize` requires us to specify the `n_iter`
-        params = {'n_iter': 50, param_name: param_value}
+        params = {"n_iter": 50, param_name: param_value}
 
         partial_embedding = embedding.prepare_partial(self.x_test)
         partial_embedding.optimize(**params, inplace=True)
@@ -205,50 +213,12 @@ class TestTSNEParameterFlow(unittest.TestCase):
         self.assertEqual(1, gradient_descent.call_count)
         check_call_contains_kwargs(gradient_descent.mock_calls[0], params)
 
-    @check_params({'metric': set(VALID_METRICS) - {'mahalanobis'}})
-    @patch('sklearn.neighbors.NearestNeighbors')
-    def test_ball_tree_distances(self, param_name, metric, ball_tree: MagicMock):
-        """Distance metrics should be properly passed down to ball tree"""
-        assert param_name == 'metric'
-        tsne = TSNE(metric=metric, neighbors='exact')
-
-        # We don't care about what happens later, just that the NN method is
-        # properly called
-        ball_tree.side_effect = InterruptedError()
-        try:
-            # Haversine distance only supports two dimensions
-            tsne.prepare_initial(self.x[:, :2])
-        except InterruptedError:
-            pass
-
-        self.assertEqual(ball_tree.call_count, 1)
-        check_call_contains_kwargs(ball_tree.mock_calls[0], {'metric': metric})
-
-    @patch('sklearn.neighbors.NearestNeighbors')
-    def test_ball_tree_mahalanobis_distance(self, ball_tree: MagicMock):
-        """Distance metrics and additional params should be correctly passed down to ball tree"""
-        metric = 'mahalanobis'
-        C = np.cov(self.x)
-
-        tsne = TSNE(metric=metric, metric_params={'V': C}, neighbors='exact')
-
-        # We don't care about what happens later, just that the NN method is
-        # properly called
-        ball_tree.side_effect = InterruptedError()
-        try:
-            tsne.prepare_initial(self.x)
-        except InterruptedError:
-            pass
-
-        self.assertEqual(ball_tree.call_count, 1)
-        check_call_contains_kwargs(ball_tree.mock_calls[0], {'metric': metric})
-
-    @check_params({'metric': set(VALID_METRICS) - {'mahalanobis'}})
-    @patch('fastTSNE.pynndescent.NNDescent')
+    @check_params({"metric": set(VALID_METRICS) - {"mahalanobis"}})
+    @patch("fastTSNE.pynndescent.NNDescent")
     def test_nndescent_distances(self, param_name, metric, nndescent: MagicMock):
         """Distance metrics should be properly passed down to NN descent"""
-        assert param_name == 'metric'
-        tsne = TSNE(metric=metric, neighbors='approx')
+        assert param_name == "metric"
+        tsne = TSNE(metric=metric, neighbors="approx")
 
         # We don't care about what happens later, just that the NN method is
         # properly called
@@ -260,34 +230,15 @@ class TestTSNEParameterFlow(unittest.TestCase):
             pass
 
         self.assertEqual(nndescent.call_count, 1)
-        check_call_contains_kwargs(nndescent.mock_calls[0], {'metric': metric})
-
-    @patch('fastTSNE.pynndescent.NNDescent')
-    def test_nndescent_mahalanobis_distance(self, nndescent: MagicMock):
-        """Distance metrics and additional params should be correctly passed down to NN descent"""
-        metric = 'mahalanobis'
-        C = np.cov(self.x)
-
-        tsne = TSNE(metric=metric, metric_params={'V': C}, neighbors='approx')
-
-        # We don't care about what happens later, just that the NN method is
-        # properly called
-        nndescent.side_effect = InterruptedError()
-        try:
-            tsne.prepare_initial(self.x)
-        except InterruptedError:
-            pass
-
-        self.assertEqual(nndescent.call_count, 1)
-        check_call_contains_kwargs(nndescent.mock_calls[0], {'metric': metric})
+        check_call_contains_kwargs(nndescent.mock_calls[0], {"metric": metric})
 
     def test_raises_error_on_unrecognized_metric(self):
         """Unknown distance metric should raise error"""
-        tsne = TSNE(metric='imaginary', neighbors='exact')
+        tsne = TSNE(metric="imaginary", neighbors="exact")
         with self.assertRaises(ValueError):
             tsne.prepare_initial(self.x)
 
-        tsne = TSNE(metric='imaginary', neighbors='approx')
+        tsne = TSNE(metric="imaginary", neighbors="approx")
         with self.assertRaises(ValueError):
             tsne.prepare_initial(self.x)
 
@@ -413,42 +364,100 @@ class TestTSNECallbackParams(unittest.TestCase):
 
 
 class TSNEInitialization(unittest.TestCase):
+    transform_initializations = ["random", "median", "weighted"]
+
     @classmethod
     def setUpClass(cls):
         # It would be nice if the initial data were not nicely behaved to test
         # for low variance
         cls.x = np.random.normal(100, 50, (25, 4))
+        cls.iris = datasets.load_iris()["data"]
 
     def test_low_variance(self):
         """Low variance of the initial embedding is very important for the
         convergence of tSNE."""
         # Cycle through various initializations
-        initializations = ['random', 'pca']
+        initializations = ["random", "pca"]
         allowed = 1e-3
 
         for init in initializations:
             tsne = TSNE(initialization=init, perplexity=2)
             embedding = tsne.prepare_initial(self.x)
             np.testing.assert_array_less(np.var(embedding, axis=0), allowed,
-                                         'using the `%s` initialization' % init)
+                                         "using the `%s` initialization" % init)
 
     def test_mismatching_embedding_dimensions_simple_api(self):
         # Fit
         tsne = TSNE(n_components=2, initialization=self.x[:10, :2])
-        with self.assertRaises(ValueError, msg='fit::ncorrect number of points'):
+        with self.assertRaises(ValueError, msg="fit::incorrect number of points"):
             tsne.fit(self.x[:25])
 
-        with self.assertRaises(ValueError, msg='fit::ncorrect number of dimensions'):
+        with self.assertRaises(ValueError, msg="fit::incorrect number of dimensions"):
             TSNE(n_components=2, initialization=self.x[:10, :4])
 
         # Transform
-        tsne = TSNE(n_components=2, initialization='random')
+        tsne = TSNE(n_components=2, initialization="random")
         embedding = tsne.fit(self.x)
-        with self.assertRaises(ValueError, msg='transform::incorrect number of points'):
+        with self.assertRaises(ValueError, msg="transform::incorrect number of points"):
             embedding.transform(X=self.x[:5], initialization=self.x[:10, :2])
 
-        with self.assertRaises(ValueError, msg='transform::incorrect number of dimensions'):
+        with self.assertRaises(ValueError, msg="transform::incorrect number of dimensions"):
             embedding.transform(X=self.x, initialization=self.x[:, :4])
+
+    def test_same_unoptimized_initializations_for_transform(self):
+        """Initializations should be deterministic."""
+        x_train, x_test = train_test_split(self.iris, test_size=0.33, random_state=42)
+
+        embedding = fastTSNE.TSNE(
+            early_exaggeration_iter=50, n_iter=50, neighbors="exact",
+            negative_gradient_method="bh", random_state=42,
+        ).fit(x_train)
+
+        for init in self.transform_initializations:
+            new_embedding_1 = embedding.prepare_partial(x_test, initialization=init)
+            new_embedding_2 = embedding.prepare_partial(x_test, initialization=init)
+
+            np.testing.assert_equal(new_embedding_1, new_embedding_2, init)
+
+    def test_same_bh_optimized_median_initializations_for_transform(self):
+        """Transform with Barnes-Hut optimization should be deterministic."""
+        x_train, x_test = train_test_split(self.iris, test_size=0.33, random_state=42)
+
+        embedding = fastTSNE.TSNE(
+            early_exaggeration_iter=10, n_iter=10, neighbors="exact",
+            negative_gradient_method="bh", random_state=42,
+        ).fit(x_train)
+
+        for init in self.transform_initializations:
+            new_embedding_1 = embedding.transform(
+                x_test, initialization=init, early_exaggeration_iter=0, n_iter=10,
+            )
+            new_embedding_2 = embedding.transform(
+                x_test, initialization=init, early_exaggeration_iter=0, n_iter=10,
+            )
+
+            np.testing.assert_equal(new_embedding_1, new_embedding_2, init)
+
+    def test_same_fft_optimized_median_initializations_for_transform(self):
+        """Transform with interpolation based optimization should be deterministic."""
+        x_train, x_test = train_test_split(self.iris, test_size=0.33, random_state=42)
+
+        embedding = fastTSNE.TSNE(
+            early_exaggeration_iter=10, n_iter=10, neighbors="exact",
+            negative_gradient_method="fft", random_state=42,
+        ).fit(x_train)
+
+        for init in self.transform_initializations:
+            new_embedding_1 = embedding.transform(
+                x_test, initialization=init, early_exaggeration_iter=0, n_iter=10,
+                learning_rate=10,
+            )
+            new_embedding_2 = embedding.transform(
+                x_test, initialization=init, early_exaggeration_iter=0, n_iter=10,
+                learning_rate=10,
+            )
+
+            np.testing.assert_equal(new_embedding_1, new_embedding_2, init)
 
 
 class TestRandomState(unittest.TestCase):
@@ -461,52 +470,52 @@ class TestRandomState(unittest.TestCase):
 
     def test_same_results_on_fixed_random_state_random_init(self):
         """Results should be exactly the same if we provide a random state."""
-        tsne1 = TSNE(random_state=1, initialization='random')
+        tsne1 = TSNE(random_state=1, initialization="random")
         embedding1 = tsne1.fit(self.x)
 
-        tsne2 = TSNE(random_state=1, initialization='random')
+        tsne2 = TSNE(random_state=1, initialization="random")
         embedding2 = tsne2.fit(self.x)
 
         np.testing.assert_array_equal(embedding1, embedding2,
-                                      'Same random state produced different initial embeddings')
+                                      "Same random state produced different initial embeddings")
 
     def test_same_results_on_fixed_random_state_pca_init(self):
         """Results should be exactly the same if we provide a random state."""
-        tsne1 = TSNE(random_state=1, initialization='pca')
+        tsne1 = TSNE(random_state=1, initialization="pca")
         embedding1 = tsne1.fit(self.x)
 
-        tsne2 = TSNE(random_state=1, initialization='pca')
+        tsne2 = TSNE(random_state=1, initialization="pca")
         embedding2 = tsne2.fit(self.x)
 
         np.testing.assert_array_equal(embedding1, embedding2,
-                                      'Same random state produced different initial embeddings')
+                                      "Same random state produced different initial embeddings")
 
     def test_same_partial_embedding_on_fixed_random_state(self):
-        tsne = TSNE(random_state=1, initialization='random')
+        tsne = TSNE(random_state=1, initialization="random")
         embedding = tsne.fit(self.x)
 
-        partial1 = embedding.prepare_partial(self.x_test, initialization='random')
-        partial2 = embedding.prepare_partial(self.x_test, initialization='random')
+        partial1 = embedding.prepare_partial(self.x_test, initialization="random")
+        partial2 = embedding.prepare_partial(self.x_test, initialization="random")
 
         np.testing.assert_array_equal(partial1, partial2,
-                                      'Same random state produced different partial embeddings')
+                                      "Same random state produced different partial embeddings")
 
 
 class TestDefaultParameterSettings(unittest.TestCase):
     def test_default_params_simple_vs_complex_flow(self):
         # Relevant affinity parameters are passed to the affinity object
         mismatching = get_mismatching_default_values(
-            TSNE, PerplexityBasedNN, {'neighbors': 'method'})
+            tsne.TSNE, PerplexityBasedNN, {"neighbors": "method"})
         self.assertEqual(mismatching, [])
 
         assert len(get_shared_parameters(tsne.TSNE, tsne.gradient_descent.__call__)) > 0, \
-            '`TSNE` and `gradient_descent` have no shared parameters. Have you ' \
-            'changed the signature or usage?'
+            "`TSNE` and `gradient_descent` have no shared parameters. Have you " \
+            "changed the signature or usage?"
 
         # The relevant gradient descent parameters are passed down directly to
         # `gradient_descent`
         mismatching = get_mismatching_default_values(tsne.TSNE, tsne.gradient_descent.__call__)
-        mismatching = list(filter(lambda x: x[0] not in ('n_iter',), mismatching))
+        mismatching = list(filter(lambda x: x[0] not in ("n_iter",), mismatching))
         self.assertEqual(mismatching, [])
 
 
@@ -532,7 +541,7 @@ def get_mismatching_default_values(f1, f2, mapping=None):
         # If the param is named differently in f2, rename
         f2_param_name = mapping[f1_param_name] if f1_param_name in mapping else f1_param_name
 
-        # If the parameter does not appear in the signature of f2, there's
+        # If the parameter does not appear in the signature of f2, there"s
         # nothing to do
         if f2_param_name not in params2:
             continue
@@ -558,32 +567,32 @@ class TestGradientDescentOptimizer(unittest.TestCase):
         embedding = self.tsne.prepare_initial(self.x)
 
         self.assertIsNone(embedding.optimizer.gains,
-                          'Optimizer should be initialized with no gains')
+                          "Optimizer should be initialized with no gains")
 
         # Check the switch from no gains to some gains
         embedding1 = embedding.optimize(10)
         self.assertIsNone(
             embedding.optimizer.gains,
-            'Gains changed on initial optimizer even though we did not do '
-            'inplace optimization.')
+            "Gains changed on initial optimizer even though we did not do "
+            "inplace optimization.")
         self.assertIsNotNone(
             embedding1.optimizer.gains,
-            'Gains were not properly set in new embedding.')
+            "Gains were not properly set in new embedding.")
         self.assertIsNot(
             embedding.optimizer, embedding1.optimizer,
-            'The embedding and new embedding optimizer are the same instance '
-            'even we did not do inplace optimization.')
+            "The embedding and new embedding optimizer are the same instance "
+            "even we did not do inplace optimization.")
 
         # Check switch from existing gains to new gains
         embedding2 = embedding1.optimize(10)
         self.assertIsNot(
             embedding1.optimizer, embedding2.optimizer,
-            'The embedding and new embedding optimizer are the same instance '
-            'even we did not do inplace optimization.')
+            "The embedding and new embedding optimizer are the same instance "
+            "even we did not do inplace optimization.")
         self.assertFalse(
             np.allclose(embedding1.optimizer.gains, embedding2.optimizer.gains),
-            'The gains in the new embedding did not change at all from the old '
-            'embedding.'
+            "The gains in the new embedding did not change at all from the old "
+            "embedding."
         )
 
     def test_optimizer_being_passed_to_partial_embeddings(self):
@@ -594,31 +603,31 @@ class TestGradientDescentOptimizer(unittest.TestCase):
         partial = embedding.prepare_partial(self.x_test)
         self.assertIsNot(
             embedding.optimizer, partial.optimizer,
-            'Embedding and partial embedding optimizers are the same instance.')
+            "Embedding and partial embedding optimizers are the same instance.")
         self.assertIsNone(
             partial.optimizer.gains,
-            'Partial embedding was not initialized with no gains')
+            "Partial embedding was not initialized with no gains")
 
         # Check the switch from no gains to some gains
         partial1 = partial.optimize(10)
         self.assertIsNone(
             partial.optimizer.gains,
-            'Gains on initial optimizer changed even though we did not do '
-            'inplace optimization.')
+            "Gains on initial optimizer changed even though we did not do "
+            "inplace optimization.")
         self.assertIsNotNone(
             partial1.optimizer.gains,
-            'Gains were not properly set in new partial embedding.')
+            "Gains were not properly set in new partial embedding.")
 
         # Check switch from existing gains to new gains
         partial2 = partial1.optimize(10)
         self.assertIsNot(
             partial1.optimizer, partial2.optimizer,
-            'The embedding and new embedding optimizer are the same instance '
-            'even we did not do inplace optimization.')
+            "The embedding and new embedding optimizer are the same instance "
+            "even we did not do inplace optimization.")
         self.assertFalse(
             np.allclose(partial1.optimizer.gains, partial2.optimizer.gains),
-            'The gains in the new embedding did not change at all from the old '
-            'embedding.'
+            "The gains in the new embedding did not change at all from the old "
+            "embedding."
         )
 
     def test_embedding_optimizer_inplace(self):
