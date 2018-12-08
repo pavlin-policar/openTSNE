@@ -3,7 +3,7 @@ import operator
 from functools import reduce
 
 import numpy as np
-from scipy.sparse import csr_matrix
+import scipy.sparse as sp
 
 from . import _tsne
 from .nearest_neighbors import VPTree, BallTree, NNDescent, KNNIndex, VALID_METRICS
@@ -124,7 +124,8 @@ class PerplexityBasedNN(Affinities):
 
         P = joint_probabilities_nn(
             neighbors, distances, [perplexity], symmetrize=False,
-            n_reference_samples=self.n_samples, n_jobs=self.n_jobs,
+            normalization="point-wise", n_reference_samples=self.n_samples,
+            n_jobs=self.n_jobs,
         )
 
         if return_distances:
@@ -166,8 +167,15 @@ def build_knn_index(data, method, metric, metric_params=None, n_jobs=1, random_s
     return knn_index
 
 
-def joint_probabilities_nn(neighbors, distances, perplexities, symmetrize=True,
-                           n_reference_samples=None, n_jobs=1):
+def joint_probabilities_nn(
+        neighbors,
+        distances,
+        perplexities,
+        symmetrize=True,
+        normalization="pair-wise",
+        n_reference_samples=None,
+        n_jobs=1,
+):
     """Compute the conditional probability matrix P_{j|i}.
 
     This method computes an approximation to P using the nearest neighbors.
@@ -186,6 +194,14 @@ def joint_probabilities_nn(neighbors, distances, perplexities, symmetrize=True,
         Whether to symmetrize the probability matrix or not. Symmetrizing is
         used for typical t-SNE, but does not make sense when embedding new data
         into an existing embedding.
+    normalization: str
+        The normalization scheme to use for the affinities. Standard t-SNE
+        considers interactions between all the data points, therefore the entire
+        affinity matrix is regarded as a probability distribution, and must sum
+        to 1. When embedding new points, we only consider interactions to
+        existing points, and treat each point separately. In this case, we
+        row-normalize the affinity matrix, meaning each point gets its own
+        probability distribution.
     n_reference_samples: int
         The number of samples in the existing (reference) embedding. Needed to
         properly construct the sparse P matrix.
@@ -199,6 +215,9 @@ def joint_probabilities_nn(neighbors, distances, perplexities, symmetrize=True,
         that a new sample would appear as a neighbor of a reference point.
 
     """
+    assert normalization in ("pair-wise", "point-wise"), \
+        f"Unrecognized normalization scheme `{normalization}`."
+
     n_samples, k_neighbors = distances.shape
 
     if n_reference_samples is None:
@@ -209,16 +228,18 @@ def joint_probabilities_nn(neighbors, distances, perplexities, symmetrize=True,
         distances, np.array(perplexities, dtype=float), num_threads=n_jobs)
     conditional_P = np.asarray(conditional_P)
 
-    P = csr_matrix((conditional_P.ravel(), neighbors.ravel(),
-                    range(0, n_samples * k_neighbors + 1, k_neighbors)),
-                   shape=(n_samples, n_reference_samples))
+    P = sp.csr_matrix((conditional_P.ravel(), neighbors.ravel(),
+                       range(0, n_samples * k_neighbors + 1, k_neighbors)),
+                      shape=(n_samples, n_reference_samples))
 
     # Symmetrize the probability matrix
     if symmetrize:
         P = (P + P.T) / 2
 
-    # Convert weights to probabilities
-    P /= np.sum(P)
+    if normalization == "pair-wise":
+        P /= np.sum(P)
+    elif normalization == "point-wise":
+        P = sp.diags(np.asarray(1 / P.sum(axis=1)).ravel()) @ P
 
     return P
 
@@ -241,9 +262,9 @@ class FixedSigmaNN(Affinities):
         conditional_P = np.exp(-distances ** 2 / (2 * sigma ** 2))
         conditional_P /= np.sum(conditional_P, axis=1)[:, np.newaxis]
 
-        P = csr_matrix((conditional_P.ravel(), neighbors.ravel(),
-                        range(0, n_samples * k + 1, k)),
-                       shape=(n_samples, n_samples))
+        P = sp.csr_matrix((conditional_P.ravel(), neighbors.ravel(),
+                           range(0, n_samples * k + 1, k)),
+                          shape=(n_samples, n_samples))
 
         # Symmetrize the probability matrix
         if symmetrize:
@@ -275,14 +296,13 @@ class FixedSigmaNN(Affinities):
 
         # Compute asymmetric pairwise input similarities
         conditional_P = np.exp(-distances ** 2 / (2 * sigma ** 2))
-        conditional_P /= np.sum(conditional_P, axis=1)[:, np.newaxis]
-
-        P = csr_matrix((conditional_P.ravel(), neighbors.ravel(),
-                        range(0, n_samples * k + 1, k)),
-                       shape=(n_samples, n_reference_samples))
 
         # Convert weights to probabilities
-        P /= np.sum(conditional_P)
+        conditional_P /= np.sum(conditional_P, axis=1)[:, np.newaxis]
+
+        P = sp.csr_matrix((conditional_P.ravel(), neighbors.ravel(),
+                           range(0, n_samples * k + 1, k)),
+                          shape=(n_samples, n_reference_samples))
 
         if return_distances:
             return P, neighbors, distances
@@ -325,12 +345,14 @@ class MultiscaleMixture(Affinities):
             distances,
             perplexities,
             symmetrize=True,
+            normalization="pair-wise",
             n_reference_samples=None,
             n_jobs=1,
     ):
         return joint_probabilities_nn(
             neighbors, distances, perplexities, symmetrize=symmetrize,
-            n_reference_samples=n_reference_samples, n_jobs=n_jobs,
+            normalization=normalization, n_reference_samples=n_reference_samples,
+            n_jobs=n_jobs,
         )
 
     def set_perplexities(self, new_perplexities):
@@ -366,7 +388,8 @@ class MultiscaleMixture(Affinities):
 
         P = self._calculate_P(
             neighbors, distances, perplexities, symmetrize=False,
-            n_reference_samples=self.n_samples, n_jobs=self.n_jobs,
+            normalization="point-wise", n_reference_samples=self.n_samples,
+            n_jobs=self.n_jobs,
         )
 
         if return_distances:
@@ -416,6 +439,7 @@ class Multiscale(MultiscaleMixture):
             distances,
             perplexities,
             symmetrize=True,
+            normalization="pair-wise",
             n_reference_samples=None,
             n_jobs=1,
     ):
@@ -423,11 +447,17 @@ class Multiscale(MultiscaleMixture):
         partial_Ps = [
             joint_probabilities_nn(
                 neighbors, distances, [perplexity], symmetrize=symmetrize,
-                n_reference_samples=n_reference_samples, n_jobs=n_jobs,
+                normalization=normalization, n_reference_samples=n_reference_samples,
+                n_jobs=n_jobs,
             ) for perplexity in perplexities
         ]
         # Sum them together, then normalize
         P = reduce(operator.add, partial_Ps, 0)
-        P /= np.sum(P)
+
+        # Take care to properly normalize the affinity matrix
+        if normalization == "pair-wise":
+            P /= np.sum(P)
+        elif normalization == "point-wise":
+            P = sp.diags(np.asarray(1 / P.sum(axis=1)).ravel()) @ P
 
         return P

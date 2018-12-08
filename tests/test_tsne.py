@@ -6,7 +6,10 @@ from typing import Callable, Any, Tuple, Optional
 from unittest.mock import patch, MagicMock
 
 import numpy as np
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
 
+import fastTSNE
 from fastTSNE import affinity
 from fastTSNE import tsne
 from fastTSNE.affinity import PerplexityBasedNN
@@ -361,11 +364,14 @@ class TestTSNECallbackParams(unittest.TestCase):
 
 
 class TSNEInitialization(unittest.TestCase):
+    transform_initializations = ["random", "median", "weighted"]
+
     @classmethod
     def setUpClass(cls):
         # It would be nice if the initial data were not nicely behaved to test
         # for low variance
         cls.x = np.random.normal(100, 50, (25, 4))
+        cls.iris = datasets.load_iris()["data"]
 
     def test_low_variance(self):
         """Low variance of the initial embedding is very important for the
@@ -383,10 +389,10 @@ class TSNEInitialization(unittest.TestCase):
     def test_mismatching_embedding_dimensions_simple_api(self):
         # Fit
         tsne = TSNE(n_components=2, initialization=self.x[:10, :2])
-        with self.assertRaises(ValueError, msg="fit::ncorrect number of points"):
+        with self.assertRaises(ValueError, msg="fit::incorrect number of points"):
             tsne.fit(self.x[:25])
 
-        with self.assertRaises(ValueError, msg="fit::ncorrect number of dimensions"):
+        with self.assertRaises(ValueError, msg="fit::incorrect number of dimensions"):
             TSNE(n_components=2, initialization=self.x[:10, :4])
 
         # Transform
@@ -397,6 +403,61 @@ class TSNEInitialization(unittest.TestCase):
 
         with self.assertRaises(ValueError, msg="transform::incorrect number of dimensions"):
             embedding.transform(X=self.x, initialization=self.x[:, :4])
+
+    def test_same_unoptimized_initializations_for_transform(self):
+        """Initializations should be deterministic."""
+        x_train, x_test = train_test_split(self.iris, test_size=0.33, random_state=42)
+
+        embedding = fastTSNE.TSNE(
+            early_exaggeration_iter=50, n_iter=50, neighbors="exact",
+            negative_gradient_method="bh", random_state=42,
+        ).fit(x_train)
+
+        for init in self.transform_initializations:
+            new_embedding_1 = embedding.prepare_partial(x_test, initialization=init)
+            new_embedding_2 = embedding.prepare_partial(x_test, initialization=init)
+
+            np.testing.assert_equal(new_embedding_1, new_embedding_2, init)
+
+    def test_same_bh_optimized_median_initializations_for_transform(self):
+        """Transform with Barnes-Hut optimization should be deterministic."""
+        x_train, x_test = train_test_split(self.iris, test_size=0.33, random_state=42)
+
+        embedding = fastTSNE.TSNE(
+            early_exaggeration_iter=10, n_iter=10, neighbors="exact",
+            negative_gradient_method="bh", random_state=42,
+        ).fit(x_train)
+
+        for init in self.transform_initializations:
+            new_embedding_1 = embedding.transform(
+                x_test, initialization=init, early_exaggeration_iter=0, n_iter=10,
+            )
+            new_embedding_2 = embedding.transform(
+                x_test, initialization=init, early_exaggeration_iter=0, n_iter=10,
+            )
+
+            np.testing.assert_equal(new_embedding_1, new_embedding_2, init)
+
+    def test_same_fft_optimized_median_initializations_for_transform(self):
+        """Transform with interpolation based optimization should be deterministic."""
+        x_train, x_test = train_test_split(self.iris, test_size=0.33, random_state=42)
+
+        embedding = fastTSNE.TSNE(
+            early_exaggeration_iter=10, n_iter=10, neighbors="exact",
+            negative_gradient_method="fft", random_state=42,
+        ).fit(x_train)
+
+        for init in self.transform_initializations:
+            new_embedding_1 = embedding.transform(
+                x_test, initialization=init, early_exaggeration_iter=0, n_iter=10,
+                learning_rate=10,
+            )
+            new_embedding_2 = embedding.transform(
+                x_test, initialization=init, early_exaggeration_iter=0, n_iter=10,
+                learning_rate=10,
+            )
+
+            np.testing.assert_equal(new_embedding_1, new_embedding_2, init)
 
 
 class TestRandomState(unittest.TestCase):

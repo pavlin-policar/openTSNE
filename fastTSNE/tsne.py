@@ -54,7 +54,7 @@ def _handle_nice_params(optim_params: dict) -> None:
     optim_params["objective_function"] = negative_gradient_method
 
     # Handle number of jobs
-    n_jobs = optim_params["n_jobs"]
+    n_jobs = optim_params.get("n_jobs", 1)
     if n_jobs < 0:
         n_cores = multiprocessing.cpu_count()
         # Add negative number of n_jobs to the number of cores, but increment by
@@ -107,6 +107,7 @@ class OptimizationInterrupt(InterruptedError):
         on where the error was raised.
 
     """
+    
     def __init__(self, error, final_embedding):
         super().__init__()
         self.error = error
@@ -146,7 +147,7 @@ class PartialTSNEEmbedding(np.ndarray):
 
     def optimize(self, n_iter, inplace=False, propagate_exception=False,
                  **gradient_descent_params):
-        """Run optmization on the embedding for a given nubmer of steps.
+        """Run optmization on the embedding for a given number of steps.
 
         Parameters
         ----------
@@ -258,7 +259,7 @@ class TSNEEmbedding(np.ndarray):
 
     def optimize(self, n_iter, inplace=False, propagate_exception=False,
                  **gradient_descent_params):
-        """Run optmization on the embedding for a given nubmer of steps.
+        """Run optmization on the embedding for a given number of steps.
 
         Parameters
         ----------
@@ -321,7 +322,7 @@ class TSNEEmbedding(np.ndarray):
         return embedding
 
     def transform(self, X, perplexity=None, initialization="median",
-                  early_exaggeration=2, early_exaggeration_iter=100,
+                  learning_rate=50, early_exaggeration=2, early_exaggeration_iter=100,
                   initial_momentum=0.2, n_iter=100, final_momentum=0.4):
         """Embed new points into the existing embedding.
 
@@ -345,6 +346,7 @@ class TSNEEmbedding(np.ndarray):
             embedding. Typically, few optimization steps are needed for good
             embeddings. ``random`` positions all new points in the center of the
             embedding and should be used for demonstration only.
+        learning_rate: float
         early_exaggeration: float
             The early exaggeration factor.
         early_exaggeration_iter: int
@@ -372,15 +374,16 @@ class TSNEEmbedding(np.ndarray):
             # Early exaggeration with lower momentum to allow points to find more
             # easily move around and find their neighbors
             embedding.optimize(
-                n_iter=early_exaggeration_iter, exaggeration=early_exaggeration,
-                momentum=initial_momentum, inplace=True, propagate_exception=True,
+                n_iter=early_exaggeration_iter, learning_rate=learning_rate,
+                exaggeration=early_exaggeration, momentum=initial_momentum,
+                inplace=True, propagate_exception=True,
             )
 
             # Restore actual affinity probabilities and increase momentum to get
             # final, optimized embedding
             embedding.optimize(
-                n_iter=n_iter, exaggeration=None, momentum=final_momentum,
-                inplace=True, propagate_exception=True,
+                n_iter=n_iter, exaggeration=None, learning_rate=learning_rate,
+                momentum=final_momentum, inplace=True, propagate_exception=True,
             )
 
         except OptimizationInterrupt as ex:

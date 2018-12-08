@@ -3,13 +3,17 @@ import unittest
 from functools import partial
 
 import numpy as np
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
 
 from fastTSNE import affinity
 
 affinity.log.setLevel(logging.ERROR)
 
 Multiscale = partial(affinity.Multiscale, method="exact")
+MultiscaleMixture = partial(affinity.MultiscaleMixture, method="exact")
 PerplexityBasedNN = partial(affinity.PerplexityBasedNN, method="exact")
+FixedSigmaNN = partial(affinity.FixedSigmaNN, method="exact")
 
 
 class TestPerplexityBased(unittest.TestCase):
@@ -117,3 +121,34 @@ class TestMultiscale(unittest.TestCase):
         # the nearest neighbors, so it should raise an error
         with self.assertRaises(RuntimeError):
             ms.set_perplexities([20, 30])
+
+
+class TestAffinityMatrixCorrectness(unittest.TestCase):
+    affinity_classes = [
+        ("PerplexityBasedNN", PerplexityBasedNN),
+        ("FixedSigmaNN", partial(FixedSigmaNN, sigma=1)),
+        ("MultiscaleMixture", partial(MultiscaleMixture, perplexities=[10, 20])),
+        ("Multiscale", partial(Multiscale, perplexities=[10, 20])),
+    ]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.iris = datasets.load_iris().data
+
+    def test_that_regular_matrix_sums_to_one(self):
+        for method_name, cls in self.affinity_classes:
+            aff: affinity.Affinities = cls(self.iris)
+            self.assertAlmostEqual(np.sum(aff.P), 1, msg=method_name)
+
+    def test_that_to_new_transform_matrix_treats_each_datapoint_separately(self):
+        x_train, x_test = train_test_split(self.iris, test_size=0.33, random_state=42)
+
+        for method_name, cls in self.affinity_classes:
+            aff: affinity.Affinities = cls(x_train)
+            P = aff.to_new(x_test)
+            np.testing.assert_allclose(
+                np.asarray(np.sum(P, axis=1)).ravel(),
+                np.ones(len(x_test)),
+                err_msg=method_name,
+            )
+
