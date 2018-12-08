@@ -97,7 +97,7 @@ class NNDescent(KNNIndex):
         self.index = pynndescent.NNDescent(
             data, metric=self.metric, metric_kwds=self.metric_params,
             random_state=random_state, n_trees=n_trees, n_iters=n_iters,
-            algorithm="alternative", max_candidates=60,
+            algorithm="standard", max_candidates=60,
         )
 
     def query_train(self, data, k):
