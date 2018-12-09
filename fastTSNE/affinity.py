@@ -12,63 +12,94 @@ log = logging.getLogger(__name__)
 
 
 class Affinities:
-    """Compute the affinities among some initial data and new data.
+    """Compute the affinities between samples.
 
     t-SNE takes as input an affinity matrix :math:`P`, and does not really care
-    about anything else about the data. This means we can use t-SNE for any data
+    about anything else from the data. This means we can use t-SNE for any data
     where we are able to express interactions between samples with an affinity
     matrix.
 
     Attributes
     ----------
     P: array_like
-        The affinity matrix expressing interactions between all data samples.
+        The :math:`N \\times N` affinity matrix expressing interactions between
+        :math:`N` initial data samples.
 
     """
 
     def __init__(self):
         self.P = None
 
-    def to_new(self, data):
-        """Compute the affinities of new data points to the existing ones.
+    def to_new(self, data, return_distances=False):
+        """Compute the affinities of new samples to the initial samples.
 
-        This is especially useful for `transform` where we need the conditional
-        probabilities from the existing to the new data.
+        This is necessary for embedding new data points into an existing
+        embedding.
+
+        Parameters
+        ----------
+        data: np.ndarray
+            The data points to be added to the existing embedding.
+
+        return_distances: bool
+            If needed, the function can return the indices of the nearest
+            neighbors and their corresponding distances.
+
+        Returns
+        -------
+        P: array_like
+            An :math:`N \\times M` affinity matrix expressing interactions
+            between :math:`N` new data points the initial :math:`M` data
+            samples.
+
+        indices: np.ndarray
+            Returned if ``return_distances=True``. The indices of the :math:`k`
+            nearest neighbors in the existing embedding for every new data
+            point.
+
+        distances: np.ndarray
+            Returned if ``return_distances=True``. The distances to the
+            :math:`k` nearest neighbors in the existing embedding for every new
+            data point.
 
         """
 
 
 class PerplexityBasedNN(Affinities):
-    """Compute affinities using the nearest neighbors defined by perplexity.
+    """Compute affinities using nearest neighbors.
+
+    Please see the Parameter guide for more information.
 
     Parameters
     ----------
     data: np.ndarray
         The data matrix.
+
     perplexity: float
         Perplexity can be thought of as the continuous :math:`k` number of
-        neighbors to consider for each data point. To avoid confusion, note that
-        perplexity linearly impacts runtime.
+        nearest neighbors, for which t-SNE will attempt to preserve distances.
+
     method: str
         Specifies the nearest neighbor method to use. Can be either ``exact`` or
-        ``approx``. ``exact`` uses space partitioning binary trees from
-        scikit-learn while ``approx`` makes use of nearest neighbor descent.
-        Note that ``approx`` has a bit of overhead and will be slower on smaller
-        data sets than exact search.
+        ``approx``.
+
     metric: str
         The metric to be used to compute affinities between points in the
         original space.
-    metric_params: Optional[dict]
+
+    metric_params: dict
         Additional keyword arguments for the metric function.
+
     symmetrize: bool
         Symmetrize affinity matrix. Standard t-SNE symmetrizes the interactions
         but when embedding new data, symmetrization is not performed.
+
     n_jobs: int
-        The number of jobs to run in parallel. This follows the scikit-learn
-        convention, ``-1`` meaning all processors, ``-2`` meaning all but one
-        processor and so on.
-    random_state: Optional[Union[int, RandomState]]
-        The random state parameter follows the convention used in scikit-learn.
+        The number of threads to use while running t-SNE. This follows the
+        scikit-learn convention, ``-1`` meaning all processors, ``-2`` meaning
+        all but one, etc.
+
+    random_state: Union[int, RandomState]
         If the value is an int, random_state is the seed used by the random
         number generator. If the value is a RandomState instance, then it will
         be used as the random number generator. If the value is None, the random
@@ -94,6 +125,21 @@ class PerplexityBasedNN(Affinities):
         self.n_jobs = n_jobs
 
     def set_perplexity(self, new_perplexity):
+        """Change the perplexity of the affinity matrix.
+
+        Note that we only allow lowering the perplexity or restoring it to its
+        original value. This restriction exists because setting a higher
+        perplexity value requires recomputing all the nearest neighbors, which
+        can take a long time. To avoid potential confusion as to why execution
+        time is slow, this is not allowed. If you would like to increase the
+        perplexity above the initial value, simply create a new instance.
+
+        Parameters
+        ----------
+        new_perplexity: float
+            The new perplexity.
+
+        """
         # If the value hasn't changed, there's nothing to do
         if new_perplexity == self.perplexity:
             return
@@ -116,6 +162,45 @@ class PerplexityBasedNN(Affinities):
         )
 
     def to_new(self, data, perplexity=None, return_distances=False):
+        """Compute the affinities of new samples to the initial samples.
+
+        This is necessary for embedding new data points into an existing
+        embedding.
+
+        Please see the Parameter guide for more information.
+
+        Parameters
+        ----------
+        data: np.ndarray
+            The data points to be added to the existing embedding.
+
+        perplexity: float
+            Perplexity can be thought of as the continuous :math:`k` number of
+            nearest neighbors, for which t-SNE will attempt to preserve
+            distances.
+
+        return_distances: bool
+            If needed, the function can return the indices of the nearest
+            neighbors and their corresponding distances.
+
+        Returns
+        -------
+        P: array_like
+            An :math:`N \\times M` affinity matrix expressing interactions
+            between :math:`N` new data points the initial :math:`M` data
+            samples.
+
+        indices: np.ndarray
+            Returned if ``return_distances=True``. The indices of the :math:`k`
+            nearest neighbors in the existing embedding for every new data
+            point.
+
+        distances: np.ndarray
+            Returned if ``return_distances=True``. The distances to the
+            :math:`k` nearest neighbors in the existing embedding for every new
+            data point.
+
+        """
         perplexity = perplexity if perplexity is not None else self.perplexity
         perplexity = self.check_perplexity(perplexity)
         k_neighbors = min(self.n_samples - 1, int(3 * perplexity))
@@ -134,7 +219,6 @@ class PerplexityBasedNN(Affinities):
         return P
 
     def check_perplexity(self, perplexity):
-        """Check for valid perplexity value."""
         if perplexity <= 0:
             raise ValueError("Perplexity must be >=0. %.2f given" % perplexity)
 
@@ -245,6 +329,52 @@ def joint_probabilities_nn(
 
 
 class FixedSigmaNN(Affinities):
+    """Compute affinities using using nearest neighbors and a fixed bandwidth
+    for the Gaussians in the ambient space.
+
+    Using a fixed Gaussian bandwidth can enable us to find smaller clusters of
+    data points than we might be able to using the automatically determined
+    bandwidths using perplexity. Note however that this requires mostly trial
+    and error.
+
+    Parameters
+    ----------
+    data: np.ndarray
+        The data matrix.
+
+    sigma: float
+        The bandwidth to use for the Gaussian kernels in the ambient space.
+
+    k: int
+        The number of nearest neighbors to consider for each kernel.
+
+    method: str
+        Specifies the nearest neighbor method to use. Can be either ``exact`` or
+        ``approx``.
+
+    metric: str
+        The metric to be used to compute affinities between points in the
+        original space.
+
+    metric_params: dict
+        Additional keyword arguments for the metric function.
+
+    symmetrize: bool
+        Symmetrize affinity matrix. Standard t-SNE symmetrizes the interactions
+        but when embedding new data, symmetrization is not performed.
+
+    n_jobs: int
+        The number of threads to use while running t-SNE. This follows the
+        scikit-learn convention, ``-1`` meaning all processors, ``-2`` meaning
+        all but one, etc.
+
+    random_state: Union[int, RandomState]
+        If the value is an int, random_state is the seed used by the random
+        number generator. If the value is a RandomState instance, then it will
+        be used as the random number generator. If the value is None, the random
+        number generator is the RandomState instance used by `np.random`.
+
+    """
 
     def __init__(self, data, sigma, k=30, method="approx", metric="euclidean",
                  metric_params=None, symmetrize=True, n_jobs=1, random_state=None):
@@ -279,6 +409,44 @@ class FixedSigmaNN(Affinities):
         self.n_jobs = n_jobs
 
     def to_new(self, data, k=None, sigma=None, return_distances=False):
+        """Compute the affinities of new samples to the initial samples.
+
+        This is necessary for embedding new data points into an existing
+        embedding.
+
+        Parameters
+        ----------
+        data: np.ndarray
+            The data points to be added to the existing embedding.
+
+        k: int
+            The number of nearest neighbors to consider for each kernel.
+
+        sigma: float
+            The bandwidth to use for the Gaussian kernels in the ambient space.
+
+        return_distances: bool
+            If needed, the function can return the indices of the nearest
+            neighbors and their corresponding distances.
+
+        Returns
+        -------
+        P: array_like
+            An :math:`N \\times M` affinity matrix expressing interactions
+            between :math:`N` new data points the initial :math:`M` data
+            samples.
+
+        indices: np.ndarray
+            Returned if ``return_distances=True``. The indices of the :math:`k`
+            nearest neighbors in the existing embedding for every new data
+            point.
+
+        distances: np.ndarray
+            Returned if ``return_distances=True``. The distances to the
+            :math:`k` nearest neighbors in the existing embedding for every new
+            data point.
+
+        """
         n_samples = data.shape[0]
         n_reference_samples = self.n_samples
 
@@ -315,7 +483,46 @@ class MultiscaleMixture(Affinities):
 
     Instead of using a single perplexity to compute the affinities between data
     points, we can use a multiscale Gaussian kernel instead. This allows us to
-    incorporate long range interactions, if used properly.
+    incorporate long range interactions.
+
+    Please see the Parameter guide for more information.
+
+    Parameters
+    ----------
+    data: np.ndarray
+        The data matrix.
+
+    perplexities: List[float]
+        A list of perplexity values, which will be used in the multiscale
+        Gaussian kernel. Perplexity can be thought of as the continuous
+        :math:`k` number of nearest neighbors, for which t-SNE will attempt to
+        preserve distances.
+
+    method: str
+        Specifies the nearest neighbor method to use. Can be either ``exact`` or
+        ``approx``.
+
+    metric: str
+        The metric to be used to compute affinities between points in the
+        original space.
+
+    metric_params: dict
+        Additional keyword arguments for the metric function.
+
+    symmetrize: bool
+        Symmetrize affinity matrix. Standard t-SNE symmetrizes the interactions
+        but when embedding new data, symmetrization is not performed.
+
+    n_jobs: int
+        The number of threads to use while running t-SNE. This follows the
+        scikit-learn convention, ``-1`` meaning all processors, ``-2`` meaning
+        all but one, etc.
+
+    random_state: Union[int, RandomState]
+        If the value is an int, random_state is the seed used by the random
+        number generator. If the value is a RandomState instance, then it will
+        be used as the random number generator. If the value is None, the random
+        number generator is the RandomState instance used by `np.random`.
 
     """
 
@@ -356,6 +563,22 @@ class MultiscaleMixture(Affinities):
         )
 
     def set_perplexities(self, new_perplexities):
+        """Change the perplexities of the affinity matrix.
+
+        Note that we only allow lowering the perplexities or restoring them to
+        their original maximum value. This restriction exists because setting a
+        higher perplexity value requires recomputing all the nearest neighbors,
+        which can take a long time. To avoid potential confusion as to why
+        execution time is slow, this is not allowed. If you would like to
+        increase the perplexity above the initial value, simply create a new
+        instance.
+
+        Parameters
+        ----------
+        new_perplexities: List[float]
+            The new list of perplexities.
+
+        """
         if np.array_equal(self.perplexities, new_perplexities):
             return
 
@@ -378,6 +601,46 @@ class MultiscaleMixture(Affinities):
         )
 
     def to_new(self, data, perplexities=None, return_distances=False):
+        """Compute the affinities of new samples to the initial samples.
+
+        This is necessary for embedding new data points into an existing
+        embedding.
+
+        Please see the Parameter guide for more information.
+
+        Parameters
+        ----------
+        data: np.ndarray
+            The data points to be added to the existing embedding.
+
+        perplexities: List[float]
+            A list of perplexity values, which will be used in the multiscale
+            Gaussian kernel. Perplexity can be thought of as the continuous
+            :math:`k` number of nearest neighbors, for which t-SNE will attempt
+            to preserve distances.
+
+        return_distances: bool
+            If needed, the function can return the indices of the nearest
+            neighbors and their corresponding distances.
+
+        Returns
+        -------
+        P: array_like
+            An :math:`N \\times M` affinity matrix expressing interactions
+            between :math:`N` new data points the initial :math:`M` data
+            samples.
+
+        indices: np.ndarray
+            Returned if ``return_distances=True``. The indices of the :math:`k`
+            nearest neighbors in the existing embedding for every new data
+            point.
+
+        distances: np.ndarray
+            Returned if ``return_distances=True``. The distances to the
+            :math:`k` nearest neighbors in the existing embedding for every new
+            data point.
+
+        """
         perplexities = perplexities if perplexities is not None else self.perplexities
         perplexities = self.check_perplexities(perplexities)
 
@@ -430,6 +693,45 @@ class Multiscale(MultiscaleMixture):
     In contrast to :class:`MultiscaleMixture`, which uses a Gaussian mixture
     kernel, here, we first compute single scale Gaussian kernels, convert them
     to probability distributions, then average them out between scales.
+
+    Please see the Parameter guide for more information.
+
+    Parameters
+    ----------
+    data: np.ndarray
+        The data matrix.
+
+    perplexities: List[float]
+        A list of perplexity values, which will be used in the multiscale
+        Gaussian kernel. Perplexity can be thought of as the continuous
+        :math:`k` number of nearest neighbors, for which t-SNE will attempt to
+        preserve distances.
+
+    method: str
+        Specifies the nearest neighbor method to use. Can be either ``exact`` or
+        ``approx``.
+
+    metric: str
+        The metric to be used to compute affinities between points in the
+        original space.
+
+    metric_params: dict
+        Additional keyword arguments for the metric function.
+
+    symmetrize: bool
+        Symmetrize affinity matrix. Standard t-SNE symmetrizes the interactions
+        but when embedding new data, symmetrization is not performed.
+
+    n_jobs: int
+        The number of threads to use while running t-SNE. This follows the
+        scikit-learn convention, ``-1`` meaning all processors, ``-2`` meaning
+        all but one, etc.
+
+    random_state: Union[int, RandomState]
+        If the value is an int, random_state is the seed used by the random
+        number generator. If the value is a RandomState instance, then it will
+        be used as the random number generator. If the value is None, the random
+        number generator is the RandomState instance used by `np.random`.
 
     """
 
