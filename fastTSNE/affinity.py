@@ -68,7 +68,7 @@ class Affinities:
 class PerplexityBasedNN(Affinities):
     """Compute affinities using nearest neighbors.
 
-    Please see the Parameter guide for more information.
+    Please see the :ref:`parameter-guide` for more information.
 
     Parameters
     ----------
@@ -167,7 +167,7 @@ class PerplexityBasedNN(Affinities):
         This is necessary for embedding new data points into an existing
         embedding.
 
-        Please see the Parameter guide for more information.
+        Please see the :ref:`parameter-guide` for more information.
 
         Parameters
         ----------
@@ -485,7 +485,7 @@ class MultiscaleMixture(Affinities):
     points, we can use a multiscale Gaussian kernel instead. This allows us to
     incorporate long range interactions.
 
-    Please see the Parameter guide for more information.
+    Please see the :ref:`parameter-guide` for more information.
 
     Parameters
     ----------
@@ -606,7 +606,7 @@ class MultiscaleMixture(Affinities):
         This is necessary for embedding new data points into an existing
         embedding.
 
-        Please see the Parameter guide for more information.
+        Please see the :ref:`parameter-guide` for more information.
 
         Parameters
         ----------
@@ -694,7 +694,7 @@ class Multiscale(MultiscaleMixture):
     kernel, here, we first compute single scale Gaussian kernels, convert them
     to probability distributions, then average them out between scales.
 
-    Please see the Parameter guide for more information.
+    Please see the :ref:`parameter-guide` for more information.
 
     Parameters
     ----------
