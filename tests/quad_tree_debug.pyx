@@ -1,4 +1,4 @@
-from .quad_tree cimport QuadTree, Node
+from fastTSNE.quad_tree cimport QuadTree, Node
 import numpy as np
 
 
@@ -40,9 +40,9 @@ def plot_tree(QuadTree tree, data):
 cdef _plot_tree(Node * root, double[:, :] data):
     import matplotlib.pyplot as plt
 
-    fig = plt.figure(figsize=(12, 8))
-    plt.title("Quadtree")
+    fig = plt.figure(figsize=(8, 8))
     ax = fig.add_subplot(111)
+    ax.set_xticks([]), ax.set_yticks([]), ax.axis('off')
 
     centers = []
 
@@ -51,9 +51,10 @@ cdef _plot_tree(Node * root, double[:, :] data):
     xs = [p[0] for p in data]
     ys = [p[1] for p in data]
 
-    plt.plot(xs, ys, 'ro')
-    plt.plot(centers[0], centers[1], 'bx')
+    plt.scatter(xs, ys, s=20)
+    # plt.scatter(centers[0], centers[1], edgecolors="r", facecolors="none", s=10, linewidths=1)
 
+    plt.savefig("quadtree.png", dpi=80, rasterize=True, transparent=True, bbox_inches="tight")
     plt.show()
 
 
