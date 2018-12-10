@@ -96,13 +96,15 @@ class CythonBuildExt(build_ext):
         # We will disable openmp flags if the compiler doesn"t support it. This
         # is only really an issue with OSX clang
         if has_c_library("omp"):
+            print("Found openmp. Compiling with openmp flags...")
             compile_flags.append(flags["openmp"]), link_flags.append(flags["openmp"])
         else:
             warnings.warn(
                 "You appear to be using a compiler which does not support "
                 "openMP, meaning that the library will not be able to run on "
                 "multiple cores. Please install/enable openMP to use multiple "
-                "cores.")
+                "cores."
+            )
 
         for extension in self.extensions:
             extension.extra_compile_args.extend(compile_flags)
@@ -125,6 +127,7 @@ extensions = [
 
 # Check if we have access to FFTW3 and if so, use that implementation
 if has_c_library("fftw3"):
+    print("FFTW3 header files found. Using FFTW implementation of FFT.")
     extensions.append(
         Extension("fastTSNE._matrix_mul.matrix_mul",
                   ["fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx"],
@@ -133,6 +136,7 @@ if has_c_library("fftw3"):
                   )
         )
 else:
+    print("FFTW3 header files not found. Using numpy implementation of FFT.")
     extensions.append(
         Extension("fastTSNE._matrix_mul.matrix_mul",
                   ["fastTSNE/_matrix_mul/matrix_mul_numpy.pyx"])
