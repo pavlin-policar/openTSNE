@@ -32,8 +32,9 @@ The goal of this project is
 
     installation
     getting_started
-    how_tsne_works
+    tsne_algorithm
     parameters
+    benchmarks
 
 
 .. toctree::

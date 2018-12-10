@@ -1,3 +1,5 @@
+.. _parameter-guide:
+
 Parameter guide
 ===============
 
