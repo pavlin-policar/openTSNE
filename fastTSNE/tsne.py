@@ -4,7 +4,6 @@ from collections import Iterable
 from types import SimpleNamespace
 
 import numpy as np
-from scipy.sparse import csr_matrix
 from sklearn.base import BaseEstimator
 
 from . import _tsne
@@ -96,15 +95,16 @@ init_checks = SimpleNamespace(
 
 
 class OptimizationInterrupt(InterruptedError):
-    """Optimization was interrupted by a callback
+    """Optimization was interrupted by a callback.
 
     Parameters
     ----------
     error: float
-        The latest KL divergence of the embedding.
+        The KL divergence of the embedding.
+
     final_embedding: Union[TSNEEmbedding, PartialTSNEEmbedding]
-        The latest embedding. Is either a partial or full embedding, depending
-        on where the error was raised.
+        Is either a partial or full embedding, depending on where the error was
+        raised.
 
     """
     
@@ -115,17 +115,100 @@ class OptimizationInterrupt(InterruptedError):
 
 
 class PartialTSNEEmbedding(np.ndarray):
-    """A partial embedding is created when we take an existing
-    :class:`TSNEEmbedding` and add new data to it. It differs from the typical
-    embedding in that it would be unwise to add even more data to only the
-    subset of already approximated data.
+    """A partial t-SNE embedding.
 
-    If we would like to add new data multiple times to the existing embedding,
-    we can simply do so by using the original embedding.
+    A partial embedding is created when we take an existing
+    :class:`TSNEEmbedding` and embed new samples into the embedding space. It
+    differs from the typical embedding in that it is not possible to add new
+    samples to a partial embedding and would generally be a bad idea.
+
+    Please see the Parameter guide for more information.
+
+    Parameters
+    ----------
+    embedding: np.ndarray
+        Initial positions for each data point.
+
+    reference_embedding: TSNEEmbedding
+        The embedding into which the new samples are to be added.
+
+    P : array_like
+        An :math:`N \\times M` affinity matrix containing the affinities from each new
+        data point :math:`n` to each data point in the existing embedding
+        :math:`m`.
+
+    learning_rate: float
+        The learning rate for t-SNE optimization. Typical values range between
+        100 to 1000. Setting the learning rate too low or too high may result in
+        the points forming a "ball". This is also known as the crowding problem.
+
+    exaggeration: float
+        The exaggeration factor is used to increase the attractive forces of
+        nearby points, producing more compact clusters.
+
+    momentum: float
+        Momentum accounts for gradient directions from previous iterations,
+        resulting in faster convergence.
+
+    negative_gradient_method: str
+        Specifies the negative gradient approximation method to use. For smaller
+        data sets, the Barnes-Hut approximation is appropriate and can be set
+        using one of the following aliases: ``bh``, ``BH`` or ``barnes-hut``.
+        For larger data sets, the FFT accelerated interpolation method is more
+        appropriate and can be set using one of the following aliases: ``fft``,
+        ``FFT`` or ``ìnterpolation``.
+
+    theta: float
+        This is the trade-off parameter between speed and accuracy of the tree
+        approximation method. Typical values range from 0.2 to 0.8. The value 0
+        indicates that no approximation is to be made and produces exact results
+        also producing longer runtime.
+
+    n_interpolation_points: int
+        Only used when ``negative_gradient_method="fft"`` or its other aliases.
+        The number of interpolation points to use within each grid cell for
+        interpolation based t-SNE. It is highly recommended leaving this value
+        at the default 3.
+
+    min_num_intervals: int
+        Only used when ``negative_gradient_method="fft"`` or its other aliases.
+        The minimum number of grid cells to use, regardless of the
+        ``ints_in_interval`` parameter. Higher values provide more accurate
+        gradient estimations.
+
+    random_state: Union[int, RandomState]
+        The random state parameter follows the convention used in scikit-learn.
+        If the value is an int, random_state is the seed used by the random
+        number generator. If the value is a RandomState instance, then it will
+        be used as the random number generator. If the value is None, the random
+        number generator is the RandomState instance used by `np.random`.
+
+    n_jobs: int
+        The number of threads to use while running t-SNE. This follows the
+        scikit-learn convention, ``-1`` meaning all processors, ``-2`` meaning
+        all but one, etc.
+
+    callbacks: Callable[[int, float, np.ndarray] -> bool]
+        Callbacks, which will be run every ``callbacks_every_iters`` iterations.
+
+    callbacks_every_iters: int
+        How many iterations should pass between each time the callbacks are
+        invoked.
+
+    optimizer: gradient_descent
+        Optionally, an existing optimizer can be used for optimization. This is
+        useful for keeping momentum gains between different calls to
+        :func:`optimize`.
+
+    Attributes
+    ----------
+    kl_divergence: float
+        The KL divergence or error of the embedding.
 
     """
 
-    def __new__(cls, embedding, reference_embedding, P, gradient_descent_params, optimizer=None):
+    def __new__(cls, embedding, reference_embedding, P, optimizer=None,
+                **gradient_descent_params):
         init_checks.num_samples(embedding.shape[0], P.shape[0])
 
         obj = np.asarray(embedding, dtype=np.float64, order="C").view(PartialTSNEEmbedding)
@@ -153,16 +236,76 @@ class PartialTSNEEmbedding(np.ndarray):
         ----------
         n_iter: int
             The number of optimization iterations.
+
+        learning_rate: float
+            The learning rate for t-SNE optimization. Typical values range
+            between 100 to 1000. Setting the learning rate too low or too high
+            may result in the points forming a "ball". This is also known as the
+            crowding problem.
+
+        exaggeration: float
+            The exaggeration factor is used to increase the attractive forces of
+            nearby points, producing more compact clusters.
+
+        momentum: float
+            Momentum accounts for gradient directions from previous iterations,
+            resulting in faster convergence.
+
+        negative_gradient_method: str
+            Specifies the negative gradient approximation method to use. For
+            smaller data sets, the Barnes-Hut approximation is appropriate and
+            can be set using one of the following aliases: ``bh``, ``BH`` or
+            ``barnes-hut``. For larger data sets, the FFT accelerated
+            interpolation method is more appropriate and can be set using one of
+            the following aliases: ``fft``, ``FFT`` or ``ìnterpolation``.
+
+        theta: float
+            This is the trade-off parameter between speed and accuracy of the
+            tree approximation method. Typical values range from 0.2 to 0.8. The
+            value 0 indicates that no approximation is to be made and produces
+            exact results also producing longer runtime.
+
+        n_interpolation_points: int
+            Only used when ``negative_gradient_method="fft"`` or its other
+            aliases. The number of interpolation points to use within each grid
+            cell for interpolation based t-SNE. It is highly recommended leaving
+            this value at the default 3.
+
+        min_num_intervals: int
+            Only used when ``negative_gradient_method="fft"`` or its other
+            aliases. The minimum number of grid cells to use, regardless of the
+            ``ints_in_interval`` parameter. Higher values provide more accurate
+            gradient estimations.
+
         inplace: bool
             Whether or not to create a copy of the embedding or to perform
             updates inplace.
+
         propagate_exception: bool
             The optimization process can be interrupted using callbacks. This
             flag indicates whether we should propagate that exception or to
             simply stop optimization and return the resulting embedding.
-        **gradient_descent_params: dict
-            Any parameters accepted by :func:`gradient_descent` can be specified
-            here for finer control of the optimization process.
+
+        random_state: Union[int, RandomState]
+            The random state parameter follows the convention used in
+            scikit-learn. If the value is an int, random_state is the seed used
+            by the random number generator. If the value is a RandomState
+            instance, then it will be used as the random number generator. If
+            the value is None, the random number generator is the RandomState
+            instance used by `np.random`.
+
+        n_jobs: int
+            The number of threads to use while running t-SNE. This follows the
+            scikit-learn convention, ``-1`` meaning all processors, ``-2``
+            meaning all but one, etc.
+
+        callbacks: Callable[[int, float, np.ndarray] -> bool]
+            Callbacks, which will be run every ``callbacks_every_iters``
+            iterations.
+
+        callbacks_every_iters: int
+            How many iterations should pass between each time the callbacks are
+            invoked.
 
         Returns
         -------
@@ -181,8 +324,8 @@ class PartialTSNEEmbedding(np.ndarray):
             embedding = self
         else:
             embedding = PartialTSNEEmbedding(
-                np.copy(self), self.reference_embedding, self.P, self.gradient_descent_params,
-                optimizer=self.optimizer.copy(),
+                np.copy(self), self.reference_embedding, self.P,
+                optimizer=self.optimizer.copy(), **self.gradient_descent_params,
             )
 
         # If optimization parameters were passed to this funciton, prefer those
@@ -212,22 +355,82 @@ class PartialTSNEEmbedding(np.ndarray):
 
 
 class TSNEEmbedding(np.ndarray):
-    """t-SNE embedding
+    """A t-SNE embedding.
+
+    Please see the Parameter guide for more information.
 
     Parameters
     ----------
     embedding: np.ndarray
         Initial positions for each data point.
+
     affinities: Affinities
         An affinity index which can be used to compute the affinities of new
         points to the points in the existing embedding. The affinity index also
         contains the affinity matrix :math:`P` used during optimization.
-    random_state: Optional[Union[int, RandomState]]
+
+    learning_rate: float
+        The learning rate for t-SNE optimization. Typical values range between
+        100 to 1000. Setting the learning rate too low or too high may result in
+        the points forming a "ball". This is also known as the crowding problem.
+
+    exaggeration: float
+        The exaggeration factor is used to increase the attractive forces of
+        nearby points, producing more compact clusters.
+
+    momentum: float
+        Momentum accounts for gradient directions from previous iterations,
+        resulting in faster convergence.
+
+    negative_gradient_method: str
+        Specifies the negative gradient approximation method to use. For smaller
+        data sets, the Barnes-Hut approximation is appropriate and can be set
+        using one of the following aliases: ``bh``, ``BH`` or ``barnes-hut``.
+        For larger data sets, the FFT accelerated interpolation method is more
+        appropriate and can be set using one of the following aliases: ``fft``,
+        ``FFT`` or ``ìnterpolation``.
+
+    theta: float
+        This is the trade-off parameter between speed and accuracy of the tree
+        approximation method. Typical values range from 0.2 to 0.8. The value 0
+        indicates that no approximation is to be made and produces exact results
+        also producing longer runtime.
+
+    n_interpolation_points: int
+        Only used when ``negative_gradient_method="fft"`` or its other aliases.
+        The number of interpolation points to use within each grid cell for
+        interpolation based t-SNE. It is highly recommended leaving this value
+        at the default 3.
+
+    min_num_intervals: int
+        Only used when ``negative_gradient_method="fft"`` or its other aliases.
+        The minimum number of grid cells to use, regardless of the
+        ``ints_in_interval`` parameter. Higher values provide more accurate
+        gradient estimations.
+
+    random_state: Union[int, RandomState]
         The random state parameter follows the convention used in scikit-learn.
         If the value is an int, random_state is the seed used by the random
         number generator. If the value is a RandomState instance, then it will
         be used as the random number generator. If the value is None, the random
         number generator is the RandomState instance used by `np.random`.
+
+    n_jobs: int
+        The number of threads to use while running t-SNE. This follows the
+        scikit-learn convention, ``-1`` meaning all processors, ``-2`` meaning
+        all but one, etc.
+
+    callbacks: Callable[[int, float, np.ndarray] -> bool]
+        Callbacks, which will be run every ``callbacks_every_iters`` iterations.
+
+    callbacks_every_iters: int
+        How many iterations should pass between each time the callbacks are
+        invoked.
+
+    optimizer: gradient_descent
+        Optionally, an existing optimizer can be used for optimization. This is
+        useful for keeping momentum gains between different calls to
+        :func:`optimize`.
 
     Attributes
     ----------
@@ -261,20 +464,82 @@ class TSNEEmbedding(np.ndarray):
                  **gradient_descent_params):
         """Run optmization on the embedding for a given number of steps.
 
+        Please see the Parameter guide for more information.
+
         Parameters
         ----------
         n_iter: int
             The number of optimization iterations.
+
+        learning_rate: float
+            The learning rate for t-SNE optimization. Typical values range
+            between 100 to 1000. Setting the learning rate too low or too high
+            may result in the points forming a "ball". This is also known as the
+            crowding problem.
+
+        exaggeration: float
+            The exaggeration factor is used to increase the attractive forces of
+            nearby points, producing more compact clusters.
+
+        momentum: float
+            Momentum accounts for gradient directions from previous iterations,
+            resulting in faster convergence.
+
+        negative_gradient_method: str
+            Specifies the negative gradient approximation method to use. For
+            smaller data sets, the Barnes-Hut approximation is appropriate and
+            can be set using one of the following aliases: ``bh``, ``BH`` or
+            ``barnes-hut``. For larger data sets, the FFT accelerated
+            interpolation method is more appropriate and can be set using one of
+            the following aliases: ``fft``, ``FFT`` or ``ìnterpolation``.
+
+        theta: float
+            This is the trade-off parameter between speed and accuracy of the
+            tree approximation method. Typical values range from 0.2 to 0.8. The
+            value 0 indicates that no approximation is to be made and produces
+            exact results also producing longer runtime.
+
+        n_interpolation_points: int
+            Only used when ``negative_gradient_method="fft"`` or its other
+            aliases. The number of interpolation points to use within each grid
+            cell for interpolation based t-SNE. It is highly recommended leaving
+            this value at the default 3.
+
+        min_num_intervals: int
+            Only used when ``negative_gradient_method="fft"`` or its other
+            aliases. The minimum number of grid cells to use, regardless of the
+            ``ints_in_interval`` parameter. Higher values provide more accurate
+            gradient estimations.
+
         inplace: bool
             Whether or not to create a copy of the embedding or to perform
             updates inplace.
+
         propagate_exception: bool
             The optimization process can be interrupted using callbacks. This
             flag indicates whether we should propagate that exception or to
             simply stop optimization and return the resulting embedding.
-        **gradient_descent_params: dict
-            Any parameters accepted by :func:`gradient_descent` can be specified
-            here for finer control of the optimization process.
+
+        random_state: Union[int, RandomState]
+            The random state parameter follows the convention used in
+            scikit-learn. If the value is an int, random_state is the seed used
+            by the random number generator. If the value is a RandomState
+            instance, then it will be used as the random number generator. If
+            the value is None, the random number generator is the RandomState
+            instance used by `np.random`.
+
+        n_jobs: int
+            The number of threads to use while running t-SNE. This follows the
+            scikit-learn convention, ``-1`` meaning all processors, ``-2``
+            meaning all but one, etc.
+
+        callbacks: Callable[[int, float, np.ndarray] -> bool]
+            Callbacks, which will be run every ``callbacks_every_iters``
+            iterations.
+
+        callbacks_every_iters: int
+            How many iterations should pass between each time the callbacks are
+            invoked.
 
         Returns
         -------
@@ -322,45 +587,65 @@ class TSNEEmbedding(np.ndarray):
         return embedding
 
     def transform(self, X, perplexity=None, initialization="median",
-                  learning_rate=50, early_exaggeration=2, early_exaggeration_iter=100,
-                  initial_momentum=0.2, n_iter=100, final_momentum=0.4):
+                  learning_rate=50, early_exaggeration_iter=100,
+                  early_exaggeration=2, n_iter=100, exaggeration=1,
+                  initial_momentum=0.2, final_momentum=0.4):
         """Embed new points into the existing embedding.
 
         This procedure optimizes each point only with respect to the existing
         embedding i.e. it ignores any interactions between the points in ``X``
         among themselves.
 
+        Please see the Parameter guide for more information.
+
         Parameters
         ----------
         X: np.ndarray
             The data matrix to be added to the existing embedding.
+
         perplexity: float
-            Perplexity can be thought of as the continuous k number of neighbors
-            to consider for each data point. To avoid confusion, note that
-            perplexity linearly impacts runtime.
+            Perplexity can be thought of as the continuous :math:`k` number of
+            nearest neighbors, for which t-SNE will attempt to preserve
+            distances. However, when transforming, we only consider neighbors in
+            the existing embedding i.e. each data point is placed into the
+            embedding, independently of other new data points.
+
         initialization: Union[np.ndarray, str]
             The initial point positions to be used in the embedding space. Can
-            be a precomputed numpy array, ``random`` or ``weighted``. In all
-            cases, ``weighted`` should be preferred. It positions each point in
-            the weighted mean position of it's nearest neighbors in the existing
-            embedding. Typically, few optimization steps are needed for good
-            embeddings. ``random`` positions all new points in the center of the
-            embedding and should be used for demonstration only.
+            be a precomputed numpy array, ``median``, ``weighted`` or
+            ``random``. In all cases, ``median`` of ``weighted`` should be
+            preferred.
+
         learning_rate: float
-        early_exaggeration: float
-            The early exaggeration factor.
+            The learning rate for t-SNE optimization. Typical values range
+            between 100 to 1000. Setting the learning rate too low or too high
+            may result in the points forming a "ball". This is also known as the
+            crowding problem.
+
         early_exaggeration_iter: int
-            The number of iterations to run in the early exaggeration phase.
-        initial_momentum: float
-            As in regular t-SNE, optimization uses momentum for faster
-            convergence. This value controls the momentum used during the
-            *early exaggeration* phase.
+            The number of iterations to run in the *early exaggeration* phase.
+            Typically, the number of iterations needed when adding new data
+            points is much lower than with regular optimization.
+
+        early_exaggeration: float
+            The exaggeration factor to use during the *early exaggeration* phase.
+            Typical values range from 12 to 32.
+
         n_iter: int
             The number of iterations to run in the normal optimization regime.
+            Typically, the number of iterations needed when adding new data
+            points is much lower than with regular optimization.
+
+        exaggeration: float
+            The exaggeration factor to use during the normal optimization phase.
+            This can be used to form more densely packed clusters and is useful
+            for large data sets.
+
+        initial_momentum: float
+            The momentum to use during the *early exaggeration* phase.
+
         final_momentum: float
-            As in regular t-SNE, optimization uses momentum for faster
-            convergence. This value controls the momentum used during the normal
-            regime and*late exaggeration* phase.
+            The momentum to use during the normal optimization phase.
 
         Returns
         -------
@@ -382,8 +667,9 @@ class TSNEEmbedding(np.ndarray):
             # Restore actual affinity probabilities and increase momentum to get
             # final, optimized embedding
             embedding.optimize(
-                n_iter=n_iter, exaggeration=None, learning_rate=learning_rate,
-                momentum=final_momentum, inplace=True, propagate_exception=True,
+                n_iter=n_iter, learning_rate=learning_rate,
+                exaggeration=exaggeration, momentum=final_momentum,
+                inplace=True, propagate_exception=True,
             )
 
         except OptimizationInterrupt as ex:
@@ -393,25 +679,23 @@ class TSNEEmbedding(np.ndarray):
         return embedding
 
     def prepare_partial(self, X, initialization="median", **affinity_params):
-        """Prepare the partial embedding which can be optimized.
+        """Prepare a partial embedding which can be optimized.
 
         Parameters
         ----------
         X : np.ndarray
             The data matrix to be added to the existing embedding.
+
         initialization: Union[np.ndarray, str]
             The initial point positions to be used in the embedding space. Can
-            be a precomputed numpy array, ``random``, ``weighted`` or ``median``.
-            In all cases, ``weighted`` or ``median`` should be preferred. These
-            positions each point at the weighted mean or median position of it's
-            nearest neighbors in the existing embedding. Typically, few
-            optimization steps are needed for good embeddings. ``weighted`` and
-            ``median`` produce very similar results.
+            be a precomputed numpy array, ``median``, ``weighted`` or
+            ``random``. In all cases, ``median`` of ``weighted`` should be
+            preferred.
 
-            ``random`` positions all new points in the center of the embedding
-            and should be used for demonstration only.
         **affinity_params: dict
-            Additional params to be passed to the ``Affinity.to_new`` method.
+            Additional params to be passed to the ``Affinities.to_new`` method.
+            Please see individual :class:`~fastTSNE.affinity.Affinities`
+            implementations as the parameters differ between implementations.
 
         Returns
         -------
@@ -438,7 +722,7 @@ class TSNEEmbedding(np.ndarray):
 
         # Random initialization with isotropic normal distribution
         elif initialization == "random":
-            embedding = initialization_scheme.random(X.shape[0], self.shape[1], self.random_state)
+            embedding = initialization_scheme.random(X, self.shape[1], self.random_state)
         elif initialization == "weighted":
             embedding = initialization_scheme.weighted_mean(X, self, neighbors, distances)
         elif initialization == "median":
@@ -448,142 +732,122 @@ class TSNEEmbedding(np.ndarray):
 
         return PartialTSNEEmbedding(
             embedding, reference_embedding=self, P=P,
-            gradient_descent_params=self.gradient_descent_params,
+            **self.gradient_descent_params,
         )
 
 
 class TSNE(BaseEstimator):
-    """t-Distributed Stochastic Neighbor Embedding
+    """t-Distributed Stochastic Neighbor Embedding.
+
+    Please see the Parameter guide for more information.
 
     Parameters
     ----------
     n_components: int
-        The dimension of the embedding space.
+        The dimension of the embedding space. This deafults to 2 for easy
+        visualization, but sometimes 1 is used for t-SNE heatmaps. t-SNE is
+        not designed to embed into higher dimension and please note that
+        acceleration schemes break down and are not fully implemented.
+
     perplexity: float
         Perplexity can be thought of as the continuous :math:`k` number of
-        neighbors to consider for each data point. To avoid confusion, note that
-        perplexity linearly impacts runtime.
+        nearest neighbors, for which t-SNE will attempt to preserve distances.
+
     learning_rate: float
-        The learning rate for the t-SNE optimization steps. Typical values range
-        from 1 to 1000. Setting the learning rate too low or too high may result
-        in the points forming a "ball". This is also known as the crowding
-        problem.
+        The learning rate for t-SNE optimization. Typical values range between
+        100 to 1000. Setting the learning rate too low or too high may
+        result in the points forming a "ball". This is also known as the
+        crowding problem.
+
     early_exaggeration_iter: int
         The number of iterations to run in the *early exaggeration* phase.
+
     early_exaggeration: float
-        The early exaggeration factor. Typical values range from 12 to 32,
-        however larger values have also been found to work well with specific
-        values of learning rate. See Linderman and Steinberger [3]_ for more
-        details.
+        The exaggeration factor to use during the *early exaggeration* phase.
+        Typical values range from 12 to 32.
+
     n_iter: int
         The number of iterations to run in the normal optimization regime.
-    exaggeration: Optional[int]
-        The exaggeration factor to be used during the normal optmimization
-        phase. Standard implementation don't use this exaggeration and it
-        typically isn't necessary for smaller data sets, but it has been shown
-        that for larger data sets, using some exaggeration is necessary in order
-        to obtain good embeddings.
+
+    exaggeration: float
+        The exaggeration factor to use during the normal optimization phase.
+        This can be used to form more densely packed clusters and is useful
+        for large data sets.
+
     theta: float
         Only used when ``negative_gradient_method="bh"`` or its other aliases.
         This is the trade-off parameter between speed and accuracy of the tree
         approximation method. Typical values range from 0.2 to 0.8. The value 0
         indicates that no approximation is to be made and produces exact results
-        also producing longer runtime. See [2]_ for more details.
+        also producing longer runtime.
+
     n_interpolation_points: int
         Only used when ``negative_gradient_method="fft"`` or its other aliases.
         The number of interpolation points to use within each grid cell for
         interpolation based t-SNE. It is highly recommended leaving this value
-        at the default 3 as otherwise the interpolation may suffer from the
-        Runge phenomenon. Theoretically, increasing this number will result in
-        higher approximation accuracy, but practically, this can also be done
-        with the ``ints_in_interval`` parameter, which does not suffer from the
-        Runge phenomenon and should always be preferred. This is described in
-        detail by Linderman [2]_.
+        at the default 3.
+
     min_num_intervals: int
         Only used when ``negative_gradient_method="fft"`` or its other aliases.
-        The interpolation approximation method splits the embedding space into a
-        grid, where the number of grid cells is governed by
-        ``ints_in_interval``. Sometimes, especially during early stages of
-        optimization, that number may be too small, and we may want better
-        accuracy. The number of intervals used will thus always be at least the
-        number specified here. Note that larger values will produce more precise
-        approximations but will have longer runtime.
+        The minimum number of grid cells to use, regardless of the
+        ``ints_in_interval`` parameter. Higher values provide more accurate
+        gradient estimations.
+
     ints_in_interval: float
         Only used when ``negative_gradient_method="fft"`` or its other aliases.
-        Since the coordinate range of the embedding changes during optimization,
-        this value tells us how many integers should appear in a single e.g.
-        setting this value to 3 means that the intervals will appear as follows:
-        [0, 3), [3, 6), ... Lower values will need more intervals to fill the
-        space, e.g. 1.5 will produce 4 intervals [0, 1.5), [1.5, 3), ...
-        Therefore lower values will produce more intervals, producing more
-        interpolation points which in turn produce better approximation at the
-        cost of longer runtime.
+        Indicates how large a grid cell should be e.g. a value of 3 indicates a
+        grid side length of 3. Lower values provide more accurate gradient
+        estimations.
+
     initialization: Union[np.ndarray, str]
         The initial point positions to be used in the embedding space. Can be a
         precomputed numpy array, ``pca`` or ``random``. Please note that when
         passing in a precomputed positions, it is highly recommended that the
         point positions have small variance (var(Y) < 0.0001), otherwise you may
         get poor embeddings.
+
     metric: str
         The metric to be used to compute affinities between points in the
         original space.
-    metric_params: Optional[dict]
+
+    metric_params: dict
         Additional keyword arguments for the metric function.
+
     initial_momentum: float
-        t-SNE optimization uses momentum for faster convergence. This value
-        controls the momentum used during the *early optimization* phase.
+        The momentum to use during the *early exaggeration* phase.
+
     final_momentum: float
-        t-SNE optimization uses momentum for faster convergence. This value
-        controls the momentum used during the normal regime and *late
-        exaggeration* phase.
+        The momentum to use during the normal optimization phase.
+
     n_jobs: int
-        The number of jobs to run in parallel. This follows the scikit-learn
-        convention, ``-1`` meaning all processors, ``-2`` meaning all but one
-        processor and so on.
+        The number of threads to use while running t-SNE. This follows the
+        scikit-learn convention, ``-1`` meaning all processors, ``-2`` meaning
+        all but one, etc.
+
     neighbors: str
         Specifies the nearest neighbor method to use. Can be either ``exact`` or
-        ``approx``. ``exact`` uses space partitioning binary trees from
-        scikit-learn while ``approx`` makes use of nearest neighbor descent.
-        Note that ``approx`` has a bit of overhead and will be slower on smaller
-        data sets than exact search.
+        ``approx``.
+
     negative_gradient_method: str
         Specifies the negative gradient approximation method to use. For smaller
-        data sets, the Barnes-Hut approximation is appropriate [2]_ and can be
-        set using one of the following aliases: ``bh``, ``BH`` or
-        ``barnes-hut``. Note that the time complexity of Barnes-Hut scales as
-        :math:`\mathcal{O}(N \log N)`. For larger data sets, the FFT accelerated
-        interpolation method is more appropriate and can be set using one of the
-        following aliases: ``fft``, ``FFT`` or ``ìnterpolation`` [4]_. Note that
-        this method scales linearly in the number of points
-        :math:`\mathcal{O}(N)` and its complexity is governed by the number of
-        interpolation points.
-    callbacks: Optional[Union[Callable, List[Callable]]]
-        We can pass callbacks, that will be run every ``callbacks_every_iters``
-        iterations. Each callback should accept three parameters, the first is
-        the current iteration number, the second is the current KL divergence
-        error and the last is the current embedding. The callback may return
-        ``True`` in order to stop the optimization.
+        data sets, the Barnes-Hut approximation is appropriate and can be set
+        using one of the following aliases: ``bh``, ``BH`` or ``barnes-hut``.
+        For larger data sets, the FFT accelerated interpolation method is more
+        appropriate and can be set using one of the following aliases: ``fft``,
+        ``FFT`` or ``ìnterpolation``.
+
+    callbacks: Union[Callable, List[Callable]]
+        Callbacks, which will be run every ``callbacks_every_iters`` iterations.
+
     callbacks_every_iters: int
-        How many iterations should run between each time a callback is invoked.
-    random_state: Optional[Union[int, RandomState]]
-        The random state parameter follows the convention used in scikit-learn.
+        How many iterations should pass between each time the callbacks are
+        invoked.
+
+    random_state: Union[int, RandomState]
         If the value is an int, random_state is the seed used by the random
         number generator. If the value is a RandomState instance, then it will
         be used as the random number generator. If the value is None, the random
         number generator is the RandomState instance used by `np.random`.
-
-    References
-    ----------
-    .. [1] Maaten, Laurens van der, and Geoffrey Hinton. "Visualizing data using
-        t-SNE." Journal of machine learning research 9.Nov (2008): 2579-2605.
-    .. [2] Van Der Maaten, Laurens. "Accelerating t-SNE using tree-based
-        algorithms." The Journal of Machine Learning Research 15.1 (2014):
-        3221-3245.
-    .. [3] Linderman, George C., and Stefan Steinerberger. "Clustering with
-        t-SNE, provably." arXiv preprint arXiv:1706.02582 (2017).
-    .. [4] Linderman, George C., et al. "Efficient Algorithms for t-distributed
-        Stochastic Neighborhood Embedding." arXiv preprint arXiv:1712.09005
-        (2017).
 
     """
 
@@ -696,11 +960,11 @@ class TSNE(BaseEstimator):
 
         elif self.initialization == "pca":
             embedding = initialization_scheme.pca(
-                X, self.n_components, scale_down=True, random_state=self.random_state,
+                X, self.n_components, random_state=self.random_state,
             )
         elif self.initialization == "random":
             embedding = initialization_scheme.random(
-                X.shape[0], self.n_components, random_state=self.random_state,
+                X, self.n_components, random_state=self.random_state,
             )
         else:
             raise ValueError("Unrecognized initialization scheme `%s`." % self.initialization)
@@ -829,67 +1093,83 @@ class gradient_descent:
         ----------
         embedding: np.ndarray
             The embedding :math:`Y`.
-        P: csr_matrix
+
+        P: array_like
             Joint probability matrix :math:`P`.
+
         n_iter: int
             The number of iterations to run for.
+
         objective_function: Callable[..., Tuple[float, np.ndarray]]
             A callable that evaluates the error and gradient for the current
             embedding.
+
         learning_rate: float
-            The learning rate for the t-SNE optimization steps. Typical values range
-            from 1 to 1000. Setting the learning rate too low or too high may result
-            in the points forming a "ball". This is also known as the crowding
-            problem.
+            The learning rate for t-SNE optimization. Typical values range
+            between 100 to 1000. Setting the learning rate too low or too high
+            may result in the points forming a "ball". This is also known as the
+            crowding problem.
+
         momentum: float
-            Momentum accounts for gradient directions from previous iterations and
+            Momentum accounts for gradient directions from previous iterations,
             resulting in faster convergence.
+
         exaggeration: float
-            The exaggeration term is used to increase the attractive forces of
-            nearby points.
+            The exaggeration factor is used to increase the attractive forces of
+            nearby points, producing more compact clusters.
+
         dof: float
             Degrees of freedom of the Student's t-distribution.
+
         min_gain: float
             Minimum individual gain for each parameter.
+
         min_grad_norm: float
-            If the gradient norm is below this threshold, the optimization will be
-            stopped.
+            If the gradient norm is below this threshold, the optimization will
+            be stopped.
+
         theta: float
             This is the trade-off parameter between speed and accuracy of the
-            Barnes-Hut approximation of the negative forces. Setting a lower value
-            will produce more accurate results, while setting a higher value will
-            search through less of the space providing a rougher approximation.
-            Scikit-learn recommends values between 0.2-0.8. This value is ignored
-            unless the Barnes-Hut algorithm is used for gradients.
+            tree approximation method. Typical values range from 0.2 to 0.8. The
+            value 0 indicates that no approximation is to be made and produces
+            exact results also producing longer runtime.
+
         n_interpolation_points: int
-            The number of interpolation points to use for FFT accelerated
-            interpolation based tSNE. It is recommended leaving this value at the
-            default=3 as otherwise the interpolation may suffer from the Runge
-            phenomenon. This value is ignored unless the interpolation based
-            algorithm is used.
+            Only used when ``negative_gradient_method="fft"`` or its other
+            aliases. The number of interpolation points to use within each grid
+            cell for interpolation based t-SNE. It is highly recommended leaving
+            this value at the default 3.
+
         min_num_intervals: int
-            The minimum number of intervals into which we split our embedding. A
-            larger value will produce better embeddings at the cost of performance.
-            This value is ignored unless the interpolation based algorithm is used.
+            Only used when ``negative_gradient_method="fft"`` or its other
+            aliases. The minimum number of grid cells to use, regardless of the
+            ``ints_in_interval`` parameter. Higher values provide more accurate
+            gradient estimations.
+
         ints_in_interval: float
-            Since the coordinate range of the embedding will certainly change
-            during optimization, this value tells us how many integer values should
-            appear in a single interval. This number of intervals affect the
-            embedding quality at the cost of performance. Less ints per interval
-            will incur a larger number of intervals.
-        reference_embedding: Optional[np.ndarray]
+            Only used when ``negative_gradient_method="fft"`` or its other
+            aliases. Indicates how large a grid cell should be e.g. a value of 3
+            indicates a grid side length of 3. Lower values provide more
+            accurate gradient estimations.
+
+        reference_embedding: np.ndarray
             If we are adding points to an existing embedding, we have to compute
             the gradients and errors w.r.t. the existing embedding.
+
         n_jobs: int
-            Number of threads.
+            The number of threads to use while running t-SNE. This follows the
+            scikit-learn convention, ``-1`` meaning all processors, ``-2``
+            meaning all but one, etc.
+
         use_callbacks: bool
+
         callbacks: Callable[[int, float, np.ndarray] -> bool]
-            The callback should accept three parameters, the first is the current
-            iteration, the second is the current KL divergence error and the last
-            is the current embedding. The callback should return a boolean value
-            indicating whether or not to stop optimization i.e. True to stop.
+            Callbacks, which will be run every ``callbacks_every_iters``
+            iterations.
+
         callbacks_every_iters: int
-            How often should the callback be called.
+            How many iterations should pass between each time the callbacks are
+            invoked.
 
         Returns
         -------

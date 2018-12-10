@@ -15,11 +15,38 @@ class Callback:
     def optimzation_about_to_start(self):
         """This is called at the beginning of the optimization procedure."""
 
-    def __call__(self, iteration: int, error: float, embedding: TSNEEmbedding) -> bool:
-        """This is the main method called from the optimization."""
+    def __call__(self, iteration, error, embedding):
+        """This is the main method called from the optimization.
+
+        Parameters
+        ----------
+        iteration: int
+            The current iteration number.
+
+        error: float
+            The current KL divergence of the given embedding.
+
+        embedding: TSNEEmbedding
+            The current t-SNE embedding.
+
+        Returns
+        -------
+        stop_optimization: bool
+            If this value is set to ``True``, the optimization will be
+            interrupted.
+
+        """
 
 
 class ErrorLogger(Callback):
+    """Basic error logger.
+
+    This logger prints out basic information about the optimization. These
+    include the iteration number, error and how much time has elapsed from the
+    previous callback invocation.
+
+    """
+
     def __init__(self):
         self.iter_count = 0
         self.last_log_time = None
