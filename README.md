@@ -19,6 +19,8 @@ Barnes-Hut tends to be slightly faster on smaller data sets (typically by a minu
 To better understand the speed trade-offs, it is useful to know how t-SNE works. t-SNE runs in two main phases. In the first phase we find the K nearest neighbors for each sample. We offer exact nearest neighbor search using scikit-learn's nearest neighbors KDTrees and approximate nearest neighbor search using a Python/Numba implementation of nearest neighbor descent. Exact search tends to be faster for smaller data sets and approximate search is faster for larger data sets.
 The second phase runs the optimization phase (which can, again, be run in several phases). In every iteration we must evaluate the negative gradient, which involves computing all pairwise interactions. This can be accelerated using Barnes-Hut space partitioning trees (scaling with O(n log n)) or FFT accelerated interpolation (scaling with O(n)) for larger data sets. For more details, see the corresponding papers.
 
+Documentation is avaialble on [Read the Docs](http://fasttsne.readthedocs.io).
+
 ## Benchmarks
 The numbers are not exact. The benchmarks were run on an Intel i7-7700HQ CPU @ 2.80GHz (up to 3.80GHz) processor.
 
