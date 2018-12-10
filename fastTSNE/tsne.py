@@ -122,7 +122,7 @@ class PartialTSNEEmbedding(np.ndarray):
     differs from the typical embedding in that it is not possible to add new
     samples to a partial embedding and would generally be a bad idea.
 
-    Please see the Parameter guide for more information.
+    Please see the :ref:`parameter-guide` for more information.
 
     Parameters
     ----------
@@ -357,7 +357,7 @@ class PartialTSNEEmbedding(np.ndarray):
 class TSNEEmbedding(np.ndarray):
     """A t-SNE embedding.
 
-    Please see the Parameter guide for more information.
+    Please see the :ref:`parameter-guide` for more information.
 
     Parameters
     ----------
@@ -464,7 +464,7 @@ class TSNEEmbedding(np.ndarray):
                  **gradient_descent_params):
         """Run optmization on the embedding for a given number of steps.
 
-        Please see the Parameter guide for more information.
+        Please see the :ref:`parameter-guide` for more information.
 
         Parameters
         ----------
@@ -596,7 +596,7 @@ class TSNEEmbedding(np.ndarray):
         embedding i.e. it ignores any interactions between the points in ``X``
         among themselves.
 
-        Please see the Parameter guide for more information.
+        Please see the :ref:`parameter-guide` for more information.
 
         Parameters
         ----------
@@ -739,7 +739,7 @@ class TSNEEmbedding(np.ndarray):
 class TSNE(BaseEstimator):
     """t-Distributed Stochastic Neighbor Embedding.
 
-    Please see the Parameter guide for more information.
+    Please see the :ref:`parameter-guide` for more information.
 
     Parameters
     ----------
