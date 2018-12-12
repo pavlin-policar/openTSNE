@@ -1,3 +1,4 @@
+import inspect
 import logging
 import multiprocessing
 from collections import Iterable
@@ -653,7 +654,23 @@ class TSNEEmbedding(np.ndarray):
             The positions of the new points in the embedding space.
 
         """
-        embedding = self.prepare_partial(X, perplexity=perplexity, initialization=initialization)
+
+        # We check if the affinity `to_new` methods takes the `perplexity`
+        # parameter and raise an informative error if not. This happes when the
+        # user uses a non-standard affinity class e.g. multiscale, then attempts
+        # to add points via `transform`. These classes take `perplexities` and
+        # fail
+        affinity_signature = inspect.signature(self.affinities.to_new)
+        if "perplexity" not in affinity_signature.parameters:
+            raise TypeError(
+                "`transform` currently does not support non `%s` type affinity "
+                "classes. Please use `prepare_partial` and `optimize` to add "
+                "points to the embedding." % PerplexityBasedNN.__name__
+            )
+
+        embedding = self.prepare_partial(
+            X, perplexity=perplexity, initialization=initialization,
+        )
 
         try:
             # Early exaggeration with lower momentum to allow points to find more

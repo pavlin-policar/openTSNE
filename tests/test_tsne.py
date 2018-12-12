@@ -652,3 +652,31 @@ class TestGradientDescentOptimizer(unittest.TestCase):
         self.assertIs(partial0.optimizer, partial1.optimizer)
         self.assertIs(partial1.optimizer, partial2.optimizer)
 
+
+class TestAffinityIntegration(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # It would be nice if the initial data were not nicely behaved to test
+        # for low variance
+        cls.x = np.random.normal(100, 50, (25, 4))
+        cls.x_test = np.random.normal(100, 50, (25, 4))
+
+    def test_transform_with_standard_affinity(self):
+        init = fastTSNE.initialization.random(self.x)
+        aff = fastTSNE.affinity.PerplexityBasedNN(self.x, 5, method="exact")
+        embedding = fastTSNE.TSNEEmbedding(init, aff, negative_gradient_method="bh")
+        embedding.optimize(100, inplace=True)
+
+        # This should not raise an error
+        embedding.transform(self.x_test)
+
+    def test_transform_with_nonstandard_affinity(self):
+        """Should raise an informative error when a non-standard affinity is used
+        with `transform`."""
+        init = fastTSNE.initialization.random(self.x)
+        aff = fastTSNE.affinity.Multiscale(self.x, [2, 5], method="exact")
+        embedding = fastTSNE.TSNEEmbedding(init, aff, negative_gradient_method="bh")
+        embedding.optimize(100, inplace=True)
+
+        with self.assertRaises(TypeError):
+            embedding.transform(self.x_test)
