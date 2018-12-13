@@ -1,1 +1,3 @@
+recursive-include fastTSNE/ *.py *.h *.c *.cpp *.pyx *.pxd
+
 include LICENSE
