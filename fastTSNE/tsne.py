@@ -587,10 +587,8 @@ class TSNEEmbedding(np.ndarray):
 
         return embedding
 
-    def transform(self, X, perplexity=None, initialization="median",
-                  learning_rate=50, early_exaggeration_iter=100,
-                  early_exaggeration=2, n_iter=100, exaggeration=1,
-                  initial_momentum=0.2, final_momentum=0.4):
+    def transform(self, X, perplexity=5, initialization="median", k=25,
+                  learning_rate=1, n_iter=100, exaggeration=1, momentum=0):
         """Embed new points into the existing embedding.
 
         This procedure optimizes each point only with respect to the existing
@@ -617,20 +615,17 @@ class TSNEEmbedding(np.ndarray):
             ``random``. In all cases, ``median`` of ``weighted`` should be
             preferred.
 
+        k: int
+            The number of nearest neighbors to consider when initially placing
+            the point onto the embedding. This is different from ``perpelxity``
+            because perplexity affects optimization while this only affects the
+            initial point positions.
+
         learning_rate: float
             The learning rate for t-SNE optimization. Typical values range
             between 100 to 1000. Setting the learning rate too low or too high
             may result in the points forming a "ball". This is also known as the
             crowding problem.
-
-        early_exaggeration_iter: int
-            The number of iterations to run in the *early exaggeration* phase.
-            Typically, the number of iterations needed when adding new data
-            points is much lower than with regular optimization.
-
-        early_exaggeration: float
-            The exaggeration factor to use during the *early exaggeration* phase.
-            Typical values range from 12 to 32.
 
         n_iter: int
             The number of iterations to run in the normal optimization regime.
@@ -642,11 +637,8 @@ class TSNEEmbedding(np.ndarray):
             This can be used to form more densely packed clusters and is useful
             for large data sets.
 
-        initial_momentum: float
-            The momentum to use during the *early exaggeration* phase.
-
-        final_momentum: float
-            The momentum to use during the normal optimization phase.
+        momentum: float
+            The momentum to use during optimization phase.
 
         Returns
         -------
@@ -669,24 +661,13 @@ class TSNEEmbedding(np.ndarray):
             )
 
         embedding = self.prepare_partial(
-            X, perplexity=perplexity, initialization=initialization,
+            X, perplexity=perplexity, initialization=initialization,k=k,
         )
 
         try:
-            # Early exaggeration with lower momentum to allow points to find more
-            # easily move around and find their neighbors
             embedding.optimize(
-                n_iter=early_exaggeration_iter, learning_rate=learning_rate,
-                exaggeration=early_exaggeration, momentum=initial_momentum,
-                inplace=True, propagate_exception=True,
-            )
-
-            # Restore actual affinity probabilities and increase momentum to get
-            # final, optimized embedding
-            embedding.optimize(
-                n_iter=n_iter, learning_rate=learning_rate,
-                exaggeration=exaggeration, momentum=final_momentum,
-                inplace=True, propagate_exception=True,
+                n_iter=n_iter, learning_rate=learning_rate, exaggeration=exaggeration,
+                momentum=momentum, inplace=True, propagate_exception=True,
             )
 
         except OptimizationInterrupt as ex:
@@ -695,12 +676,12 @@ class TSNEEmbedding(np.ndarray):
 
         return embedding
 
-    def prepare_partial(self, X, initialization="median", **affinity_params):
+    def prepare_partial(self, X, initialization="median", k=25, **affinity_params):
         """Prepare a partial embedding which can be optimized.
 
         Parameters
         ----------
-        X : np.ndarray
+        X: np.ndarray
             The data matrix to be added to the existing embedding.
 
         initialization: Union[np.ndarray, str]
@@ -708,6 +689,12 @@ class TSNEEmbedding(np.ndarray):
             be a precomputed numpy array, ``median``, ``weighted`` or
             ``random``. In all cases, ``median`` of ``weighted`` should be
             preferred.
+
+        k: int
+            The number of nearest neighbors to consider when initially placing
+            the point onto the embedding. This is different from ``perpelxity``
+            because perplexity affects optimization while this only affects the
+            initial point positions.
 
         **affinity_params: dict
             Additional params to be passed to the ``Affinities.to_new`` method.
@@ -721,14 +708,9 @@ class TSNEEmbedding(np.ndarray):
             optimization.
 
         """
-        P = self.affinities.to_new(X, **affinity_params)
-
-        # Extract neighbor indices and their affinities as a dense matrix from P
-        # so they can be used in weighted initialization schemes
-        P = P.tocsr()
-        k_neighbors = int(P.data.shape[0] / P.shape[0])
-        neighbors = P.indices.copy().reshape((P.shape[0], k_neighbors))
-        distances = P.data.copy().reshape((P.shape[0], k_neighbors))
+        P, neighbors, distances = self.affinities.to_new(
+            X, return_distances=True, **affinity_params,
+        )
 
         # If initial positions are given in an array, use a copy of that
         if isinstance(initialization, np.ndarray):
@@ -741,9 +723,11 @@ class TSNEEmbedding(np.ndarray):
         elif initialization == "random":
             embedding = initialization_scheme.random(X, self.shape[1], self.random_state)
         elif initialization == "weighted":
-            embedding = initialization_scheme.weighted_mean(X, self, neighbors, distances)
+            embedding = initialization_scheme.weighted_mean(
+                X, self, neighbors[:, :k], distances[:, :k],
+            )
         elif initialization == "median":
-            embedding = initialization_scheme.median(self, neighbors)
+            embedding = initialization_scheme.median(self, neighbors[:, :k])
         else:
             raise ValueError("Unrecognized initialization scheme `%s`." % initialization)
 
@@ -1024,14 +1008,18 @@ def kl_divergence_bh(embedding, P, dof, bh_params, reference_embedding=None,
     # In the event that we wish to embed new points into an existing embedding
     # using simple optimization, we compute optimize the new embedding points
     # w.r.t. the existing embedding. Otherwise, we want to optimize the
-    # embedding w.r.t. itself
+    # embedding w.r.t. itself. We've also got to make sure that the points'
+    # interactions don't interfere with each other
+    pairwise_normalization = reference_embedding is None
     if reference_embedding is None:
         reference_embedding = embedding
 
     # Compute negative gradient
     tree = QuadTree(reference_embedding)
     sum_Q = _tsne.estimate_negative_gradient_bh(
-        tree, embedding, gradient, **bh_params, dof=dof, num_threads=n_jobs)
+        tree, embedding, gradient, **bh_params, dof=dof, num_threads=n_jobs,
+        pairwise_normalization=pairwise_normalization,
+    )
     del tree
 
     # Compute positive gradient
@@ -1057,20 +1045,27 @@ def kl_divergence_fft(embedding, P, dof, fft_params, reference_embedding=None,
     if embedding.ndim == 1 or embedding.shape[1] == 1:
         if reference_embedding is not None:
             sum_Q = _tsne.estimate_negative_gradient_fft_1d_with_reference(
-                embedding.ravel(), reference_embedding.ravel(), gradient.ravel(), **fft_params)
+                embedding.ravel(), reference_embedding.ravel(), gradient.ravel(),
+                **fft_params,
+            )
         else:
             sum_Q = _tsne.estimate_negative_gradient_fft_1d(
-                embedding.ravel(), gradient.ravel(), **fft_params)
+                embedding.ravel(), gradient.ravel(), **fft_params,
+            )
     elif embedding.shape[1] == 2:
         if reference_embedding is not None:
             sum_Q = _tsne.estimate_negative_gradient_fft_2d_with_reference(
-                embedding, reference_embedding, gradient, **fft_params)
+                embedding, reference_embedding, gradient, **fft_params,
+            )
         else:
             sum_Q = _tsne.estimate_negative_gradient_fft_2d(
-                embedding, gradient, **fft_params)
+                embedding, gradient, **fft_params,
+            )
     else:
-        raise RuntimeError("Interpolation based t-SNE for >2 dimensions is "
-                           "currently unsupported (and generally a bad idea)")
+        raise RuntimeError(
+            "Interpolation based t-SNE for >2 dimensions is currently "
+            "unsupported (and generally a bad idea)"
+        )
 
     # The positive gradient function needs a reference embedding always
     if reference_embedding is None:
@@ -1263,8 +1258,10 @@ class gradient_descent:
             update = momentum * update - learning_rate * self.gains * gradient
             embedding += update
 
-            # Zero-mean the embedding
-            embedding -= np.mean(embedding, axis=0)
+            # Zero-mean the embedding only if we're not adding new data points,
+            # otherwise this will reset point positions
+            if reference_embedding is None:
+                embedding -= np.mean(embedding, axis=0)
 
             if np.linalg.norm(gradient) < min_grad_norm:
                 log.info("Gradient norm eps reached. Finished.")

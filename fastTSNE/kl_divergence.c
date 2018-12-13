@@ -1258,9 +1258,10 @@ struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_bh {
   double theta;
   double dof;
   Py_ssize_t num_threads;
+  int pairwise_normalization;
 };
 
-/* "_tsne.pxd":39
+/* "_tsne.pxd":40
  * )
  * 
  * cpdef double estimate_negative_gradient_fft_1d(             # <<<<<<<<<<<<<<
@@ -1274,7 +1275,7 @@ struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d {
   double ints_in_interval;
 };
 
-/* "_tsne.pxd":47
+/* "_tsne.pxd":48
  * )
  * 
  * cpdef double estimate_negative_gradient_fft_1d_with_reference(             # <<<<<<<<<<<<<<
@@ -1288,7 +1289,7 @@ struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_re
   double ints_in_interval;
 };
 
-/* "_tsne.pxd":56
+/* "_tsne.pxd":57
  * )
  * 
  * cpdef double estimate_negative_gradient_fft_2d(             # <<<<<<<<<<<<<<
@@ -1302,7 +1303,7 @@ struct __pyx_opt_args_8fastTSNE_5_tsne_estimate_negative_gradient_fft_2d {
   double ints_in_interval;
 };
 
-/* "_tsne.pxd":64
+/* "_tsne.pxd":65
  * )
  * 
  * cpdef double estimate_negative_gradient_fft_2d_with_reference(             # <<<<<<<<<<<<<<

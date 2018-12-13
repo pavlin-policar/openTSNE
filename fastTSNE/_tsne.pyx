@@ -170,6 +170,7 @@ cpdef double estimate_negative_gradient_bh(
     double theta=0.5,
     double dof=1,
     Py_ssize_t num_threads=1,
+    bint pairwise_normalization=True,
 ):
     """Estimate the negative tSNE gradient using the Barnes Hut approximation.
     
@@ -201,7 +202,10 @@ cpdef double estimate_negative_gradient_bh(
     # Normalize q_{ij}s
     for i in range(gradient.shape[0]):
         for j in range(gradient.shape[1]):
-            gradient[i, j] /= sum_Q + EPSILON
+            if pairwise_normalization:
+                gradient[i, j] /= sum_Q + EPSILON
+            else:
+                gradient[i, j] /= sum_Qi[i] + EPSILON
 
     return sum_Q
 
@@ -409,7 +413,7 @@ cpdef double estimate_negative_gradient_fft_1d(
     # Compute the gradient using a slight variation on the formula provided in
     # the paper
     for i in range(n_samples):
-        gradient[i] -= (embedding[i] * phi[i, 0] - phi[i, 1]) / sum_Q
+        gradient[i] -= (embedding[i] * phi[i, 0] - phi[i, 1]) / (sum_Q + EPSILON)
 
     return sum_Q
 
@@ -539,17 +543,20 @@ cpdef double estimate_negative_gradient_fft_1d_with_reference(
 
     # Compute the normalization term Z or sum of q_{ij}s, this is not described
     # in the paper, but can be worked out
+    cdef double[::1] sum_Qi = np.zeros(n_samples, dtype=float)
+    for i in range(n_samples):
+        sum_Qi[i] += (1 + embedding[i] ** 2) * phi[i, 0] - \
+                     2 * embedding[i] * phi[i, 1] + \
+                     phi[i, 2]
+
     cdef double sum_Q = 0
     for i in range(n_samples):
-        sum_Q += (1 + embedding[i] ** 2) * phi[i, 0] - \
-                 2 * embedding[i] * phi[i, 1] + \
-                 phi[i, 2]
-    sum_Q -= n_samples
+        sum_Q += sum_Qi[i]
 
     # Compute the gradient using a slight variation on the formula provided in
     # the paper
     for i in range(n_samples):
-        gradient[i] -= (embedding[i] * phi[i, 0] - phi[i, 1]) / sum_Q
+        gradient[i] -= (embedding[i] * phi[i, 0] - phi[i, 1]) / (sum_Qi[i] + EPSILON)
 
     return sum_Q
 
@@ -745,8 +752,8 @@ cpdef double estimate_negative_gradient_fft_2d(
     # Compute the gradient using a slight variation on the formula provided in
     # the paper
     for i in range(n_samples):
-        gradient[i, 0] -= (embedding[i, 0] * phi[i, 0] - phi[i, 1]) / sum_Q
-        gradient[i, 1] -= (embedding[i, 1] * phi[i, 0] - phi[i, 2]) / sum_Q
+        gradient[i, 0] -= (embedding[i, 0] * phi[i, 0] - phi[i, 1]) / (sum_Q + EPSILON)
+        gradient[i, 1] -= (embedding[i, 1] * phi[i, 0] - phi[i, 2]) / (sum_Q + EPSILON)
 
     return sum_Q
 
@@ -939,20 +946,24 @@ cpdef double estimate_negative_gradient_fft_2d_with_reference(
 
     # Compute the normalization term Z or sum of q_{ij}s, this is not described
     # in the paper, but can be worked out
-    cdef double sum_Q = 0, y1, y2
+    cdef double[::1] sum_Qi = np.empty(n_samples, dtype=float)
+    cdef double y1, y2
     for i in range(n_samples):
         y1 = embedding[i, 0]
         y2 = embedding[i, 1]
 
-        sum_Q += (1 + y1 ** 2 + y2 ** 2) * phi[i, 0] - \
-                 2 * (y1 * phi[i, 1] + y2 * phi[i, 2]) + \
-                 phi[i, 3]
-    sum_Q -= n_samples
+        sum_Qi[i] = (1 + y1 ** 2 + y2 ** 2) * phi[i, 0] - \
+                    2 * (y1 * phi[i, 1] + y2 * phi[i, 2]) + \
+                    phi[i, 3]
+
+    cdef sum_Q = 0
+    for i in range(n_samples):
+        sum_Q += sum_Qi[i]
 
     # Compute the gradient using a slight variation on the formula provided in
     # the paper
     for i in range(n_samples):
-        gradient[i, 0] -= (embedding[i, 0] * phi[i, 0] - phi[i, 1]) / sum_Q
-        gradient[i, 1] -= (embedding[i, 1] * phi[i, 0] - phi[i, 2]) / sum_Q
+        gradient[i, 0] -= (embedding[i, 0] * phi[i, 0] - phi[i, 1]) / (sum_Qi[i] + EPSILON)
+        gradient[i, 1] -= (embedding[i, 1] * phi[i, 0] - phi[i, 2]) / (sum_Qi[i] + EPSILON)
 
     return sum_Q

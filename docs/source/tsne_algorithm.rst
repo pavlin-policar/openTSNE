@@ -101,6 +101,8 @@ Repulsive forces
 
 We next show how to accelerate the computation of the second term i.e. the repulsive forces. As previously mentioned, these have a natural interpretation of an N-body problem.
 
+.. _barnes-hut:
+
 Barnes-Hut t-SNE
 ~~~~~~~~~~~~~~~~
 
@@ -130,13 +132,7 @@ where :math:`r_{\text{cell}}` is the length of the diagonal in the cell and :mat
 
 Lastly, let's look at the time complexity of the Barnes-Hut approximation. Constructing the tree is fairly simple with complexity :math:`\mathcal{O}(N)`. Lookup time is depende on :math:`\theta`, but on average takes about :math:`\mathcal{O}(N \log N)` time.
 
-
-Parameters
-^^^^^^^^^^
-
-theta: float
-    The trade-off parameter between accuracy and speed.
-
+.. _fit-sne:
 
 Interpolation-based t-SNE
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -163,18 +159,14 @@ So clearly, increasing the number of interpolation points can be problematic, so
 
 By shifting most of the computation onto the interpolation points, we have effectively made the computational complexity dependent on the number of interpolation points :math:`p` rather than :math:`N`. The computational complexity therefore reduces to :math:`\mathcal{O}(N)` with respect to :math:`N`.
 
-Parameters
-^^^^^^^^^^
+Optimization
+------------
 
-n_interpolation_points: int
-    The number of interpolation points to use within each grid cell. It is highly recommended leaving this at the default value due to the Runge phenomenon described above.
+The t-SNE optimization phase typically runs in two phases. The early exaggeartion phase and the normal regime.
 
-min_num_intervals: int
-    This value indicates what the minimum number of intervals/cells should be in any dimension.
+The early exaggeration phase is first run for typically 250 iterations with a large value of exaggeration. This increases the attractive forces between points and allows points to move through the embedding more freely to find their true neighbors. Skipping this phase may result in larger clusters being split into several smaller clusters which can be scattered in the embedding.
 
-ints_in_interval: float
-    Our implementation dynamically determines the number of cells such that the accuracy for any given interval remains fixed. This value indicates the size of the interval/cell in any dimension e.g. setting this value to 3 indicates that all the cells should have side length of 3.
-
+The normal regime follows the early exaggeration phase and is typically run for 750 iterations. The attractive forces are usually restored to their true values and we allow the embedding to converge to a stable state.
 
 Embedding data into lower dimensions
 ------------------------------------

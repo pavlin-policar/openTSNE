@@ -152,11 +152,8 @@ class TestTSNEParameterFlow(unittest.TestCase):
         check_call_contains_kwargs(gradient_descent.mock_calls[0], params)
 
     @check_params({
-        "early_exaggeration_iter": [50, 100],
-        "early_exaggeration": [4, 12],
-        "initial_momentum": [0.2, 0.5, 0.8],
         "n_iter": [50, 100],
-        "final_momentum": [0.2, 0.5, 0.8],
+        "momentum": [0.2, 0.5, 0.8],
     })
     @patch("fastTSNE.tsne.gradient_descent.__call__")
     def test_embedding_transform(self, param_name, param_value, gradient_descent):
@@ -171,20 +168,9 @@ class TestTSNEParameterFlow(unittest.TestCase):
 
         embedding.transform(self.x_test, **{param_name: param_value})
 
-        # Early exaggeration training loop
-        if param_name in ("early_exaggeration_iter", "early_exaggeration"):
-            call_idx = 0
-        # Main training loop
-        elif param_name in ("n_iter", "final_momentum"):
-            call_idx = 1
-
-        # If general parameter, should be applied to every call
-        else:
-            call_idx = 0
-
-        self.assertEqual(2, gradient_descent.call_count)
+        self.assertEqual(1, gradient_descent.call_count)
         check_call_contains_kwargs(
-            gradient_descent.mock_calls[call_idx],
+            gradient_descent.mock_calls[0],
             {param_name: param_value},
         )
 
@@ -409,8 +395,11 @@ class TSNEInitialization(unittest.TestCase):
         x_train, x_test = train_test_split(self.iris, test_size=0.33, random_state=42)
 
         embedding = fastTSNE.TSNE(
-            early_exaggeration_iter=50, n_iter=50, neighbors="exact",
-            negative_gradient_method="bh", random_state=42,
+            early_exaggeration_iter=50,
+            n_iter=50,
+            neighbors="exact",
+            negative_gradient_method="bh",
+            random_state=42,
         ).fit(x_train)
 
         for init in self.transform_initializations:
@@ -424,16 +413,19 @@ class TSNEInitialization(unittest.TestCase):
         x_train, x_test = train_test_split(self.iris, test_size=0.33, random_state=42)
 
         embedding = fastTSNE.TSNE(
-            early_exaggeration_iter=10, n_iter=10, neighbors="exact",
-            negative_gradient_method="bh", random_state=42,
+            early_exaggeration_iter=10,
+            n_iter=10,
+            neighbors="exact",
+            negative_gradient_method="bh",
+            random_state=42,
         ).fit(x_train)
 
         for init in self.transform_initializations:
             new_embedding_1 = embedding.transform(
-                x_test, initialization=init, early_exaggeration_iter=0, n_iter=10,
+                x_test, initialization=init, n_iter=10
             )
             new_embedding_2 = embedding.transform(
-                x_test, initialization=init, early_exaggeration_iter=0, n_iter=10,
+                x_test, initialization=init, n_iter=10
             )
 
             np.testing.assert_equal(new_embedding_1, new_embedding_2, init)
@@ -443,18 +435,19 @@ class TSNEInitialization(unittest.TestCase):
         x_train, x_test = train_test_split(self.iris, test_size=0.33, random_state=42)
 
         embedding = fastTSNE.TSNE(
-            early_exaggeration_iter=10, n_iter=10, neighbors="exact",
-            negative_gradient_method="fft", random_state=42,
+            early_exaggeration_iter=10,
+            n_iter=10,
+            neighbors="exact",
+            negative_gradient_method="fft",
+            random_state=42,
         ).fit(x_train)
 
         for init in self.transform_initializations:
             new_embedding_1 = embedding.transform(
-                x_test, initialization=init, early_exaggeration_iter=0, n_iter=10,
-                learning_rate=10,
+                x_test, initialization=init, n_iter=10, learning_rate=10
             )
             new_embedding_2 = embedding.transform(
-                x_test, initialization=init, early_exaggeration_iter=0, n_iter=10,
-                learning_rate=10,
+                x_test, initialization=init, n_iter=10, learning_rate=10
             )
 
             np.testing.assert_equal(new_embedding_1, new_embedding_2, init)

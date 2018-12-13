@@ -8,46 +8,46 @@ A visualization of 160,796 single cell transcriptomes from the mouse nervous sys
 
 ![Zeisel 2018 mouse nervous system t-SNE embedding](docs/source/images/zeisel_2018.png)
 
-The goal of this project is to have fast implementations of t-SNE in one place, with a flexible API and without any external dependencies. This makes it very easy to experiment with various aspects of t-SNE and makes the package very easy to distribute.
+The goal of this project is
 
-This package provides two fast implementations of t-SNE:
-1. Barnes-hut t-SNE [2] is appropriate for small data sets and has asymptotic complexity O(n log n).
-2. FFT Accelerated t-SNE [3] is appropriate for larger data sets (>10,000 samples). It has asymptotic complexity O(n).
+1. **Speed**. We provide two fast, parallel implementations of t-SNE, which are comparable to their C++ counterparts in speed.
 
-Barnes-Hut tends to be slightly faster on smaller data sets (typically by a minute or two) while FIt-SNE should always be used for larger data sets (>10,000 samples). In most cases, using the FIt-SNE implementation is a safe default.
+2. **Interactivity**. This library was built for Orange, an interactive machine learning toolkit. As such, we provide a powerful API which can control all aspects of the t-SNE algorithm and makes it suitable for interactive environments.
 
-To better understand the speed trade-offs, it is useful to know how t-SNE works. t-SNE runs in two main phases. In the first phase we find the K nearest neighbors for each sample. We offer exact nearest neighbor search using scikit-learn's nearest neighbors KDTrees and approximate nearest neighbor search using a Python/Numba implementation of nearest neighbor descent. Exact search tends to be faster for smaller data sets and approximate search is faster for larger data sets.
-The second phase runs the optimization phase (which can, again, be run in several phases). In every iteration we must evaluate the negative gradient, which involves computing all pairwise interactions. This can be accelerated using Barnes-Hut space partitioning trees (scaling with O(n log n)) or FFT accelerated interpolation (scaling with O(n)) for larger data sets. For more details, see the corresponding papers.
+3. **Extensibility**. We provide efficient defaults for the typical use case i.e. visualizing high dimensional data. If you aren't happy with the defaults e.g. you would like to use your own nearest neighbor search or would like to embed graph data, this library makes this very easy. This allows for great freedom with experimentation.
 
-## Benchmarks
-The numbers are not exact. The benchmarks were run on an Intel i7-7700HQ CPU @ 2.80GHz (up to 3.80GHz) processor.
+4. **Ease of distribution**. FIt-SNE, the reference C++ implementation for the most scalable variant of t-SNE, is not easy to install or distribute. It requires one to preinstall C libraries and requires manual compilation. This package is installable either through `pip` or `conda` with a single command, making it very easy to include in other packages.
 
-FFT benchmarks are run using approximate nearest neigbhor search. Exact search is used for Barnes-Hut.
-
-The typical benchmark to use is the MNIST data set containing 70,000 28x28 images (784 pixels).
-
-| MNIST | Exact NN | Approximate NN | BH gradient | FFT gradient |
-|:---|---:|---:|---:|---:|
-| 4 cores | 2086s | 22s | 243s | 67s |
+Detailed documentation on t-SNE is available on [Read the Docs](http://fasttsne.readthedocs.io).
 
 ## Installation
 
-fastTSNE can be installed using `conda` from conda-forge with
+### Conda
+
+The recommended installation method for fastTSNE is using ``conda`` and can be easily installed from ``conda-forge`` with
 
 ```
 conda install --channel conda-forge fasttsne
 ```
 
-fastTSNE can also be installed using pip. The only prerequisite is `numpy`.
+[Conda package](https://anaconda.org/conda-forge/fasttsne)
 
-Once numpy is installed, simply run
+### PyPi
+
+fastTSNE is also available through ``pip`` and can be installed with
+
 ```
 pip install fasttsne
 ```
-and you're good to go.
 
-### FFTW
-By default, fastTSNE uses numpy's implementation of the Fast Fourier Transform because of it's wide availability. If you would like to squeeze out maximum performance, you can install the highly optimized FFTW C library, available through conda. fastTSNE will automatically detect FFTW and will use that. The speed ups here are generally not large, but can save seconds to minutes when running t-SNE on larger data sets.
+[PyPi package](https://pypi.org/project/fastTSNE)
+
+Note, however, that fastTSNE requires a C/C++ compiler. ``numpy`` must also be installed. If it is not available, we will attempt to install it before proceeding with the installation.
+
+In order for fastTSNE to utilize multiple threads, the C/C++ compiler must also implement ``OpenMP``. In practice, almost all compilers implement this with the exception of older version of ``clang`` on OSX systems.
+
+To squeeze the most out of fastTSNE, you may also consider installing FFTW3 prior to installation. FFTW3 implements the Fast Fourier Transform, which is heavily used in fastTSNE. If FFTW3 is not available, fastTSNE will use numpy's implementation of the FFT, which is slightly slower than FFTW. The difference is only noticeable with large data sets containing millions of data points.
+
  
 ## Usage
 We provide two modes of usage. One is somewhat familliar to scikit-learn's `TSNE.fit`.
@@ -63,13 +63,13 @@ from fastTSNE import TSNE
 from sklearn import datasets
 
 iris = datasets.load_iris()
-x, y = iris['data'], iris['target']
+x, y = iris["data"], iris["target"]
 
 tsne = TSNE(
     n_components=2, perplexity=30, learning_rate=200,
-    n_jobs=4, angle=0.5, initialization='pca', metric='euclidean',
+    n_jobs=4, angle=0.5, initialization="pca", metric="euclidean",
     early_exaggeration_iter=250, early_exaggeration=12, n_iter=750,
-    neighbors='exact', negative_gradient_method='bh',
+    neighbors="exact", negative_gradient_method="bh",
 )
 
 embedding = tsne.fit(x)
@@ -110,9 +110,9 @@ from fastTSNE import initialization, affinity
 from fastTSNE.tsne import TSNEEmbedding
 
 init = initialization.pca(x)
-affinities = affinity.PerplexityBasedNN(x, perplexity=30, method='approx', n_jobs=8)
+affinities = affinity.PerplexityBasedNN(x, perplexity=30, method="approx", n_jobs=8)
 embedding = TSNEEmbedding(
-    init, affinities, negative_gradient_method='fft',
+    init, affinities, negative_gradient_method="fft",
     learning_rate=200, n_jobs=8, callbacks=ErrorLogger(),
 )
 embedding.optimize(n_iter=250, exaggeration=12, momentum=0.5, inplace=True)

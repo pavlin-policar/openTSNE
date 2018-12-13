@@ -34,6 +34,7 @@ cpdef double estimate_negative_gradient_bh(
     double theta=*,
     double dof=*,
     Py_ssize_t num_threads=*,
+    bint pairwise_normalization=*,
 )
 
 cpdef double estimate_negative_gradient_fft_1d(
