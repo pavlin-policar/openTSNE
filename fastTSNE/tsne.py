@@ -587,7 +587,7 @@ class TSNEEmbedding(np.ndarray):
 
         return embedding
 
-    def transform(self, X, perplexity=None, initialization="median",
+    def transform(self, X, perplexity=None, initialization="median", k=25,
                   learning_rate=50, early_exaggeration_iter=100,
                   early_exaggeration=2, n_iter=100, exaggeration=1,
                   initial_momentum=0.2, final_momentum=0.4):
@@ -616,6 +616,12 @@ class TSNEEmbedding(np.ndarray):
             be a precomputed numpy array, ``median``, ``weighted`` or
             ``random``. In all cases, ``median`` of ``weighted`` should be
             preferred.
+
+        k: int
+            The number of nearest neighbors to consider when initially placing
+            the point onto the embedding. This is different from ``perpelxity``
+            because perplexity affects optimization while this only affects the
+            initial point positions.
 
         learning_rate: float
             The learning rate for t-SNE optimization. Typical values range
@@ -669,7 +675,7 @@ class TSNEEmbedding(np.ndarray):
             )
 
         embedding = self.prepare_partial(
-            X, perplexity=perplexity, initialization=initialization,
+            X, perplexity=perplexity, initialization=initialization,k=k,
         )
 
         try:
@@ -695,12 +701,12 @@ class TSNEEmbedding(np.ndarray):
 
         return embedding
 
-    def prepare_partial(self, X, initialization="median", **affinity_params):
+    def prepare_partial(self, X, initialization="median", k=25, **affinity_params):
         """Prepare a partial embedding which can be optimized.
 
         Parameters
         ----------
-        X : np.ndarray
+        X: np.ndarray
             The data matrix to be added to the existing embedding.
 
         initialization: Union[np.ndarray, str]
@@ -708,6 +714,12 @@ class TSNEEmbedding(np.ndarray):
             be a precomputed numpy array, ``median``, ``weighted`` or
             ``random``. In all cases, ``median`` of ``weighted`` should be
             preferred.
+
+        k: int
+            The number of nearest neighbors to consider when initially placing
+            the point onto the embedding. This is different from ``perpelxity``
+            because perplexity affects optimization while this only affects the
+            initial point positions.
 
         **affinity_params: dict
             Additional params to be passed to the ``Affinities.to_new`` method.
@@ -736,9 +748,11 @@ class TSNEEmbedding(np.ndarray):
         elif initialization == "random":
             embedding = initialization_scheme.random(X, self.shape[1], self.random_state)
         elif initialization == "weighted":
-            embedding = initialization_scheme.weighted_mean(X, self, neighbors, distances)
+            embedding = initialization_scheme.weighted_mean(
+                X, self, neighbors[:, :k], distances[:, :k],
+            )
         elif initialization == "median":
-            embedding = initialization_scheme.median(self, neighbors)
+            embedding = initialization_scheme.median(self, neighbors[:, :k])
         else:
             raise ValueError("Unrecognized initialization scheme `%s`." % initialization)
 
