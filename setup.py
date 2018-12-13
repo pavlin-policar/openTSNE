@@ -152,7 +152,7 @@ except ImportError:
 setup(
     name="fastTSNE",
     description="",
-    version="0.2.13",
+    version="0.2.16",
     license="BSD-3-Clause",
 
     author="Pavlin Poličar",
