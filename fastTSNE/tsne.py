@@ -721,14 +721,9 @@ class TSNEEmbedding(np.ndarray):
             optimization.
 
         """
-        P = self.affinities.to_new(X, **affinity_params)
-
-        # Extract neighbor indices and their affinities as a dense matrix from P
-        # so they can be used in weighted initialization schemes
-        P = P.tocsr()
-        k_neighbors = int(P.data.shape[0] / P.shape[0])
-        neighbors = P.indices.copy().reshape((P.shape[0], k_neighbors))
-        distances = P.data.copy().reshape((P.shape[0], k_neighbors))
+        P, neighbors, distances = self.affinities.to_new(
+            X, return_distances=True, **affinity_params,
+        )
 
         # If initial positions are given in an array, use a copy of that
         if isinstance(initialization, np.ndarray):
