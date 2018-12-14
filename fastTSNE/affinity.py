@@ -6,7 +6,7 @@ import numpy as np
 import scipy.sparse as sp
 
 from . import _tsne
-from .nearest_neighbors import VPTree, BallTree, NNDescent, KNNIndex
+from . import nearest_neighbors
 
 log = logging.getLogger(__name__)
 
@@ -261,8 +261,12 @@ class PerplexityBasedNN(Affinities):
 def build_knn_index(
     data, method, metric, metric_params=None, n_jobs=1, random_state=None
 ):
-    methods = {"exact_alt": VPTree, "exact": BallTree, "approx": NNDescent}
-    if isinstance(method, KNNIndex):
+    methods = {
+        "exact_alt": nearest_neighbors.VPTree,
+        "exact": nearest_neighbors.BallTree,
+        "approx": nearest_neighbors.NNDescent,
+    }
+    if isinstance(method, nearest_neighbors.KNNIndex):
         knn_index = method
 
     elif method not in methods:

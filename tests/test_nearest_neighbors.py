@@ -1,8 +1,11 @@
+import fastTSNE
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
 from fastTSNE import nearest_neighbors
+from .test_tsne import check_mock_called_with_kwargs
 
 
 class KNNIndexTestMixin:
@@ -46,3 +49,36 @@ class TestVPTree(KNNIndexTestMixin, unittest.TestCase):
 
 class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
     knn_index = nearest_neighbors.NNDescent
+
+    def test_query_train_same_result_with_fixed_random_state(self):
+        knn_index1 = nearest_neighbors.NNDescent("euclidean", random_state=1)
+        knn_index1.build(self.x1)
+        indices1, distances1 = knn_index1.query_train(self.x1, k=20)
+
+        knn_index2 = nearest_neighbors.NNDescent("euclidean", random_state=1)
+        knn_index2.build(self.x1)
+        indices2, distances2 = knn_index2.query_train(self.x1, k=20)
+
+        np.testing.assert_equal(indices1, indices2)
+        np.testing.assert_equal(distances1, distances2)
+
+    def test_query_same_result_with_fixed_random_state(self):
+        knn_index1 = nearest_neighbors.NNDescent("euclidean", random_state=1)
+        knn_index1.build(self.x1)
+        indices1, distances1 = knn_index1.query(self.x2, k=30)
+
+        knn_index2 = nearest_neighbors.NNDescent("euclidean", random_state=1)
+        knn_index2.build(self.x1)
+        indices2, distances2 = knn_index2.query(self.x2, k=30)
+
+        np.testing.assert_equal(indices1, indices2)
+        np.testing.assert_equal(distances1, distances2)
+
+    @patch("fastTSNE.pynndescent.NNDescent", wraps=fastTSNE.pynndescent.NNDescent)
+    def test_random_state_being_passed_through(self, nndescent):
+        random_state = 1
+        knn_index = nearest_neighbors.NNDescent("euclidean", random_state=random_state)
+        knn_index.build(self.x1)
+
+        nndescent.assert_called_once()
+        check_mock_called_with_kwargs(nndescent, {"random_state": random_state})

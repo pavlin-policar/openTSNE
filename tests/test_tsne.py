@@ -10,8 +10,7 @@ from sklearn import datasets
 from sklearn.model_selection import train_test_split
 
 import fastTSNE
-from fastTSNE import affinity
-from fastTSNE import tsne
+from fastTSNE import affinity, initialization
 from fastTSNE.affinity import PerplexityBasedNN
 from fastTSNE.nearest_neighbors import NNDescent
 from fastTSNE.tsne import kl_divergence_bh, kl_divergence_fft
@@ -19,7 +18,7 @@ from fastTSNE.tsne import kl_divergence_bh, kl_divergence_fft
 np.random.seed(42)
 affinity.log.setLevel(logging.ERROR)
 
-TSNE = partial(tsne.TSNE, neighbors="exact", negative_gradient_method="bh")
+TSNE = partial(fastTSNE.TSNE, neighbors="exact", negative_gradient_method="bh")
 
 
 def check_params(params: dict) -> Callable:
@@ -487,8 +486,11 @@ class TestRandomState(unittest.TestCase):
         tsne2 = TSNE(random_state=1, initialization="random")
         embedding2 = tsne2.fit(self.x)
 
-        np.testing.assert_array_equal(embedding1, embedding2,
-                                      "Same random state produced different initial embeddings")
+        np.testing.assert_array_equal(
+            embedding1,
+            embedding2,
+            "Same random state produced different initial embeddings",
+        )
 
     def test_same_results_on_fixed_random_state_pca_init(self):
         """Results should be exactly the same if we provide a random state."""
@@ -498,8 +500,11 @@ class TestRandomState(unittest.TestCase):
         tsne2 = TSNE(random_state=1, initialization="pca")
         embedding2 = tsne2.fit(self.x)
 
-        np.testing.assert_array_equal(embedding1, embedding2,
-                                      "Same random state produced different initial embeddings")
+        np.testing.assert_array_equal(
+            embedding1,
+            embedding2,
+            "Same random state produced different initial embeddings",
+        )
 
     def test_same_partial_embedding_on_fixed_random_state(self):
         tsne = TSNE(random_state=1, initialization="random")
@@ -508,24 +513,71 @@ class TestRandomState(unittest.TestCase):
         partial1 = embedding.prepare_partial(self.x_test, initialization="random")
         partial2 = embedding.prepare_partial(self.x_test, initialization="random")
 
-        np.testing.assert_array_equal(partial1, partial2,
-                                      "Same random state produced different partial embeddings")
+        np.testing.assert_array_equal(
+            partial1,
+            partial2,
+            "Same random state produced different partial embeddings",
+        )
+
+    @patch("fastTSNE.initialization.random", wraps=fastTSNE.initialization.random)
+    @patch("fastTSNE.nearest_neighbors.BallTree", wraps=fastTSNE.nearest_neighbors.BallTree)
+    def test_random_state_parameter_is_propagated_random_init_exact(self, init, neighbors):
+        random_state = 1
+
+        tsne = fastTSNE.TSNE(
+            neighbors="exact",
+            initialization="random",
+            random_state=random_state,
+        )
+        tsne.prepare_initial(self.x)
+
+        # Verify that `random_state` was passed
+        init.assert_called_once()
+        check_mock_called_with_kwargs(init, {"random_state": random_state})
+        neighbors.assert_called_once()
+        check_mock_called_with_kwargs(neighbors, {"random_state": random_state})
+
+    @patch("fastTSNE.initialization.pca", wraps=fastTSNE.initialization.pca)
+    @patch("fastTSNE.nearest_neighbors.NNDescent", wraps=fastTSNE.nearest_neighbors.NNDescent)
+    def test_random_state_parameter_is_propagated_pca_init_approx(self, init, neighbors):
+        random_state = 1
+
+        tsne = fastTSNE.TSNE(
+            neighbors="approx",
+            initialization="pca",
+            random_state=random_state,
+        )
+        tsne.prepare_initial(self.x)
+
+        # Verify that `random_state` was passed
+        init.assert_called_once()
+        check_mock_called_with_kwargs(init, {"random_state": random_state})
+        neighbors.assert_called_once()
+        check_mock_called_with_kwargs(neighbors, {"random_state": random_state})
 
 
 class TestDefaultParameterSettings(unittest.TestCase):
     def test_default_params_simple_vs_complex_flow(self):
         # Relevant affinity parameters are passed to the affinity object
         mismatching = get_mismatching_default_values(
-            tsne.TSNE, PerplexityBasedNN, {"neighbors": "method"})
+            fastTSNE.TSNE,
+            PerplexityBasedNN,
+            {"neighbors": "method"},
+        )
         self.assertEqual(mismatching, [])
 
-        assert len(get_shared_parameters(tsne.TSNE, tsne.gradient_descent.__call__)) > 0, \
+        assert len(
+            get_shared_parameters(fastTSNE.TSNE, fastTSNE.tsne.gradient_descent.__call__)
+        ) > 0, \
             "`TSNE` and `gradient_descent` have no shared parameters. Have you " \
             "changed the signature or usage?"
 
         # The relevant gradient descent parameters are passed down directly to
         # `gradient_descent`
-        mismatching = get_mismatching_default_values(tsne.TSNE, tsne.gradient_descent.__call__)
+        mismatching = get_mismatching_default_values(
+            fastTSNE.TSNE,
+            fastTSNE.tsne.gradient_descent.__call__,
+        )
         mismatching = list(filter(lambda x: x[0] not in ("n_iter",), mismatching))
         self.assertEqual(mismatching, [])
 

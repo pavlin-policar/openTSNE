@@ -9,12 +9,12 @@ from collections import namedtuple
 from fastTSNE.pynndescent.utils import tau_rand_int, norm
 
 
-RandomProjectionTreeNode = namedtuple('RandomProjectionTreeNode',
-                                      ['indices', 'is_leaf', 'hyperplane',
-                                       'offset', 'left_child', 'right_child'])
+RandomProjectionTreeNode = namedtuple(
+    "RandomProjectionTreeNode",
+    ["indices", "is_leaf", "hyperplane", "offset", "left_child", "right_child"],
+)
 
-FlatTree = namedtuple('FlatTree', ['hyperplanes', 'offsets',
-                                   'children', 'indices'])
+FlatTree = namedtuple("FlatTree", ["hyperplanes", "offsets", "children", "indices"])
 
 
 @numba.njit(fastmath=True, nogil=True, parallel=True)
@@ -66,8 +66,9 @@ def euclidean_random_projection_split(data, indices, rng_state):
 
     for d in range(dim):
         hyperplane_vector[d] = data[left, d] - data[right, d]
-        hyperplane_offset -= hyperplane_vector[d] * (
-            data[left, d] + data[right, d]) / 2.0
+        hyperplane_offset -= (
+            hyperplane_vector[d] * (data[left, d] + data[right, d]) / 2.0
+        )
 
     # For each point compute the margin (project into normal vector, add offset)
     # If we are on lower side of the hyperplane put in one pile, otherwise
@@ -167,8 +168,9 @@ def angular_random_projection_split(data, indices, rng_state):
     hyperplane_vector = np.empty(dim, dtype=np.float32)
 
     for d in range(dim):
-        hyperplane_vector[d] = ((data[left, d] / left_norm) -
-                                (data[right, d] / right_norm))
+        hyperplane_vector[d] = (data[left, d] / left_norm) - (
+            data[right, d] / right_norm
+        )
 
     hyperplane_norm = norm(hyperplane_vector)
     if hyperplane_norm == 0.0:
@@ -221,20 +223,16 @@ def angular_random_projection_split(data, indices, rng_state):
 
 def make_euclidean_tree(data, indices, rng_state, leaf_size=30):
     if indices.shape[0] > leaf_size:
-        left_indices, right_indices, hyperplane, offset = \
-            euclidean_random_projection_split(data, indices, rng_state)
+        left_indices, right_indices, hyperplane, offset = euclidean_random_projection_split(
+            data, indices, rng_state
+        )
 
-        left_node = make_euclidean_tree(data,
-                                        left_indices,
-                                        rng_state,
-                                        leaf_size)
-        right_node = make_euclidean_tree(data,
-                                         right_indices,
-                                         rng_state,
-                                         leaf_size)
+        left_node = make_euclidean_tree(data, left_indices, rng_state, leaf_size)
+        right_node = make_euclidean_tree(data, right_indices, rng_state, leaf_size)
 
-        node = RandomProjectionTreeNode(None, False, hyperplane, offset,
-                                        left_node, right_node)
+        node = RandomProjectionTreeNode(
+            None, False, hyperplane, offset, left_node, right_node
+        )
     else:
         node = RandomProjectionTreeNode(indices, True, None, None, None, None)
 
@@ -243,20 +241,16 @@ def make_euclidean_tree(data, indices, rng_state, leaf_size=30):
 
 def make_angular_tree(data, indices, rng_state, leaf_size=30):
     if indices.shape[0] > leaf_size:
-        left_indices, right_indices, hyperplane, offset = \
-            angular_random_projection_split(data, indices, rng_state)
+        left_indices, right_indices, hyperplane, offset = angular_random_projection_split(
+            data, indices, rng_state
+        )
 
-        left_node = make_angular_tree(data,
-                                      left_indices,
-                                      rng_state,
-                                      leaf_size)
-        right_node = make_angular_tree(data,
-                                       right_indices,
-                                       rng_state,
-                                       leaf_size)
+        left_node = make_angular_tree(data, left_indices, rng_state, leaf_size)
+        right_node = make_angular_tree(data, right_indices, rng_state, leaf_size)
 
-        node = RandomProjectionTreeNode(None, False, hyperplane, offset,
-                                        left_node, right_node)
+        node = RandomProjectionTreeNode(
+            None, False, hyperplane, offset, left_node, right_node
+        )
     else:
         node = RandomProjectionTreeNode(indices, True, None, None, None, None)
 
@@ -279,12 +273,12 @@ def num_leaves(tree):
         return num_leaves(tree.left_child) + num_leaves(tree.right_child)
 
 
-def recursive_flatten(tree, hyperplanes, offsets,
-                      children, indices, node_num,
-                      leaf_num):
+def recursive_flatten(
+    tree, hyperplanes, offsets, children, indices, node_num, leaf_num
+):
     if tree.is_leaf:
         children[node_num, 0] = -leaf_num
-        indices[leaf_num, :tree.indices.shape[0]] = tree.indices
+        indices[leaf_num, : tree.indices.shape[0]] = tree.indices
         leaf_num += 1
         return node_num, leaf_num
     else:
@@ -292,23 +286,32 @@ def recursive_flatten(tree, hyperplanes, offsets,
         offsets[node_num] = tree.offset
         children[node_num, 0] = node_num + 1
         old_node_num = node_num
-        node_num, leaf_num = recursive_flatten(tree.left_child,
-                                               hyperplanes, offsets,
-                                               children, indices,
-                                               node_num + 1, leaf_num)
+        node_num, leaf_num = recursive_flatten(
+            tree.left_child,
+            hyperplanes,
+            offsets,
+            children,
+            indices,
+            node_num + 1,
+            leaf_num,
+        )
         children[old_node_num, 1] = node_num + 1
-        node_num, leaf_num = recursive_flatten(tree.right_child,
-                                               hyperplanes, offsets,
-                                               children, indices,
-                                               node_num + 1, leaf_num)
+        node_num, leaf_num = recursive_flatten(
+            tree.right_child,
+            hyperplanes,
+            offsets,
+            children,
+            indices,
+            node_num + 1,
+            leaf_num,
+        )
         return node_num, leaf_num
 
 
 def flatten_tree(tree, leaf_size):
     n_nodes = num_nodes(tree)
     n_leaves = num_leaves(tree)
-    hyperplanes = np.zeros((n_nodes, tree.hyperplane.shape[0]),
-                           dtype=np.float32)
+    hyperplanes = np.zeros((n_nodes, tree.hyperplane.shape[0]), dtype=np.float32)
     offsets = np.zeros(n_nodes, dtype=np.float32)
     children = -1 * np.ones((n_nodes, 2), dtype=np.int64)
     indices = -1 * np.ones((n_leaves, leaf_size), dtype=np.int64)
@@ -335,10 +338,7 @@ def select_side(hyperplane, offset, point, rng_state):
 
 
 @numba.njit(fastmath=True)
-def search_flat_tree(point,
-                     hyperplanes, offsets,
-                     children, indices,
-                     rng_state):
+def search_flat_tree(point, hyperplanes, offsets, children, indices, rng_state):
     node = 0
     while children[node, 0] > 0:
         side = select_side(hyperplanes[node], offsets[node], point, rng_state)

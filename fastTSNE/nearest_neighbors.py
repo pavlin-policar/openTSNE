@@ -104,7 +104,6 @@ class NNDescent(KNNIndex):
 
     def build(self, data):
         self.check_metric(self.metric)
-        random_state = check_random_state(self.random_state)
 
         # These values were taken from UMAP, which we assume to be sensible defaults
         n_trees = 5 + int(round((data.shape[0]) ** 0.5 / 20))
@@ -116,7 +115,7 @@ class NNDescent(KNNIndex):
             data,
             metric=self.metric,
             metric_kwds=self.metric_params,
-            random_state=random_state,
+            random_state=self.random_state,
             n_trees=n_trees,
             n_iters=n_iters,
             algorithm="standard",
