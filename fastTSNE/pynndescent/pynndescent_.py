@@ -10,17 +10,21 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils import check_random_state, check_array
 
 from fastTSNE.pynndescent import distances as dist
-from fastTSNE.pynndescent.rp_trees import (make_euclidean_tree,
-                                           make_angular_tree,
-                                           flatten_tree,
-                                           search_flat_tree)
-from fastTSNE.pynndescent.utils import (rejection_sample,
-                                        make_heap,
-                                        heap_push,
-                                        unchecked_heap_push,
-                                        deheap_sort,
-                                        smallest_flagged,
-                                        build_candidates)
+from fastTSNE.pynndescent.rp_trees import (
+    make_euclidean_tree,
+    make_angular_tree,
+    flatten_tree,
+    search_flat_tree,
+)
+from fastTSNE.pynndescent.utils import (
+    rejection_sample,
+    make_heap,
+    heap_push,
+    unchecked_heap_push,
+    deheap_sort,
+    smallest_flagged,
+    build_candidates,
+)
 
 INT32_MIN = np.iinfo(np.int32).min + 1
 INT32_MAX = np.iinfo(np.int32).max - 1
@@ -41,9 +45,14 @@ def make_initialisations(dist, dist_args):
     @numba.njit(parallel=True, fastmath=True)
     def init_from_tree(tree, data, query_points, heap, rng_state):
         for i in range(query_points.shape[0]):
-            indices = search_flat_tree(query_points[i], tree.hyperplanes,
-                                       tree.offsets, tree.children, tree.indices,
-                                       rng_state)
+            indices = search_flat_tree(
+                query_points[i],
+                tree.hyperplanes,
+                tree.offsets,
+                tree.children,
+                tree.indices,
+                rng_state,
+            )
 
             for j in range(indices.shape[0]):
                 if indices[j] < 0:
@@ -56,8 +65,9 @@ def make_initialisations(dist, dist_args):
     return init_from_random, init_from_tree
 
 
-def initialise_search(forest, data, query_points, n_neighbors,
-                      init_from_random, init_from_tree, rng_state):
+def initialise_search(
+    forest, data, query_points, n_neighbors, init_from_random, init_from_tree, rng_state
+):
     results = make_heap(query_points.shape[0], n_neighbors)
     init_from_random(n_neighbors, data, query_points, results, rng_state)
     if forest is not None:
@@ -69,11 +79,7 @@ def initialise_search(forest, data, query_points, n_neighbors,
 
 def make_initialized_nnd_search(dist, dist_args):
     @numba.njit(parallel=True, fastmath=True)
-    def initialized_nnd_search(data,
-                               indptr,
-                               indices,
-                               initialization,
-                               query_points):
+    def initialized_nnd_search(data, indptr, indices, initialization, query_points):
 
         for i in numba.prange(query_points.shape[0]):
 
@@ -86,10 +92,13 @@ def make_initialized_nnd_search(dist, dist_args):
 
                 if vertex == -1:
                     break
-                candidates = indices[indptr[vertex]:indptr[vertex + 1]]
+                candidates = indices[indptr[vertex] : indptr[vertex + 1]]
                 for j in range(candidates.shape[0]):
-                    if candidates[j] == vertex or candidates[j] == -1 or \
-                            candidates[j] in tried:
+                    if (
+                        candidates[j] == vertex
+                        or candidates[j] == -1
+                        or candidates[j] in tried
+                    ):
                         continue
                     d = dist(data[candidates[j]], query_points[i], *dist_args)
                     unchecked_heap_push(initialization, i, d, candidates[j], 1)
@@ -123,9 +132,18 @@ def make_nn_descent(dist, dist_args):
     """
 
     @numba.njit(fastmath=True)
-    def nn_descent(data, n_neighbors, rng_state, max_candidates=50,
-                   n_iters=10, delta=0.001, rho=0.5,
-                   rp_tree_init=True, leaf_array=None, verbose=False):
+    def nn_descent(
+        data,
+        n_neighbors,
+        rng_state,
+        max_candidates=50,
+        n_iters=10,
+        delta=0.001,
+        rho=0.5,
+        rp_tree_init=True,
+        leaf_array=None,
+        verbose=False,
+    ):
         n_vertices = data.shape[0]
 
         current_graph = make_heap(data.shape[0], n_neighbors)
@@ -147,24 +165,22 @@ def make_nn_descent(dist, dist_args):
                             break
                         if (leaf_array[n, i], leaf_array[n, j]) in tried:
                             continue
-                        d = dist(data[leaf_array[n, i]], data[leaf_array[n, j]],
-                                 *dist_args)
-                        heap_push(current_graph, leaf_array[n, i], d,
-                                  leaf_array[n, j],
-                                  1)
-                        heap_push(current_graph, leaf_array[n, j], d,
-                                  leaf_array[n, i],
-                                  1)
+                        d = dist(
+                            data[leaf_array[n, i]], data[leaf_array[n, j]], *dist_args
+                        )
+                        heap_push(
+                            current_graph, leaf_array[n, i], d, leaf_array[n, j], 1
+                        )
+                        heap_push(
+                            current_graph, leaf_array[n, j], d, leaf_array[n, i], 1
+                        )
                         tried.add((leaf_array[n, i], leaf_array[n, j]))
 
         for n in range(n_iters):
 
-            (new_candidate_neighbors,
-             old_candidate_neighbors) = build_candidates(current_graph,
-                                                         n_vertices,
-                                                         n_neighbors,
-                                                         max_candidates,
-                                                         rng_state, rho)
+            (new_candidate_neighbors, old_candidate_neighbors) = build_candidates(
+                current_graph, n_vertices, n_neighbors, max_candidates, rng_state, rho
+            )
 
             c = 0
             for i in range(n_vertices):
@@ -236,16 +252,19 @@ def make_heap_initializer(dist, dist_args):
                     if (leaf_array[n, i], leaf_array[n, j]) in tried:
                         continue
 
-                    d = dist(data[leaf_array[n, i]], data[leaf_array[n, j]],
-                             *dist_args)
-                    unchecked_heap_push(graph_heap, leaf_array[n, i], d,
-                                        leaf_array[n, j], 1)
-                    unchecked_heap_push(graph_heap, leaf_array[n, j], d,
-                                        leaf_array[n, i], 1)
-                    unchecked_heap_push(search_heap, leaf_array[n, i], d,
-                                        leaf_array[n, j], 1)
-                    unchecked_heap_push(search_heap, leaf_array[n, j], d,
-                                        leaf_array[n, i], 1)
+                    d = dist(data[leaf_array[n, i]], data[leaf_array[n, j]], *dist_args)
+                    unchecked_heap_push(
+                        graph_heap, leaf_array[n, i], d, leaf_array[n, j], 1
+                    )
+                    unchecked_heap_push(
+                        graph_heap, leaf_array[n, j], d, leaf_array[n, i], 1
+                    )
+                    unchecked_heap_push(
+                        search_heap, leaf_array[n, i], d, leaf_array[n, j], 1
+                    )
+                    unchecked_heap_push(
+                        search_heap, leaf_array[n, j], d, leaf_array[n, i], 1
+                    )
                     tried.add((leaf_array[n, i], leaf_array[n, j]))
 
         return graph_heap, search_heap
@@ -433,20 +452,23 @@ class NNDescent(object):
         you know what you're doing.
     """
 
-    def __init__(self, data,
-                 metric='euclidean',
-                 metric_kwds=None,
-                 n_neighbors=15,
-                 n_trees=8,
-                 leaf_size=15,
-                 pruning_level=0,
-                 tree_init=True,
-                 random_state=np.random,
-                 algorithm='standard',
-                 max_candidates=20,
-                 n_iters=10,
-                 delta=0.001,
-                 rho=0.5):
+    def __init__(
+        self,
+        data,
+        metric="euclidean",
+        metric_kwds=None,
+        n_neighbors=15,
+        n_trees=8,
+        leaf_size=15,
+        pruning_level=0,
+        tree_init=True,
+        random_state=np.random,
+        algorithm="standard",
+        max_candidates=20,
+        n_iters=10,
+        delta=0.001,
+        rho=0.5,
+    ):
 
         self.n_trees = n_trees
         self.n_neighbors = n_neighbors
@@ -482,31 +504,36 @@ class NNDescent(object):
         elif metric in dist.named_distances:
             self._distance_func = dist.named_distances[metric]
 
-        if metric in ('cosine', 'correlation', 'dice', 'jaccard'):
+        if metric in ("cosine", "correlation", "dice", "jaccard"):
             self._angular_trees = True
         else:
             self._angular_trees = False
 
-        self.rng_state = \
-            self.random_state.randint(INT32_MIN, INT32_MAX, 3).astype(np.int64)
+        self.rng_state = self.random_state.randint(INT32_MIN, INT32_MAX, 3).astype(
+            np.int64
+        )
 
         indices = np.arange(data.shape[0])
 
         if self.tree_init:
             if self._angular_trees:
                 self._rp_forest = [
-                    flatten_tree(make_angular_tree(data, indices,
-                                                   self.rng_state,
-                                                   self.leaf_size),
-                                 self.leaf_size)
+                    flatten_tree(
+                        make_angular_tree(
+                            data, indices, self.rng_state, self.leaf_size
+                        ),
+                        self.leaf_size,
+                    )
                     for i in range(n_trees)
                 ]
             else:
                 self._rp_forest = [
-                    flatten_tree(make_euclidean_tree(data, indices,
-                                                     self.rng_state,
-                                                     self.leaf_size),
-                                 self.leaf_size)
+                    flatten_tree(
+                        make_euclidean_tree(
+                            data, indices, self.rng_state, self.leaf_size
+                        ),
+                        self.leaf_size,
+                    )
                     for i in range(n_trees)
                 ]
 
@@ -515,54 +542,63 @@ class NNDescent(object):
             self._rp_forest = None
             leaf_array = np.array([[-1]])
 
-        if algorithm == 'standard' or leaf_array.shape[0] == 1:
+        if algorithm == "standard" or leaf_array.shape[0] == 1:
             nn_descent = make_nn_descent(self._distance_func, self._dist_args)
-            self._neighbor_graph = nn_descent(self._raw_data,
-                                              self.n_neighbors,
-                                              self.rng_state,
-                                              self.max_candidates,
-                                              self.n_iters,
-                                              self.delta,
-                                              self.rho,
-                                              True,
-                                              leaf_array)
-        elif algorithm == 'alternative':
-            self._search = make_initialized_nnd_search(self._distance_func,
-                                                       self._dist_args)
+            self._neighbor_graph = nn_descent(
+                self._raw_data,
+                self.n_neighbors,
+                self.rng_state,
+                self.max_candidates,
+                self.n_iters,
+                self.delta,
+                self.rho,
+                True,
+                leaf_array,
+            )
+        elif algorithm == "alternative":
+            self._search = make_initialized_nnd_search(
+                self._distance_func, self._dist_args
+            )
 
-            init_heaps = make_heap_initializer(self._distance_func,
-                                               self._dist_args)
-            graph_heap, search_heap = init_heaps(self._raw_data,
-                                                 self.n_neighbors,
-                                                 leaf_array)
+            init_heaps = make_heap_initializer(self._distance_func, self._dist_args)
+            graph_heap, search_heap = init_heaps(
+                self._raw_data, self.n_neighbors, leaf_array
+            )
             graph = lil_matrix((data.shape[0], data.shape[0]))
             graph.rows, graph.data = deheap_sort(graph_heap)
             graph = graph.maximum(graph.transpose())
-            self._neighbor_graph = deheap_sort(self._search(self._raw_data,
-                                                            graph.indptr,
-                                                            graph.indices,
-                                                            search_heap,
-                                                            self._raw_data))
+            self._neighbor_graph = deheap_sort(
+                self._search(
+                    self._raw_data,
+                    graph.indptr,
+                    graph.indices,
+                    search_heap,
+                    self._raw_data,
+                )
+            )
         else:
-            raise ValueError('Unknown algorithm selected')
+            raise ValueError("Unknown algorithm selected")
 
-        self._search_graph = lil_matrix((data.shape[0], data.shape[0]),
-                                        dtype=np.float32)
+        self._search_graph = lil_matrix(
+            (data.shape[0], data.shape[0]), dtype=np.float32
+        )
         self._search_graph.rows = self._neighbor_graph[0]
         self._search_graph.data = self._neighbor_graph[1]
         self._search_graph = self._search_graph.maximum(
-            self._search_graph.transpose()).tocsr()
-        self._search_graph = prune(self._search_graph,
-                                   prune_level=self.prune_level,
-                                   n_neighbors=self.n_neighbors)
+            self._search_graph.transpose()
+        ).tocsr()
+        self._search_graph = prune(
+            self._search_graph,
+            prune_level=self.prune_level,
+            n_neighbors=self.n_neighbors,
+        )
         self._search_graph = (self._search_graph != 0).astype(np.int8)
 
         self._random_init, self._tree_init = make_initialisations(
-            self._distance_func,
-            self._dist_args)
+            self._distance_func, self._dist_args
+        )
 
-        self._search = make_initialized_nnd_search(self._distance_func,
-                                                   self._dist_args)
+        self._search = make_initialized_nnd_search(self._distance_func, self._dist_args)
 
         return
 
@@ -599,15 +635,22 @@ class NNDescent(object):
         """
         # query_data = check_array(query_data, dtype=np.float64, order='C')
         query_data = np.asarray(query_data).astype(np.float32)
-        init = initialise_search(self._rp_forest, self._raw_data,
-                                 query_data, int(k * queue_size),
-                                 self._random_init, self._tree_init,
-                                 self.rng_state)
-        result = self._search(self._raw_data,
-                              self._search_graph.indptr,
-                              self._search_graph.indices,
-                              init,
-                              query_data)
+        init = initialise_search(
+            self._rp_forest,
+            self._raw_data,
+            query_data,
+            int(k * queue_size),
+            self._random_init,
+            self._tree_init,
+            self.rng_state,
+        )
+        result = self._search(
+            self._raw_data,
+            self._search_graph.indptr,
+            self._search_graph.indices,
+            init,
+            query_data,
+        )
 
         indices, dists = deheap_sort(result)
         return indices[:, :k], dists[:, :k]
@@ -730,21 +773,23 @@ class PyNNDescentTransformer(BaseEstimator, TransformerMixin):
     ...     Isomap(neighbors_algorithm='precomputed'))
     """
 
-    def __init__(self,
-                 n_neighbors=5,
-                 metric='euclidean',
-                 metric_kwds=None,
-                 n_trees=8,
-                 leaf_size=15,
-                 search_queue_size=4.0,
-                 pruning_level=0,
-                 tree_init=True,
-                 random_state=np.random,
-                 algorithm='standard',
-                 max_candidates=20,
-                 n_iters=10,
-                 early_termination_value=0.001,
-                 sampling_rate=0.5):
+    def __init__(
+        self,
+        n_neighbors=5,
+        metric="euclidean",
+        metric_kwds=None,
+        n_trees=8,
+        leaf_size=15,
+        search_queue_size=4.0,
+        pruning_level=0,
+        tree_init=True,
+        random_state=np.random,
+        algorithm="standard",
+        max_candidates=20,
+        n_iters=10,
+        early_termination_value=0.001,
+        sampling_rate=0.5,
+    ):
 
         self.n_neighbors = n_neighbors
         self.metric = metric
@@ -796,7 +841,7 @@ class PyNNDescentTransformer(BaseEstimator, TransformerMixin):
             self.max_candidates,
             self.n_iters,
             self.early_termination_value,
-            self.sampling_rate
+            self.sampling_rate,
         )
 
         return self
@@ -825,14 +870,12 @@ class PyNNDescentTransformer(BaseEstimator, TransformerMixin):
             indices, distances = self.pynndescent_._neighbor_graph
         else:
             indices, distances = self.pynndescent_.query(
-                X,
-                k=self.n_neighbors,
-                queue_size=self.search_queue_size
+                X, k=self.n_neighbors, queue_size=self.search_queue_size
             )
 
-        result = lil_matrix((n_samples_transform,
-                             n_samples_transform),
-                            dtype=np.float32)
+        result = lil_matrix(
+            (n_samples_transform, n_samples_transform), dtype=np.float32
+        )
         result.rows = indices
         result.data = distances
 
