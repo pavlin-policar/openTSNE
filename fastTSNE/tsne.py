@@ -588,7 +588,7 @@ class TSNEEmbedding(np.ndarray):
         return embedding
 
     def transform(self, X, perplexity=5, initialization="median", k=25,
-                  learning_rate=1, n_iter=100, exaggeration=1, momentum=0):
+                  learning_rate=1, n_iter=100, exaggeration=2, momentum=0):
         """Embed new points into the existing embedding.
 
         This procedure optimizes each point only with respect to the existing
