@@ -24,6 +24,7 @@ from fastTSNE.pynndescent.utils import (
     deheap_sort,
     smallest_flagged,
     build_candidates,
+    tau_rand,
 )
 
 INT32_MIN = np.iinfo(np.int32).min + 1
@@ -114,24 +115,21 @@ def make_nn_descent(dist, dist_args):
     specialised for the given distance metric and metric arguments. Numba
     doesn't support higher order functions directly, but we can instead JIT
     compile the version of NN-descent for any given metric.
-
     Parameters
     ----------
     dist: function
         A numba JITd distance function which, given two arrays computes a
         dissimilarity between them.
-
     dist_args: tuple
         Any extra arguments that need to be passed to the distance function
         beyond the two arrays to be compared.
-
     Returns
     -------
     A numba JITd function for nearest neighbor descent computation that is
     specialised to the given metric.
     """
 
-    @numba.njit(fastmath=True)
+    @numba.njit(parallel=True)
     def nn_descent(
         data,
         n_neighbors,
@@ -156,15 +154,12 @@ def make_nn_descent(dist, dist_args):
 
         if rp_tree_init:
             for n in range(leaf_array.shape[0]):
-                tried = set([(-1, -1)])
                 for i in range(leaf_array.shape[1]):
                     if leaf_array[n, i] < 0:
                         break
                     for j in range(i + 1, leaf_array.shape[1]):
                         if leaf_array[n, j] < 0:
                             break
-                        if (leaf_array[n, i], leaf_array[n, j]) in tried:
-                            continue
                         d = dist(
                             data[leaf_array[n, i]], data[leaf_array[n, j]], *dist_args
                         )
@@ -174,32 +169,28 @@ def make_nn_descent(dist, dist_args):
                         heap_push(
                             current_graph, leaf_array[n, j], d, leaf_array[n, i], 1
                         )
-                        tried.add((leaf_array[n, i], leaf_array[n, j]))
 
         for n in range(n_iters):
+            if verbose:
+                print("\t", n, " / ", n_iters)
 
-            (new_candidate_neighbors, old_candidate_neighbors) = build_candidates(
-                current_graph, n_vertices, n_neighbors, max_candidates, rng_state, rho
+            candidate_neighbors = build_candidates(
+                current_graph, n_vertices, n_neighbors, max_candidates, rng_state
             )
 
             c = 0
             for i in range(n_vertices):
                 for j in range(max_candidates):
-                    p = int(new_candidate_neighbors[0, i, j])
-                    if p < 0:
+                    p = int(candidate_neighbors[0, i, j])
+                    if p < 0 or tau_rand(rng_state) < rho:
                         continue
-                    for k in range(j, max_candidates):
-                        q = int(new_candidate_neighbors[0, i, k])
-                        if q < 0:
-                            continue
-
-                        d = dist(data[p], data[q], *dist_args)
-                        c += heap_push(current_graph, p, d, q, 1)
-                        c += heap_push(current_graph, q, d, p, 1)
-
                     for k in range(max_candidates):
-                        q = int(old_candidate_neighbors[0, i, k])
-                        if q < 0:
+                        q = int(candidate_neighbors[0, i, k])
+                        if (
+                            q < 0
+                            or not candidate_neighbors[2, i, j]
+                            and not candidate_neighbors[2, i, k]
+                        ):
                             continue
 
                         d = dist(data[p], data[q], *dist_args)

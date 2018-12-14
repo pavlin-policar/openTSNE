@@ -385,7 +385,44 @@ def smallest_flagged(heap, row):
 
 
 @numba.njit(parallel=True)
-def build_candidates(
+def build_candidates(current_graph, n_vertices, n_neighbors, max_candidates, rng_state):
+    """Build a heap of candidate neighbors for nearest neighbor descent. For
+    each vertex the candidate neighbors are any current neighbors, and any
+    vertices that have the vertex as one of their nearest neighbors.
+    Parameters
+    ----------
+    current_graph: heap
+        The current state of the graph for nearest neighbor descent.
+    n_vertices: int
+        The total number of vertices in the graph.
+    n_neighbors: int
+        The number of neighbor edges per node in the current graph.
+    max_candidates: int
+        The maximum number of new candidate neighbors.
+    rng_state: array of int64, shape (3,)
+        The internal state of the rng
+    Returns
+    -------
+    candidate_neighbors: A heap with an array of (randomly sorted) candidate
+    neighbors for each vertex in the graph.
+    """
+    candidate_neighbors = make_heap(n_vertices, max_candidates)
+    for i in range(n_vertices):
+        for j in range(n_neighbors):
+            if current_graph[0, i, j] < 0:
+                continue
+            idx = current_graph[0, i, j]
+            isn = current_graph[2, i, j]
+            d = tau_rand(rng_state)
+            heap_push(candidate_neighbors, i, d, idx, isn)
+            heap_push(candidate_neighbors, idx, d, i, isn)
+            current_graph[2, i, j] = 0
+
+    return candidate_neighbors
+
+
+@numba.njit(parallel=True)
+def new_build_candidates(
     current_graph, n_vertices, n_neighbors, max_candidates, rng_state, rho=0.5
 ):
     """Build a heap of candidate neighbors for nearest neighbor descent. For
