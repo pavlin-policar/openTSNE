@@ -973,6 +973,7 @@ class TSNE(BaseEstimator):
         affinities = PerplexityBasedNN(
             X, self.perplexity, method=self.neighbors_method,
             metric=self.metric, metric_params=self.metric_params, n_jobs=self.n_jobs,
+            random_state=self.random_state,
         )
 
         gradient_descent_params = {
