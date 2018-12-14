@@ -13,7 +13,7 @@ import fastTSNE
 from fastTSNE import affinity
 from fastTSNE import tsne
 from fastTSNE.affinity import PerplexityBasedNN
-from fastTSNE.nearest_neighbors import VALID_METRICS
+from fastTSNE.nearest_neighbors import NNDescent
 from fastTSNE.tsne import kl_divergence_bh, kl_divergence_fft
 
 np.random.seed(42)
@@ -199,7 +199,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         self.assertEqual(1, gradient_descent.call_count)
         check_call_contains_kwargs(gradient_descent.mock_calls[0], params)
 
-    @check_params({"metric": set(VALID_METRICS) - {"mahalanobis"}})
+    @check_params({"metric": set(NNDescent.VALID_METRICS) - {"mahalanobis"}})
     @patch("fastTSNE.pynndescent.NNDescent")
     def test_nndescent_distances(self, param_name, metric, nndescent: MagicMock):
         """Distance metrics should be properly passed down to NN descent"""
@@ -212,6 +212,24 @@ class TestTSNEParameterFlow(unittest.TestCase):
         try:
             # Haversine distance only supports two dimensions
             tsne.prepare_initial(self.x[:, :2])
+        except InterruptedError:
+            pass
+
+        self.assertEqual(nndescent.call_count, 1)
+        check_call_contains_kwargs(nndescent.mock_calls[0], {"metric": metric})
+
+    @patch("fastTSNE.pynndescent.NNDescent")
+    def test_nndescent_mahalanobis_distance(self, nndescent: MagicMock):
+        """Distance metrics and additional params should be correctly passed down to NN descent"""
+        metric = "mahalanobis"
+        C = np.cov(self.x)
+        tsne = TSNE(metric=metric, metric_params={"V": C}, neighbors="approx")
+
+        # We don't care about what happens later, just that the NN method is
+        # properly called
+        nndescent.side_effect = InterruptedError()
+        try:
+            tsne.prepare_initial(self.x)
         except InterruptedError:
             pass
 

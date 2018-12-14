@@ -6,7 +6,7 @@ import numpy as np
 import scipy.sparse as sp
 
 from . import _tsne
-from .nearest_neighbors import VPTree, BallTree, NNDescent, KNNIndex, VALID_METRICS
+from .nearest_neighbors import VPTree, BallTree, NNDescent, KNNIndex
 
 log = logging.getLogger(__name__)
 
@@ -107,20 +107,38 @@ class PerplexityBasedNN(Affinities):
 
     """
 
-    def __init__(self, data, perplexity=30, method="approx", metric="euclidean",
-                 metric_params=None, symmetrize=True, n_jobs=1, random_state=None):
+    def __init__(
+        self,
+        data,
+        perplexity=30,
+        method="approx",
+        metric="euclidean",
+        metric_params=None,
+        symmetrize=True,
+        n_jobs=1,
+        random_state=None,
+    ):
         self.n_samples = data.shape[0]
         self.perplexity = self.check_perplexity(perplexity)
 
-        self.knn_index = build_knn_index(data, method, metric, metric_params, n_jobs, random_state)
+        self.knn_index = build_knn_index(
+            data, method, metric, metric_params, n_jobs, random_state
+        )
 
         # Find and store the nearest neighbors so we can reuse them if the
         # perplexity is ever lowered
         k_neighbors = min(self.n_samples - 1, int(3 * self.perplexity))
-        self.__neighbors, self.__distances = self.knn_index.query_train(data, k=k_neighbors)
+        self.__neighbors, self.__distances = self.knn_index.query_train(
+            data, k=k_neighbors
+        )
 
-        self.P = joint_probabilities_nn(self.__neighbors, self.__distances, [self.perplexity],
-                                        symmetrize=symmetrize, n_jobs=n_jobs)
+        self.P = joint_probabilities_nn(
+            self.__neighbors,
+            self.__distances,
+            [self.perplexity],
+            symmetrize=symmetrize,
+            n_jobs=n_jobs,
+        )
 
         self.n_jobs = n_jobs
 
@@ -152,13 +170,17 @@ class PerplexityBasedNN(Affinities):
                 "The desired perplexity `%.2f` is larger than the initial one "
                 "used. This would need to recompute the nearest neighbors, "
                 "which is not efficient. Please create a new `%s` instance "
-                "with the increased perplexity." % (
-                    new_perplexity, self.__class__.__name__))
+                "with the increased perplexity."
+                % (new_perplexity, self.__class__.__name__)
+            )
 
         self.perplexity = new_perplexity
         self.P = joint_probabilities_nn(
-            self.__neighbors[:, :k_neighbors], self.__distances[:, :k_neighbors],
-            [self.perplexity], symmetrize=True, n_jobs=self.n_jobs,
+            self.__neighbors[:, :k_neighbors],
+            self.__distances[:, :k_neighbors],
+            [self.perplexity],
+            symmetrize=True,
+            n_jobs=self.n_jobs,
         )
 
     def to_new(self, data, perplexity=None, return_distances=False):
@@ -208,8 +230,12 @@ class PerplexityBasedNN(Affinities):
         neighbors, distances = self.knn_index.query(data, k_neighbors)
 
         P = joint_probabilities_nn(
-            neighbors, distances, [perplexity], symmetrize=False,
-            normalization="point-wise", n_reference_samples=self.n_samples,
+            neighbors,
+            distances,
+            [perplexity],
+            symmetrize=False,
+            normalization="point-wise",
+            n_reference_samples=self.n_samples,
             n_jobs=self.n_jobs,
         )
 
@@ -224,27 +250,34 @@ class PerplexityBasedNN(Affinities):
 
         if self.n_samples - 1 < 3 * perplexity:
             old_perplexity, perplexity = perplexity, (self.n_samples - 1) / 3
-            log.warning("Perplexity value %d is too high. Using perplexity "
-                        "%.2f instead" % (old_perplexity, perplexity))
+            log.warning(
+                "Perplexity value %d is too high. Using perplexity "
+                "%.2f instead" % (old_perplexity, perplexity)
+            )
 
         return perplexity
 
 
-def build_knn_index(data, method, metric, metric_params=None, n_jobs=1, random_state=None):
-    methods = {"exact": VPTree, "exact_slow": BallTree, "approx": NNDescent}
+def build_knn_index(
+    data, method, metric, metric_params=None, n_jobs=1, random_state=None
+):
+    methods = {"exact_alt": VPTree, "exact": BallTree, "approx": NNDescent}
     if isinstance(method, KNNIndex):
         knn_index = method
 
     elif method not in methods:
-        raise ValueError("Unrecognized nearest neighbor algorithm `%s`. "
-                         "Please choose one of the supported methods or "
-                         "provide a valid `KNNIndex` instance." % method)
+        raise ValueError(
+            "Unrecognized nearest neighbor algorithm `%s`. "
+            "Please choose one of the supported methods or "
+            "provide a valid `KNNIndex` instance." % method
+        )
     else:
-        if metric not in VALID_METRICS:
-            raise ValueError("Unrecognized distance metric `%s`. Please "
-                             "choose one of the supported methods." % metric)
-        knn_index = methods[method](metric=metric, metric_params=metric_params,
-                                    n_jobs=n_jobs, random_state=random_state)
+        knn_index = methods[method](
+            metric=metric,
+            metric_params=metric_params,
+            n_jobs=n_jobs,
+            random_state=random_state,
+        )
 
     knn_index.build(data)
 
@@ -252,13 +285,13 @@ def build_knn_index(data, method, metric, metric_params=None, n_jobs=1, random_s
 
 
 def joint_probabilities_nn(
-        neighbors,
-        distances,
-        perplexities,
-        symmetrize=True,
-        normalization="pair-wise",
-        n_reference_samples=None,
-        n_jobs=1,
+    neighbors,
+    distances,
+    perplexities,
+    symmetrize=True,
+    normalization="pair-wise",
+    n_reference_samples=None,
+    n_jobs=1,
 ):
     """Compute the conditional probability matrix P_{j|i}.
 
@@ -299,8 +332,10 @@ def joint_probabilities_nn(
         that a new sample would appear as a neighbor of a reference point.
 
     """
-    assert normalization in ("pair-wise", "point-wise"), \
-        f"Unrecognized normalization scheme `{normalization}`."
+    assert normalization in (
+        "pair-wise",
+        "point-wise",
+    ), f"Unrecognized normalization scheme `{normalization}`."
 
     n_samples, k_neighbors = distances.shape
 
@@ -309,12 +344,18 @@ def joint_probabilities_nn(
 
     # Compute asymmetric pairwise input similarities
     conditional_P = _tsne.compute_gaussian_perplexity(
-        distances, np.array(perplexities, dtype=float), num_threads=n_jobs)
+        distances, np.array(perplexities, dtype=float), num_threads=n_jobs
+    )
     conditional_P = np.asarray(conditional_P)
 
-    P = sp.csr_matrix((conditional_P.ravel(), neighbors.ravel(),
-                       range(0, n_samples * k_neighbors + 1, k_neighbors)),
-                      shape=(n_samples, n_reference_samples))
+    P = sp.csr_matrix(
+        (
+            conditional_P.ravel(),
+            neighbors.ravel(),
+            range(0, n_samples * k_neighbors + 1, k_neighbors),
+        ),
+        shape=(n_samples, n_reference_samples),
+    )
 
     # Symmetrize the probability matrix
     if symmetrize:
@@ -376,14 +417,28 @@ class FixedSigmaNN(Affinities):
 
     """
 
-    def __init__(self, data, sigma, k=30, method="approx", metric="euclidean",
-                 metric_params=None, symmetrize=True, n_jobs=1, random_state=None):
+    def __init__(
+        self,
+        data,
+        sigma,
+        k=30,
+        method="approx",
+        metric="euclidean",
+        metric_params=None,
+        symmetrize=True,
+        n_jobs=1,
+        random_state=None,
+    ):
         self.n_samples = n_samples = data.shape[0]
 
         if k >= self.n_samples:
-            raise ValueError("`k` (%d) cannot be larger than N-1 (%d)." % (k, self.n_samples))
+            raise ValueError(
+                "`k` (%d) cannot be larger than N-1 (%d)." % (k, self.n_samples)
+            )
 
-        knn_index = build_knn_index(data, method, metric, metric_params, n_jobs, random_state)
+        knn_index = build_knn_index(
+            data, method, metric, metric_params, n_jobs, random_state
+        )
         neighbors, distances = knn_index.query_train(data, k=k)
 
         self.knn_index = knn_index
@@ -392,9 +447,10 @@ class FixedSigmaNN(Affinities):
         conditional_P = np.exp(-distances ** 2 / (2 * sigma ** 2))
         conditional_P /= np.sum(conditional_P, axis=1)[:, np.newaxis]
 
-        P = sp.csr_matrix((conditional_P.ravel(), neighbors.ravel(),
-                           range(0, n_samples * k + 1, k)),
-                          shape=(n_samples, n_samples))
+        P = sp.csr_matrix(
+            (conditional_P.ravel(), neighbors.ravel(), range(0, n_samples * k + 1, k)),
+            shape=(n_samples, n_samples),
+        )
 
         # Symmetrize the probability matrix
         if symmetrize:
@@ -453,8 +509,10 @@ class FixedSigmaNN(Affinities):
         if k is None:
             k = self.k
         elif k >= n_reference_samples:
-            raise ValueError("`k` (%d) cannot be larger than the number of "
-                             "reference samples (%d)." % (k, self.n_samples))
+            raise ValueError(
+                "`k` (%d) cannot be larger than the number of "
+                "reference samples (%d)." % (k, self.n_samples)
+            )
 
         if sigma is None:
             sigma = self.sigma
@@ -468,9 +526,10 @@ class FixedSigmaNN(Affinities):
         # Convert weights to probabilities
         conditional_P /= np.sum(conditional_P, axis=1)[:, np.newaxis]
 
-        P = sp.csr_matrix((conditional_P.ravel(), neighbors.ravel(),
-                           range(0, n_samples * k + 1, k)),
-                          shape=(n_samples, n_reference_samples))
+        P = sp.csr_matrix(
+            (conditional_P.ravel(), neighbors.ravel(), range(0, n_samples * k + 1, k)),
+            shape=(n_samples, n_reference_samples),
+        )
 
         if return_distances:
             return P, neighbors, distances
@@ -526,8 +585,17 @@ class MultiscaleMixture(Affinities):
 
     """
 
-    def __init__(self, data, perplexities, method="approx", metric="euclidean",
-                 metric_params=None, symmetrize=True, n_jobs=1, random_state=None):
+    def __init__(
+        self,
+        data,
+        perplexities,
+        method="approx",
+        metric="euclidean",
+        metric_params=None,
+        symmetrize=True,
+        n_jobs=1,
+        random_state=None,
+    ):
         self.n_samples = data.shape[0]
 
         # We will compute the nearest neighbors to the max value of perplexity,
@@ -536,29 +604,40 @@ class MultiscaleMixture(Affinities):
         max_perplexity = np.max(perplexities)
         k_neighbors = min(self.n_samples - 1, int(3 * max_perplexity))
 
-        knn_index = build_knn_index(data, method, metric, metric_params, n_jobs, random_state)
+        knn_index = build_knn_index(
+            data, method, metric, metric_params, n_jobs, random_state
+        )
         self.__neighbors, self.__distances = knn_index.query_train(data, k=k_neighbors)
 
         self.knn_index = knn_index
-        self.P = self._calculate_P(self.__neighbors, self.__distances, perplexities,
-                                   symmetrize=symmetrize, n_jobs=n_jobs)
+        self.P = self._calculate_P(
+            self.__neighbors,
+            self.__distances,
+            perplexities,
+            symmetrize=symmetrize,
+            n_jobs=n_jobs,
+        )
 
         self.perplexities = perplexities
         self.n_jobs = n_jobs
 
     @staticmethod
     def _calculate_P(
+        neighbors,
+        distances,
+        perplexities,
+        symmetrize=True,
+        normalization="pair-wise",
+        n_reference_samples=None,
+        n_jobs=1,
+    ):
+        return joint_probabilities_nn(
             neighbors,
             distances,
             perplexities,
-            symmetrize=True,
-            normalization="pair-wise",
-            n_reference_samples=None,
-            n_jobs=1,
-    ):
-        return joint_probabilities_nn(
-            neighbors, distances, perplexities, symmetrize=symmetrize,
-            normalization=normalization, n_reference_samples=n_reference_samples,
+            symmetrize=symmetrize,
+            normalization=normalization,
+            n_reference_samples=n_reference_samples,
             n_jobs=n_jobs,
         )
 
@@ -591,13 +670,17 @@ class MultiscaleMixture(Affinities):
                 "The largest perplexity `%.2f` is larger than the initial one "
                 "used. This would need to recompute the nearest neighbors, "
                 "which is not efficient. Please create a new `%s` instance "
-                "with the increased perplexity." % (
-                    max_perplexity, self.__class__.__name__))
+                "with the increased perplexity."
+                % (max_perplexity, self.__class__.__name__)
+            )
 
         self.perplexities = new_perplexities
         self.P = self._calculate_P(
-            self.__neighbors[:, :k_neighbors], self.__distances[:, :k_neighbors],
-            self.perplexities, symmetrize=True, n_jobs=self.n_jobs,
+            self.__neighbors[:, :k_neighbors],
+            self.__distances[:, :k_neighbors],
+            self.perplexities,
+            symmetrize=True,
+            n_jobs=self.n_jobs,
         )
 
     def to_new(self, data, perplexities=None, return_distances=False):
@@ -650,8 +733,12 @@ class MultiscaleMixture(Affinities):
         neighbors, distances = self.knn_index.query(data, k_neighbors)
 
         P = self._calculate_P(
-            neighbors, distances, perplexities, symmetrize=False,
-            normalization="point-wise", n_reference_samples=self.n_samples,
+            neighbors,
+            distances,
+            perplexities,
+            symmetrize=False,
+            normalization="point-wise",
+            n_reference_samples=self.n_samples,
             n_jobs=self.n_jobs,
         )
 
@@ -674,13 +761,17 @@ class MultiscaleMixture(Affinities):
                 new_perplexity = (self.n_samples - 1) / 3
 
                 if new_perplexity in usable_perplexities:
-                    log.warning("Perplexity value %d is too high. Dropping "
-                                "because the max perplexity is already in the "
-                                "list." % perplexity)
+                    log.warning(
+                        "Perplexity value %d is too high. Dropping "
+                        "because the max perplexity is already in the "
+                        "list." % perplexity
+                    )
                 else:
                     usable_perplexities.append(new_perplexity)
-                    log.warning("Perplexity value %d is too high. Using "
-                                "perplexity %.2f instead" % (perplexity, new_perplexity))
+                    log.warning(
+                        "Perplexity value %d is too high. Using "
+                        "perplexity %.2f instead" % (perplexity, new_perplexity)
+                    )
             else:
                 usable_perplexities.append(perplexity)
 
@@ -737,21 +828,26 @@ class Multiscale(MultiscaleMixture):
 
     @staticmethod
     def _calculate_P(
-            neighbors,
-            distances,
-            perplexities,
-            symmetrize=True,
-            normalization="pair-wise",
-            n_reference_samples=None,
-            n_jobs=1,
+        neighbors,
+        distances,
+        perplexities,
+        symmetrize=True,
+        normalization="pair-wise",
+        n_reference_samples=None,
+        n_jobs=1,
     ):
         # Compute normalized probabilities for each perplexity
         partial_Ps = [
             joint_probabilities_nn(
-                neighbors, distances, [perplexity], symmetrize=symmetrize,
-                normalization=normalization, n_reference_samples=n_reference_samples,
+                neighbors,
+                distances,
+                [perplexity],
+                symmetrize=symmetrize,
+                normalization=normalization,
+                n_reference_samples=n_reference_samples,
                 n_jobs=n_jobs,
-            ) for perplexity in perplexities
+            )
+            for perplexity in perplexities
         ]
         # Sum them together, then normalize
         P = reduce(operator.add, partial_Ps, 0)
