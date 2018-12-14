@@ -488,7 +488,7 @@ class NNDescent(object):
             self._angular_trees = False
 
         self.rng_state = \
-            random_state.randint(INT32_MIN, INT32_MAX, 3).astype(np.int64)
+            self.random_state.randint(INT32_MIN, INT32_MAX, 3).astype(np.int64)
 
         indices = np.arange(data.shape[0])
 

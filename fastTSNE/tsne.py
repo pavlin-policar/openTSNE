@@ -325,8 +325,11 @@ class PartialTSNEEmbedding(np.ndarray):
             embedding = self
         else:
             embedding = PartialTSNEEmbedding(
-                np.copy(self), self.reference_embedding, self.P,
-                optimizer=self.optimizer.copy(), **self.gradient_descent_params,
+                np.copy(self),
+                self.reference_embedding,
+                self.P,
+                optimizer=self.optimizer.copy(),
+                **self.gradient_descent_params,
             )
 
         # If optimization parameters were passed to this funciton, prefer those
@@ -340,8 +343,10 @@ class PartialTSNEEmbedding(np.ndarray):
             # Run gradient descent with the embedding optimizer so gains are
             # properly updated and kept
             error, embedding = embedding.optimizer(
-                embedding=embedding, reference_embedding=self.reference_embedding,
-                P=self.P, **optim_params,
+                embedding=embedding,
+                reference_embedding=self.reference_embedding,
+                P=self.P,
+                **optim_params,
             )
 
         except OptimizationInterrupt as ex:
@@ -559,8 +564,11 @@ class TSNEEmbedding(np.ndarray):
             embedding = self
         else:
             embedding = TSNEEmbedding(
-                np.copy(self), self.affinities, random_state=self.random_state,
-                optimizer=self.optimizer.copy(), **self.gradient_descent_params,
+                np.copy(self),
+                self.affinities,
+                random_state=self.random_state,
+                optimizer=self.optimizer.copy(),
+                **self.gradient_descent_params,
             )
 
         # If optimization parameters were passed to this funciton, prefer those
@@ -574,7 +582,7 @@ class TSNEEmbedding(np.ndarray):
             # Run gradient descent with the embedding optimizer so gains are
             # properly updated and kept
             error, embedding = embedding.optimizer(
-                embedding=embedding, P=self.affinities.P, **optim_params,
+                embedding=embedding, P=self.affinities.P, **optim_params
             )
 
         except OptimizationInterrupt as ex:
@@ -661,13 +669,17 @@ class TSNEEmbedding(np.ndarray):
             )
 
         embedding = self.prepare_partial(
-            X, perplexity=perplexity, initialization=initialization,k=k,
+            X, perplexity=perplexity, initialization=initialization, k=k
         )
 
         try:
             embedding.optimize(
-                n_iter=n_iter, learning_rate=learning_rate, exaggeration=exaggeration,
-                momentum=momentum, inplace=True, propagate_exception=True,
+                n_iter=n_iter,
+                learning_rate=learning_rate,
+                exaggeration=exaggeration,
+                momentum=momentum,
+                inplace=True,
+                propagate_exception=True,
             )
 
         except OptimizationInterrupt as ex:
@@ -709,7 +721,7 @@ class TSNEEmbedding(np.ndarray):
 
         """
         P, neighbors, distances = self.affinities.to_new(
-            X, return_distances=True, **affinity_params,
+            X, return_distances=True, **affinity_params
         )
 
         # If initial positions are given in an array, use a copy of that
@@ -724,15 +736,17 @@ class TSNEEmbedding(np.ndarray):
             embedding = initialization_scheme.random(X, self.shape[1], self.random_state)
         elif initialization == "weighted":
             embedding = initialization_scheme.weighted_mean(
-                X, self, neighbors[:, :k], distances[:, :k],
+                X, self, neighbors[:, :k], distances[:, :k]
             )
         elif initialization == "median":
             embedding = initialization_scheme.median(self, neighbors[:, :k])
         else:
-            raise ValueError("Unrecognized initialization scheme `%s`." % initialization)
+            raise ValueError(f"Unrecognized initialization scheme `{initialization}`.")
 
         return PartialTSNEEmbedding(
-            embedding, reference_embedding=self, P=P,
+            embedding,
+            reference_embedding=self,
+            P=P,
             **self.gradient_descent_params,
         )
 
@@ -913,15 +927,21 @@ class TSNE(BaseEstimator):
             # Early exaggeration with lower momentum to allow points to find more
             # easily move around and find their neighbors
             embedding.optimize(
-                n_iter=self.early_exaggeration_iter, exaggeration=self.early_exaggeration,
-                momentum=self.initial_momentum, inplace=True, propagate_exception=True,
+                n_iter=self.early_exaggeration_iter,
+                exaggeration=self.early_exaggeration,
+                momentum=self.initial_momentum,
+                inplace=True,
+                propagate_exception=True,
             )
 
             # Restore actual affinity probabilities and increase momentum to get
             # final, optimized embedding
             embedding.optimize(
-                n_iter=self.n_iter, exaggeration=self.exaggeration,
-                momentum=self.final_momentum, inplace=True, propagate_exception=True,
+                n_iter=self.n_iter,
+                exaggeration=self.exaggeration,
+                momentum=self.final_momentum,
+                inplace=True,
+                propagate_exception=True,
             )
 
         except OptimizationInterrupt as ex:
@@ -961,18 +981,24 @@ class TSNE(BaseEstimator):
 
         elif self.initialization == "pca":
             embedding = initialization_scheme.pca(
-                X, self.n_components, random_state=self.random_state,
+                X, self.n_components, random_state=self.random_state
             )
         elif self.initialization == "random":
             embedding = initialization_scheme.random(
-                X, self.n_components, random_state=self.random_state,
+                X, self.n_components, random_state=self.random_state
             )
         else:
-            raise ValueError("Unrecognized initialization scheme `%s`." % self.initialization)
+            raise ValueError(
+                f"Unrecognized initialization scheme `{self.initialization}`."
+            )
 
         affinities = PerplexityBasedNN(
-            X, self.perplexity, method=self.neighbors_method,
-            metric=self.metric, metric_params=self.metric_params, n_jobs=self.n_jobs,
+            X,
+            self.perplexity,
+            method=self.neighbors_method,
+            metric=self.metric,
+            metric_params=self.metric_params,
+            n_jobs=self.n_jobs,
             random_state=self.random_state,
         )
 
@@ -999,7 +1025,12 @@ class TSNE(BaseEstimator):
             "callbacks_every_iters": self.callbacks_every_iters,
         }
 
-        return TSNEEmbedding(embedding, affinities, self.random_state, **gradient_descent_params)
+        return TSNEEmbedding(
+            embedding,
+            affinities=affinities,
+            random_state=self.random_state,
+            **gradient_descent_params,
+        )
 
 
 def kl_divergence_bh(embedding, P, dof, bh_params, reference_embedding=None,
