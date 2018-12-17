@@ -9,16 +9,16 @@ import numpy as np
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
 
-import fastTSNE
-from fastTSNE import affinity, initialization
-from fastTSNE.affinity import PerplexityBasedNN
-from fastTSNE.nearest_neighbors import NNDescent
-from fastTSNE.tsne import kl_divergence_bh, kl_divergence_fft
+import openTSNE
+from openTSNE import affinity, initialization
+from openTSNE.affinity import PerplexityBasedNN
+from openTSNE.nearest_neighbors import NNDescent
+from openTSNE.tsne import kl_divergence_bh, kl_divergence_fft
 
 np.random.seed(42)
 affinity.log.setLevel(logging.ERROR)
 
-TSNE = partial(fastTSNE.TSNE, neighbors="exact", negative_gradient_method="bh")
+TSNE = partial(openTSNE.TSNE, neighbors="exact", negative_gradient_method="bh")
 
 
 def check_params(params: dict) -> Callable:
@@ -105,7 +105,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         "exaggeration": [None, 2],
         "final_momentum": [0.2, 0.5, 0.8],
     }})
-    @patch("fastTSNE.tsne.gradient_descent.__call__")
+    @patch("openTSNE.tsne.gradient_descent.__call__")
     def test_constructor(self, param_name, param_value, gradient_descent):
         # type: (str, Any, MagicMock) -> None
         # Make sure mock still conforms to signature
@@ -134,7 +134,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         "exaggeration": [None, 2, 5],
         "momentum": [0.2, 0.5, 0.8],
     }})
-    @patch("fastTSNE.tsne.gradient_descent.__call__")
+    @patch("openTSNE.tsne.gradient_descent.__call__")
     def test_embedding_optimize(self, param_name, param_value, gradient_descent):
         # type: (str, Any, MagicMock) -> None
         # Make sure mock still conforms to signature
@@ -154,7 +154,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         "n_iter": [50, 100],
         "momentum": [0.2, 0.5, 0.8],
     })
-    @patch("fastTSNE.tsne.gradient_descent.__call__")
+    @patch("openTSNE.tsne.gradient_descent.__call__")
     def test_embedding_transform(self, param_name, param_value, gradient_descent):
         # type: (str, Any, MagicMock) -> None
         # Make sure mock still conforms to signature
@@ -178,7 +178,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         "exaggeration": [None, 2, 5],
         "momentum": [0.2, 0.5, 0.8],
     }})
-    @patch("fastTSNE.tsne.gradient_descent.__call__")
+    @patch("openTSNE.tsne.gradient_descent.__call__")
     def test_partial_embedding_optimize(self, param_name, param_value, gradient_descent):
         # type: (str, Any, MagicMock) -> None
         # Make sure mock still conforms to signature
@@ -199,7 +199,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         check_call_contains_kwargs(gradient_descent.mock_calls[0], params)
 
     @check_params({"metric": set(NNDescent.VALID_METRICS) - {"mahalanobis"}})
-    @patch("fastTSNE.pynndescent.NNDescent")
+    @patch("openTSNE.pynndescent.NNDescent")
     def test_nndescent_distances(self, param_name, metric, nndescent: MagicMock):
         """Distance metrics should be properly passed down to NN descent"""
         assert param_name == "metric"
@@ -217,7 +217,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         self.assertEqual(nndescent.call_count, 1)
         check_call_contains_kwargs(nndescent.mock_calls[0], {"metric": metric})
 
-    @patch("fastTSNE.pynndescent.NNDescent")
+    @patch("openTSNE.pynndescent.NNDescent")
     def test_nndescent_mahalanobis_distance(self, nndescent: MagicMock):
         """Distance metrics and additional params should be correctly passed down to NN descent"""
         metric = "mahalanobis"
@@ -411,7 +411,7 @@ class TSNEInitialization(unittest.TestCase):
         """Initializations should be deterministic."""
         x_train, x_test = train_test_split(self.iris, test_size=0.33, random_state=42)
 
-        embedding = fastTSNE.TSNE(
+        embedding = openTSNE.TSNE(
             early_exaggeration_iter=50,
             n_iter=50,
             neighbors="exact",
@@ -429,7 +429,7 @@ class TSNEInitialization(unittest.TestCase):
         """Transform with Barnes-Hut optimization should be deterministic."""
         x_train, x_test = train_test_split(self.iris, test_size=0.33, random_state=42)
 
-        embedding = fastTSNE.TSNE(
+        embedding = openTSNE.TSNE(
             early_exaggeration_iter=10,
             n_iter=10,
             neighbors="exact",
@@ -451,7 +451,7 @@ class TSNEInitialization(unittest.TestCase):
         """Transform with interpolation based optimization should be deterministic."""
         x_train, x_test = train_test_split(self.iris, test_size=0.33, random_state=42)
 
-        embedding = fastTSNE.TSNE(
+        embedding = openTSNE.TSNE(
             early_exaggeration_iter=10,
             n_iter=10,
             neighbors="exact",
@@ -519,12 +519,12 @@ class TestRandomState(unittest.TestCase):
             "Same random state produced different partial embeddings",
         )
 
-    @patch("fastTSNE.initialization.random", wraps=fastTSNE.initialization.random)
-    @patch("fastTSNE.nearest_neighbors.BallTree", wraps=fastTSNE.nearest_neighbors.BallTree)
+    @patch("openTSNE.initialization.random", wraps=openTSNE.initialization.random)
+    @patch("openTSNE.nearest_neighbors.BallTree", wraps=openTSNE.nearest_neighbors.BallTree)
     def test_random_state_parameter_is_propagated_random_init_exact(self, init, neighbors):
         random_state = 1
 
-        tsne = fastTSNE.TSNE(
+        tsne = openTSNE.TSNE(
             neighbors="exact",
             initialization="random",
             random_state=random_state,
@@ -537,12 +537,12 @@ class TestRandomState(unittest.TestCase):
         neighbors.assert_called_once()
         check_mock_called_with_kwargs(neighbors, {"random_state": random_state})
 
-    @patch("fastTSNE.initialization.pca", wraps=fastTSNE.initialization.pca)
-    @patch("fastTSNE.nearest_neighbors.NNDescent", wraps=fastTSNE.nearest_neighbors.NNDescent)
+    @patch("openTSNE.initialization.pca", wraps=openTSNE.initialization.pca)
+    @patch("openTSNE.nearest_neighbors.NNDescent", wraps=openTSNE.nearest_neighbors.NNDescent)
     def test_random_state_parameter_is_propagated_pca_init_approx(self, init, neighbors):
         random_state = 1
 
-        tsne = fastTSNE.TSNE(
+        tsne = openTSNE.TSNE(
             neighbors="approx",
             initialization="pca",
             random_state=random_state,
@@ -560,14 +560,14 @@ class TestDefaultParameterSettings(unittest.TestCase):
     def test_default_params_simple_vs_complex_flow(self):
         # Relevant affinity parameters are passed to the affinity object
         mismatching = get_mismatching_default_values(
-            fastTSNE.TSNE,
+            openTSNE.TSNE,
             PerplexityBasedNN,
             {"neighbors": "method"},
         )
         self.assertEqual(mismatching, [])
 
         assert len(
-            get_shared_parameters(fastTSNE.TSNE, fastTSNE.tsne.gradient_descent.__call__)
+            get_shared_parameters(openTSNE.TSNE, openTSNE.tsne.gradient_descent.__call__)
         ) > 0, \
             "`TSNE` and `gradient_descent` have no shared parameters. Have you " \
             "changed the signature or usage?"
@@ -575,8 +575,8 @@ class TestDefaultParameterSettings(unittest.TestCase):
         # The relevant gradient descent parameters are passed down directly to
         # `gradient_descent`
         mismatching = get_mismatching_default_values(
-            fastTSNE.TSNE,
-            fastTSNE.tsne.gradient_descent.__call__,
+            openTSNE.TSNE,
+            openTSNE.tsne.gradient_descent.__call__,
         )
         mismatching = list(filter(lambda x: x[0] not in ("n_iter",), mismatching))
         self.assertEqual(mismatching, [])
@@ -725,9 +725,9 @@ class TestAffinityIntegration(unittest.TestCase):
         cls.x_test = np.random.normal(100, 50, (25, 4))
 
     def test_transform_with_standard_affinity(self):
-        init = fastTSNE.initialization.random(self.x)
-        aff = fastTSNE.affinity.PerplexityBasedNN(self.x, 5, method="exact")
-        embedding = fastTSNE.TSNEEmbedding(init, aff, negative_gradient_method="bh")
+        init = openTSNE.initialization.random(self.x)
+        aff = openTSNE.affinity.PerplexityBasedNN(self.x, 5, method="exact")
+        embedding = openTSNE.TSNEEmbedding(init, aff, negative_gradient_method="bh")
         embedding.optimize(100, inplace=True)
 
         # This should not raise an error
@@ -736,9 +736,9 @@ class TestAffinityIntegration(unittest.TestCase):
     def test_transform_with_nonstandard_affinity(self):
         """Should raise an informative error when a non-standard affinity is used
         with `transform`."""
-        init = fastTSNE.initialization.random(self.x)
-        aff = fastTSNE.affinity.Multiscale(self.x, [2, 5], method="exact")
-        embedding = fastTSNE.TSNEEmbedding(init, aff, negative_gradient_method="bh")
+        init = openTSNE.initialization.random(self.x)
+        aff = openTSNE.affinity.Multiscale(self.x, [2, 5], method="exact")
+        embedding = openTSNE.TSNEEmbedding(init, aff, negative_gradient_method="bh")
         embedding.optimize(100, inplace=True)
 
         with self.assertRaises(TypeError):

@@ -1,5 +1,5 @@
 Initialization
 ==============
 
-.. automodule:: fastTSNE.initialization
+.. automodule:: openTSNE.initialization
     :members: pca, random

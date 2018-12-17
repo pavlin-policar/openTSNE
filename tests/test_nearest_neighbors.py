@@ -1,10 +1,10 @@
-import fastTSNE
+import openTSNE
 import unittest
 from unittest.mock import patch
 
 import numpy as np
 
-from fastTSNE import nearest_neighbors
+from openTSNE import nearest_neighbors
 from .test_tsne import check_mock_called_with_kwargs
 
 
@@ -74,7 +74,7 @@ class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
         np.testing.assert_equal(indices1, indices2)
         np.testing.assert_equal(distances1, distances2)
 
-    @patch("fastTSNE.pynndescent.NNDescent", wraps=fastTSNE.pynndescent.NNDescent)
+    @patch("openTSNE.pynndescent.NNDescent", wraps=openTSNE.pynndescent.NNDescent)
     def test_random_state_being_passed_through(self, nndescent):
         random_state = 1
         knn_index = nearest_neighbors.NNDescent("euclidean", random_state=random_state)

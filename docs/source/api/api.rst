@@ -8,6 +8,6 @@ API Reference
     affinity
     callbacks
 
-.. automodule:: fastTSNE
+.. automodule:: openTSNE
     :members: TSNE, TSNEEmbedding, PartialTSNEEmbedding, OptimizationInterrupt
     :undoc-members:

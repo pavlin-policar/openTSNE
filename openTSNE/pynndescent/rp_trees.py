@@ -6,7 +6,7 @@ import numpy as np
 
 from collections import namedtuple
 
-from fastTSNE.pynndescent.utils import tau_rand_int, norm
+from openTSNE.pynndescent.utils import tau_rand_int, norm
 
 
 RandomProjectionTreeNode = namedtuple(

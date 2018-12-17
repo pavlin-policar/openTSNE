@@ -12,12 +12,12 @@
             "fftw",
             "math"
         ],
-        "name": "fastTSNE._matrix_mul.matrix_mul",
+        "name": "openTSNE._matrix_mul.matrix_mul",
         "sources": [
-            "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx"
+            "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx"
         ]
     },
-    "module_name": "fastTSNE._matrix_mul.matrix_mul"
+    "module_name": "openTSNE._matrix_mul.matrix_mul"
 }
 END: Cython Metadata */
 
@@ -580,8 +580,8 @@ static CYTHON_INLINE float __PYX_NAN() {
   #endif
 #endif
 
-#define __PYX_HAVE__fastTSNE___matrix_mul__matrix_mul
-#define __PYX_HAVE_API__fastTSNE___matrix_mul__matrix_mul
+#define __PYX_HAVE__openTSNE___matrix_mul__matrix_mul
+#define __PYX_HAVE_API__openTSNE___matrix_mul__matrix_mul
 /* Early includes */
 #include <string.h>
 #include <stdio.h>
@@ -816,7 +816,7 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx",
+  "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx",
   "__init__.pxd",
   "stringsource",
   "type.pxd",
@@ -2199,9 +2199,9 @@ static PyObject *__pyx_memoryview_assign_item_from_object(struct __pyx_memoryvie
 static PyObject *__pyx_memoryviewslice_convert_item_to_object(struct __pyx_memoryviewslice_obj *__pyx_v_self, char *__pyx_v_itemp); /* proto*/
 static PyObject *__pyx_memoryviewslice_assign_item_from_object(struct __pyx_memoryviewslice_obj *__pyx_v_self, char *__pyx_v_itemp, PyObject *__pyx_v_value); /* proto*/
 
-/* Module declarations from 'fastTSNE._matrix_mul' */
+/* Module declarations from 'openTSNE._matrix_mul' */
 
-/* Module declarations from 'fastTSNE' */
+/* Module declarations from 'openTSNE' */
 
 /* Module declarations from 'cpython.buffer' */
 
@@ -2232,7 +2232,7 @@ static PyTypeObject *__pyx_ptype_5numpy_ndarray = 0;
 static PyTypeObject *__pyx_ptype_5numpy_ufunc = 0;
 static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *, char *, char *, int *); /*proto*/
 
-/* Module declarations from 'fastTSNE._matrix_mul.matrix_mul' */
+/* Module declarations from 'openTSNE._matrix_mul.matrix_mul' */
 static PyTypeObject *__pyx_array_type = 0;
 static PyTypeObject *__pyx_MemviewEnum_type = 0;
 static PyTypeObject *__pyx_memoryview_type = 0;
@@ -2279,11 +2279,11 @@ static void __pyx_memoryview__slice_assign_scalar(char *, Py_ssize_t *, Py_ssize
 static PyObject *__pyx_unpickle_Enum__set_state(struct __pyx_MemviewEnum_obj *, PyObject *); /*proto*/
 static __Pyx_TypeInfo __Pyx_TypeInfo_double = { "double", NULL, sizeof(double), { 0 }, 0, 'R', 0, 0 };
 static __Pyx_TypeInfo __Pyx_TypeInfo___pyx_t_double_complex = { "double complex", NULL, sizeof(__pyx_t_double_complex), { 0 }, 0, 'C', 0, 0 };
-#define __Pyx_MODULE_NAME "fastTSNE._matrix_mul.matrix_mul"
-extern int __pyx_module_is_main_fastTSNE___matrix_mul__matrix_mul;
-int __pyx_module_is_main_fastTSNE___matrix_mul__matrix_mul = 0;
+#define __Pyx_MODULE_NAME "openTSNE._matrix_mul.matrix_mul"
+extern int __pyx_module_is_main_openTSNE___matrix_mul__matrix_mul;
+int __pyx_module_is_main_openTSNE___matrix_mul__matrix_mul = 0;
 
-/* Implementation of 'fastTSNE._matrix_mul.matrix_mul' */
+/* Implementation of 'openTSNE._matrix_mul.matrix_mul' */
 static PyObject *__pyx_builtin_range;
 static PyObject *__pyx_builtin_ValueError;
 static PyObject *__pyx_builtin_RuntimeError;
@@ -2587,7 +2587,7 @@ static PyObject *__pyx_tuple__37;
 static PyObject *__pyx_codeobj__31;
 /* Late includes */
 
-/* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":32
+/* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":32
  * 
  * 
  * cdef double[:, ::1] matrix_multiply_fft_1d(             # <<<<<<<<<<<<<<
@@ -2595,7 +2595,7 @@ static PyObject *__pyx_codeobj__31;
  *     double[:, ::1] w_coefficients,
  */
 
-static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_multiply_fft_1d(__Pyx_memviewslice __pyx_v_kernel_tilde, __Pyx_memviewslice __pyx_v_w_coefficients) {
+static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_multiply_fft_1d(__Pyx_memviewslice __pyx_v_kernel_tilde, __Pyx_memviewslice __pyx_v_w_coefficients) {
   Py_ssize_t __pyx_v_n_interpolation_points_1d;
   Py_ssize_t __pyx_v_n_terms;
   Py_ssize_t __pyx_v_n_fft_coeffs;
@@ -2643,7 +2643,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __Pyx_RefNannySetupContext("matrix_multiply_fft_1d", 0);
   __Pyx_TraceCall("matrix_multiply_fft_1d", __pyx_f[0], 32, 0, __PYX_ERR(0, 32, __pyx_L1_error));
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":58
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":58
  *     """
  *     cdef:
  *         Py_ssize_t n_interpolation_points_1d = w_coefficients.shape[0]             # <<<<<<<<<<<<<<
@@ -2652,7 +2652,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_n_interpolation_points_1d = (__pyx_v_w_coefficients.shape[0]);
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":59
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":59
  *     cdef:
  *         Py_ssize_t n_interpolation_points_1d = w_coefficients.shape[0]
  *         Py_ssize_t n_terms = w_coefficients.shape[1]             # <<<<<<<<<<<<<<
@@ -2661,7 +2661,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_n_terms = (__pyx_v_w_coefficients.shape[1]);
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":60
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":60
  *         Py_ssize_t n_interpolation_points_1d = w_coefficients.shape[0]
  *         Py_ssize_t n_terms = w_coefficients.shape[1]
  *         Py_ssize_t n_fft_coeffs = kernel_tilde.shape[0]             # <<<<<<<<<<<<<<
@@ -2670,7 +2670,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_n_fft_coeffs = (__pyx_v_kernel_tilde.shape[0]);
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":62
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":62
  *         Py_ssize_t n_fft_coeffs = kernel_tilde.shape[0]
  * 
  *         double[:, ::1] y_tilde_values = np.empty((n_interpolation_points_1d, n_terms), dtype=float)             # <<<<<<<<<<<<<<
@@ -2713,7 +2713,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_t_5.memview = NULL;
   __pyx_t_5.data = NULL;
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":64
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":64
  *         double[:, ::1] y_tilde_values = np.empty((n_interpolation_points_1d, n_terms), dtype=float)
  * 
  *         complex[::1] fft_kernel_tilde = np.empty(n_fft_coeffs, dtype=complex)             # <<<<<<<<<<<<<<
@@ -2746,7 +2746,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":65
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":65
  * 
  *         complex[::1] fft_kernel_tilde = np.empty(n_fft_coeffs, dtype=complex)
  *         complex[::1] fft_w_coeffs = np.empty(n_fft_coeffs, dtype=complex)             # <<<<<<<<<<<<<<
@@ -2779,7 +2779,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":71
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":71
  *         # changed during the IDFT, so it's faster to use two buffers, at the
  *         # cost of some memory
  *         double[::1] fft_in_buffer = np.zeros(n_fft_coeffs, dtype=float)             # <<<<<<<<<<<<<<
@@ -2812,7 +2812,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":72
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":72
  *         # cost of some memory
  *         double[::1] fft_in_buffer = np.zeros(n_fft_coeffs, dtype=float)
  *         double[::1] fft_out_buffer = np.zeros(n_fft_coeffs, dtype=float)             # <<<<<<<<<<<<<<
@@ -2845,7 +2845,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":80
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":80
  *     plan_dft = fftw_plan_dft_r2c_1d(
  *         n_fft_coeffs,
  *         &kernel_tilde[0], <fftw_complex *>(&fft_kernel_tilde[0]),             # <<<<<<<<<<<<<<
@@ -2855,7 +2855,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_t_8 = 0;
   __pyx_t_9 = 0;
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":78
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":78
  *     # Compute the FFT of the kernel vector
  *     cdef fftw_plan plan_dft, plan_idft
  *     plan_dft = fftw_plan_dft_r2c_1d(             # <<<<<<<<<<<<<<
@@ -2864,7 +2864,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_plan_dft = fftw_plan_dft_r2c_1d(__pyx_v_n_fft_coeffs, (&(*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_kernel_tilde.data) + __pyx_t_8)) )))), ((fftw_complex *)(&(*((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_kernel_tilde.data) + __pyx_t_9)) ))))), FFTW_ESTIMATE);
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":83
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":83
  *         FFTW_ESTIMATE,
  *     )
  *     fftw_execute(plan_dft)             # <<<<<<<<<<<<<<
@@ -2873,7 +2873,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   fftw_execute(__pyx_v_plan_dft);
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":84
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":84
  *     )
  *     fftw_execute(plan_dft)
  *     fftw_destroy_plan(plan_dft)             # <<<<<<<<<<<<<<
@@ -2882,7 +2882,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   fftw_destroy_plan(__pyx_v_plan_dft);
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":88
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":88
  *     plan_dft = fftw_plan_dft_r2c_1d(
  *         n_fft_coeffs,
  *         &fft_in_buffer[0], <fftw_complex *>(&fft_w_coeffs[0]),             # <<<<<<<<<<<<<<
@@ -2892,7 +2892,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_t_10 = 0;
   __pyx_t_11 = 0;
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":86
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":86
  *     fftw_destroy_plan(plan_dft)
  * 
  *     plan_dft = fftw_plan_dft_r2c_1d(             # <<<<<<<<<<<<<<
@@ -2901,7 +2901,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_plan_dft = fftw_plan_dft_r2c_1d(__pyx_v_n_fft_coeffs, (&(*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_fft_in_buffer.data) + __pyx_t_10)) )))), ((fftw_complex *)(&(*((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_w_coeffs.data) + __pyx_t_11)) ))))), FFTW_ESTIMATE);
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":93
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":93
  *     plan_idft = fftw_plan_dft_c2r_1d(
  *         n_fft_coeffs,
  *         <fftw_complex *>(&fft_w_coeffs[0]), &fft_out_buffer[0],             # <<<<<<<<<<<<<<
@@ -2911,7 +2911,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_t_12 = 0;
   __pyx_t_13 = 0;
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":91
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":91
  *         FFTW_ESTIMATE,
  *     )
  *     plan_idft = fftw_plan_dft_c2r_1d(             # <<<<<<<<<<<<<<
@@ -2920,7 +2920,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_plan_idft = fftw_plan_dft_c2r_1d(__pyx_v_n_fft_coeffs, ((fftw_complex *)(&(*((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_w_coeffs.data) + __pyx_t_12)) ))))), (&(*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_fft_out_buffer.data) + __pyx_t_13)) )))), FFTW_ESTIMATE);
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":97
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":97
  *     )
  * 
  *     for d in range(n_terms):             # <<<<<<<<<<<<<<
@@ -2932,7 +2932,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   for (__pyx_t_16 = 0; __pyx_t_16 < __pyx_t_15; __pyx_t_16+=1) {
     __pyx_v_d = __pyx_t_16;
 
-    /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":98
+    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":98
  * 
  *     for d in range(n_terms):
  *         for i in range(n_interpolation_points_1d):             # <<<<<<<<<<<<<<
@@ -2944,7 +2944,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
     for (__pyx_t_19 = 0; __pyx_t_19 < __pyx_t_18; __pyx_t_19+=1) {
       __pyx_v_i = __pyx_t_19;
 
-      /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":99
+      /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":99
  *     for d in range(n_terms):
  *         for i in range(n_interpolation_points_1d):
  *             fft_in_buffer[i] = w_coefficients[i, d]             # <<<<<<<<<<<<<<
@@ -2957,7 +2957,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
       *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_fft_in_buffer.data) + __pyx_t_22)) )) = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_w_coefficients.data + __pyx_t_20 * __pyx_v_w_coefficients.strides[0]) )) + __pyx_t_21)) )));
     }
 
-    /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":101
+    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":101
  *             fft_in_buffer[i] = w_coefficients[i, d]
  * 
  *         fftw_execute(plan_dft)             # <<<<<<<<<<<<<<
@@ -2966,7 +2966,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
     fftw_execute(__pyx_v_plan_dft);
 
-    /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":104
+    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":104
  * 
  *         # Take the Hadamard product of two complex vectors
  *         for i in range(n_fft_coeffs):             # <<<<<<<<<<<<<<
@@ -2978,7 +2978,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
     for (__pyx_t_19 = 0; __pyx_t_19 < __pyx_t_18; __pyx_t_19+=1) {
       __pyx_v_i = __pyx_t_19;
 
-      /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":105
+      /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":105
  *         # Take the Hadamard product of two complex vectors
  *         for i in range(n_fft_coeffs):
  *             fft_w_coeffs[i] = fft_w_coeffs[i] * fft_kernel_tilde[i]             # <<<<<<<<<<<<<<
@@ -2991,7 +2991,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
       *((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_w_coeffs.data) + __pyx_t_25)) )) = __Pyx_c_prod_double((*((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_w_coeffs.data) + __pyx_t_23)) ))), (*((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_kernel_tilde.data) + __pyx_t_24)) ))));
     }
 
-    /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":107
+    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":107
  *             fft_w_coeffs[i] = fft_w_coeffs[i] * fft_kernel_tilde[i]
  * 
  *         fftw_execute(plan_idft)             # <<<<<<<<<<<<<<
@@ -3000,7 +3000,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
     fftw_execute(__pyx_v_plan_idft);
 
-    /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":109
+    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":109
  *         fftw_execute(plan_idft)
  * 
  *         for i in range(n_interpolation_points_1d):             # <<<<<<<<<<<<<<
@@ -3012,7 +3012,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
     for (__pyx_t_19 = 0; __pyx_t_19 < __pyx_t_18; __pyx_t_19+=1) {
       __pyx_v_i = __pyx_t_19;
 
-      /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":113
+      /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":113
  *             # ourselves. This is done by multiplying the result with the number
  *             #  of points in the input
  *             y_tilde_values[i, d] = fft_out_buffer[n_interpolation_points_1d + i].real / n_fft_coeffs             # <<<<<<<<<<<<<<
@@ -3039,7 +3039,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
     }
   }
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":115
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":115
  *             y_tilde_values[i, d] = fft_out_buffer[n_interpolation_points_1d + i].real / n_fft_coeffs
  * 
  *     fftw_destroy_plan(plan_dft)             # <<<<<<<<<<<<<<
@@ -3048,7 +3048,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   fftw_destroy_plan(__pyx_v_plan_dft);
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":116
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":116
  * 
  *     fftw_destroy_plan(plan_dft)
  *     fftw_destroy_plan(plan_idft)             # <<<<<<<<<<<<<<
@@ -3057,7 +3057,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   fftw_destroy_plan(__pyx_v_plan_idft);
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":118
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":118
  *     fftw_destroy_plan(plan_idft)
  * 
  *     return y_tilde_values             # <<<<<<<<<<<<<<
@@ -3068,7 +3068,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_r = __pyx_v_y_tilde_values;
   goto __pyx_L0;
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":32
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":32
  * 
  * 
  * cdef double[:, ::1] matrix_multiply_fft_1d(             # <<<<<<<<<<<<<<
@@ -3087,7 +3087,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __PYX_XDEC_MEMVIEW(&__pyx_t_7, 1);
   __pyx_r.data = NULL;
   __pyx_r.memview = NULL;
-  __Pyx_AddTraceback("fastTSNE._matrix_mul.matrix_mul.matrix_multiply_fft_1d", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("openTSNE._matrix_mul.matrix_mul.matrix_multiply_fft_1d", __pyx_clineno, __pyx_lineno, __pyx_filename);
 
   goto __pyx_L2;
   __pyx_L0:;
@@ -3105,7 +3105,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   return __pyx_r;
 }
 
-/* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":121
+/* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":121
  * 
  * 
  * cdef double[:, ::1] matrix_multiply_fft_2d(             # <<<<<<<<<<<<<<
@@ -3113,7 +3113,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  *     double[:, ::1] w_coefficients,
  */
 
-static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_multiply_fft_2d(__Pyx_memviewslice __pyx_v_kernel_tilde, __Pyx_memviewslice __pyx_v_w_coefficients) {
+static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_multiply_fft_2d(__Pyx_memviewslice __pyx_v_kernel_tilde, __Pyx_memviewslice __pyx_v_w_coefficients) {
   Py_ssize_t __pyx_v_total_interpolation_points;
   Py_ssize_t __pyx_v_n_terms;
   Py_ssize_t __pyx_v_n_fft_coeffs;
@@ -3171,7 +3171,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __Pyx_RefNannySetupContext("matrix_multiply_fft_2d", 0);
   __Pyx_TraceCall("matrix_multiply_fft_2d", __pyx_f[0], 121, 0, __PYX_ERR(0, 121, __pyx_L1_error));
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":147
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":147
  *     """
  *     cdef:
  *         Py_ssize_t total_interpolation_points = w_coefficients.shape[0]             # <<<<<<<<<<<<<<
@@ -3180,7 +3180,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_total_interpolation_points = (__pyx_v_w_coefficients.shape[0]);
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":148
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":148
  *     cdef:
  *         Py_ssize_t total_interpolation_points = w_coefficients.shape[0]
  *         Py_ssize_t n_terms = w_coefficients.shape[1]             # <<<<<<<<<<<<<<
@@ -3189,7 +3189,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_n_terms = (__pyx_v_w_coefficients.shape[1]);
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":149
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":149
  *         Py_ssize_t total_interpolation_points = w_coefficients.shape[0]
  *         Py_ssize_t n_terms = w_coefficients.shape[1]
  *         Py_ssize_t n_fft_coeffs = kernel_tilde.shape[0]             # <<<<<<<<<<<<<<
@@ -3198,7 +3198,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_n_fft_coeffs = (__pyx_v_kernel_tilde.shape[0]);
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":150
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":150
  *         Py_ssize_t n_terms = w_coefficients.shape[1]
  *         Py_ssize_t n_fft_coeffs = kernel_tilde.shape[0]
  *         Py_ssize_t n_interpolation_points_1d = n_fft_coeffs / 2             # <<<<<<<<<<<<<<
@@ -3207,7 +3207,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_n_interpolation_points_1d = (__pyx_v_n_fft_coeffs / 2);
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":152
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":152
  *         Py_ssize_t n_interpolation_points_1d = n_fft_coeffs / 2
  * 
  *         double[:, ::1] y_tilde_values = np.empty((total_interpolation_points, n_terms))             # <<<<<<<<<<<<<<
@@ -3283,7 +3283,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":155
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":155
  * 
  *         fftw_plan plan_dft, plan_idft
  *         complex[::1] fft_w_coefficients = np.empty(n_fft_coeffs * (n_fft_coeffs / 2 + 1), dtype=complex)             # <<<<<<<<<<<<<<
@@ -3316,7 +3316,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":156
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":156
  *         fftw_plan plan_dft, plan_idft
  *         complex[::1] fft_w_coefficients = np.empty(n_fft_coeffs * (n_fft_coeffs / 2 + 1), dtype=complex)
  *         complex[::1] fft_kernel_tilde = np.empty(n_fft_coeffs * (n_fft_coeffs / 2 + 1), dtype=complex)             # <<<<<<<<<<<<<<
@@ -3349,7 +3349,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":162
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":162
  *         # changed during the IDFT, so it's faster to use two buffers, at the
  *         # cost of some memory
  *         double[:, ::1] fft_in_buffer = np.zeros((n_fft_coeffs, n_fft_coeffs))             # <<<<<<<<<<<<<<
@@ -3425,7 +3425,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":163
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":163
  *         # cost of some memory
  *         double[:, ::1] fft_in_buffer = np.zeros((n_fft_coeffs, n_fft_coeffs))
  *         double[:, ::1] fft_out_buffer = np.zeros((n_fft_coeffs, n_fft_coeffs))             # <<<<<<<<<<<<<<
@@ -3501,7 +3501,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":169
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":169
  *     plan_dft = fftw_plan_dft_r2c_2d(
  *         n_fft_coeffs, n_fft_coeffs,
  *         &kernel_tilde[0, 0], <fftw_complex *>(&fft_kernel_tilde[0]),             # <<<<<<<<<<<<<<
@@ -3512,7 +3512,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_t_9 = 0;
   __pyx_t_10 = 0;
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":167
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":167
  *         Py_ssize_t d, i, j, idx
  * 
  *     plan_dft = fftw_plan_dft_r2c_2d(             # <<<<<<<<<<<<<<
@@ -3521,7 +3521,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_plan_dft = fftw_plan_dft_r2c_2d(__pyx_v_n_fft_coeffs, __pyx_v_n_fft_coeffs, (&(*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_kernel_tilde.data + __pyx_t_8 * __pyx_v_kernel_tilde.strides[0]) )) + __pyx_t_9)) )))), ((fftw_complex *)(&(*((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_kernel_tilde.data) + __pyx_t_10)) ))))), FFTW_ESTIMATE);
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":172
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":172
  *         FFTW_ESTIMATE,
  *     )
  *     fftw_execute(plan_dft)             # <<<<<<<<<<<<<<
@@ -3530,7 +3530,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   fftw_execute(__pyx_v_plan_dft);
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":173
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":173
  *     )
  *     fftw_execute(plan_dft)
  *     fftw_destroy_plan(plan_dft)             # <<<<<<<<<<<<<<
@@ -3539,7 +3539,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   fftw_destroy_plan(__pyx_v_plan_dft);
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":177
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":177
  *     plan_dft = fftw_plan_dft_r2c_2d(
  *         n_fft_coeffs, n_fft_coeffs,
  *         &fft_in_buffer[0, 0], <fftw_complex *>(&fft_w_coefficients[0]),             # <<<<<<<<<<<<<<
@@ -3550,7 +3550,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_t_12 = 0;
   __pyx_t_13 = 0;
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":175
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":175
  *     fftw_destroy_plan(plan_dft)
  * 
  *     plan_dft = fftw_plan_dft_r2c_2d(             # <<<<<<<<<<<<<<
@@ -3559,7 +3559,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_plan_dft = fftw_plan_dft_r2c_2d(__pyx_v_n_fft_coeffs, __pyx_v_n_fft_coeffs, (&(*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_fft_in_buffer.data + __pyx_t_11 * __pyx_v_fft_in_buffer.strides[0]) )) + __pyx_t_12)) )))), ((fftw_complex *)(&(*((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_w_coefficients.data) + __pyx_t_13)) ))))), FFTW_ESTIMATE);
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":182
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":182
  *     plan_idft = fftw_plan_dft_c2r_2d(
  *         n_fft_coeffs, n_fft_coeffs,
  *         <fftw_complex *>(&fft_w_coefficients[0]), &fft_out_buffer[0, 0],             # <<<<<<<<<<<<<<
@@ -3570,7 +3570,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_t_15 = 0;
   __pyx_t_16 = 0;
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":180
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":180
  *         FFTW_ESTIMATE
  *     )
  *     plan_idft = fftw_plan_dft_c2r_2d(             # <<<<<<<<<<<<<<
@@ -3579,7 +3579,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_plan_idft = fftw_plan_dft_c2r_2d(__pyx_v_n_fft_coeffs, __pyx_v_n_fft_coeffs, ((fftw_complex *)(&(*((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_w_coefficients.data) + __pyx_t_14)) ))))), (&(*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_fft_out_buffer.data + __pyx_t_15 * __pyx_v_fft_out_buffer.strides[0]) )) + __pyx_t_16)) )))), FFTW_ESTIMATE);
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":186
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":186
  *     )
  * 
  *     for d in range(n_terms):             # <<<<<<<<<<<<<<
@@ -3591,7 +3591,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   for (__pyx_t_19 = 0; __pyx_t_19 < __pyx_t_18; __pyx_t_19+=1) {
     __pyx_v_d = __pyx_t_19;
 
-    /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":187
+    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":187
  * 
  *     for d in range(n_terms):
  *         for i in range(n_interpolation_points_1d):             # <<<<<<<<<<<<<<
@@ -3603,7 +3603,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
     for (__pyx_t_22 = 0; __pyx_t_22 < __pyx_t_21; __pyx_t_22+=1) {
       __pyx_v_i = __pyx_t_22;
 
-      /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":188
+      /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":188
  *     for d in range(n_terms):
  *         for i in range(n_interpolation_points_1d):
  *             for j in range(n_interpolation_points_1d):             # <<<<<<<<<<<<<<
@@ -3615,7 +3615,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
       for (__pyx_t_25 = 0; __pyx_t_25 < __pyx_t_24; __pyx_t_25+=1) {
         __pyx_v_j = __pyx_t_25;
 
-        /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":189
+        /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":189
  *         for i in range(n_interpolation_points_1d):
  *             for j in range(n_interpolation_points_1d):
  *                 fft_in_buffer[i, j] = w_coefficients[i * n_interpolation_points_1d + j, d]             # <<<<<<<<<<<<<<
@@ -3630,7 +3630,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
       }
     }
 
-    /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":191
+    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":191
  *                 fft_in_buffer[i, j] = w_coefficients[i * n_interpolation_points_1d + j, d]
  * 
  *         fftw_execute(plan_dft)             # <<<<<<<<<<<<<<
@@ -3639,7 +3639,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
     fftw_execute(__pyx_v_plan_dft);
 
-    /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":194
+    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":194
  * 
  *         # Take the Hadamard product of two complex vectors
  *         for i in range(n_fft_coeffs * (n_fft_coeffs / 2 + 1)):             # <<<<<<<<<<<<<<
@@ -3651,7 +3651,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
     for (__pyx_t_22 = 0; __pyx_t_22 < __pyx_t_21; __pyx_t_22+=1) {
       __pyx_v_i = __pyx_t_22;
 
-      /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":195
+      /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":195
  *         # Take the Hadamard product of two complex vectors
  *         for i in range(n_fft_coeffs * (n_fft_coeffs / 2 + 1)):
  *             fft_w_coefficients[i] = fft_w_coefficients[i] * fft_kernel_tilde[i]             # <<<<<<<<<<<<<<
@@ -3664,7 +3664,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
       *((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_w_coefficients.data) + __pyx_t_32)) )) = __Pyx_c_prod_double((*((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_w_coefficients.data) + __pyx_t_30)) ))), (*((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_kernel_tilde.data) + __pyx_t_31)) ))));
     }
 
-    /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":198
+    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":198
  * 
  *         # Invert the computed values at the interpolated nodes
  *         fftw_execute(plan_idft)             # <<<<<<<<<<<<<<
@@ -3673,7 +3673,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
     fftw_execute(__pyx_v_plan_idft);
 
-    /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":202
+    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":202
  *         # ourselves. This is done by multiplying the result with the number of
  *         # points in the input
  *         for i in range(n_interpolation_points_1d):             # <<<<<<<<<<<<<<
@@ -3685,7 +3685,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
     for (__pyx_t_22 = 0; __pyx_t_22 < __pyx_t_21; __pyx_t_22+=1) {
       __pyx_v_i = __pyx_t_22;
 
-      /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":203
+      /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":203
  *         # points in the input
  *         for i in range(n_interpolation_points_1d):
  *             for j in range(n_interpolation_points_1d):             # <<<<<<<<<<<<<<
@@ -3697,7 +3697,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
       for (__pyx_t_25 = 0; __pyx_t_25 < __pyx_t_24; __pyx_t_25+=1) {
         __pyx_v_j = __pyx_t_25;
 
-        /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":204
+        /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":204
  *         for i in range(n_interpolation_points_1d):
  *             for j in range(n_interpolation_points_1d):
  *                 idx = i * n_interpolation_points_1d + j             # <<<<<<<<<<<<<<
@@ -3706,7 +3706,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
         __pyx_v_idx = ((__pyx_v_i * __pyx_v_n_interpolation_points_1d) + __pyx_v_j);
 
-        /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":205
+        /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":205
  *             for j in range(n_interpolation_points_1d):
  *                 idx = i * n_interpolation_points_1d + j
  *                 y_tilde_values[idx, d] = fft_out_buffer[n_interpolation_points_1d + i,             # <<<<<<<<<<<<<<
@@ -3716,7 +3716,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
         __pyx_t_33 = (__pyx_v_n_interpolation_points_1d + __pyx_v_i);
         __pyx_t_34 = (__pyx_v_n_interpolation_points_1d + __pyx_v_j);
 
-        /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":206
+        /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":206
  *                 idx = i * n_interpolation_points_1d + j
  *                 y_tilde_values[idx, d] = fft_out_buffer[n_interpolation_points_1d + i,
  *                                                         n_interpolation_points_1d + j] / n_fft_coeffs ** 2             # <<<<<<<<<<<<<<
@@ -3730,7 +3730,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
     }
   }
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":208
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":208
  *                                                         n_interpolation_points_1d + j] / n_fft_coeffs ** 2
  * 
  *     fftw_destroy_plan(plan_dft)             # <<<<<<<<<<<<<<
@@ -3739,7 +3739,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   fftw_destroy_plan(__pyx_v_plan_dft);
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":209
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":209
  * 
  *     fftw_destroy_plan(plan_dft)
  *     fftw_destroy_plan(plan_idft)             # <<<<<<<<<<<<<<
@@ -3748,7 +3748,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   fftw_destroy_plan(__pyx_v_plan_idft);
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":211
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":211
  *     fftw_destroy_plan(plan_idft)
  * 
  *     return y_tilde_values             # <<<<<<<<<<<<<<
@@ -3757,7 +3757,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_r = __pyx_v_y_tilde_values;
   goto __pyx_L0;
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":121
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":121
  * 
  * 
  * cdef double[:, ::1] matrix_multiply_fft_2d(             # <<<<<<<<<<<<<<
@@ -3776,7 +3776,7 @@ static __Pyx_memviewslice __pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __PYX_XDEC_MEMVIEW(&__pyx_t_7, 1);
   __pyx_r.data = NULL;
   __pyx_r.memview = NULL;
-  __Pyx_AddTraceback("fastTSNE._matrix_mul.matrix_mul.matrix_multiply_fft_2d", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("openTSNE._matrix_mul.matrix_mul.matrix_multiply_fft_2d", __pyx_clineno, __pyx_lineno, __pyx_filename);
 
   goto __pyx_L2;
   __pyx_L0:;
@@ -19685,7 +19685,7 @@ static PyBufferProcs __pyx_tp_as_buffer_array = {
 
 static PyTypeObject __pyx_type___pyx_array = {
   PyVarObject_HEAD_INIT(0, 0)
-  "fastTSNE._matrix_mul.matrix_mul.array", /*tp_name*/
+  "openTSNE._matrix_mul.matrix_mul.array", /*tp_name*/
   sizeof(struct __pyx_array_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_array, /*tp_dealloc*/
@@ -19793,7 +19793,7 @@ static PyMethodDef __pyx_methods_Enum[] = {
 
 static PyTypeObject __pyx_type___pyx_MemviewEnum = {
   PyVarObject_HEAD_INIT(0, 0)
-  "fastTSNE._matrix_mul.matrix_mul.Enum", /*tp_name*/
+  "openTSNE._matrix_mul.matrix_mul.Enum", /*tp_name*/
   sizeof(struct __pyx_MemviewEnum_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_Enum, /*tp_dealloc*/
@@ -20043,7 +20043,7 @@ static PyBufferProcs __pyx_tp_as_buffer_memoryview = {
 
 static PyTypeObject __pyx_type___pyx_memoryview = {
   PyVarObject_HEAD_INIT(0, 0)
-  "fastTSNE._matrix_mul.matrix_mul.memoryview", /*tp_name*/
+  "openTSNE._matrix_mul.matrix_mul.memoryview", /*tp_name*/
   sizeof(struct __pyx_memoryview_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_memoryview, /*tp_dealloc*/
@@ -20170,7 +20170,7 @@ static struct PyGetSetDef __pyx_getsets__memoryviewslice[] = {
 
 static PyTypeObject __pyx_type___pyx_memoryviewslice = {
   PyVarObject_HEAD_INIT(0, 0)
-  "fastTSNE._matrix_mul.matrix_mul._memoryviewslice", /*tp_name*/
+  "openTSNE._matrix_mul.matrix_mul._memoryviewslice", /*tp_name*/
   sizeof(struct __pyx_memoryviewslice_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc__memoryviewslice, /*tp_dealloc*/
@@ -20832,8 +20832,8 @@ static int __Pyx_modinit_function_export_code(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_modinit_function_export_code", 0);
   /*--- Function export code ---*/
-  if (__Pyx_ExportFunction("matrix_multiply_fft_1d", (void (*)(void))__pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_multiply_fft_1d, "__Pyx_memviewslice (__Pyx_memviewslice, __Pyx_memviewslice)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ExportFunction("matrix_multiply_fft_2d", (void (*)(void))__pyx_f_8fastTSNE_11_matrix_mul_10matrix_mul_matrix_multiply_fft_2d, "__Pyx_memviewslice (__Pyx_memviewslice, __Pyx_memviewslice)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportFunction("matrix_multiply_fft_1d", (void (*)(void))__pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_multiply_fft_1d, "__Pyx_memviewslice (__Pyx_memviewslice, __Pyx_memviewslice)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportFunction("matrix_multiply_fft_2d", (void (*)(void))__pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_multiply_fft_2d, "__Pyx_memviewslice (__Pyx_memviewslice, __Pyx_memviewslice)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -21081,14 +21081,14 @@ if (!__Pyx_RefNanny) {
   #if PY_MAJOR_VERSION < 3 && (__PYX_DEFAULT_STRING_ENCODING_IS_ASCII || __PYX_DEFAULT_STRING_ENCODING_IS_DEFAULT)
   if (__Pyx_init_sys_getdefaultencoding_params() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
-  if (__pyx_module_is_main_fastTSNE___matrix_mul__matrix_mul) {
+  if (__pyx_module_is_main_openTSNE___matrix_mul__matrix_mul) {
     if (PyObject_SetAttrString(__pyx_m, "__name__", __pyx_n_s_main) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   }
   #if PY_MAJOR_VERSION >= 3
   {
     PyObject *modules = PyImport_GetModuleDict(); if (unlikely(!modules)) __PYX_ERR(0, 1, __pyx_L1_error)
-    if (!PyDict_GetItemString(modules, "fastTSNE._matrix_mul.matrix_mul")) {
-      if (unlikely(PyDict_SetItemString(modules, "fastTSNE._matrix_mul.matrix_mul", __pyx_m) < 0)) __PYX_ERR(0, 1, __pyx_L1_error)
+    if (!PyDict_GetItemString(modules, "openTSNE._matrix_mul.matrix_mul")) {
+      if (unlikely(PyDict_SetItemString(modules, "openTSNE._matrix_mul.matrix_mul", __pyx_m) < 0)) __PYX_ERR(0, 1, __pyx_L1_error)
     }
   }
   #endif
@@ -21110,8 +21110,8 @@ if (!__Pyx_RefNanny) {
   #endif
   __Pyx_TraceCall("__Pyx_PyMODINIT_FUNC PyInit_matrix_mul(void)", __pyx_f[0], 1, 0, __PYX_ERR(0, 1, __pyx_L1_error));
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":9
- * cimport fastTSNE._matrix_mul.matrix_mul
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":9
+ * cimport openTSNE._matrix_mul.matrix_mul
  * cimport numpy as np
  * import numpy as np             # <<<<<<<<<<<<<<
  * 
@@ -21122,7 +21122,7 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx":1
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":1
  * # cython: profile=True             # <<<<<<<<<<<<<<
  * # cython: boundscheck=False
  * # cython: wraparound=False
@@ -21293,11 +21293,11 @@ if (!__Pyx_RefNanny) {
   __Pyx_XDECREF(__pyx_t_1);
   if (__pyx_m) {
     if (__pyx_d) {
-      __Pyx_AddTraceback("init fastTSNE._matrix_mul.matrix_mul", 0, __pyx_lineno, __pyx_filename);
+      __Pyx_AddTraceback("init openTSNE._matrix_mul.matrix_mul", 0, __pyx_lineno, __pyx_filename);
     }
     Py_DECREF(__pyx_m); __pyx_m = 0;
   } else if (!PyErr_Occurred()) {
-    PyErr_SetString(PyExc_ImportError, "init fastTSNE._matrix_mul.matrix_mul");
+    PyErr_SetString(PyExc_ImportError, "init openTSNE._matrix_mul.matrix_mul");
   }
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();

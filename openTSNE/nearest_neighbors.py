@@ -3,7 +3,7 @@ import sys
 import numpy as np
 from sklearn import neighbors
 from sklearn.utils import check_random_state
-from fastTSNE.vptree import VPTree as c_vptree
+from openTSNE.vptree import VPTree as c_vptree
 
 # In case we're running on a 32bit system, we have to properly handle numba's
 # ``parallel`` directive, which throws a ``RuntimeError``. It is important to
