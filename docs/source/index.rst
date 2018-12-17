@@ -12,6 +12,8 @@ t-SNE has had several criticisms over the years, which we will address here:
 3. t-SNE is nonparametric therefore it is impossible to add *new samples* to an existing embedding. This argument is often repeated and likely comes from the fact that most software packages simply did not take the time to implement this. t-SNE is nonparametric meaning that it does not learn a function :math:`f` that projects samples from the ambient space into the embedding space. However, the objective function of t-SNE is well defined and new samples can easily be added into an existing embedding by taking a data point and optimizing its position with respect to the existing embedding.
 
 .. figure:: images/macosko_2015.png
+    :width: 500px
+    :align: center
 
     A visualization of 44,808 single cell transcriptomes from the mouse retina embedded using the multiscale kernel trick for preserving global structure.
 
