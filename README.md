@@ -1,7 +1,7 @@
 # openTSNE
 
 [![Build Status](https://travis-ci.com/pavlin-policar/openTSNE.svg?branch=master)](https://travis-ci.com/pavlin-policar/openTSNE)
-[![Build status](https://ci.appveyor.com/api/projects/status/2s1cbbsk8dltte3y?svg=true)](https://ci.appveyor.com/project/pavlin-policar/opentsne)
+[![Build status](https://ci.appveyor.com/api/projects/status/6i5vv7b7ot6iws90?svg=true)](https://ci.appveyor.com/project/pavlin-policar/opentsne)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ef67c21a74924b548acae5a514bc443d)](https://app.codacy.com/app/pavlin-policar/openTSNE?utm_source=github.com&utm_medium=referral&utm_content=pavlin-policar/openTSNE&utm_campaign=Badge_Grade_Dashboard)
 
 A visualization of 160,796 single cell transcriptomes from the mouse nervous system [Zeisel 2018] computed in under 2 minutes using FFT accelerated interpolation and approximate nearest neighbors. See basic usage notebook for more details.
