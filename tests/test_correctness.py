@@ -1,18 +1,18 @@
 import unittest
 from functools import partial
 
-import fastTSNE
-import fastTSNE.affinity
-import fastTSNE.initialization
+import openTSNE
+import openTSNE.affinity
+import openTSNE.initialization
 import numpy as np
-from fastTSNE.callbacks import VerifyExaggerationError
-from fastTSNE.tsne import TSNEEmbedding
+from openTSNE.callbacks import VerifyExaggerationError
+from openTSNE.tsne import TSNEEmbedding
 from sklearn import datasets
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 
-TSNE = partial(fastTSNE.TSNE, neighbors="exact", negative_gradient_method="bh")
+TSNE = partial(openTSNE.TSNE, neighbors="exact", negative_gradient_method="bh")
 
 
 class TestTSNECorrectness(unittest.TestCase):
@@ -89,7 +89,7 @@ class TestTSNECorrectness(unittest.TestCase):
         )
 
         # Set up the initial embedding
-        embedding = fastTSNE.TSNE(
+        embedding = openTSNE.TSNE(
             early_exaggeration_iter=0,
             n_iter=50,
             neighbors="exact",
@@ -129,7 +129,7 @@ class TestTSNECorrectness(unittest.TestCase):
         )
 
         # Set up the initial embedding
-        embedding = fastTSNE.TSNE(
+        embedding = openTSNE.TSNE(
             early_exaggeration_iter=0,
             n_iter=50,
             neighbors="exact",
@@ -160,7 +160,7 @@ class TestTSNECorrectness(unittest.TestCase):
         )
 
         # Set up the initial embedding
-        embedding = fastTSNE.TSNE(
+        embedding = openTSNE.TSNE(
             neighbors="exact",
             negative_gradient_method="bh",
             early_exaggeration_iter=0,
@@ -181,7 +181,7 @@ class TestTSNECorrectness(unittest.TestCase):
         )
 
         # Set up the initial embedding
-        embedding = fastTSNE.TSNE(
+        embedding = openTSNE.TSNE(
             neighbors="exact",
             negative_gradient_method="fft",
             early_exaggeration_iter=0,
@@ -202,9 +202,9 @@ class TestTSNECorrectness(unittest.TestCase):
         )
 
         # Set up the initial embedding
-        init = fastTSNE.initialization.pca(x_train)
-        affinity = fastTSNE.affinity.PerplexityBasedNN(x_train, method="exact")
-        embedding = fastTSNE.TSNEEmbedding(
+        init = openTSNE.initialization.pca(x_train)
+        affinity = openTSNE.affinity.PerplexityBasedNN(x_train, method="exact")
+        embedding = openTSNE.TSNEEmbedding(
             init, affinity, negative_gradient_method="bh", random_state=42
         )
         embedding.optimize(n_iter=50, inplace=True)
@@ -222,9 +222,9 @@ class TestTSNECorrectness(unittest.TestCase):
         )
 
         # Set up the initial embedding
-        init = fastTSNE.initialization.pca(x_train)
-        affinity = fastTSNE.affinity.PerplexityBasedNN(x_train, method="exact")
-        embedding = fastTSNE.TSNEEmbedding(
+        init = openTSNE.initialization.pca(x_train)
+        affinity = openTSNE.affinity.PerplexityBasedNN(x_train, method="exact")
+        embedding = openTSNE.TSNEEmbedding(
             init, affinity, negative_gradient_method="fft", random_state=42
         )
         embedding.optimize(n_iter=50, inplace=True)

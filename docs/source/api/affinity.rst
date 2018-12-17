@@ -1,6 +1,6 @@
 Affinity
 ========
 
-.. automodule:: fastTSNE.affinity
+.. automodule:: openTSNE.affinity
     :members: Affinities, PerplexityBasedNN, MultiscaleMixture, Multiscale, FixedSigmaNN
     :undoc-members:

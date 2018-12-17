@@ -119,18 +119,18 @@ class CythonBuildExt(build_ext):
 
 
 extensions = [
-    Extension("fastTSNE.vptree", ["fastTSNE/vptree.pyx"], language="c++"),
-    Extension("fastTSNE.quad_tree", ["fastTSNE/quad_tree.pyx"]),
-    Extension("fastTSNE._tsne", ["fastTSNE/_tsne.pyx"]),
-    Extension("fastTSNE.kl_divergence", ["fastTSNE/kl_divergence.pyx"]),
+    Extension("openTSNE.vptree", ["openTSNE/vptree.pyx"], language="c++"),
+    Extension("openTSNE.quad_tree", ["openTSNE/quad_tree.pyx"]),
+    Extension("openTSNE._tsne", ["openTSNE/_tsne.pyx"]),
+    Extension("openTSNE.kl_divergence", ["openTSNE/kl_divergence.pyx"]),
 ]
 
 # Check if we have access to FFTW3 and if so, use that implementation
 if has_c_library("fftw3"):
     print("FFTW3 header files found. Using FFTW implementation of FFT.")
     extensions.append(
-        Extension("fastTSNE._matrix_mul.matrix_mul",
-                  ["fastTSNE/_matrix_mul/matrix_mul_fftw3.pyx"],
+        Extension("openTSNE._matrix_mul.matrix_mul",
+                  ["openTSNE/_matrix_mul/matrix_mul_fftw3.pyx"],
                   extra_compile_args=["fftw", "math"],
                   extra_link_args=["fftw", "math"],
                   )
@@ -138,8 +138,8 @@ if has_c_library("fftw3"):
 else:
     print("FFTW3 header files not found. Using numpy implementation of FFT.")
     extensions.append(
-        Extension("fastTSNE._matrix_mul.matrix_mul",
-                  ["fastTSNE/_matrix_mul/matrix_mul_numpy.pyx"])
+        Extension("openTSNE._matrix_mul.matrix_mul",
+                  ["openTSNE/_matrix_mul/matrix_mul_numpy.pyx"])
     )
 
 try:
@@ -150,18 +150,18 @@ except ImportError:
     HAS_CYTHON = False
 
 setup(
-    name="fastTSNE",
+    name="openTSNE",
     description="",
-    version="0.2.16",
+    version="0.3.0",
     license="BSD-3-Clause",
 
     author="Pavlin Poličar",
     author_email="pavlin.g.p@gmail.com",
-    url="https://github.com/pavlin-policar/fastTSNE",
+    url="https://github.com/pavlin-policar/openTSNE",
     project_urls={
-        "Documentation": "https://fasttsne.readthedocs.io/",
-        "Source": "https://github.com/pavlin-policar/fastTSNE",
-        "Issue Tracker": "https://github.com/pavlin-policar/fastTSNE/issues",
+        "Documentation": "https://opentsne.readthedocs.io/",
+        "Source": "https://github.com/pavlin-policar/openTSNE",
+        "Issue Tracker": "https://github.com/pavlin-policar/openTSNE/issues",
     },
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -180,7 +180,7 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
 
-    packages=setuptools.find_packages(include=["fastTSNE", "fastTSNE.*"]),
+    packages=setuptools.find_packages(include=["openTSNE", "openTSNE.*"]),
     install_requires=[
         "numpy>1.14",
         "numba>=0.38.1",

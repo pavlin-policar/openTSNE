@@ -1,4 +1,4 @@
-fastTSNE: Fast, parallel implementations of t-SNE
+openTSNE: Fast, parallel implementations of t-SNE
 =================================================
 
 t-Distributed Stochastic Neighbor Embedding or t-SNE is a popular non-linear dimensionality reduction technique that can be used for visualizing high dimensional data sets.

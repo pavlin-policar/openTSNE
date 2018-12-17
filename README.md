@@ -1,8 +1,8 @@
-# fastTSNE
+# openTSNE
 
-[![Build Status](https://travis-ci.com/pavlin-policar/fastTSNE.svg?branch=master)](https://travis-ci.com/pavlin-policar/fastTSNE)
-[![Build status](https://ci.appveyor.com/api/projects/status/2s1cbbsk8dltte3y?svg=true)](https://ci.appveyor.com/project/pavlin-policar/fasttsne)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/ef67c21a74924b548acae5a514bc443d)](https://app.codacy.com/app/pavlin-policar/fastTSNE?utm_source=github.com&utm_medium=referral&utm_content=pavlin-policar/fastTSNE&utm_campaign=Badge_Grade_Dashboard)
+[![Build Status](https://travis-ci.com/pavlin-policar/openTSNE.svg?branch=master)](https://travis-ci.com/pavlin-policar/openTSNE)
+[![Build status](https://ci.appveyor.com/api/projects/status/2s1cbbsk8dltte3y?svg=true)](https://ci.appveyor.com/project/pavlin-policar/opentsne)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/ef67c21a74924b548acae5a514bc443d)](https://app.codacy.com/app/pavlin-policar/openTSNE?utm_source=github.com&utm_medium=referral&utm_content=pavlin-policar/openTSNE&utm_campaign=Badge_Grade_Dashboard)
 
 A visualization of 160,796 single cell transcriptomes from the mouse nervous system [Zeisel 2018] computed in under 2 minutes using FFT accelerated interpolation and approximate nearest neighbors. See basic usage notebook for more details.
 
@@ -18,35 +18,35 @@ The goal of this project is
 
 4. **Ease of distribution**. FIt-SNE, the reference C++ implementation for the most scalable variant of t-SNE, is not easy to install or distribute. It requires one to preinstall C libraries and requires manual compilation. This package is installable either through `pip` or `conda` with a single command, making it very easy to include in other packages.
 
-Detailed documentation on t-SNE is available on [Read the Docs](http://fasttsne.readthedocs.io).
+Detailed documentation on t-SNE is available on [Read the Docs](http://opentsne.readthedocs.io).
 
 ## Installation
 
 ### Conda
 
-The recommended installation method for fastTSNE is using ``conda`` and can be easily installed from ``conda-forge`` with
+The recommended installation method for openTSNE is using ``conda`` and can be easily installed from ``conda-forge`` with
 
 ```
-conda install --channel conda-forge fasttsne
+conda install --channel conda-forge opentsne
 ```
 
-[Conda package](https://anaconda.org/conda-forge/fasttsne)
+[Conda package](https://anaconda.org/conda-forge/opentsne)
 
 ### PyPi
 
-fastTSNE is also available through ``pip`` and can be installed with
+openTSNE is also available through ``pip`` and can be installed with
 
 ```
-pip install fasttsne
+pip install opentsne
 ```
 
-[PyPi package](https://pypi.org/project/fastTSNE)
+[PyPi package](https://pypi.org/project/openTSNE)
 
-Note, however, that fastTSNE requires a C/C++ compiler. ``numpy`` must also be installed. If it is not available, we will attempt to install it before proceeding with the installation.
+Note, however, that openTSNE requires a C/C++ compiler. ``numpy`` must also be installed. If it is not available, we will attempt to install it before proceeding with the installation.
 
-In order for fastTSNE to utilize multiple threads, the C/C++ compiler must also implement ``OpenMP``. In practice, almost all compilers implement this with the exception of older version of ``clang`` on OSX systems.
+In order for openTSNE to utilize multiple threads, the C/C++ compiler must also implement ``OpenMP``. In practice, almost all compilers implement this with the exception of older version of ``clang`` on OSX systems.
 
-To squeeze the most out of fastTSNE, you may also consider installing FFTW3 prior to installation. FFTW3 implements the Fast Fourier Transform, which is heavily used in fastTSNE. If FFTW3 is not available, fastTSNE will use numpy's implementation of the FFT, which is slightly slower than FFTW. The difference is only noticeable with large data sets containing millions of data points.
+To squeeze the most out of openTSNE, you may also consider installing FFTW3 prior to installation. FFTW3 implements the Fast Fourier Transform, which is heavily used in openTSNE. If FFTW3 is not available, openTSNE will use numpy's implementation of the FFT, which is slightly slower than FFTW. The difference is only noticeable with large data sets containing millions of data points.
 
  
 ## Usage
@@ -59,7 +59,7 @@ We also provide an advanced interface for finer control of the optimization, all
 We provide a basic interface somewhat similar to the one provided by scikit-learn.
 
 ```python
-from fastTSNE import TSNE
+from openTSNE import TSNE
 from sklearn import datasets
 
 iris = datasets.load_iris()
@@ -84,7 +84,7 @@ Our `tsne` object acts as a fitter instance, and returns a `TSNEEmbedding` insta
 We don't log any progress by default, but provide callbacks that can be run at any interval of the optimization process. A simple logger is provided as an example.
 
 ```python
-from fastTSNE.callbacks import ErrorLogger
+from openTSNE.callbacks import ErrorLogger
 
 tsne = TSNE(callbacks=ErrorLogger(), callbacks_every_iters=50)
 ```
@@ -101,13 +101,13 @@ Additionally, a list of callbacks can also be passed, in which case all the call
 
 ### Advanced usage
 
-Recently, Kobak and Berens [4] demonstrate several tricks we can use to obtain better t-SNE embeddings. The main critique of t-SNE is that global structure is mainly thrown away. This is typically the main selling point for UMAP over t-SNE. In the preprint, several techniques are presented that enable t-SNE to capture more global structure. All of these tricks can easily be implemented using fastTSNE and are shown in the notebook examples.
+Recently, Kobak and Berens [4] demonstrate several tricks we can use to obtain better t-SNE embeddings. The main critique of t-SNE is that global structure is mainly thrown away. This is typically the main selling point for UMAP over t-SNE. In the preprint, several techniques are presented that enable t-SNE to capture more global structure. All of these tricks can easily be implemented using openTSNE and are shown in the notebook examples.
 
 To introduce the API, we will implement the standard t-SNE algorithm, the one implemented by `TSNE.fit`. 
 
 ```python
-from fastTSNE import initialization, affinity
-from fastTSNE.tsne import TSNEEmbedding
+from openTSNE import initialization, affinity
+from openTSNE.tsne import TSNEEmbedding
 
 init = initialization.pca(x)
 affinities = affinity.PerplexityBasedNN(x, perplexity=30, method="approx", n_jobs=8)

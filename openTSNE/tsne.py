@@ -710,7 +710,7 @@ class TSNEEmbedding(np.ndarray):
 
         **affinity_params: dict
             Additional params to be passed to the ``Affinities.to_new`` method.
-            Please see individual :class:`~fastTSNE.affinity.Affinities`
+            Please see individual :class:`~openTSNE.affinity.Affinities`
             implementations as the parameters differ between implementations.
 
         Returns

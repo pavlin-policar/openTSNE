@@ -1,4 +1,4 @@
-from fastTSNE.quad_tree cimport QuadTree, Node
+from openTSNE.quad_tree cimport QuadTree, Node
 import numpy as np
 
 

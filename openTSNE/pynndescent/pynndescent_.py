@@ -9,14 +9,14 @@ from scipy.sparse.csgraph import minimum_spanning_tree
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils import check_random_state, check_array
 
-from fastTSNE.pynndescent import distances as dist
-from fastTSNE.pynndescent.rp_trees import (
+from openTSNE.pynndescent import distances as dist
+from openTSNE.pynndescent.rp_trees import (
     make_euclidean_tree,
     make_angular_tree,
     flatten_tree,
     search_flat_tree,
 )
-from fastTSNE.pynndescent.utils import (
+from openTSNE.pynndescent.utils import (
     rejection_sample,
     make_heap,
     heap_push,
