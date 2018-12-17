@@ -4,19 +4,19 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/6i5vv7b7ot6iws90?svg=true)](https://ci.appveyor.com/project/pavlin-policar/opentsne)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ef67c21a74924b548acae5a514bc443d)](https://app.codacy.com/app/pavlin-policar/openTSNE?utm_source=github.com&utm_medium=referral&utm_content=pavlin-policar/openTSNE&utm_campaign=Badge_Grade_Dashboard)
 
-A visualization of 160,796 single cell transcriptomes from the mouse nervous system [Zeisel 2018] computed in under 2 minutes using FFT accelerated interpolation and approximate nearest neighbors. See basic usage notebook for more details.
+A visualization of 44,808 single cell transcriptomes from the mouse retina [5] embedded using the multiscale kernel trick for preserving global structure.
 
-![Zeisel 2018 mouse nervous system t-SNE embedding](docs/source/images/zeisel_2018.png)
+![Macosko 2015 mouse retina t-SNE embedding](docs/source/images/macosko_2015.png)
 
 The goal of this project is
 
-1. **Speed**. We provide two fast, parallel implementations of t-SNE, which are comparable to their C++ counterparts in speed.
+1. **Extensibility**. We provide efficient defaults for the typical use case i.e. visualizing high dimensional data. We also make it very simple to use various tricks that have been introduced to improve the quality of t-SNE embeddings. The library is designed to it's easy to implement and use your own components and encourages experimentation.
 
-2. **Interactivity**. This library was built for Orange, an interactive machine learning toolkit. As such, we provide a powerful API which can control all aspects of the t-SNE algorithm and makes it suitable for interactive environments.
+2. **Speed**. We provide two fast, parallel implementations of t-SNE, which are comparable to their C++ counterparts in speed. Python does incur some overhead, so if speed is your only requirement, consider using [FIt-SNE](https://github.com/KlugerLab/FIt-SNE). The differences are often minute and become even less apparent when utilizing multiple cores. 
 
-3. **Extensibility**. We provide efficient defaults for the typical use case i.e. visualizing high dimensional data. If you aren't happy with the defaults e.g. you would like to use your own nearest neighbor search or would like to embed graph data, this library makes this very easy. This allows for great freedom with experimentation.
+3. **Interactivity**. This library was built for Orange, an interactive machine learning toolkit. As such, we provide a powerful API which can control all aspects of the t-SNE algorithm and makes it suitable for interactive environments.
 
-4. **Ease of distribution**. FIt-SNE, the reference C++ implementation for the most scalable variant of t-SNE, is not easy to install or distribute. It requires one to preinstall C libraries and requires manual compilation. This package is installable either through `pip` or `conda` with a single command, making it very easy to include in other packages.
+4. **Ease of distribution**. FIt-SNE, the reference C++ implementation for the interpolation based variant of t-SNE, is not easy to install or distribute. It requires one to preinstall C libraries and requires manual compilation. This package is installable either through `pip` or `conda` with a single command, making it very easy to include in other packages.
 
 Detailed documentation on t-SNE is available on [Read the Docs](http://opentsne.readthedocs.io).
 
@@ -24,7 +24,7 @@ Detailed documentation on t-SNE is available on [Read the Docs](http://opentsne.
 
 ### Conda
 
-The recommended installation method for openTSNE is using ``conda`` and can be easily installed from ``conda-forge`` with
+openTSNE can be easily installed from ``conda-forge`` with
 
 ```
 conda install --channel conda-forge opentsne
@@ -42,7 +42,7 @@ pip install opentsne
 
 [PyPi package](https://pypi.org/project/openTSNE)
 
-Note, however, that openTSNE requires a C/C++ compiler. ``numpy`` must also be installed. If it is not available, we will attempt to install it before proceeding with the installation.
+Note that openTSNE requires a C/C++ compiler. ``numpy`` must also be installed.
 
 In order for openTSNE to utilize multiple threads, the C/C++ compiler must also implement ``OpenMP``. In practice, almost all compilers implement this with the exception of older version of ``clang`` on OSX systems.
 
@@ -50,6 +50,7 @@ To squeeze the most out of openTSNE, you may also consider installing FFTW3 prio
 
  
 ## Usage
+
 We provide two modes of usage. One is somewhat familliar to scikit-learn's `TSNE.fit`.
 
 We also provide an advanced interface for finer control of the optimization, allowing us to interactively tune the embedding and make use of various tricks to improve the embedding quality.
@@ -129,3 +130,5 @@ embedding.optimize(n_iter=750, momentum=0.8, inplace=True)
 3. Linderman, George C., et al. ["Efficient Algorithms for t-distributed Stochastic Neighborhood Embedding."](https://arxiv.org/pdf/1712.09005.pdf) arXiv preprint arXiv:1712.09005 (2017).
 
 4. Kobak, Dmitry, and Philipp Berens. ["The art of using t-SNE for single-cell transcriptomics."](https://www.biorxiv.org/content/early/2018/10/25/453449) bioRxiv (2018): 453449.
+
+5. Macosko, Evan Z., et al. ["Highly parallel genome-wide expression profiling of individual cells using nanoliter droplets."](https://www.sciencedirect.com/science/article/pii/S0092867415005498) Cell 161.5 (2015): 1202-1214.

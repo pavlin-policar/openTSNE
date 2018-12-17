@@ -1,5 +1,5 @@
-openTSNE: Fast, parallel implementations of t-SNE
-=================================================
+openTSNE: Extensible, parallel implementations of t-SNE
+=======================================================
 
 t-Distributed Stochastic Neighbor Embedding or t-SNE is a popular non-linear dimensionality reduction technique that can be used for visualizing high dimensional data sets.
 
@@ -11,18 +11,17 @@ t-SNE has had several criticisms over the years, which we will address here:
 
 3. t-SNE is nonparametric therefore it is impossible to add *new samples* to an existing embedding. This argument is often repeated and likely comes from the fact that most software packages simply did not take the time to implement this. t-SNE is nonparametric meaning that it does not learn a function :math:`f` that projects samples from the ambient space into the embedding space. However, the objective function of t-SNE is well defined and new samples can easily be added into an existing embedding by taking a data point and optimizing its position with respect to the existing embedding.
 
-.. figure:: images/zeisel_2018.png
+.. figure:: images/macosko_2015.png
 
-   A visualization of 160,796 single cell transcriptomes from the mouse nervous system [Zeisel 2018] computed in under 2 minutes using FFT accelerated interpolation and approximate nearest neighbors.
-
+    A visualization of 44,808 single cell transcriptomes from the mouse retina embedded using the multiscale kernel trick for preserving global structure.
 
 The goal of this project is
 
-1. **Speed**. We provide two fast, parallel implementations of t-SNE, which are comparable to their C++ counterparts in speed.
+1. **Extensibility**. We provide efficient defaults for the typical use case i.e. visualizing high dimensional data. We also make it very simple to use various tricks that have been introduced to improve the quality of t-SNE embeddings. The library is designed to it's easy to implement and use your own components and encourages experimentation.
 
-2. **Interactivity**. This library was built for Orange, an interactive machine learning toolkit. As such, we provide a powerful API which can control all aspects of the t-SNE algorithm and makes it suitable for interactive environments.
+2. **Speed**. We provide two fast, parallel implementations of t-SNE, which are comparable to their C++ counterparts in speed. Python does incur some overhead, so if speed is your only requirement, consider using `FIt-SNE <https://github.com/KlugerLab/FIt-SNE>`_. The differences are often minute and become even less apparent when utilizing multiple cores.
 
-3. **Extensibility**. We provide efficient defaults for the typical use case i.e. visualizing high dimensional data. If you aren't happy with the defaults e.g. you would like to use your own nearest neighbor search or would like to embed graph data, this library makes this very easy. This allows for great freedom with experimentation.
+3. **Interactivity**. This library was built for Orange, an interactive machine learning toolkit. As such, we provide a powerful API which can control all aspects of the t-SNE algorithm and makes it suitable for interactive environments.
 
 4. **Ease of distribution**. FIt-SNE, the reference C++ implementation for the most scalable variant of t-SNE, is not easy to install or distribute. It requires one to preinstall C libraries and requires manual compilation. This package is installable either through :code:`pip` or :code:`conda` with a single command, making it very easy to include in other packages.
 

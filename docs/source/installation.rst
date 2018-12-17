@@ -4,7 +4,7 @@ Installation
 Conda
 -----
 
-The recommended installation method for openTSNE is using ``conda`` and can be easily installed from ``conda-forge`` with
+openTSNE can be easily installed from ``conda-forge`` with
 
 .. code-block:: text
 

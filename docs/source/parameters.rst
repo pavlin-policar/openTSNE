@@ -12,8 +12,12 @@ In most implementations, perplexity defaults to 30. This focuses the attention o
 
 For larger data sets, e.g. 10,000 points, considering 30 nearest neighbors will do a poor job of preserving global structure. Using a higher value, e.g. 500, will do a fairly good job for of uncovering the global structure. For larger data sets still e.g. 500k or 1 million samples, this is typically not enough and can take quite a long time to run. Luckily, various tricks can be used to improve global structure [4]_.
 
+.. figure:: images/macosko_perplexity.png
+
+    **Figure 1**: Higher values of perplexity do a better job of preserving global structure, but can obscure local structure. In both a) and b) we run standard t-SNE with perpelxities 30 and 500, respectively.
+
 Note that perplexity linearly impacts runtime i.e. higher values of
-perplexity will incur longer execution time.
+perplexity will incur longer execution time. For example, the embedding in Figure 1a took around 1 minute 30 seconds to compute, while Figure 1b took around 6 minutes.
 
 
 Exaggeration
@@ -22,6 +26,10 @@ Exaggeration
 The exaggeration factor is typically used during the early exaggeration phase. This factor increases the attractive forces between points and allows points to move around more freely, finding their corresponding neighbors more easily. The most typical value of exaggeration during the early exaggeration phase is 12, but higher values have also been shown to work in combination with different learning rates [5]_.
 
 Exaggeration can also be used in the normal optimization regime to form more densely packed clusters, making the separation between clusters more visible [4]_.
+
+.. figure:: images/10x_exaggeration.png
+
+    **Figure 2**: We run t-SNE twice on the 10x genomics mouse brain data set, containing 1,306,127 samples. a) t-SNE was run with the regular early exaggeration phase 12 for 500 iterations, then in the regular regime with no exaggeration for 750 iterations. b) t-SNE was run  with the regular early exaggeration phase 12 for 500 iterations, then for another 750 iterations with exaggeration 4.
 
 Optimization parameters
 -----------------------
