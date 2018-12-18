@@ -32,7 +32,7 @@ The goal of this project is
     :caption: User Guide
 
     installation
-    getting_started
+    examples/index
     tsne_algorithm
     parameters
     benchmarks
@@ -42,4 +42,4 @@ The goal of this project is
     :maxdepth: 2
     :caption: API Reference
 
-    api/api
+    api/index
