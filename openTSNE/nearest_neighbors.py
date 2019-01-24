@@ -3,6 +3,7 @@ import sys
 import numpy as np
 from sklearn import neighbors
 from sklearn.utils import check_random_state
+import faiss
 from openTSNE.vptree import VPTree as c_vptree
 
 # In case we're running on a 32bit system, we have to properly handle numba's
@@ -128,3 +129,32 @@ class NNDescent(KNNIndex):
 
     def query(self, query, k):
         return self.index.query(query, k=k, queue_size=1)
+
+class FaissCPU(KNNIndex):
+
+    def build(self, data):
+        d = data.shape[1]
+        data = data.astype(np.float32)
+        
+        index = faiss.IndexFlatL2(d)   # build the index
+        index.add(data)
+        self.index = index
+
+        
+    def query_train(self, data, k):
+        data = data.astype(np.float32)
+        D, N = self.index.search(data, int(k) + 1)     # actual search
+        
+        self.neighbors = np.array(N[:,1:], dtype=np.int32)
+        self.distances = np.sqrt(np.array(D[:,1:], dtype=np.float64))
+        
+        return self.neighbors, self.distances
+
+    def query(self, query, k):
+        data = data.astype(np.float32)
+        D, N = self.index.search(query, int(k) + 1)     # actual search
+        
+        self.neighbors = np.array(N[:,1:], dtype=np.int32)
+        self.distances = np.sqrt(np.array(D[:,1:], dtype=np.float64))
+        
+        return self.neighbors, self.distances

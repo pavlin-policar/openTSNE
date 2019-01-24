@@ -265,6 +265,7 @@ def build_knn_index(
         "exact_alt": nearest_neighbors.VPTree,
         "exact": nearest_neighbors.BallTree,
         "approx": nearest_neighbors.NNDescent,
+        "faiss": nearest_neighbors.FaissCPU,
     }
     if isinstance(method, nearest_neighbors.KNNIndex):
         knn_index = method
