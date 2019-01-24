@@ -1,0 +1,13 @@
+name: opentsne
+dependencies:
+  - python=3.6
+  - numpy
+  - cython
+  - scipy
+  - numba>=0.38.1
+  - scikit-learn>=0.20
+  - matplotlib
+  - fftw
+  - pip:
+    - fire
+    - MulticoreTSNE
