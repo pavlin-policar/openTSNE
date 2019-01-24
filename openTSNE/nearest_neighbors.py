@@ -54,9 +54,9 @@ class KNNIndex:
         """Check that the metric is supported by the KNNIndex instance."""
         if metric not in self.VALID_METRICS:
             raise ValueError(
-                f"`{self.__class__.__name__}` does not support the `{metric}` "
-                f"metric. Please choose one of the supported metrics: "
-                f"{', '.join(self.VALID_METRICS)}."
+                "`{}` does not support the `{}` ".format(self.__class__.__name__, metric)
+                "metric. Please choose one of the supported metrics: "
+                "{}.".format(', '.join(self.VALID_METRICS))
             )
 
 

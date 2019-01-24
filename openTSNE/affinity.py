@@ -339,7 +339,7 @@ def joint_probabilities_nn(
     assert normalization in (
         "pair-wise",
         "point-wise",
-    ), f"Unrecognized normalization scheme `{normalization}`."
+    ), "Unrecognized normalization scheme `{}`.".format(normalization)
 
     n_samples, k_neighbors = distances.shape
 

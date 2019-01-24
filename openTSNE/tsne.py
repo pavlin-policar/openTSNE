@@ -741,7 +741,7 @@ class TSNEEmbedding(np.ndarray):
         elif initialization == "median":
             embedding = initialization_scheme.median(self, neighbors[:, :k])
         else:
-            raise ValueError(f"Unrecognized initialization scheme `{initialization}`.")
+            raise ValueError("Unrecognized initialization scheme `{initialization}`.")
 
         return PartialTSNEEmbedding(
             embedding,
@@ -989,7 +989,7 @@ class TSNE(BaseEstimator):
             )
         else:
             raise ValueError(
-                f"Unrecognized initialization scheme `{self.initialization}`."
+                "Unrecognized initialization scheme `{}`.".format(self.initialization)
             )
 
         affinities = PerplexityBasedNN(
