@@ -1,0 +1,6 @@
+numpy>1.14
+cython
+scikit-learn>=0.20
+scipy
+multicoreTSNE
+fire
