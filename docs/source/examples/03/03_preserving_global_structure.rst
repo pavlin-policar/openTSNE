@@ -93,9 +93,9 @@ Using PCA initialization
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 The first, easy improvement we can get is to “inject” some global
-structure into the initialization. The intialization dictates which
+structure into the initialization. The initialization dictates which
 regions points will appear in, so adding any global structure to the
-initilization can help.
+initialization can help.
 
 Note that this is the default in this implementation and the parameter
 can be omitted.

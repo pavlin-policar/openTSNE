@@ -14,7 +14,7 @@ For larger data sets, e.g. 10,000 points, considering 30 nearest neighbors will 
 
 .. figure:: images/macosko_perplexity.png
 
-    **Figure 1**: Higher values of perplexity do a better job of preserving global structure, but can obscure local structure. In both a) and b) we run standard t-SNE with perpelxities 30 and 500, respectively.
+    **Figure 1**: Higher values of perplexity do a better job of preserving global structure, but can obscure local structure. In both a) and b) we run standard t-SNE with perplexities 30 and 500, respectively.
 
 Note that perplexity linearly impacts runtime i.e. higher values of
 perplexity will incur longer execution time. For example, the embedding in Figure 1a took around 1 minute 30 seconds to compute, while Figure 1b took around 6 minutes.
@@ -34,7 +34,7 @@ Exaggeration can also be used during the normal optimization regime to form more
 Optimization parameters
 -----------------------
 
-t-SNE uses a variation of gradient descent optimizationn proceedure that incorporates momentum to speed up convergence of the embedding [3]_.
+t-SNE uses a variation of gradient descent optimization procedure that incorporates momentum to speed up convergence of the embedding [3]_.
 
 learning_rate: float
     The learning rate controls the step size of the gradient updates. This typically ranges from 100 to 1000, but usually the default (200) works well enough.
@@ -42,7 +42,7 @@ learning_rate: float
     When dealing with large data sets e.g 500k samples or more, it may be necessary to increase the learning rate or to increase the number of iterations [1]_.
 
 momentum: float
-    Gradient descent with momentum keeps a sum exponentially decaying weights from previous iterations, speeding up convergence. In early stages of the optmization, this is typically set to a lower value (0.5 in most implementations) since points generally move around quite a bit in this phase and increased after the initial early exaggeration phase (typically to 0.8) to speed up convergence.
+    Gradient descent with momentum keeps a sum exponentially decaying weights from previous iterations, speeding up convergence. In early stages of the optimization, this is typically set to a lower value (0.5 in most implementations) since points generally move around quite a bit in this phase and increased after the initial early exaggeration phase (typically to 0.8) to speed up convergence.
 
 
 Barnes-Hut parameters
