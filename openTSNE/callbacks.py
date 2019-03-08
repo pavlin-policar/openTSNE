@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 
 
 class Callback:
-    def optimzation_about_to_start(self):
+    def optimization_about_to_start(self):
         """This is called at the beginning of the optimization procedure."""
 
     def __call__(self, iteration, error, embedding):
@@ -51,7 +51,7 @@ class ErrorLogger(Callback):
         self.iter_count = 0
         self.last_log_time = None
 
-    def optimzation_about_to_start(self):
+    def optimization_about_to_start(self):
         self.last_log_time = time.time()
         self.iter_count = 0
 

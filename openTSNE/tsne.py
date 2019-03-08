@@ -1257,7 +1257,7 @@ class gradient_descent:
         if isinstance(callbacks, Iterable):
             for callback in callbacks:
                 # Only call function if present on object
-                getattr(callback, "optimzation_about_to_start", lambda: ...)()
+                getattr(callback, "optimization_about_to_start", lambda: ...)()
 
         for iteration in range(n_iter):
             should_call_callback = use_callbacks and (iteration + 1) % callbacks_every_iters == 0

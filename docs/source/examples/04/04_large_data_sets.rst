@@ -11,7 +11,7 @@ points to the embedding and use that as our initialization.
 Remember that the initialization largely affects the structure of the
 embedding. This way, our initialization provides the global structure
 for the embedding, and the subsequent optimization can focus on
-preserving local strucutre.
+preserving local structure.
 
 .. code:: python
 

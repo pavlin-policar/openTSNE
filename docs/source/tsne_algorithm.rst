@@ -8,7 +8,7 @@ In this section, we describe the algorithm in a way that will hopefully be acces
 t-SNE
 -----
 
-Given a :math:`d`-dimensional data set :math:`\mathbf{X} \in \mathbb{R}^D`, t-SNE aims to produce a low dimensional embedding :math:`\mathbf{Y} \in \mathbb{R}^d` where :math:`d` is much smaller than :math:`D`, typically 2, such that if two points :math:`\mathbf{x}_i` and :math:`\mathbf{x}_j` are close to one another in the input space :math:`\mathbf{X}`, then their corresponding lower dimensional points :math:`\mathbf{y}_i` and :math:`\mathbf{y}_j` are also close.
+Given a :math:`D`-dimensional data set :math:`\mathbf{X} \in \mathbb{R}^D`, t-SNE aims to produce a low dimensional embedding :math:`\mathbf{Y} \in \mathbb{R}^d` where :math:`d` is much smaller than :math:`D`, typically 2, such that if two points :math:`\mathbf{x}_i` and :math:`\mathbf{x}_j` are close to one another in the input space :math:`\mathbf{X}`, then their corresponding lower dimensional points :math:`\mathbf{y}_i` and :math:`\mathbf{y}_j` are also close.
 
 In order to achieve this, t-SNE models similarities in the input and embedding space as probability densities. In the input space, the similarities are given by a Gaussian distribution.
 
@@ -86,7 +86,7 @@ First, we will address how to speed up the computation of the attractive forces.
 Only nearest neighbors
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The first improvement for the computation of the input similarities :math:`p_{ij}` in the input space comes from observing that points further than :math:`3 \sigma` have nearly infinitesimaly small probabilities. These :math:`p_{ij}` have pracitcally zero contribution to the KL divergence and can be ignored. Because of the way these bandwidths are computed, it is reasonable to compute and consider only the :math:`\lfloor 3 * \text{Perplexity} \rfloor` nearest neighbors of each data point and ignore points further away. This means that the affinity matrix :math:`\mathbf{P}` becomes sparse, and computing the :math:`p_{ij}` values includes summing up only the non-zero entries [2]_.
+The first improvement for the computation of the input similarities :math:`p_{ij}` in the input space comes from observing that points further than :math:`3 \sigma` have nearly infinitesimally small probabilities. These :math:`p_{ij}` have practically zero contribution to the KL divergence and can be ignored. Because of the way these bandwidths are computed, it is reasonable to compute and consider only the :math:`\lfloor 3 * \text{Perplexity} \rfloor` nearest neighbors of each data point and ignore points further away. This means that the affinity matrix :math:`\mathbf{P}` becomes sparse, and computing the :math:`p_{ij}` values includes summing up only the non-zero entries [2]_.
 
 Approximate neighbors
 ~~~~~~~~~~~~~~~~~~~~~
