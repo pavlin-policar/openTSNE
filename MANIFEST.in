@@ -1,3 +1,4 @@
 recursive-include openTSNE/ *.py *.h *.c *.cpp *.pyx *.pxd
 
 include LICENSE
+include README.md

@@ -149,10 +149,16 @@ try:
 except ImportError:
     HAS_CYTHON = False
 
+
+def readme():
+    with open("README.md") as f:
+        return f.read()
+
+
 setup(
     name="openTSNE",
-    description="",
-    version="0.3.1",
+    description=readme(),
+    version="0.3.2",
     license="BSD-3-Clause",
 
     author="Pavlin Poličar",
