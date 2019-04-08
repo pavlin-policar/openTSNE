@@ -123,8 +123,8 @@ class NNDescent(KNNIndex):
         )
 
     def query_train(self, data, k):
-        indices, neighbors = self.index._neighbor_graph
-        return indices[:, :k], neighbors[:, :k]
+        neighbors, distances = self.index.query(data, k=k + 1, queue_size=1)
+        return neighbors[:, 1:], distances[:, 1:]
 
     def query(self, query, k):
         return self.index.query(query, k=k, queue_size=1)
