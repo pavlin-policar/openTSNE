@@ -152,7 +152,7 @@ except ImportError:
 setup(
     name="openTSNE",
     description="",
-    version="0.3.0",
+    version="0.3.1",
     license="BSD-3-Clause",
 
     author="Pavlin Poličar",
