@@ -121,15 +121,9 @@ class PerplexityBasedNN(Affinities):
         self.n_samples = data.shape[0]
         self.perplexity = self.check_perplexity(perplexity)
 
-        self.knn_index = build_knn_index(
-            data, method, metric, metric_params, n_jobs, random_state
-        )
-
-        # Find and store the nearest neighbors so we can reuse them if the
-        # perplexity is ever lowered
         k_neighbors = min(self.n_samples - 1, int(3 * self.perplexity))
-        self.__neighbors, self.__distances = self.knn_index.query_train(
-            data, k=k_neighbors
+        self.knn_index, self.__neighbors, self.__distances = build_knn_index(
+            data, method, k_neighbors, metric, metric_params, n_jobs, random_state
         )
 
         self.P = joint_probabilities_nn(
@@ -251,18 +245,17 @@ class PerplexityBasedNN(Affinities):
         if self.n_samples - 1 < 3 * perplexity:
             old_perplexity, perplexity = perplexity, (self.n_samples - 1) / 3
             log.warning(
-                "Perplexity value %d is too high. Using perplexity "
-                "%.2f instead" % (old_perplexity, perplexity)
+                "Perplexity value %d is too high. Using perplexity %.2f "
+                "instead" % (old_perplexity, perplexity)
             )
 
         return perplexity
 
 
 def build_knn_index(
-    data, method, metric, metric_params=None, n_jobs=1, random_state=None
+    data, method, k, metric, metric_params=None, n_jobs=1, random_state=None
 ):
     methods = {
-        "exact_alt": nearest_neighbors.VPTree,
         "exact": nearest_neighbors.BallTree,
         "approx": nearest_neighbors.NNDescent,
     }
@@ -271,9 +264,9 @@ def build_knn_index(
 
     elif method not in methods:
         raise ValueError(
-            "Unrecognized nearest neighbor algorithm `%s`. "
-            "Please choose one of the supported methods or "
-            "provide a valid `KNNIndex` instance." % method
+            "Unrecognized nearest neighbor algorithm `%s`. Please choose one "
+            "of the supported methods or provide a valid `KNNIndex` instance."
+            % method
         )
     else:
         knn_index = methods[method](
@@ -283,9 +276,9 @@ def build_knn_index(
             random_state=random_state,
         )
 
-    knn_index.build(data)
+    neighbors, distances = knn_index.build(data, k=k)
 
-    return knn_index
+    return knn_index, neighbors, distances
 
 
 def joint_probabilities_nn(
@@ -440,10 +433,9 @@ class FixedSigmaNN(Affinities):
                 "`k` (%d) cannot be larger than N-1 (%d)." % (k, self.n_samples)
             )
 
-        knn_index = build_knn_index(
-            data, method, metric, metric_params, n_jobs, random_state
+        knn_index, neighbors, distances = build_knn_index(
+            data, method, k, metric, metric_params, n_jobs, random_state
         )
-        neighbors, distances = knn_index.query_train(data, k=k)
 
         self.knn_index = knn_index
 
@@ -514,8 +506,8 @@ class FixedSigmaNN(Affinities):
             k = self.k
         elif k >= n_reference_samples:
             raise ValueError(
-                "`k` (%d) cannot be larger than the number of "
-                "reference samples (%d)." % (k, self.n_samples)
+                "`k` (%d) cannot be larger than the number of reference "
+                "samples (%d)." % (k, self.n_samples)
             )
 
         if sigma is None:
@@ -608,12 +600,10 @@ class MultiscaleMixture(Affinities):
         max_perplexity = np.max(perplexities)
         k_neighbors = min(self.n_samples - 1, int(3 * max_perplexity))
 
-        knn_index = build_knn_index(
-            data, method, metric, metric_params, n_jobs, random_state
+        self.knn_index, self.__neighbors, self.__distances = build_knn_index(
+            data, method, k_neighbors, metric, metric_params, n_jobs, random_state
         )
-        self.__neighbors, self.__distances = knn_index.query_train(data, k=k_neighbors)
 
-        self.knn_index = knn_index
         self.P = self._calculate_P(
             self.__neighbors,
             self.__distances,
