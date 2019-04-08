@@ -119,7 +119,6 @@ class CythonBuildExt(build_ext):
 
 
 extensions = [
-    Extension("openTSNE.vptree", ["openTSNE/vptree.pyx"], language="c++"),
     Extension("openTSNE.quad_tree", ["openTSNE/quad_tree.pyx"]),
     Extension("openTSNE._tsne", ["openTSNE/_tsne.pyx"]),
     Extension("openTSNE.kl_divergence", ["openTSNE/kl_divergence.pyx"]),
