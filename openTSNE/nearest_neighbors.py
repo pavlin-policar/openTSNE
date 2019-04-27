@@ -40,12 +40,17 @@ class KNNIndex:
         self.random_state = random_state
 
     def build(self, data, k):
-        """Build the index so we can query nearest neighbors.
+        """Build the nearest neighbor index on the training data.
+
+        Builds an index on the training data and computes the nearest neighbors
+        on the training data.
 
         Parameters
         ----------
         data: array_like
+            Training data.
         k: int
+            The number of nearest neighbors to compute on the training data.
 
         Returns
         -------
@@ -55,7 +60,22 @@ class KNNIndex:
         """
 
     def query(self, query, k):
-        """Query the index with new points."""
+        """Query the index with new points.
+
+        Finds k nearest neighbors from the training data to each row of the
+        query data.
+
+        Parameters
+        ----------
+        query: array_like
+        k: int
+
+        Returns
+        -------
+        indices: np.ndarray
+        distances: np.ndarray
+
+        """
 
     def check_metric(self, metric):
         """Check that the metric is supported by the KNNIndex instance."""
