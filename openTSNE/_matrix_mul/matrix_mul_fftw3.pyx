@@ -4,6 +4,7 @@
 # cython: cdivision=True
 # cython: initializedcheck=False
 # cython: warn.undeclared=True
+# cython: language_level=3
 cimport openTSNE._matrix_mul.matrix_mul
 cimport numpy as np
 import numpy as np
