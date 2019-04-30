@@ -526,6 +526,18 @@ class TSNEEmbedding(np.ndarray):
             flag indicates whether we should propagate that exception or to
             simply stop optimization and return the resulting embedding.
 
+        min_grad_norm: float
+            If the gradient norm is below this threshold, the optimization will
+            be stopped.
+
+        max_grad_norm: float
+            Maximum gradient norm. If the norm exceeds this value, it will be
+            clipped. This is most beneficial when adding points into an existing
+            embedding and the new points overlap with the reference points,
+            leading to large gradients. This can make points "shoot off" from
+            the embedding, causing the interpolation method to compute a very
+            large grid, and leads to worse results.
+
         random_state: Union[int, RandomState]
             The random state parameter follows the convention used in
             scikit-learn. If the value is an int, random_state is the seed used
@@ -596,7 +608,8 @@ class TSNEEmbedding(np.ndarray):
         return embedding
 
     def transform(self, X, perplexity=5, initialization="median", k=25,
-                  learning_rate=1, n_iter=100, exaggeration=2, momentum=0):
+                  learning_rate=100, n_iter=100, exaggeration=2, momentum=0,
+                  max_grad_norm=0.25):
         """Embed new points into the existing embedding.
 
         This procedure optimizes each point only with respect to the existing
@@ -648,6 +661,14 @@ class TSNEEmbedding(np.ndarray):
         momentum: float
             The momentum to use during optimization phase.
 
+        max_grad_norm: float
+            Maximum gradient norm. If the norm exceeds this value, it will be
+            clipped. This is most beneficial when adding points into an existing
+            embedding and the new points overlap with the reference points,
+            leading to large gradients. This can make points "shoot off" from
+            the embedding, causing the interpolation method to compute a very
+            large grid, and leads to worse results.
+
         Returns
         -------
         PartialTSNEEmbedding
@@ -680,6 +701,7 @@ class TSNEEmbedding(np.ndarray):
                 momentum=momentum,
                 inplace=True,
                 propagate_exception=True,
+                max_grad_norm=max_grad_norm,
             )
 
         except OptimizationInterrupt as ex:
@@ -834,6 +856,18 @@ class TSNE(BaseEstimator):
     final_momentum: float
         The momentum to use during the normal optimization phase.
 
+    min_grad_norm: float
+        If the gradient norm is below this threshold, the optimization will
+        be stopped.
+
+    max_grad_norm: float
+        Maximum gradient norm. If the norm exceeds this value, it will be
+        clipped. This is most beneficial when adding points into an existing
+        embedding and the new points overlap with the reference points,
+        leading to large gradients. This can make points "shoot off" from
+        the embedding, causing the interpolation method to compute a very
+        large grid, and leads to worse results.
+
     n_jobs: int
         The number of threads to use while running t-SNE. This follows the
         scikit-learn convention, ``-1`` meaning all processors, ``-2`` meaning
@@ -872,6 +906,7 @@ class TSNE(BaseEstimator):
                  theta=0.5, n_interpolation_points=3, min_num_intervals=10,
                  ints_in_interval=1, initialization="pca", metric="euclidean",
                  metric_params=None, initial_momentum=0.5, final_momentum=0.8,
+                 min_grad_norm=1e-8, max_grad_norm=None,
                  n_jobs=1, neighbors="approx", negative_gradient_method="fft",
                  callbacks=None, callbacks_every_iters=50, random_state=None):
         self.n_components = n_components
@@ -895,6 +930,8 @@ class TSNE(BaseEstimator):
         self.metric_params = metric_params
         self.initial_momentum = initial_momentum
         self.final_momentum = final_momentum
+        self.min_grad_norm = min_grad_norm
+        self.max_grad_norm = max_grad_norm
         self.n_jobs = n_jobs
         self.neighbors_method = neighbors
         self.negative_gradient_method = negative_gradient_method
@@ -1019,6 +1056,9 @@ class TSNE(BaseEstimator):
             "min_num_intervals": self.min_num_intervals,
             "ints_in_interval": self.ints_in_interval,
 
+            "min_grad_norm": self.min_grad_norm,
+            "max_grad_norm": self.max_grad_norm,
+
             "n_jobs": self.n_jobs,
             # Callback params
             "callbacks": self.callbacks,
@@ -1128,9 +1168,10 @@ class gradient_descent:
 
     def __call__(self, embedding, P, n_iter, objective_function, learning_rate=200,
                  momentum=0.5, exaggeration=None, dof=1, min_gain=0.01,
-                 min_grad_norm=1e-8, theta=0.5, n_interpolation_points=3,
-                 min_num_intervals=10, ints_in_interval=1, reference_embedding=None,
-                 n_jobs=1, use_callbacks=False, callbacks=None, callbacks_every_iters=50):
+                 min_grad_norm=1e-8, max_grad_norm=None, theta=0.5,
+                 n_interpolation_points=3, min_num_intervals=10, ints_in_interval=1,
+                 reference_embedding=None, n_jobs=1,
+                 use_callbacks=False, callbacks=None, callbacks_every_iters=50):
         """Perform batch gradient descent with momentum and gains.
 
         Parameters
@@ -1171,6 +1212,14 @@ class gradient_descent:
         min_grad_norm: float
             If the gradient norm is below this threshold, the optimization will
             be stopped.
+
+        max_grad_norm: float
+            Maximum gradient norm. If the norm exceeds this value, it will be
+            clipped. This is most beneficial when adding points into an existing
+            embedding and the new points overlap with the reference points,
+            leading to large gradients. This can make points "shoot off" from
+            the embedding, causing the interpolation method to compute a very
+            large grid, and leads to worse results.
 
         theta: float
             This is the trade-off parameter between speed and accuracy of the
@@ -1268,6 +1317,16 @@ class gradient_descent:
                 reference_embedding=reference_embedding, n_jobs=n_jobs,
                 should_eval_error=should_eval_error,
             )
+
+            # Clip gradients to avoid points shooting off. This can be an issue
+            # when applying transform and points are initialized so that the new
+            # points overlap with the reference points, leading to large
+            # gradients
+            if max_grad_norm is not None:
+                norm = np.linalg.norm(gradient)
+                coeff = max_grad_norm / (norm + 1e-6)
+                if coeff < 1:
+                    gradient *= coeff
 
             # Correct the KL divergence w.r.t. the exaggeration if needed
             if should_eval_error and exaggeration != 1:
