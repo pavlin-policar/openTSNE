@@ -2673,7 +2673,7 @@ static PyObject *__pyx_tuple__32;
 static PyObject *__pyx_codeobj__26;
 /* Late includes */
 
-/* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":33
+/* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":34
  * 
  * 
  * cdef double[:, ::1] matrix_multiply_fft_1d(             # <<<<<<<<<<<<<<
@@ -2727,9 +2727,9 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   Py_ssize_t __pyx_t_28;
   Py_ssize_t __pyx_t_29;
   __Pyx_RefNannySetupContext("matrix_multiply_fft_1d", 0);
-  __Pyx_TraceCall("matrix_multiply_fft_1d", __pyx_f[0], 33, 0, __PYX_ERR(0, 33, __pyx_L1_error));
+  __Pyx_TraceCall("matrix_multiply_fft_1d", __pyx_f[0], 34, 0, __PYX_ERR(0, 34, __pyx_L1_error));
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":59
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":60
  *     """
  *     cdef:
  *         Py_ssize_t n_interpolation_points_1d = w_coefficients.shape[0]             # <<<<<<<<<<<<<<
@@ -2738,7 +2738,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_n_interpolation_points_1d = (__pyx_v_w_coefficients.shape[0]);
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":60
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":61
  *     cdef:
  *         Py_ssize_t n_interpolation_points_1d = w_coefficients.shape[0]
  *         Py_ssize_t n_terms = w_coefficients.shape[1]             # <<<<<<<<<<<<<<
@@ -2747,7 +2747,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_n_terms = (__pyx_v_w_coefficients.shape[1]);
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":61
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":62
  *         Py_ssize_t n_interpolation_points_1d = w_coefficients.shape[0]
  *         Py_ssize_t n_terms = w_coefficients.shape[1]
  *         Py_ssize_t n_fft_coeffs = kernel_tilde.shape[0]             # <<<<<<<<<<<<<<
@@ -2756,23 +2756,23 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_n_fft_coeffs = (__pyx_v_kernel_tilde.shape[0]);
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":63
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":64
  *         Py_ssize_t n_fft_coeffs = kernel_tilde.shape[0]
  * 
  *         double[:, ::1] y_tilde_values = np.empty((n_interpolation_points_1d, n_terms), dtype=float)             # <<<<<<<<<<<<<<
  * 
  *         complex[::1] fft_kernel_tilde = np.empty(n_fft_coeffs, dtype=complex)
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 63, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 64, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 63, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 64, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_interpolation_points_1d); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 63, __pyx_L1_error)
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_interpolation_points_1d); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 64, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_n_terms); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 63, __pyx_L1_error)
+  __pyx_t_3 = PyInt_FromSsize_t(__pyx_v_n_terms); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 64, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 63, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 64, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
@@ -2780,158 +2780,158 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_3);
   __pyx_t_1 = 0;
   __pyx_t_3 = 0;
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 63, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 64, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 63, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 64, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 63, __pyx_L1_error)
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 63, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 64, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 64, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 63, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 64, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_y_tilde_values = __pyx_t_5;
   __pyx_t_5.memview = NULL;
   __pyx_t_5.data = NULL;
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":65
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":66
  *         double[:, ::1] y_tilde_values = np.empty((n_interpolation_points_1d, n_terms), dtype=float)
  * 
  *         complex[::1] fft_kernel_tilde = np.empty(n_fft_coeffs, dtype=complex)             # <<<<<<<<<<<<<<
  *         complex[::1] fft_w_coeffs = np.empty(n_fft_coeffs, dtype=complex)
  *         # Note that we can't use the same buffer for the input and output since
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 65, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 65, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 65, __pyx_L1_error)
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 65, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 65, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyComplex_Type))) < 0) __PYX_ERR(0, 65, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 65, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyComplex_Type))) < 0) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dc___pyx_t_double_complex(__pyx_t_2, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 65, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dc___pyx_t_double_complex(__pyx_t_2, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_fft_kernel_tilde = __pyx_t_6;
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":66
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":67
  * 
  *         complex[::1] fft_kernel_tilde = np.empty(n_fft_coeffs, dtype=complex)
  *         complex[::1] fft_w_coeffs = np.empty(n_fft_coeffs, dtype=complex)             # <<<<<<<<<<<<<<
  *         # Note that we can't use the same buffer for the input and output since
  *         # we only write to the first half of the vector - we'd need to
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 67, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_empty); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_empty); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 67, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 67, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 67, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 67, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, ((PyObject *)(&PyComplex_Type))) < 0) __PYX_ERR(0, 66, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 66, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, ((PyObject *)(&PyComplex_Type))) < 0) __PYX_ERR(0, 67, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 67, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dc___pyx_t_double_complex(__pyx_t_4, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dc___pyx_t_double_complex(__pyx_t_4, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 67, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_fft_w_coeffs = __pyx_t_6;
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":72
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":73
  *         # changed during the IDFT, so it's faster to use two buffers, at the
  *         # cost of some memory
  *         double[::1] fft_in_buffer = np.zeros(n_fft_coeffs, dtype=float)             # <<<<<<<<<<<<<<
  *         double[::1] fft_out_buffer = np.zeros(n_fft_coeffs, dtype=float)
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 72, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 72, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 72, __pyx_L1_error)
+  __pyx_t_4 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 72, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 72, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 72, __pyx_L1_error)
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 72, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 73, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 72, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_fft_in_buffer = __pyx_t_7;
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":73
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":74
  *         # cost of some memory
  *         double[::1] fft_in_buffer = np.zeros(n_fft_coeffs, dtype=float)
  *         double[::1] fft_out_buffer = np.zeros(n_fft_coeffs, dtype=float)             # <<<<<<<<<<<<<<
  * 
  *         Py_ssize_t d, i
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 73, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 74, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 73, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 74, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 73, __pyx_L1_error)
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 74, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 73, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 74, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 73, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 74, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 73, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 73, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyFloat_Type))) < 0) __PYX_ERR(0, 74, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 74, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_2, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 73, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_2, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 74, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_fft_out_buffer = __pyx_t_7;
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":81
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":82
  *     plan_dft = fftw_plan_dft_r2c_1d(
  *         n_fft_coeffs,
  *         &kernel_tilde[0], <fftw_complex *>(&fft_kernel_tilde[0]),             # <<<<<<<<<<<<<<
@@ -2941,7 +2941,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_t_8 = 0;
   __pyx_t_9 = 0;
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":79
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":80
  *     # Compute the FFT of the kernel vector
  *     cdef fftw_plan plan_dft, plan_idft
  *     plan_dft = fftw_plan_dft_r2c_1d(             # <<<<<<<<<<<<<<
@@ -2950,7 +2950,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_plan_dft = fftw_plan_dft_r2c_1d(__pyx_v_n_fft_coeffs, (&(*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_kernel_tilde.data) + __pyx_t_8)) )))), ((fftw_complex *)(&(*((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_kernel_tilde.data) + __pyx_t_9)) ))))), FFTW_ESTIMATE);
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":84
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":85
  *         FFTW_ESTIMATE,
  *     )
  *     fftw_execute(plan_dft)             # <<<<<<<<<<<<<<
@@ -2959,7 +2959,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   fftw_execute(__pyx_v_plan_dft);
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":85
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":86
  *     )
  *     fftw_execute(plan_dft)
  *     fftw_destroy_plan(plan_dft)             # <<<<<<<<<<<<<<
@@ -2968,17 +2968,17 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   fftw_destroy_plan(__pyx_v_plan_dft);
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":89
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":90
  *     plan_dft = fftw_plan_dft_r2c_1d(
  *         n_fft_coeffs,
  *         &fft_in_buffer[0], <fftw_complex *>(&fft_w_coeffs[0]),             # <<<<<<<<<<<<<<
- *         FFTW_ESTIMATE,
+ *         FFTW_ESTIMATE
  *     )
  */
   __pyx_t_10 = 0;
   __pyx_t_11 = 0;
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":87
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":88
  *     fftw_destroy_plan(plan_dft)
  * 
  *     plan_dft = fftw_plan_dft_r2c_1d(             # <<<<<<<<<<<<<<
@@ -2987,18 +2987,18 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_plan_dft = fftw_plan_dft_r2c_1d(__pyx_v_n_fft_coeffs, (&(*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_fft_in_buffer.data) + __pyx_t_10)) )))), ((fftw_complex *)(&(*((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_w_coeffs.data) + __pyx_t_11)) ))))), FFTW_ESTIMATE);
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":94
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":95
  *     plan_idft = fftw_plan_dft_c2r_1d(
  *         n_fft_coeffs,
  *         <fftw_complex *>(&fft_w_coeffs[0]), &fft_out_buffer[0],             # <<<<<<<<<<<<<<
- *         FFTW_ESTIMATE,
+ *         FFTW_ESTIMATE
  *     )
  */
   __pyx_t_12 = 0;
   __pyx_t_13 = 0;
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":92
- *         FFTW_ESTIMATE,
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":93
+ *         FFTW_ESTIMATE
  *     )
  *     plan_idft = fftw_plan_dft_c2r_1d(             # <<<<<<<<<<<<<<
  *         n_fft_coeffs,
@@ -3006,7 +3006,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_plan_idft = fftw_plan_dft_c2r_1d(__pyx_v_n_fft_coeffs, ((fftw_complex *)(&(*((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_w_coeffs.data) + __pyx_t_12)) ))))), (&(*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_fft_out_buffer.data) + __pyx_t_13)) )))), FFTW_ESTIMATE);
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":98
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":99
  *     )
  * 
  *     for d in range(n_terms):             # <<<<<<<<<<<<<<
@@ -3018,7 +3018,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   for (__pyx_t_16 = 0; __pyx_t_16 < __pyx_t_15; __pyx_t_16+=1) {
     __pyx_v_d = __pyx_t_16;
 
-    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":99
+    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":100
  * 
  *     for d in range(n_terms):
  *         for i in range(n_interpolation_points_1d):             # <<<<<<<<<<<<<<
@@ -3030,7 +3030,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
     for (__pyx_t_19 = 0; __pyx_t_19 < __pyx_t_18; __pyx_t_19+=1) {
       __pyx_v_i = __pyx_t_19;
 
-      /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":100
+      /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":101
  *     for d in range(n_terms):
  *         for i in range(n_interpolation_points_1d):
  *             fft_in_buffer[i] = w_coefficients[i, d]             # <<<<<<<<<<<<<<
@@ -3043,7 +3043,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
       *((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_fft_in_buffer.data) + __pyx_t_22)) )) = (*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_w_coefficients.data + __pyx_t_20 * __pyx_v_w_coefficients.strides[0]) )) + __pyx_t_21)) )));
     }
 
-    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":102
+    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":103
  *             fft_in_buffer[i] = w_coefficients[i, d]
  * 
  *         fftw_execute(plan_dft)             # <<<<<<<<<<<<<<
@@ -3052,7 +3052,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
     fftw_execute(__pyx_v_plan_dft);
 
-    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":105
+    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":106
  * 
  *         # Take the Hadamard product of two complex vectors
  *         for i in range(n_fft_coeffs):             # <<<<<<<<<<<<<<
@@ -3064,7 +3064,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
     for (__pyx_t_19 = 0; __pyx_t_19 < __pyx_t_18; __pyx_t_19+=1) {
       __pyx_v_i = __pyx_t_19;
 
-      /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":106
+      /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":107
  *         # Take the Hadamard product of two complex vectors
  *         for i in range(n_fft_coeffs):
  *             fft_w_coeffs[i] = fft_w_coeffs[i] * fft_kernel_tilde[i]             # <<<<<<<<<<<<<<
@@ -3077,7 +3077,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
       *((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_w_coeffs.data) + __pyx_t_25)) )) = __Pyx_c_prod_double((*((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_w_coeffs.data) + __pyx_t_23)) ))), (*((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_kernel_tilde.data) + __pyx_t_24)) ))));
     }
 
-    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":108
+    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":109
  *             fft_w_coeffs[i] = fft_w_coeffs[i] * fft_kernel_tilde[i]
  * 
  *         fftw_execute(plan_idft)             # <<<<<<<<<<<<<<
@@ -3086,7 +3086,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
     fftw_execute(__pyx_v_plan_idft);
 
-    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":110
+    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":111
  *         fftw_execute(plan_idft)
  * 
  *         for i in range(n_interpolation_points_1d):             # <<<<<<<<<<<<<<
@@ -3098,7 +3098,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
     for (__pyx_t_19 = 0; __pyx_t_19 < __pyx_t_18; __pyx_t_19+=1) {
       __pyx_v_i = __pyx_t_19;
 
-      /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":114
+      /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":115
  *             # ourselves. This is done by multiplying the result with the number
  *             #  of points in the input
  *             y_tilde_values[i, d] = fft_out_buffer[n_interpolation_points_1d + i].real / n_fft_coeffs             # <<<<<<<<<<<<<<
@@ -3106,18 +3106,18 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  *     fftw_destroy_plan(plan_dft)
  */
       __pyx_t_26 = (__pyx_v_n_interpolation_points_1d + __pyx_v_i);
-      __pyx_t_2 = PyFloat_FromDouble((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_fft_out_buffer.data) + __pyx_t_26)) )))); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 114, __pyx_L1_error)
+      __pyx_t_2 = PyFloat_FromDouble((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_fft_out_buffer.data) + __pyx_t_26)) )))); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 115, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_real); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 114, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_real); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 115, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 114, __pyx_L1_error)
+      __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 115, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_3 = __Pyx_PyNumber_Divide(__pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 114, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyNumber_Divide(__pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 115, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __pyx_t_27 = __pyx_PyFloat_AsDouble(__pyx_t_3); if (unlikely((__pyx_t_27 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 114, __pyx_L1_error)
+      __pyx_t_27 = __pyx_PyFloat_AsDouble(__pyx_t_3); if (unlikely((__pyx_t_27 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 115, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __pyx_t_28 = __pyx_v_i;
       __pyx_t_29 = __pyx_v_d;
@@ -3125,7 +3125,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
     }
   }
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":116
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":117
  *             y_tilde_values[i, d] = fft_out_buffer[n_interpolation_points_1d + i].real / n_fft_coeffs
  * 
  *     fftw_destroy_plan(plan_dft)             # <<<<<<<<<<<<<<
@@ -3134,7 +3134,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   fftw_destroy_plan(__pyx_v_plan_dft);
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":117
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":118
  * 
  *     fftw_destroy_plan(plan_dft)
  *     fftw_destroy_plan(plan_idft)             # <<<<<<<<<<<<<<
@@ -3143,7 +3143,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   fftw_destroy_plan(__pyx_v_plan_idft);
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":119
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":120
  *     fftw_destroy_plan(plan_idft)
  * 
  *     return y_tilde_values             # <<<<<<<<<<<<<<
@@ -3154,7 +3154,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_r = __pyx_v_y_tilde_values;
   goto __pyx_L0;
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":33
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":34
  * 
  * 
  * cdef double[:, ::1] matrix_multiply_fft_1d(             # <<<<<<<<<<<<<<
@@ -3190,7 +3190,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   return __pyx_r;
 }
 
-/* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":122
+/* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":123
  * 
  * 
  * cdef double[:, ::1] matrix_multiply_fft_2d(             # <<<<<<<<<<<<<<
@@ -3254,9 +3254,9 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   Py_ssize_t __pyx_t_35;
   Py_ssize_t __pyx_t_36;
   __Pyx_RefNannySetupContext("matrix_multiply_fft_2d", 0);
-  __Pyx_TraceCall("matrix_multiply_fft_2d", __pyx_f[0], 122, 0, __PYX_ERR(0, 122, __pyx_L1_error));
+  __Pyx_TraceCall("matrix_multiply_fft_2d", __pyx_f[0], 123, 0, __PYX_ERR(0, 123, __pyx_L1_error));
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":148
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":149
  *     """
  *     cdef:
  *         Py_ssize_t total_interpolation_points = w_coefficients.shape[0]             # <<<<<<<<<<<<<<
@@ -3265,7 +3265,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_total_interpolation_points = (__pyx_v_w_coefficients.shape[0]);
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":149
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":150
  *     cdef:
  *         Py_ssize_t total_interpolation_points = w_coefficients.shape[0]
  *         Py_ssize_t n_terms = w_coefficients.shape[1]             # <<<<<<<<<<<<<<
@@ -3274,7 +3274,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_n_terms = (__pyx_v_w_coefficients.shape[1]);
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":150
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":151
  *         Py_ssize_t total_interpolation_points = w_coefficients.shape[0]
  *         Py_ssize_t n_terms = w_coefficients.shape[1]
  *         Py_ssize_t n_fft_coeffs = kernel_tilde.shape[0]             # <<<<<<<<<<<<<<
@@ -3283,7 +3283,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_n_fft_coeffs = (__pyx_v_kernel_tilde.shape[0]);
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":151
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":152
  *         Py_ssize_t n_terms = w_coefficients.shape[1]
  *         Py_ssize_t n_fft_coeffs = kernel_tilde.shape[0]
  *         Py_ssize_t n_interpolation_points_1d = n_fft_coeffs / 2             # <<<<<<<<<<<<<<
@@ -3292,23 +3292,23 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_n_interpolation_points_1d = (__pyx_v_n_fft_coeffs / 2);
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":153
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":154
  *         Py_ssize_t n_interpolation_points_1d = n_fft_coeffs / 2
  * 
  *         double[:, ::1] y_tilde_values = np.empty((total_interpolation_points, n_terms))             # <<<<<<<<<<<<<<
  * 
  *         fftw_plan plan_dft, plan_idft
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 153, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 154, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_empty); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 153, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_empty); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 154, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_total_interpolation_points); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 153, __pyx_L1_error)
+  __pyx_t_2 = PyInt_FromSsize_t(__pyx_v_total_interpolation_points); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 154, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = PyInt_FromSsize_t(__pyx_v_n_terms); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 153, __pyx_L1_error)
+  __pyx_t_4 = PyInt_FromSsize_t(__pyx_v_n_terms); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 154, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 153, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 154, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_2);
@@ -3329,98 +3329,98 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_t_1 = (__pyx_t_4) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_4, __pyx_t_5) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_5);
   __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 153, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 154, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 153, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 154, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_y_tilde_values = __pyx_t_6;
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":156
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":157
  * 
  *         fftw_plan plan_dft, plan_idft
  *         complex[::1] fft_w_coefficients = np.empty(n_fft_coeffs * (n_fft_coeffs / 2 + 1), dtype=complex)             # <<<<<<<<<<<<<<
  *         complex[::1] fft_kernel_tilde = np.empty(n_fft_coeffs * (n_fft_coeffs / 2 + 1), dtype=complex)
  *         # Note that we can't use the same buffer for the input and output since
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 156, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 157, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 156, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 157, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyInt_FromSsize_t((__pyx_v_n_fft_coeffs * ((__pyx_v_n_fft_coeffs / 2) + 1))); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 156, __pyx_L1_error)
+  __pyx_t_1 = PyInt_FromSsize_t((__pyx_v_n_fft_coeffs * ((__pyx_v_n_fft_coeffs / 2) + 1))); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 157, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 156, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 157, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 156, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 157, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyComplex_Type))) < 0) __PYX_ERR(0, 156, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 156, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyComplex_Type))) < 0) __PYX_ERR(0, 157, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 157, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dc___pyx_t_double_complex(__pyx_t_4, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 156, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dc___pyx_t_double_complex(__pyx_t_4, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 157, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_fft_w_coefficients = __pyx_t_7;
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":157
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":158
  *         fftw_plan plan_dft, plan_idft
  *         complex[::1] fft_w_coefficients = np.empty(n_fft_coeffs * (n_fft_coeffs / 2 + 1), dtype=complex)
  *         complex[::1] fft_kernel_tilde = np.empty(n_fft_coeffs * (n_fft_coeffs / 2 + 1), dtype=complex)             # <<<<<<<<<<<<<<
  *         # Note that we can't use the same buffer for the input and output since
  *         # we only write to the top quadrant of the in matrix - we'd need to
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 157, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 158, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_empty); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 157, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_empty); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 158, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyInt_FromSsize_t((__pyx_v_n_fft_coeffs * ((__pyx_v_n_fft_coeffs / 2) + 1))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 157, __pyx_L1_error)
+  __pyx_t_4 = PyInt_FromSsize_t((__pyx_v_n_fft_coeffs * ((__pyx_v_n_fft_coeffs / 2) + 1))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 158, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 157, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 158, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 157, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 158, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, ((PyObject *)(&PyComplex_Type))) < 0) __PYX_ERR(0, 157, __pyx_L1_error)
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_5, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 157, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, ((PyObject *)(&PyComplex_Type))) < 0) __PYX_ERR(0, 158, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_5, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 158, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dc___pyx_t_double_complex(__pyx_t_3, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 157, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dc___pyx_t_double_complex(__pyx_t_3, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 158, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_fft_kernel_tilde = __pyx_t_7;
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":163
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":164
  *         # changed during the IDFT, so it's faster to use two buffers, at the
  *         # cost of some memory
  *         double[:, ::1] fft_in_buffer = np.zeros((n_fft_coeffs, n_fft_coeffs))             # <<<<<<<<<<<<<<
  *         double[:, ::1] fft_out_buffer = np.zeros((n_fft_coeffs, n_fft_coeffs))
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 164, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_zeros); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_zeros); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 164, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_4 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 164, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 164, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 164, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_4);
@@ -3441,32 +3441,32 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_t_3 = (__pyx_t_1) ? __Pyx_PyObject_Call2Args(__pyx_t_5, __pyx_t_1, __pyx_t_2) : __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_2);
   __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 163, __pyx_L1_error)
+  if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 164, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_3, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_3, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 164, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_fft_in_buffer = __pyx_t_6;
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":164
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":165
  *         # cost of some memory
  *         double[:, ::1] fft_in_buffer = np.zeros((n_fft_coeffs, n_fft_coeffs))
  *         double[:, ::1] fft_out_buffer = np.zeros((n_fft_coeffs, n_fft_coeffs))             # <<<<<<<<<<<<<<
  * 
  *         Py_ssize_t d, i, j, idx
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 164, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 165, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 164, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 165, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 164, __pyx_L1_error)
+  __pyx_t_5 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 165, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 164, __pyx_L1_error)
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_n_fft_coeffs); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 165, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 164, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 165, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_5);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_5);
@@ -3487,16 +3487,16 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_t_3 = (__pyx_t_1) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_1, __pyx_t_4) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_4);
   __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 164, __pyx_L1_error)
+  if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 165, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_3, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 164, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_double(__pyx_t_3, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 165, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_fft_out_buffer = __pyx_t_6;
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":170
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":171
  *     plan_dft = fftw_plan_dft_r2c_2d(
  *         n_fft_coeffs, n_fft_coeffs,
  *         &kernel_tilde[0, 0], <fftw_complex *>(&fft_kernel_tilde[0]),             # <<<<<<<<<<<<<<
@@ -3507,7 +3507,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_t_9 = 0;
   __pyx_t_10 = 0;
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":168
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":169
  *         Py_ssize_t d, i, j, idx
  * 
  *     plan_dft = fftw_plan_dft_r2c_2d(             # <<<<<<<<<<<<<<
@@ -3516,7 +3516,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_plan_dft = fftw_plan_dft_r2c_2d(__pyx_v_n_fft_coeffs, __pyx_v_n_fft_coeffs, (&(*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_kernel_tilde.data + __pyx_t_8 * __pyx_v_kernel_tilde.strides[0]) )) + __pyx_t_9)) )))), ((fftw_complex *)(&(*((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_kernel_tilde.data) + __pyx_t_10)) ))))), FFTW_ESTIMATE);
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":173
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":174
  *         FFTW_ESTIMATE,
  *     )
  *     fftw_execute(plan_dft)             # <<<<<<<<<<<<<<
@@ -3525,7 +3525,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   fftw_execute(__pyx_v_plan_dft);
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":174
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":175
  *     )
  *     fftw_execute(plan_dft)
  *     fftw_destroy_plan(plan_dft)             # <<<<<<<<<<<<<<
@@ -3534,7 +3534,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   fftw_destroy_plan(__pyx_v_plan_dft);
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":178
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":179
  *     plan_dft = fftw_plan_dft_r2c_2d(
  *         n_fft_coeffs, n_fft_coeffs,
  *         &fft_in_buffer[0, 0], <fftw_complex *>(&fft_w_coefficients[0]),             # <<<<<<<<<<<<<<
@@ -3545,7 +3545,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_t_12 = 0;
   __pyx_t_13 = 0;
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":176
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":177
  *     fftw_destroy_plan(plan_dft)
  * 
  *     plan_dft = fftw_plan_dft_r2c_2d(             # <<<<<<<<<<<<<<
@@ -3554,7 +3554,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_plan_dft = fftw_plan_dft_r2c_2d(__pyx_v_n_fft_coeffs, __pyx_v_n_fft_coeffs, (&(*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_fft_in_buffer.data + __pyx_t_11 * __pyx_v_fft_in_buffer.strides[0]) )) + __pyx_t_12)) )))), ((fftw_complex *)(&(*((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_w_coefficients.data) + __pyx_t_13)) ))))), FFTW_ESTIMATE);
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":183
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":184
  *     plan_idft = fftw_plan_dft_c2r_2d(
  *         n_fft_coeffs, n_fft_coeffs,
  *         <fftw_complex *>(&fft_w_coefficients[0]), &fft_out_buffer[0, 0],             # <<<<<<<<<<<<<<
@@ -3565,7 +3565,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_t_15 = 0;
   __pyx_t_16 = 0;
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":181
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":182
  *         FFTW_ESTIMATE
  *     )
  *     plan_idft = fftw_plan_dft_c2r_2d(             # <<<<<<<<<<<<<<
@@ -3574,7 +3574,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   __pyx_v_plan_idft = fftw_plan_dft_c2r_2d(__pyx_v_n_fft_coeffs, __pyx_v_n_fft_coeffs, ((fftw_complex *)(&(*((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_w_coefficients.data) + __pyx_t_14)) ))))), (&(*((double *) ( /* dim=1 */ ((char *) (((double *) ( /* dim=0 */ (__pyx_v_fft_out_buffer.data + __pyx_t_15 * __pyx_v_fft_out_buffer.strides[0]) )) + __pyx_t_16)) )))), FFTW_ESTIMATE);
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":187
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":188
  *     )
  * 
  *     for d in range(n_terms):             # <<<<<<<<<<<<<<
@@ -3586,7 +3586,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   for (__pyx_t_19 = 0; __pyx_t_19 < __pyx_t_18; __pyx_t_19+=1) {
     __pyx_v_d = __pyx_t_19;
 
-    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":188
+    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":189
  * 
  *     for d in range(n_terms):
  *         for i in range(n_interpolation_points_1d):             # <<<<<<<<<<<<<<
@@ -3598,7 +3598,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
     for (__pyx_t_22 = 0; __pyx_t_22 < __pyx_t_21; __pyx_t_22+=1) {
       __pyx_v_i = __pyx_t_22;
 
-      /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":189
+      /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":190
  *     for d in range(n_terms):
  *         for i in range(n_interpolation_points_1d):
  *             for j in range(n_interpolation_points_1d):             # <<<<<<<<<<<<<<
@@ -3610,7 +3610,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
       for (__pyx_t_25 = 0; __pyx_t_25 < __pyx_t_24; __pyx_t_25+=1) {
         __pyx_v_j = __pyx_t_25;
 
-        /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":190
+        /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":191
  *         for i in range(n_interpolation_points_1d):
  *             for j in range(n_interpolation_points_1d):
  *                 fft_in_buffer[i, j] = w_coefficients[i * n_interpolation_points_1d + j, d]             # <<<<<<<<<<<<<<
@@ -3625,7 +3625,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
       }
     }
 
-    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":192
+    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":193
  *                 fft_in_buffer[i, j] = w_coefficients[i * n_interpolation_points_1d + j, d]
  * 
  *         fftw_execute(plan_dft)             # <<<<<<<<<<<<<<
@@ -3634,7 +3634,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
     fftw_execute(__pyx_v_plan_dft);
 
-    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":195
+    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":196
  * 
  *         # Take the Hadamard product of two complex vectors
  *         for i in range(n_fft_coeffs * (n_fft_coeffs / 2 + 1)):             # <<<<<<<<<<<<<<
@@ -3646,7 +3646,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
     for (__pyx_t_22 = 0; __pyx_t_22 < __pyx_t_21; __pyx_t_22+=1) {
       __pyx_v_i = __pyx_t_22;
 
-      /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":196
+      /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":197
  *         # Take the Hadamard product of two complex vectors
  *         for i in range(n_fft_coeffs * (n_fft_coeffs / 2 + 1)):
  *             fft_w_coefficients[i] = fft_w_coefficients[i] * fft_kernel_tilde[i]             # <<<<<<<<<<<<<<
@@ -3659,7 +3659,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
       *((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_w_coefficients.data) + __pyx_t_32)) )) = __Pyx_c_prod_double((*((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_w_coefficients.data) + __pyx_t_30)) ))), (*((__pyx_t_double_complex *) ( /* dim=0 */ ((char *) (((__pyx_t_double_complex *) __pyx_v_fft_kernel_tilde.data) + __pyx_t_31)) ))));
     }
 
-    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":199
+    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":200
  * 
  *         # Invert the computed values at the interpolated nodes
  *         fftw_execute(plan_idft)             # <<<<<<<<<<<<<<
@@ -3668,7 +3668,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
     fftw_execute(__pyx_v_plan_idft);
 
-    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":203
+    /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":204
  *         # ourselves. This is done by multiplying the result with the number of
  *         # points in the input
  *         for i in range(n_interpolation_points_1d):             # <<<<<<<<<<<<<<
@@ -3680,7 +3680,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
     for (__pyx_t_22 = 0; __pyx_t_22 < __pyx_t_21; __pyx_t_22+=1) {
       __pyx_v_i = __pyx_t_22;
 
-      /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":204
+      /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":205
  *         # points in the input
  *         for i in range(n_interpolation_points_1d):
  *             for j in range(n_interpolation_points_1d):             # <<<<<<<<<<<<<<
@@ -3692,7 +3692,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
       for (__pyx_t_25 = 0; __pyx_t_25 < __pyx_t_24; __pyx_t_25+=1) {
         __pyx_v_j = __pyx_t_25;
 
-        /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":205
+        /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":206
  *         for i in range(n_interpolation_points_1d):
  *             for j in range(n_interpolation_points_1d):
  *                 idx = i * n_interpolation_points_1d + j             # <<<<<<<<<<<<<<
@@ -3701,7 +3701,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
         __pyx_v_idx = ((__pyx_v_i * __pyx_v_n_interpolation_points_1d) + __pyx_v_j);
 
-        /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":206
+        /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":207
  *             for j in range(n_interpolation_points_1d):
  *                 idx = i * n_interpolation_points_1d + j
  *                 y_tilde_values[idx, d] = fft_out_buffer[n_interpolation_points_1d + i,             # <<<<<<<<<<<<<<
@@ -3711,7 +3711,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
         __pyx_t_33 = (__pyx_v_n_interpolation_points_1d + __pyx_v_i);
         __pyx_t_34 = (__pyx_v_n_interpolation_points_1d + __pyx_v_j);
 
-        /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":207
+        /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":208
  *                 idx = i * n_interpolation_points_1d + j
  *                 y_tilde_values[idx, d] = fft_out_buffer[n_interpolation_points_1d + i,
  *                                                         n_interpolation_points_1d + j] / n_fft_coeffs ** 2             # <<<<<<<<<<<<<<
@@ -3725,7 +3725,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
     }
   }
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":209
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":210
  *                                                         n_interpolation_points_1d + j] / n_fft_coeffs ** 2
  * 
  *     fftw_destroy_plan(plan_dft)             # <<<<<<<<<<<<<<
@@ -3734,7 +3734,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   fftw_destroy_plan(__pyx_v_plan_dft);
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":210
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":211
  * 
  *     fftw_destroy_plan(plan_dft)
  *     fftw_destroy_plan(plan_idft)             # <<<<<<<<<<<<<<
@@ -3743,7 +3743,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
  */
   fftw_destroy_plan(__pyx_v_plan_idft);
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":212
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":213
  *     fftw_destroy_plan(plan_idft)
  * 
  *     return y_tilde_values             # <<<<<<<<<<<<<<
@@ -3752,7 +3752,7 @@ static __Pyx_memviewslice __pyx_f_8openTSNE_11_matrix_mul_10matrix_mul_matrix_mu
   __pyx_r = __pyx_v_y_tilde_values;
   goto __pyx_L0;
 
-  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":122
+  /* "openTSNE/_matrix_mul/matrix_mul_fftw3.pyx":123
  * 
  * 
  * cdef double[:, ::1] matrix_multiply_fft_2d(             # <<<<<<<<<<<<<<
@@ -20193,7 +20193,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 98, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 99, __pyx_L1_error)
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(1, 272, __pyx_L1_error)
   __pyx_builtin_RuntimeError = __Pyx_GetBuiltinName(__pyx_n_s_RuntimeError); if (!__pyx_builtin_RuntimeError) __PYX_ERR(1, 856, __pyx_L1_error)
   __pyx_builtin_ImportError = __Pyx_GetBuiltinName(__pyx_n_s_ImportError); if (!__pyx_builtin_ImportError) __PYX_ERR(1, 1038, __pyx_L1_error)

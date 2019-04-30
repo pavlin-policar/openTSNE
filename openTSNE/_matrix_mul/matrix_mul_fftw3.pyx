@@ -15,6 +15,7 @@ cdef extern from 'fftw3.h':
     void fftw_plan_with_nthreads(int)
 
     cdef unsigned FFTW_ESTIMATE
+    cdef unsigned FFTW_DESTROY_INPUT
     ctypedef double fftw_complex[2]
 
     ctypedef struct _fftw_plan:
@@ -87,12 +88,12 @@ cdef double[:, ::1] matrix_multiply_fft_1d(
     plan_dft = fftw_plan_dft_r2c_1d(
         n_fft_coeffs,
         &fft_in_buffer[0], <fftw_complex *>(&fft_w_coeffs[0]),
-        FFTW_ESTIMATE,
+        FFTW_ESTIMATE | FFTW_DESTROY_INPUT,
     )
     plan_idft = fftw_plan_dft_c2r_1d(
         n_fft_coeffs,
         <fftw_complex *>(&fft_w_coeffs[0]), &fft_out_buffer[0],
-        FFTW_ESTIMATE,
+        FFTW_ESTIMATE | FFTW_DESTROY_INPUT,
     )
 
     for d in range(n_terms):
@@ -176,12 +177,12 @@ cdef double[:, ::1] matrix_multiply_fft_2d(
     plan_dft = fftw_plan_dft_r2c_2d(
         n_fft_coeffs, n_fft_coeffs,
         &fft_in_buffer[0, 0], <fftw_complex *>(&fft_w_coefficients[0]),
-        FFTW_ESTIMATE
+        FFTW_ESTIMATE | FFTW_DESTROY_INPUT,
     )
     plan_idft = fftw_plan_dft_c2r_2d(
         n_fft_coeffs, n_fft_coeffs,
         <fftw_complex *>(&fft_w_coefficients[0]), &fft_out_buffer[0, 0],
-        FFTW_ESTIMATE
+        FFTW_ESTIMATE | FFTW_DESTROY_INPUT,
     )
 
     for d in range(n_terms):
