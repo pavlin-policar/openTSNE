@@ -87,6 +87,8 @@ class TestTSNEParameterFlow(unittest.TestCase):
         "n_interpolation_points": [3, 5],
         "min_num_intervals": [10, 20, 30],
         "ints_in_interval": [1, 2, 5],
+        "min_grad_norm": [0.01, 0.1],
+        "max_grad_norm": [None, 0.5, 1],
         "n_jobs": [1, 2, 4],
         "callbacks": [None, [lambda *args, **kwargs: ...]],
         "callbacks_every_iters": [25, 50],
@@ -153,6 +155,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
     @check_params({
         "n_iter": [50, 100],
         "momentum": [0.2, 0.5, 0.8],
+        "max_grad_norm": [None, 0.5, 1],
     })
     @patch("openTSNE.tsne.gradient_descent.__call__")
     def test_embedding_transform(self, param_name, param_value, gradient_descent):
@@ -177,6 +180,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         "n_iter": [50, 100, 150],
         "exaggeration": [None, 2, 5],
         "momentum": [0.2, 0.5, 0.8],
+        "max_grad_norm": [None, 0.5, 1],
     }})
     @patch("openTSNE.tsne.gradient_descent.__call__")
     def test_partial_embedding_optimize(self, param_name, param_value, gradient_descent):

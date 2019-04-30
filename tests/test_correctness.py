@@ -136,7 +136,12 @@ class TestTSNECorrectness(unittest.TestCase):
             negative_gradient_method="fft",
         ).fit(x_train)
 
-        params = dict(n_iter=100, perplexity=5)
+        # Changing the gradients using clipping changes how the points move
+        # sufficiently so that the interpolation grid is shifted. This test is
+        # more reliable when we don't do gradient clipping and reduce the
+        # learning rate. We increase the number of iterations so that the points
+        # have time to move around
+        params = dict(n_iter=500, perplexity=5, learning_rate=1, max_grad_norm=None)
         # Build up an embedding by adding points one by one
         new_embedding_1 = np.vstack(
             [embedding.transform(np.atleast_2d(point), **params) for point in x_test]
@@ -165,15 +170,16 @@ class TestTSNECorrectness(unittest.TestCase):
             negative_gradient_method="bh",
             early_exaggeration_iter=0,
             n_iter=50,
+            random_state=0,
         ).fit(x_train)
 
         # Evaluate t-SNE optimization using a KNN classifier
         knn = KNeighborsClassifier(n_neighbors=10)
         knn.fit(embedding, y_train)
 
-        new_embedding = embedding.transform(x_test, n_iter=100, perplexity=100)
+        new_embedding = embedding.transform(x_test, n_iter=100)
         predictions = knn.predict(new_embedding)
-        self.assertGreater(accuracy_score(predictions, y_test), 0.99)
+        self.assertGreater(accuracy_score(predictions, y_test), 0.95)
 
     def test_iris_fft_transform_correctness(self):
         x_train, x_test, y_train, y_test = train_test_split(
@@ -186,15 +192,16 @@ class TestTSNECorrectness(unittest.TestCase):
             negative_gradient_method="fft",
             early_exaggeration_iter=0,
             n_iter=50,
+            random_state=0,
         ).fit(x_train)
 
         # Evaluate t-SNE optimization using a KNN classifier
         knn = KNeighborsClassifier(n_neighbors=10)
         knn.fit(embedding, y_train)
 
-        new_embedding = embedding.transform(x_test, n_iter=100, perplexity=100)
+        new_embedding = embedding.transform(x_test, n_iter=100)
         predictions = knn.predict(new_embedding)
-        self.assertGreater(accuracy_score(predictions, y_test), 0.99)
+        self.assertGreater(accuracy_score(predictions, y_test), 0.95)
 
     def test_bh_transform_with_point_subsets_using_perplexity_nn(self):
         x_train, x_test = train_test_split(
@@ -227,7 +234,7 @@ class TestTSNECorrectness(unittest.TestCase):
         embedding = openTSNE.TSNEEmbedding(
             init, affinity, negative_gradient_method="fft", random_state=42
         )
-        embedding.optimize(n_iter=50, inplace=True)
+        embedding.optimize(n_iter=100, inplace=True)
 
         # The test set contains 50 samples, so let's verify on half of those
         transform_params = dict(n_iter=0)

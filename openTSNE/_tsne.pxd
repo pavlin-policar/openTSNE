@@ -4,6 +4,7 @@
 # cython: cdivision=True
 # cython: initializedcheck=False
 # cython: warn.undeclared=True
+# cython: language_level=3
 from .quad_tree cimport QuadTree
 
 

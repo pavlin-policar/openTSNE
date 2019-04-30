@@ -2,6 +2,7 @@
 # cython: boundscheck=False
 # cython: wraparound=False
 # cython: cdivision=True
+# cython: language_level=3
 import numpy as np
 
 cdef double EPSILON = np.finfo(np.float64).eps

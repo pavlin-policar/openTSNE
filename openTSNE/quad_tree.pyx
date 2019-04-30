@@ -2,6 +2,7 @@
 # cython: boundscheck=False
 # cython: wraparound=False
 # cython: cdivision=True
+# cython: language_level=3
 """Implements a quad/oct-tree space partitioning algorithm primarily used in
 efficiently estimating the t-SNE negative gradient. Lowers the time complexity
 from the naive O(n^2) to O(n * log(n)).
