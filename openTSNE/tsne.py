@@ -609,7 +609,7 @@ class TSNEEmbedding(np.ndarray):
 
     def transform(self, X, perplexity=5, initialization="median", k=25,
                   learning_rate=100, n_iter=100, exaggeration=2, momentum=0,
-                  max_grad_norm=0.25):
+                  max_grad_norm=0.05):
         """Embed new points into the existing embedding.
 
         This procedure optimizes each point only with respect to the existing
@@ -1323,10 +1323,10 @@ class gradient_descent:
             # points overlap with the reference points, leading to large
             # gradients
             if max_grad_norm is not None:
-                norm = np.linalg.norm(gradient)
+                norm = np.linalg.norm(gradient, axis=1)
                 coeff = max_grad_norm / (norm + 1e-6)
-                if coeff < 1:
-                    gradient *= coeff
+                mask = coeff < 1
+                gradient[mask] *= coeff[mask, None]
 
             # Correct the KL divergence w.r.t. the exaggeration if needed
             if should_eval_error and exaggeration != 1:
