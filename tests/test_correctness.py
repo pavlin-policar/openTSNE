@@ -177,7 +177,7 @@ class TestTSNECorrectness(unittest.TestCase):
         knn = KNeighborsClassifier(n_neighbors=10)
         knn.fit(embedding, y_train)
 
-        new_embedding = embedding.transform(x_test, n_iter=100, perplexity=100)
+        new_embedding = embedding.transform(x_test, n_iter=100)
         predictions = knn.predict(new_embedding)
         self.assertGreater(accuracy_score(predictions, y_test), 0.95)
 
@@ -199,7 +199,7 @@ class TestTSNECorrectness(unittest.TestCase):
         knn = KNeighborsClassifier(n_neighbors=10)
         knn.fit(embedding, y_train)
 
-        new_embedding = embedding.transform(x_test, n_iter=100, perplexity=100)
+        new_embedding = embedding.transform(x_test, n_iter=100)
         predictions = knn.predict(new_embedding)
         self.assertGreater(accuracy_score(predictions, y_test), 0.95)
 
@@ -234,7 +234,7 @@ class TestTSNECorrectness(unittest.TestCase):
         embedding = openTSNE.TSNEEmbedding(
             init, affinity, negative_gradient_method="fft", random_state=42
         )
-        embedding.optimize(n_iter=50, inplace=True)
+        embedding.optimize(n_iter=100, inplace=True)
 
         # The test set contains 50 samples, so let's verify on half of those
         transform_params = dict(n_iter=0)
