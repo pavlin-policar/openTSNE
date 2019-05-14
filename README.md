@@ -53,9 +53,25 @@ To squeeze the most out of openTSNE, you may also consider installing FFTW3 prio
  
 ## Usage
 
-We provide two modes of usage. One is somewhat familliar to scikit-learn's `TSNE.fit`.
+We provide two modes of usage as well as a familliar scikit-learn API.
 
-We also provide an advanced interface for finer control of the optimization, allowing us to interactively tune the embedding and make use of various tricks to improve the embedding quality.
+### scikit-learn API
+
+Most users are comfortable with the scikit-learn API so we provide a familliar wrapper to make openTSNE very easy to use.
+
+```python
+from openTSNE.sklearn import TSNE
+from sklearn import datasets
+
+iris = datasets.load_iris()
+x, y = iris["data"], iris["target"]
+
+embedding = TSNE().fit_transform(x)
+```
+
+This interface behaves in much the same way as scikit-learn's t-SNE, but with richer functionality and improved speed. The interface allows us to create arbitrary t-SNE embeddings using the `fit` method and embed new instances into the existing embedding using the `transform` method.
+
+The scikit-learn interface is provides a familliar interface to t-SNE, but in doing so disables some of the more advanced functionality that openTSNE provides such as different affinity models, interactive optimization and callbacks. However, this basic functionality should cover the majority of use cases.
 
 ### Basic usage
 
