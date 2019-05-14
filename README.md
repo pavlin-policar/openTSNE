@@ -22,6 +22,8 @@ Detailed documentation on t-SNE is available on [Read the Docs](http://opentsne.
 
 ## Installation
 
+openTSNE requires Python 3.6 or higher in order to run.
+
 ### Conda
 
 openTSNE can be easily installed from ``conda-forge`` with
