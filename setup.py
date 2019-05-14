@@ -1,4 +1,5 @@
 import os
+import sys
 import tempfile
 import warnings
 from distutils import ccompiler
@@ -16,6 +17,16 @@ except ImportError:
     call(["pip", "install", "numpy"])
 
 import numpy as np
+
+
+def get_include_dirs():
+    """Get all the include directories which may contain headers that we need to
+    compile the cython extensions."""
+    return (
+        np.get_include(),
+        os.path.join(sys.prefix, "include"),
+        os.path.join(sys.prefix, "Library", "include"),
+    )
 
 
 def has_c_library(library, extension=".c"):
@@ -44,6 +55,9 @@ def has_c_library(library, extension=".c"):
 
         # Get a compiler instance
         compiler = ccompiler.new_compiler()
+        # Add conda and numpy library include dirs
+        for inc_dir in get_include_dirs():
+            compiler.add_include_dir(inc_dir)
         assert isinstance(compiler, ccompiler.CCompiler)
 
         try:
@@ -110,10 +124,9 @@ class CythonBuildExt(build_ext):
             extension.extra_compile_args.extend(compile_flags)
             extension.extra_link_args.extend(link_flags)
 
-        # We typically use numpy includes in our Cython files, so we"ll add the
-        # appropriate headers here
+        # Add numpy and system include directories
         for extension in self.extensions:
-            extension.include_dirs.append(np.get_include())
+            extension.include_dirs.extend(get_include_dirs())
 
         super().build_extensions()
 
@@ -186,6 +199,7 @@ setup(
     ],
 
     packages=setuptools.find_packages(include=["openTSNE", "openTSNE.*"]),
+    python_requires=">=3.6",
     install_requires=[
         "numpy>1.14",
         "numba>=0.38.1",
