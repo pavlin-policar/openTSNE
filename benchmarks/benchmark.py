@@ -2,55 +2,18 @@
 
 Run something like this:
 
-    python benchmark.py openTSNEapprox run_multiple --n-samples 1000 --n 10     > logs/opentsne_approx_fft_1000.log 2>&1
-    python benchmark.py openTSNEapprox run_multiple --n-samples 5000 --n 10     > logs/opentsne_approx_fft_5000.log 2>&1
-    python benchmark.py openTSNEapprox run_multiple --n-samples 10000 --n 10    > logs/opentsne_approx_fft_10000.log 2>&1
-    python benchmark.py openTSNEapprox run_multiple --n-samples 20000 --n 10    > logs/opentsne_approx_fft_20000.log 2>&1
-    python benchmark.py openTSNEapprox run_multiple --n-samples 40000 --n 10    > logs/opentsne_approx_fft_40000.log 2>&1
-    python benchmark.py openTSNEapprox run_multiple --n-samples 100000 --n 10   > logs/opentsne_approx_fft_100000.log 2>&1
-    python benchmark.py openTSNEapprox run_multiple --n-samples 200000 --n 10   > logs/opentsne_approx_fft_200000.log 2>&1
-    python benchmark.py openTSNEapprox run_multiple --n-samples 500000 --n 10   > logs/opentsne_approx_fft_500000.log 2>&1
-    python benchmark.py openTSNEapprox run_multiple --n-samples 1000000 --n 10  > logs/opentsne_approx_fft_1000000.log 2>&1
+Choose one of the available methods:
+--> openTSNEapprox | openTSNEexact | MulticoreTSNE | FItSNE | sklearn
 
-    python benchmark.py openTSNEexact run_multiple --n-samples 1000 --n 10     > logs/opentsne_exact_bh_1000.log 2>&1
-    python benchmark.py openTSNEexact run_multiple --n-samples 5000 --n 10     > logs/opentsne_exact_bh_5000.log 2>&1
-    python benchmark.py openTSNEexact run_multiple --n-samples 10000 --n 10    > logs/opentsne_exact_bh_10000.log 2>&1
-    python benchmark.py openTSNEexact run_multiple --n-samples 20000 --n 10    > logs/opentsne_exact_bh_20000.log 2>&1
-    python benchmark.py openTSNEexact run_multiple --n-samples 40000 --n 10    > logs/opentsne_exact_bh_40000.log 2>&1
-    python benchmark.py openTSNEexact run_multiple --n-samples 100000 --n 10   > logs/opentsne_exact_bh_100000.log 2>&1
-    python benchmark.py openTSNEexact run_multiple --n-samples 200000 --n 10   > logs/opentsne_exact_bh_200000.log 2>&1
-    python benchmark.py openTSNEexact run_multiple --n-samples 500000 --n 10   > logs/opentsne_exact_bh_500000.log 2>&1
-    python benchmark.py openTSNEexact run_multiple --n-samples 1000000 --n 10  > logs/opentsne_exact_bh_1000000.log 2>&1
-    
-    python benchmark.py MulticoreTSNE run_multiple --n-samples 1000 --n 10      > logs/multicore_exact_bh_1000.log 2>&1
-    python benchmark.py MulticoreTSNE run_multiple --n-samples 5000 --n 10      > logs/multicore_exact_bh_5000.log 2>&1
-    python benchmark.py MulticoreTSNE run_multiple --n-samples 10000 --n 10     > logs/multicore_exact_bh_10000.log 2>&1
-    python benchmark.py MulticoreTSNE run_multiple --n-samples 20000 --n 10     > logs/multicore_exact_bh_20000.log 2>&1
-    python benchmark.py MulticoreTSNE run_multiple --n-samples 40000 --n 10     > logs/multicore_exact_bh_40000.log 2>&1
-    python benchmark.py MulticoreTSNE run_multiple --n-samples 100000 --n 10    > logs/multicore_exact_bh_100000.log 2>&1
-    python benchmark.py MulticoreTSNE run_multiple --n-samples 200000 --n 10    > logs/multicore_exact_bh_200000.log 2>&1
-    python benchmark.py MulticoreTSNE run_multiple --n-samples 500000 --n 10    > logs/multicore_exact_bh_500000.log 2>&1
-    python benchmark.py MulticoreTSNE run_multiple --n-samples 1000000 --n 10   > logs/multicore_exact_bh_1000000.log 2>&1
+METHOD="openTSNEapprox";
+SAMPLE_SIZES=(1000 5000 10000 100000 250000 500000 750000 1000000);
+REPETITIONS=10;
 
-    python benchmark.py FItSNE run_multiple --n-samples 1000 --n 10     > logs/fitsne_approx_fft_1000.log 2>&1
-    python benchmark.py FItSNE run_multiple --n-samples 5000 --n 10     > logs/fitsne_approx_fft_5000.log 2>&1
-    python benchmark.py FItSNE run_multiple --n-samples 10000 --n 10    > logs/fitsne_approx_fft_10000.log 2>&1
-    python benchmark.py FItSNE run_multiple --n-samples 20000 --n 10    > logs/fitsne_approx_fft_20000.log 2>&1
-    python benchmark.py FItSNE run_multiple --n-samples 40000 --n 10    > logs/fitsne_approx_fft_40000.log 2>&1
-    python benchmark.py FItSNE run_multiple --n-samples 100000 --n 10   > logs/fitsne_approx_fft_100000.log 2>&1
-    python benchmark.py FItSNE run_multiple --n-samples 200000 --n 10   > logs/fitsne_approx_fft_200000.log 2>&1
-    python benchmark.py FItSNE run_multiple --n-samples 500000 --n 10   > logs/fitsne_approx_fft_500000.log 2>&1
-    python benchmark.py FItSNE run_multiple --n-samples 1000000 --n 10  > logs/fitsne_approx_fft_1000000.log 2>&1
-
-    python benchmark.py sklearn run_multiple --n-samples 1000 --n 10     > logs/sklearn_exact_bh_1000.log 2>&1
-    python benchmark.py sklearn run_multiple --n-samples 5000 --n 10     > logs/sklearn_exact_bh_5000.log 2>&1
-    python benchmark.py sklearn run_multiple --n-samples 10000 --n 10    > logs/sklearn_exact_bh_10000.log 2>&1
-    python benchmark.py sklearn run_multiple --n-samples 20000 --n 10    > logs/sklearn_exact_bh_20000.log 2>&1
-    python benchmark.py sklearn run_multiple --n-samples 40000 --n 10    > logs/sklearn_exact_bh_40000.log 2>&1
-    python benchmark.py sklearn run_multiple --n-samples 100000 --n 10   > logs/sklearn_exact_bh_100000.log 2>&1
-    python benchmark.py sklearn run_multiple --n-samples 200000 --n 10   > logs/sklearn_exact_bh_200000.log 2>&1
-    python benchmark.py sklearn run_multiple --n-samples 500000 --n 10   > logs/sklearn_exact_bh_500000.log 2>&1
-    python benchmark.py sklearn run_multiple --n-samples 1000000 --n 10  > logs/sklearn_exact_bh_1000000.log 2>&1
+for size in ${SAMPLE_SIZES[@]}; do
+    cmd="python benchmark.py $METHOD run_multiple --n-samples $size --n $REPETITIONS 2>&1 | tee -a logs/$METHOD_$size.log";
+    echo "$cmd";
+    eval "$cmd";
+done;
 
 """
 import gzip
@@ -87,7 +50,9 @@ class TSNEBenchmark:
         x, y = data["pca_50"], data["CellType1"]
 
         if n_samples is not None:
-            indices = np.random.choice(list(range(x.shape[0])), n_samples, replace=False)
+            indices = np.random.choice(
+                list(range(x.shape[0])), n_samples, replace=False
+            )
             x, y = x[indices], y[indices]
 
         return x, y
@@ -97,52 +62,62 @@ class openTSNEapprox(TSNEBenchmark):
     def run(self, n_samples=1000):
         x, y = self.load_data(n_samples=n_samples)
 
-        print("-" * 80)
+        print("-" * 80), sys.stdout.flush()
         start = time.time()
         start_aff = time.time()
         affinity = openTSNE.affinity.PerplexityBasedNN(
-            x, perplexity=self.perplexity, method="approx", n_jobs=self.n_jobs,
+            x, perplexity=self.perplexity, method="approx", n_jobs=self.n_jobs
         )
-        print("openTSNE: NN search", time.time() - start_aff)
+        print("openTSNE: NN search", time.time() - start_aff), sys.stdout.flush()
 
         init = openTSNE.initialization.random(x.shape[0], n_components=2)
 
         start_optim = time.time()
         embedding = openTSNE.TSNEEmbedding(
-            init, affinity, learning_rate=self.learning_rate, n_jobs=self.n_jobs,
-            negative_gradient_method="fft", theta=0.5,
-            min_num_intervals=10, ints_in_interval=1,
+            init,
+            affinity,
+            learning_rate=self.learning_rate,
+            n_jobs=self.n_jobs,
+            negative_gradient_method="fft",
+            theta=0.5,
+            min_num_intervals=10,
+            ints_in_interval=1,
         )
         embedding.optimize(250, exaggeration=12, momentum=0.8, inplace=True)
         embedding.optimize(750, momentum=0.5, inplace=True)
         print("openTSNE: Optimization", time.time() - start_optim)
-        print("openTSNE: Full", time.time() - start)
+        print("openTSNE: Full", time.time() - start), sys.stdout.flush()
 
 
 class openTSNEexact(TSNEBenchmark):
     def run(self, n_samples=1000):
         x, y = self.load_data(n_samples=n_samples)
 
-        print("-" * 80)
+        print("-" * 80), sys.stdout.flush()
         start = time.time()
         start_aff = time.time()
         affinity = openTSNE.affinity.PerplexityBasedNN(
-            x, perplexity=self.perplexity, method="exact", n_jobs=self.n_jobs,
+            x, perplexity=self.perplexity, method="exact", n_jobs=self.n_jobs
         )
-        print("openTSNE: NN search", time.time() - start_aff)
+        print("openTSNE: NN search", time.time() - start_aff), sys.stdout.flush()
 
         init = openTSNE.initialization.random(x.shape[0], n_components=2)
 
         start_optim = time.time()
         embedding = openTSNE.TSNEEmbedding(
-            init, affinity, learning_rate=self.learning_rate, n_jobs=self.n_jobs,
-            negative_gradient_method="bh", theta=0.5,
-            min_num_intervals=10, ints_in_interval=1,
+            init,
+            affinity,
+            learning_rate=self.learning_rate,
+            n_jobs=self.n_jobs,
+            negative_gradient_method="bh",
+            theta=0.5,
+            min_num_intervals=10,
+            ints_in_interval=1,
         )
         embedding.optimize(250, exaggeration=12, momentum=0.8, inplace=True)
         embedding.optimize(750, momentum=0.5, inplace=True)
         print("openTSNE: Optimization", time.time() - start_optim)
-        print("openTSNE: Full", time.time() - start)
+        print("openTSNE: Full", time.time() - start), sys.stdout.flush()
 
 
 class MulticoreTSNE(TSNEBenchmark):
@@ -152,8 +127,11 @@ class MulticoreTSNE(TSNEBenchmark):
         print("-" * 80), sys.stdout.flush()
         start = time.time()
         tsne = MulticoreTSNE_(
-            early_exaggeration=12, learning_rate=self.learning_rate,
-            perplexity=self.perplexity, n_jobs=self.n_jobs, angle=0.5,
+            early_exaggeration=12,
+            learning_rate=self.learning_rate,
+            perplexity=self.perplexity,
+            n_jobs=self.n_jobs,
+            angle=0.5,
             verbose=True,
         )
         tsne.fit_transform(x)
@@ -167,22 +145,32 @@ class FItSNE(TSNEBenchmark):
         print("-" * 80), sys.stdout.flush()
         start = time.time()
         FItSNE_(
-            x, 2, perplexity=self.perplexity, stop_lying_iter=250, ann_not_vptree=True,
-            early_exag_coeff=12, nthreads=1, theta=0.5,
+            x,
+            2,
+            perplexity=self.perplexity,
+            stop_lying_iter=250,
+            ann_not_vptree=True,
+            early_exag_coeff=12,
+            nthreads=1,
+            theta=0.5,
         )
         print("FIt-SNE:", time.time() - start), sys.stdout.flush()
-        
-        
+
+
 class sklearn(TSNEBenchmark):
     def run(self, n_samples=1000):
         x, y = self.load_data(n_samples=n_samples)
-        print("-" * 80)
+        print("-" * 80), sys.stdout.flush()
         start = time.time()
         SKLTSNE(
-            early_exaggeration=12, learning_rate=self.learning_rate, angle=0.5,
-            perplexity=self.perplexity, init="random", verbose=True,
+            early_exaggeration=12,
+            learning_rate=self.learning_rate,
+            angle=0.5,
+            perplexity=self.perplexity,
+            init="random",
+            verbose=True,
         ).fit_transform(x)
-        print("scikit-learn t-SNE:", time.time() - start)
+        print("scikit-learn t-SNE:", time.time() - start), sys.stdout.flush()
 
 
 if __name__ == "__main__":
