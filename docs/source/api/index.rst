@@ -7,6 +7,7 @@ API Reference
     initialization
     affinity
     callbacks
+    sklearn
 
 .. automodule:: openTSNE
     :members: TSNE, TSNEEmbedding, PartialTSNEEmbedding, OptimizationInterrupt
