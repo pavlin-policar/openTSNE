@@ -123,7 +123,7 @@ class NNDescent(KNNIndex):
         # memory corruption, so use the standard one, which seems to work fine
         self.index = pynndescent.NNDescent(
             data,
-            n_neighbors=k + 1,
+            n_neighbors=15,
             metric=self.metric,
             metric_kwds=self.metric_params,
             random_state=self.random_state,
@@ -133,7 +133,7 @@ class NNDescent(KNNIndex):
             max_candidates=60,
         )
 
-        indices, distances = self.index._neighbor_graph
+        indices, distances = self.index.query(data, k=k + 1, queue_size=1)
         return indices[:, 1:], distances[:, 1:]
 
     def query(self, query, k):
