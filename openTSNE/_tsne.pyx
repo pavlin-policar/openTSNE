@@ -124,8 +124,8 @@ cpdef tuple estimate_positive_gradient_nn(
         num_threads = 1
 
     with nogil, parallel(num_threads=num_threads):
-        # Use `malloc` here instead of `PyMem_Malloc` because we"re in a
-        # `nogil` clause and we won"t be allocating much memory
+        # Use `malloc` here instead of `PyMem_Malloc` because we're in a
+        # `nogil` clause and we won't be allocating much memory
         diff = <double *>malloc(n_dims * sizeof(double))
         if not diff:
             with gil:
@@ -192,7 +192,7 @@ cpdef double estimate_negative_gradient_bh(
         num_threads = 1
 
     # In order to run gradient estimation in parallel, we need to pass each
-    # worker it"s own memory slot to write sum_Qs
+    # worker it's own memory slot to write sum_Qs
     for i in prange(num_points, nogil=True, num_threads=num_threads, schedule="guided"):
         _estimate_negative_gradient_single(
             &tree.root, &embedding[i, 0], &gradient[i, 0], &sum_Qi[i], theta, dof)

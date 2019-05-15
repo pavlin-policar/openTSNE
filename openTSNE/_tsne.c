@@ -4112,8 +4112,8 @@ static PyObject *__pyx_f_8openTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
  *         num_threads = 1
  * 
  *     with nogil, parallel(num_threads=num_threads):             # <<<<<<<<<<<<<<
- *         # Use `malloc` here instead of `PyMem_Malloc` because we"re in a
- *         # `nogil` clause and we won"t be allocating much memory
+ *         # Use `malloc` here instead of `PyMem_Malloc` because we're in a
+ *         # `nogil` clause and we won't be allocating much memory
  */
   {
       #ifdef WITH_THREAD
@@ -4147,8 +4147,8 @@ static PyObject *__pyx_f_8openTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
                 __pyx_v_diff = ((double *)1);
 
                 /* "openTSNE/_tsne.pyx":129
- *         # Use `malloc` here instead of `PyMem_Malloc` because we"re in a
- *         # `nogil` clause and we won"t be allocating much memory
+ *         # Use `malloc` here instead of `PyMem_Malloc` because we're in a
+ *         # `nogil` clause and we won't be allocating much memory
  *         diff = <double *>malloc(n_dims * sizeof(double))             # <<<<<<<<<<<<<<
  *         if not diff:
  *             with gil:
@@ -4156,7 +4156,7 @@ static PyObject *__pyx_f_8openTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
                 __pyx_v_diff = ((double *)malloc((__pyx_v_n_dims * (sizeof(double)))));
 
                 /* "openTSNE/_tsne.pyx":130
- *         # `nogil` clause and we won"t be allocating much memory
+ *         # `nogil` clause and we won't be allocating much memory
  *         diff = <double *>malloc(n_dims * sizeof(double))
  *         if not diff:             # <<<<<<<<<<<<<<
  *             with gil:
@@ -4206,7 +4206,7 @@ static PyObject *__pyx_f_8openTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
                   }
 
                   /* "openTSNE/_tsne.pyx":130
- *         # `nogil` clause and we won"t be allocating much memory
+ *         # `nogil` clause and we won't be allocating much memory
  *         diff = <double *>malloc(n_dims * sizeof(double))
  *         if not diff:             # <<<<<<<<<<<<<<
  *             with gil:
@@ -4503,8 +4503,8 @@ static PyObject *__pyx_f_8openTSNE_5_tsne_estimate_positive_gradient_nn(__Pyx_me
  *         num_threads = 1
  * 
  *     with nogil, parallel(num_threads=num_threads):             # <<<<<<<<<<<<<<
- *         # Use `malloc` here instead of `PyMem_Malloc` because we"re in a
- *         # `nogil` clause and we won"t be allocating much memory
+ *         # Use `malloc` here instead of `PyMem_Malloc` because we're in a
+ *         # `nogil` clause and we won't be allocating much memory
  */
       /*finally:*/ {
         /*normal exit:*/{
@@ -4930,7 +4930,7 @@ static double __pyx_f_8openTSNE_5_tsne_estimate_negative_gradient_bh(struct __py
 
   /* "openTSNE/_tsne.pyx":196
  *     # In order to run gradient estimation in parallel, we need to pass each
- *     # worker it"s own memory slot to write sum_Qs
+ *     # worker it's own memory slot to write sum_Qs
  *     for i in prange(num_points, nogil=True, num_threads=num_threads, schedule="guided"):             # <<<<<<<<<<<<<<
  *         _estimate_negative_gradient_single(
  *             &tree.root, &embedding[i, 0], &gradient[i, 0], &sum_Qi[i], theta, dof)
@@ -4979,7 +4979,7 @@ static double __pyx_f_8openTSNE_5_tsne_estimate_negative_gradient_bh(struct __py
                             __pyx_t_14 = __pyx_v_i;
 
                             /* "openTSNE/_tsne.pyx":197
- *     # worker it"s own memory slot to write sum_Qs
+ *     # worker it's own memory slot to write sum_Qs
  *     for i in prange(num_points, nogil=True, num_threads=num_threads, schedule="guided"):
  *         _estimate_negative_gradient_single(             # <<<<<<<<<<<<<<
  *             &tree.root, &embedding[i, 0], &gradient[i, 0], &sum_Qi[i], theta, dof)
@@ -5001,7 +5001,7 @@ static double __pyx_f_8openTSNE_5_tsne_estimate_negative_gradient_bh(struct __py
 
       /* "openTSNE/_tsne.pyx":196
  *     # In order to run gradient estimation in parallel, we need to pass each
- *     # worker it"s own memory slot to write sum_Qs
+ *     # worker it's own memory slot to write sum_Qs
  *     for i in prange(num_points, nogil=True, num_threads=num_threads, schedule="guided"):             # <<<<<<<<<<<<<<
  *         _estimate_negative_gradient_single(
  *             &tree.root, &embedding[i, 0], &gradient[i, 0], &sum_Qi[i], theta, dof)
