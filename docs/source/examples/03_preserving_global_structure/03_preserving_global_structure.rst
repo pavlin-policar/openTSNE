@@ -2,7 +2,7 @@
 Preserving global structure
 ===========================
 
-.. code:: python
+.. code:: ipython3
 
     from openTSNE import TSNE, TSNEEmbedding, affinity, initialization
     from openTSNE import initialization
@@ -17,7 +17,7 @@ Preserving global structure
 Load data
 ---------
 
-.. code:: python
+.. code:: ipython3
 
     import gzip
     import pickle
@@ -28,12 +28,12 @@ Load data
     x = data["pca_50"]
     y = data["CellType1"].astype(str)
 
-.. code:: python
+.. code:: ipython3
 
     print("Data set contains %d samples with %d features" % x.shape)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     Data set contains 44808 samples with 50 features
 
@@ -41,7 +41,7 @@ Load data
 To avoid constantly specifying colors in our plots, define a helper
 here.
 
-.. code:: python
+.. code:: ipython3
 
     def plot(x, **kwargs):
         utils.plot(x, y, colors=utils.MACOSKO_COLORS, **kwargs)
@@ -59,7 +59,7 @@ Standard t-SNE
 First, we’ll run t-SNE as it is implemented in most software packages.
 This will serve as a baseline comparison.
 
-.. code:: python
+.. code:: ipython3
 
     tsne = TSNE(
         perplexity=30,
@@ -69,18 +69,18 @@ This will serve as a baseline comparison.
         random_state=3,
     )
 
-.. code:: python
+.. code:: ipython3
 
     %time embedding_standard = tsne.fit(x)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 7min 38s, sys: 20.3 s, total: 7min 58s
     Wall time: 1min 13s
 
 
-.. code:: python
+.. code:: ipython3
 
     plot(embedding_standard)
 
@@ -93,14 +93,14 @@ Using PCA initialization
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 The first, easy improvement we can get is to “inject” some global
-structure into the initialization. The initialization dictates which
+structure into the initialization. The intialization dictates which
 regions points will appear in, so adding any global structure to the
-initialization can help.
+initilization can help.
 
 Note that this is the default in this implementation and the parameter
 can be omitted.
 
-.. code:: python
+.. code:: ipython3
 
     tsne = TSNE(
         perplexity=30,
@@ -110,18 +110,18 @@ can be omitted.
         random_state=3,
     )
 
-.. code:: python
+.. code:: ipython3
 
     %time embedding_pca = tsne.fit(x)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 7min 7s, sys: 18.4 s, total: 7min 26s
     Wall time: 1min 7s
 
 
-.. code:: python
+.. code:: ipython3
 
     plot(embedding_pca)
 
@@ -140,7 +140,7 @@ dimensions and the *cosine* distance is far more appropriate.
 We can easily use the cosine distance by setting the ``metric``
 parameter.
 
-.. code:: python
+.. code:: ipython3
 
     tsne = TSNE(
         perplexity=30,
@@ -150,18 +150,18 @@ parameter.
         random_state=3,
     )
 
-.. code:: python
+.. code:: ipython3
 
     %time embedding_cosine = tsne.fit(x)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 7min 13s, sys: 18.3 s, total: 7min 31s
     Wall time: 1min 10s
 
 
-.. code:: python
+.. code:: ipython3
 
     plot(embedding_cosine)
 
@@ -175,7 +175,7 @@ Using PCA initialization and cosine distance
 
 Lastly, let’s see how our embedding looks with both the changes.
 
-.. code:: python
+.. code:: ipython3
 
     tsne = TSNE(
         perplexity=30,
@@ -185,18 +185,18 @@ Lastly, let’s see how our embedding looks with both the changes.
         random_state=3,
     )
 
-.. code:: python
+.. code:: ipython3
 
     %time embedding_pca_cosine = tsne.fit(x)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 7min 5s, sys: 17.9 s, total: 7min 23s
     Wall time: 1min 8s
 
 
-.. code:: python
+.. code:: ipython3
 
     plot(embedding_pca_cosine)
 
@@ -208,7 +208,7 @@ Lastly, let’s see how our embedding looks with both the changes.
 Summary
 ~~~~~~~
 
-.. code:: python
+.. code:: ipython3
 
     _, ax = plt.subplots(nrows=2, ncols=2, figsize=(12, 12))
     plot(embedding_standard, title="Standard t-SNE", ax=ax[0, 0], draw_legend=False)
@@ -244,7 +244,7 @@ structure.
 Perplexity: 30
 ~~~~~~~~~~~~~~
 
-.. code:: python
+.. code:: ipython3
 
     plot(embedding_pca_cosine)
 
@@ -256,7 +256,7 @@ Perplexity: 30
 Perplexity: 500
 ~~~~~~~~~~~~~~~
 
-.. code:: python
+.. code:: ipython3
 
     tsne = TSNE(
         perplexity=500,
@@ -266,18 +266,18 @@ Perplexity: 500
         random_state=3,
     )
 
-.. code:: python
+.. code:: ipython3
 
     %time embedding_pca_cosine_500 = tsne.fit(x)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 38min 2s, sys: 12.9 s, total: 38min 15s
     Wall time: 6min 8s
 
 
-.. code:: python
+.. code:: ipython3
 
     plot(embedding_pca_cosine_500)
 
@@ -309,7 +309,7 @@ The first trick we can use is to first optimize the embedding using a
 large perplexity to capture the global structure, then lower the
 perplexity to something smaller to emphasize the local structure.
 
-.. code:: python
+.. code:: ipython3
 
     %%time
     affinities_annealing = affinity.PerplexityBasedNN(
@@ -321,24 +321,24 @@ perplexity to something smaller to emphasize the local structure.
     )
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 10min 10s, sys: 3.46 s, total: 10min 13s
     Wall time: 2min 39s
 
 
-.. code:: python
+.. code:: ipython3
 
     %time init = initialization.pca(x, random_state=42)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 384 ms, sys: 12 ms, total: 396 ms
     Wall time: 65.3 ms
 
 
-.. code:: python
+.. code:: ipython3
 
     embedding = TSNEEmbedding(
         init,
@@ -349,18 +349,18 @@ perplexity to something smaller to emphasize the local structure.
 
 1. Perform normal t-SNE optimization with large perplexity
 
-.. code:: python
+.. code:: ipython3
 
     %time embedding1 = embedding.optimize(n_iter=250, exaggeration=12, momentum=0.5)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 6min 50s, sys: 1.45 s, total: 6min 52s
     Wall time: 51.6 s
 
 
-.. code:: python
+.. code:: ipython3
 
     plot(embedding1)
 
@@ -369,18 +369,18 @@ perplexity to something smaller to emphasize the local structure.
 .. image:: output_41_0.png
 
 
-.. code:: python
+.. code:: ipython3
 
     %time embedding2 = embedding1.optimize(n_iter=750, exaggeration=1, momentum=0.8)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 21min 19s, sys: 8 s, total: 21min 27s
     Wall time: 2min 41s
 
 
-.. code:: python
+.. code:: ipython3
 
     plot(embedding2)
 
@@ -391,29 +391,29 @@ perplexity to something smaller to emphasize the local structure.
 
 2. Lower perplexity and optimize
 
-.. code:: python
+.. code:: ipython3
 
     %time affinities_annealing.set_perplexity(50)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 10.8 s, sys: 204 ms, total: 11 s
     Wall time: 1.48 s
 
 
-.. code:: python
+.. code:: ipython3
 
     %time embedding3 = embedding2.optimize(n_iter=500, momentum=0.8)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 4min 42s, sys: 11.9 s, total: 4min 54s
     Wall time: 36.9 s
 
 
-.. code:: python
+.. code:: ipython3
 
     plot(embedding3)
 
@@ -422,7 +422,7 @@ perplexity to something smaller to emphasize the local structure.
 .. image:: output_47_0.png
 
 
-.. code:: python
+.. code:: ipython3
 
     embedding_annealing = embedding3.view(np.ndarray)
 
@@ -436,7 +436,7 @@ kernel which will account for two different perplexity values. This
 typically results in better separation of clusters while still keeping
 much of the global structure.
 
-.. code:: python
+.. code:: ipython3
 
     %%time
     affinities_multiscale_mixture = affinity.Multiscale(
@@ -448,24 +448,24 @@ much of the global structure.
     )
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 11min 40s, sys: 5.19 s, total: 11min 45s
     Wall time: 2min 54s
 
 
-.. code:: python
+.. code:: ipython3
 
     %time init = initialization.pca(x, random_state=42)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 440 ms, sys: 8 ms, total: 448 ms
     Wall time: 74.2 ms
 
 
-.. code:: python
+.. code:: ipython3
 
     embedding = TSNEEmbedding(
         init,
@@ -476,18 +476,18 @@ much of the global structure.
 
 Now, we just optimize just like we would standard t-SNE.
 
-.. code:: python
+.. code:: ipython3
 
     %time embedding1 = embedding.optimize(n_iter=250, exaggeration=12, momentum=0.5)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 6min 31s, sys: 1.37 s, total: 6min 32s
     Wall time: 49.1 s
 
 
-.. code:: python
+.. code:: ipython3
 
     plot(embedding1)
 
@@ -496,18 +496,18 @@ Now, we just optimize just like we would standard t-SNE.
 .. image:: output_55_0.png
 
 
-.. code:: python
+.. code:: ipython3
 
     %time embedding2 = embedding1.optimize(n_iter=750, exaggeration=1, momentum=0.8)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 21min 41s, sys: 10.7 s, total: 21min 52s
     Wall time: 2min 44s
 
 
-.. code:: python
+.. code:: ipython3
 
     plot(embedding2)
 
@@ -516,14 +516,14 @@ Now, we just optimize just like we would standard t-SNE.
 .. image:: output_57_0.png
 
 
-.. code:: python
+.. code:: ipython3
 
     embedding_multiscale = embedding2.view(np.ndarray)
 
 Summary
 ~~~~~~~
 
-.. code:: python
+.. code:: ipython3
 
     _, ax = plt.subplots(nrows=2, ncols=2, figsize=(12, 12))
     plot(embedding_pca_cosine, title="Perplexity 30", ax=ax[0, 0], draw_legend=False)
@@ -540,12 +540,12 @@ Summary
 Comparison to UMAP
 ------------------
 
-.. code:: python
+.. code:: ipython3
 
     from umap import UMAP
     from itertools import product
 
-.. code:: python
+.. code:: ipython3
 
     %%time
     embeddings = []
@@ -556,13 +556,13 @@ Comparison to UMAP
         embeddings.append((n_neighbors, min_dist, embedding_umap))
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 11min 18s, sys: 48 s, total: 12min 6s
     Wall time: 8min 3s
 
 
-.. code:: python
+.. code:: ipython3
 
     _, ax = plt.subplots(nrows=2, ncols=2, figsize=(12, 12))
     plot(embeddings[0][2], title=f"k={embeddings[0][0]}, min_dist={embeddings[0][1]}", ax=ax[0, 0], draw_legend=False)
@@ -574,4 +574,5 @@ Comparison to UMAP
 
 
 .. image:: output_64_0.png
+
 
