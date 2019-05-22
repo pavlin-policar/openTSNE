@@ -153,8 +153,12 @@ class TestTSNEParameterFlow(unittest.TestCase):
         check_call_contains_kwargs(gradient_descent.mock_calls[0], params)
 
     @check_params({
+        "early_exaggeration_iter": [50, 100],
+        "early_exaggeration": [None, 2, 4],
         "n_iter": [50, 100],
-        "momentum": [0.2, 0.5, 0.8],
+        "exaggeration": [None, 1, 2],
+        "initial_momentum": [0.2, 0.5, 0.8],
+        "final_momentum": [0.2, 0.5, 0.8],
         "max_grad_norm": [None, 0.5, 1],
     })
     @patch("openTSNE.tsne.gradient_descent.__call__")
@@ -170,9 +174,14 @@ class TestTSNEParameterFlow(unittest.TestCase):
 
         embedding.transform(self.x_test, **{param_name: param_value})
 
-        self.assertEqual(1, gradient_descent.call_count)
+        if "early" in param_name or "initial" in param_name:
+            call_idx = 0
+        else:
+            call_idx = 1
+
+        self.assertEqual(2, gradient_descent.call_count)
         check_call_contains_kwargs(
-            gradient_descent.mock_calls[0],
+            gradient_descent.mock_calls[call_idx],
             {param_name: param_value},
         )
 
