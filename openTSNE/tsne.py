@@ -911,7 +911,7 @@ class TSNE(BaseEstimator):
         exaggeration=None,
         theta=0.5,
         n_interpolation_points=3,
-        min_num_intervals=10,
+        min_num_intervals=50,
         ints_in_interval=1,
         initialization="pca",
         metric="euclidean",
@@ -1187,7 +1187,7 @@ class gradient_descent:
     def __call__(self, embedding, P, n_iter, objective_function, learning_rate=200,
                  momentum=0.5, exaggeration=None, dof=1, min_gain=0.01,
                  min_grad_norm=1e-8, max_grad_norm=None, theta=0.5,
-                 n_interpolation_points=3, min_num_intervals=10, ints_in_interval=1,
+                 n_interpolation_points=3, min_num_intervals=50, ints_in_interval=1,
                  reference_embedding=None, n_jobs=1,
                  use_callbacks=False, callbacks=None, callbacks_every_iters=50):
         """Perform batch gradient descent with momentum and gains.
