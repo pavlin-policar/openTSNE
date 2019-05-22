@@ -106,11 +106,12 @@ class CythonBuildExt(build_ext):
 
         # Optimization compiler/linker flags are added appropriately
         flags = self.COMPILER_FLAGS[self.compiler.compiler_type]
-        compile_flags = [flags["math"], flags["optimize"], flags["fast-math"]]
-        link_flags = [flags["math"], flags["optimize"], flags["fast-math"]]
+        compile_flags = [flags["math"], flags["optimize"]]
+        link_flags = [flags["math"], flags["optimize"]]
 
         # We don't want the compiler to optimize for system architecture if
-        # we're building packages to be distributed by conda-forge
+        # we're building packages to be distributed by conda-forge, but if the
+        # package is being built locally, this is desired
         if "CONDA_BUILD" not in os.environ:
             compile_flags.append(flags["native"])
             link_flags.append(flags["native"])
