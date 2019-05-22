@@ -7,10 +7,10 @@ from types import SimpleNamespace
 import numpy as np
 from sklearn.base import BaseEstimator
 
-from . import _tsne
-from . import initialization as initialization_scheme
-from .affinity import Affinities, PerplexityBasedNN
-from .quad_tree import QuadTree
+from openTSNE import _tsne
+from openTSNE import initialization as initialization_scheme
+from openTSNE.affinity import Affinities, PerplexityBasedNN
+from openTSNE.quad_tree import QuadTree
 
 EPSILON = np.finfo(np.float64).eps
 
