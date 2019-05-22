@@ -11,7 +11,7 @@ If you are comfortable with the advanced API, please refer to the
 *preserving_global_structure* notebook for a guide how obtain better
 embeddings and preserve more global structure.
 
-.. code:: python
+.. code:: ipython3
 
     from openTSNE import TSNEEmbedding
     from openTSNE.affinity import PerplexityBasedNN
@@ -28,7 +28,7 @@ embeddings and preserve more global structure.
 Load data
 ---------
 
-.. code:: python
+.. code:: ipython3
 
     import gzip
     import pickle
@@ -39,12 +39,12 @@ Load data
     x = data["pca_50"]
     y = data["CellType1"].astype(str)
 
-.. code:: python
+.. code:: ipython3
 
     print("Data set contains %d samples with %d features" % x.shape)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     Data set contains 44808 samples with 50 features
 
@@ -52,17 +52,17 @@ Load data
 Create train/test split
 -----------------------
 
-.. code:: python
+.. code:: ipython3
 
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=.33, random_state=42)
 
-.. code:: python
+.. code:: ipython3
 
     print("%d training samples" % x_train.shape[0])
     print("%d test samples" % x_test.shape[0])
 
 
-.. code-block:: text
+.. parsed-literal::
 
     30021 training samples
     14787 test samples
@@ -81,7 +81,7 @@ examples.
 
 **1. Compute the affinities between data points**
 
-.. code:: python
+.. code:: ipython3
 
     %%time
     affinities_train = PerplexityBasedNN(
@@ -93,7 +93,7 @@ examples.
     )
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 27 s, sys: 291 ms, total: 27.3 s
     Wall time: 14 s
@@ -101,12 +101,12 @@ examples.
 
 **2. Generate initial coordinates for our embedding**
 
-.. code:: python
+.. code:: ipython3
 
     %time init_train = initialization.pca(x_train, random_state=42)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 330 ms, sys: 3.59 ms, total: 333 ms
     Wall time: 57.6 ms
@@ -114,7 +114,7 @@ examples.
 
 **3. Construct the ``TSNEEmbedding`` object**
 
-.. code:: python
+.. code:: ipython3
 
     embedding_train = TSNEEmbedding(
         init_train,
@@ -128,12 +128,12 @@ examples.
 
 1. Early exaggeration phase
 
-.. code:: python
+.. code:: ipython3
 
     %time embedding_train_1 = embedding_train.optimize(n_iter=250, exaggeration=12, momentum=0.5)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     Iteration   50, KL divergence  5.7901, 50 iterations in 1.0475 sec
     Iteration  100, KL divergence  5.2511, 50 iterations in 1.0043 sec
@@ -144,7 +144,7 @@ examples.
     Wall time: 5.44 s
 
 
-.. code:: python
+.. code:: ipython3
 
     utils.plot(embedding_train_1, y_train, colors=utils.MACOSKO_COLORS)
 
@@ -155,12 +155,12 @@ examples.
 
 2. Regular optimization
 
-.. code:: python
+.. code:: ipython3
 
     %time embedding_train_2 = embedding_train_1.optimize(n_iter=750, momentum=0.8)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     Iteration   50, KL divergence  3.8025, 50 iterations in 1.0494 sec
     Iteration  100, KL divergence  3.4117, 50 iterations in 1.5276 sec
@@ -181,7 +181,7 @@ examples.
     Wall time: 51.9 s
 
 
-.. code:: python
+.. code:: ipython3
 
     utils.plot(embedding_train_2, y_train, colors=utils.MACOSKO_COLORS)
 
@@ -193,7 +193,7 @@ examples.
 Transform
 ---------
 
-.. code:: python
+.. code:: ipython3
 
     %%time
     embedding_test = embedding_train_2.prepare_partial(
@@ -204,13 +204,13 @@ Transform
     )
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 1.93 s, sys: 8 µs, total: 1.93 s
     Wall time: 801 ms
 
 
-.. code:: python
+.. code:: ipython3
 
     utils.plot(embedding_test, y_test, colors=utils.MACOSKO_COLORS)
 
@@ -219,7 +219,7 @@ Transform
 .. image:: output_24_0.png
 
 
-.. code:: python
+.. code:: ipython3
 
     %%time
     embedding_test_1 = embedding_test.optimize(
@@ -230,7 +230,7 @@ Transform
     )
 
 
-.. code-block:: text
+.. parsed-literal::
 
     Iteration   50, KL divergence  212552.5028, 50 iterations in 6.6991 sec
     Iteration  100, KL divergence  212498.8526, 50 iterations in 6.2299 sec
@@ -238,7 +238,7 @@ Transform
     Wall time: 13.1 s
 
 
-.. code:: python
+.. code:: ipython3
 
     utils.plot(embedding_test_1, y_test, colors=utils.MACOSKO_COLORS)
 
@@ -253,7 +253,7 @@ Together
 We superimpose the transformed points onto the original embedding with
 larger opacity.
 
-.. code:: python
+.. code:: ipython3
 
     fig, ax = plt.subplots(figsize=(12, 8))
     utils.plot(embedding_train_2, y_train, colors=utils.MACOSKO_COLORS, alpha=0.25, ax=ax)
@@ -262,4 +262,5 @@ larger opacity.
 
 
 .. image:: output_28_0.png
+
 

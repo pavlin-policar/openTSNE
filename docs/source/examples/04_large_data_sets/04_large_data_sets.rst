@@ -11,9 +11,9 @@ points to the embedding and use that as our initialization.
 Remember that the initialization largely affects the structure of the
 embedding. This way, our initialization provides the global structure
 for the embedding, and the subsequent optimization can focus on
-preserving local structure.
+preserving local strucutre.
 
-.. code:: python
+.. code:: ipython3
 
     from openTSNE import TSNE, TSNEEmbedding, affinity, initialization
     from openTSNE import initialization
@@ -28,7 +28,7 @@ preserving local structure.
 Load data
 ---------
 
-.. code:: python
+.. code:: ipython3
 
     import gzip
     import pickle
@@ -39,17 +39,17 @@ Load data
     x = data["pca_50"]
     y = data["CellType1"]
 
-.. code:: python
+.. code:: ipython3
 
     print("Data set contains %d samples with %d features" % x.shape)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     Data set contains 1306127 samples with 50 features
 
 
-.. code:: python
+.. code:: ipython3
 
     def plot(x, y, **kwargs):
         utils.plot(
@@ -61,7 +61,7 @@ Load data
             **kwargs,
         )
 
-.. code:: python
+.. code:: ipython3
 
     def rotate(degrees):
         phi = degrees * np.pi / 180
@@ -70,7 +70,7 @@ Load data
             [np.sin(phi), np.cos(phi)],
         ])
 
-.. code:: python
+.. code:: ipython3
 
     plot(x, y)
 
@@ -82,7 +82,7 @@ Load data
 We’ll also precompute the full affinities, since we’ll be needing it in
 several places throughout the notebook, and can take a long time to run.
 
-.. code:: python
+.. code:: ipython3
 
     %%time
     affinities = affinity.PerplexityBasedNN(
@@ -93,7 +93,7 @@ several places throughout the notebook, and can take a long time to run.
     )
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 38min 48s, sys: 13.6 s, total: 39min 1s
     Wall time: 25min 3s
@@ -104,18 +104,18 @@ Standard t-SNE
 
 First, let’s see what standard t-SNE does.
 
-.. code:: python
+.. code:: ipython3
 
     %time init = initialization.pca(x, random_state=0)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 17.6 s, sys: 1.36 s, total: 19 s
     Wall time: 3.19 s
 
 
-.. code:: python
+.. code:: ipython3
 
     embedding_standard = TSNEEmbedding(
         init,
@@ -124,20 +124,20 @@ First, let’s see what standard t-SNE does.
         n_jobs=8,
     )
 
-.. code:: python
+.. code:: ipython3
 
     %%time
     embedding_standard.optimize(n_iter=250, exaggeration=12, momentum=0.5, inplace=True)
     embedding_standard.optimize(n_iter=750, exaggeration=1, momentum=0.8, inplace=True)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 2h 23min 6s, sys: 2min 8s, total: 2h 25min 15s
     Wall time: 18min 46s
 
 
-.. code:: python
+.. code:: ipython3
 
     plot(embedding_standard, y)
 
@@ -155,18 +155,18 @@ Using exaggeration
 Exaggeration can be used in order to get better separation between
 clusters. Let’s see if that helps.
 
-.. code:: python
+.. code:: ipython3
 
     %time init = initialization.pca(x, random_state=0)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 17.1 s, sys: 1.22 s, total: 18.3 s
     Wall time: 3.07 s
 
 
-.. code:: python
+.. code:: ipython3
 
     embedding_exag = TSNEEmbedding(
         init,
@@ -175,20 +175,20 @@ clusters. Let’s see if that helps.
         n_jobs=8,
     )
 
-.. code:: python
+.. code:: ipython3
 
     %%time
     embedding_exag.optimize(n_iter=250, exaggeration=12, momentum=0.5, inplace=True)
     embedding_exag.optimize(n_iter=750, exaggeration=4, momentum=0.8, inplace=True)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 2h 24min 55s, sys: 12min, total: 2h 36min 55s
     Wall time: 27min 22s
 
 
-.. code:: python
+.. code:: ipython3
 
     plot(embedding_exag, y)
 
@@ -208,11 +208,11 @@ We now perform the sample-transform trick we described above.
 Create train/test split
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: python
+.. code:: ipython3
 
     np.random.seed(0)
 
-.. code:: python
+.. code:: ipython3
 
     indices = np.random.permutation(list(range(x.shape[0])))
     reverse = np.argsort(indices)
@@ -223,7 +223,7 @@ Create train/test split
 Create sample embedding
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: python
+.. code:: ipython3
 
     %%time
     sample_affinities = affinity.PerplexityBasedNN(
@@ -235,24 +235,24 @@ Create sample embedding
     )
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 5min 8s, sys: 22.9 s, total: 5min 31s
     Wall time: 1min 36s
 
 
-.. code:: python
+.. code:: ipython3
 
     %time sample_init = initialization.pca(x_sample, random_state=42)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 224 ms, sys: 8 ms, total: 232 ms
     Wall time: 38.1 ms
 
 
-.. code:: python
+.. code:: ipython3
 
     sample_embedding = TSNEEmbedding(
         sample_init,
@@ -262,12 +262,12 @@ Create sample embedding
         callbacks=ErrorLogger(),
     )
 
-.. code:: python
+.. code:: ipython3
 
     %time sample_embedding1 = sample_embedding.optimize(n_iter=250, exaggeration=12, momentum=0.5)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     Iteration   50, KL divergence  3.1707, 50 iterations in 6.2728 sec
     Iteration  100, KL divergence  3.0522, 50 iterations in 6.1494 sec
@@ -278,7 +278,7 @@ Create sample embedding
     Wall time: 30.8 s
 
 
-.. code:: python
+.. code:: ipython3
 
     plot(sample_embedding1, y[indices[:25000]], alpha=0.5)
 
@@ -287,12 +287,12 @@ Create sample embedding
 .. image:: output_31_0.png
 
 
-.. code:: python
+.. code:: ipython3
 
     %time sample_embedding2 = sample_embedding1.optimize(n_iter=750, exaggeration=1, momentum=0.8)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     Iteration   50, KL divergence  1.5281, 50 iterations in 6.0649 sec
     Iteration  100, KL divergence  1.3389, 50 iterations in 5.9886 sec
@@ -313,7 +313,7 @@ Create sample embedding
     Wall time: 1min 39s
 
 
-.. code:: python
+.. code:: ipython3
 
     plot(sample_embedding2, y[indices[:25000]], alpha=0.5)
 
@@ -325,22 +325,22 @@ Create sample embedding
 Learn the full embedding
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: python
+.. code:: ipython3
 
     %time rest_init = sample_embedding2.prepare_partial(x_rest, k=1, perplexity=1/3)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 50 s, sys: 1.72 s, total: 51.7 s
     Wall time: 37.7 s
 
 
-.. code:: python
+.. code:: ipython3
 
     init_full = np.vstack((sample_embedding2, rest_init))[reverse]
 
-.. code:: python
+.. code:: ipython3
 
     fig, ax = plt.subplots(figsize=(11, 10))
     plot(init_full, y, ax=ax)
@@ -350,7 +350,7 @@ Learn the full embedding
 .. image:: output_37_0.png
 
 
-.. code:: python
+.. code:: ipython3
 
     init_full = init_full / (np.std(init_full[:, 0]) * 10000)
     np.std(init_full, axis=0)
@@ -358,13 +358,13 @@ Learn the full embedding
 
 
 
-.. code-block:: text
+.. parsed-literal::
 
     array([0.0001    , 0.00011403])
 
 
 
-.. code:: python
+.. code:: ipython3
 
     embedding = TSNEEmbedding(
         init_full,
@@ -376,12 +376,12 @@ Learn the full embedding
         random_state=42,
     )
 
-.. code:: python
+.. code:: ipython3
 
     %time embedding1 = embedding.optimize(n_iter=500, exaggeration=12, momentum=0.5)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     Iteration   50, KL divergence  10.2843, 50 iterations in 84.8886 sec
     Iteration  100, KL divergence  10.2803, 50 iterations in 83.2534 sec
@@ -397,7 +397,7 @@ Learn the full embedding
     Wall time: 28min 14s
 
 
-.. code:: python
+.. code:: ipython3
 
     fig, ax = plt.subplots(figsize=(11, 10))
     plot(embedding1 @ rotate(90), y, ax=ax)
@@ -407,12 +407,12 @@ Learn the full embedding
 .. image:: output_41_0.png
 
 
-.. code:: python
+.. code:: ipython3
 
     %time embedding2 = embedding1.optimize(n_iter=250, exaggeration=4, momentum=0.8)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     Iteration   50, KL divergence  7.6484, 50 iterations in 218.5987 sec
     Iteration  100, KL divergence  7.4664, 50 iterations in 209.4354 sec
@@ -423,7 +423,7 @@ Learn the full embedding
     Wall time: 17min 34s
 
 
-.. code:: python
+.. code:: ipython3
 
     fig, ax = plt.subplots(figsize=(11, 10))
     plot(embedding2 @ rotate(90), y, ax=ax)
@@ -433,12 +433,12 @@ Learn the full embedding
 .. image:: output_43_0.png
 
 
-.. code:: python
+.. code:: ipython3
 
     %time embedding3 = embedding2.optimize(n_iter=250, exaggeration=4, momentum=0.8)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     Iteration   50, KL divergence  7.2002, 50 iterations in 208.8301 sec
     Iteration  100, KL divergence  7.1705, 50 iterations in 146.0506 sec
@@ -449,7 +449,7 @@ Learn the full embedding
     Wall time: 10min 46s
 
 
-.. code:: python
+.. code:: ipython3
 
     fig, ax = plt.subplots(figsize=(11, 10))
     plot(embedding3 @ rotate(90), y, ax=ax)
@@ -459,12 +459,12 @@ Learn the full embedding
 .. image:: output_45_0.png
 
 
-.. code:: python
+.. code:: ipython3
 
     %time embedding4 = embedding3.optimize(n_iter=250, exaggeration=4, momentum=0.8)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     Iteration   50, KL divergence  7.0983, 50 iterations in 210.3227 sec
     Iteration  100, KL divergence  7.0863, 50 iterations in 213.1101 sec
@@ -475,7 +475,7 @@ Learn the full embedding
     Wall time: 17min 45s
 
 
-.. code:: python
+.. code:: ipython3
 
     fig, ax = plt.subplots(figsize=(11, 10))
     plot(embedding4 @ rotate(90), y, ax=ax)
@@ -488,30 +488,31 @@ Learn the full embedding
 Comparison to UMAP
 ------------------
 
-.. code:: python
+.. code:: ipython3
 
     from umap import UMAP
 
-.. code:: python
+.. code:: ipython3
 
     umap = UMAP(n_neighbors=15, min_dist=0.1, random_state=1)
 
-.. code:: python
+.. code:: ipython3
 
     %time embedding_umap = umap.fit_transform(x)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     CPU times: user 2h 42min 35s, sys: 13min 32s, total: 2h 56min 7s
     Wall time: 1h 19min 51s
 
 
-.. code:: python
+.. code:: ipython3
 
     plot(embedding_umap, y)
 
 
 
 .. image:: output_52_0.png
+
 

@@ -1,3 +1,4 @@
+import distutils
 import os
 import sys
 import tempfile
@@ -9,6 +10,42 @@ from os.path import join
 
 import setuptools
 from setuptools import setup, Extension
+
+
+class ConvertNotebooksToDocs(distutils.cmd.Command):
+    description = "Convert the example notebooks to reStructuredText that will" \
+                  "be available in the documentation."
+
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        import nbconvert
+        from os.path import join
+
+        exporter = nbconvert.RSTExporter()
+        writer = nbconvert.writers.FilesWriter()
+
+        files = [
+            join("examples", "01_simple_usage.ipynb"),
+            join("examples", "02_advanced_usage.ipynb"),
+            join("examples", "03_preserving_global_structure.ipynb"),
+            join("examples", "04_large_data_sets.ipynb"),
+        ]
+        target_dir = join("docs", "source", "examples")
+
+        for fname in files:
+            self.announce(f"Converting {fname}...")
+            directory, nb_name = fname.split("/")
+            nb_name, _ = nb_name.split(".")
+            body, resources = exporter.from_file(fname)
+            writer.build_directory = join(target_dir, nb_name)
+            writer.write(body, resources, nb_name)
 
 
 class get_numpy_include:
@@ -226,5 +263,5 @@ setup(
     ],
 
     ext_modules=extensions,
-    cmdclass={"build_ext": CythonBuildExt},
+    cmdclass={"build_ext": CythonBuildExt, "convert_notebooks": ConvertNotebooksToDocs},
 )

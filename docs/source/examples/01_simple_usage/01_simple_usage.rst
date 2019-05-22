@@ -5,7 +5,7 @@ Simple usage
 This notebook demonstrates basic usage of the *openTSNE* library. This
 is sufficient for almost all use-cases.
 
-.. code:: python
+.. code:: ipython3
 
     from openTSNE import TSNE
     from openTSNE.callbacks import ErrorLogger
@@ -24,7 +24,7 @@ In most of the notebooks, we will be using the Macosko 2015 mouse retina
 data set. This is a fairly well-known and well explored data set in the
 single-cell literature making it suitable as an example.
 
-.. code:: python
+.. code:: ipython3
 
     import gzip
     import pickle
@@ -35,12 +35,27 @@ single-cell literature making it suitable as an example.
     x = data["pca_50"]
     y = data["CellType1"].astype(str)
 
-.. code:: python
+.. code:: ipython3
+
+    y
+
+
+
+
+.. parsed-literal::
+
+    array(['Retinal ganglion cells', 'Retinal ganglion cells',
+           'Retinal ganglion cells', ..., 'Retinal ganglion cells', 'Rods',
+           'Rods'], dtype='<U22')
+
+
+
+.. code:: ipython3
 
     print("Data set contains %d samples with %d features" % x.shape)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     Data set contains 44808 samples with 50 features
 
@@ -48,17 +63,17 @@ single-cell literature making it suitable as an example.
 Create train/test split
 -----------------------
 
-.. code:: python
+.. code:: ipython3
 
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=.33, random_state=42)
 
-.. code:: python
+.. code:: ipython3
 
     print("%d training samples" % x_train.shape[0])
     print("%d test samples" % x_test.shape[0])
 
 
-.. code-block:: text
+.. parsed-literal::
 
     30021 training samples
     14787 test samples
@@ -69,7 +84,7 @@ Run t-SNE
 
 We’ll first create an embedding on the training data.
 
-.. code:: python
+.. code:: ipython3
 
     tsne = TSNE(
         perplexity=30,
@@ -79,12 +94,12 @@ We’ll first create an embedding on the training data.
         random_state=42,
     )
 
-.. code:: python
+.. code:: ipython3
 
     %time embedding_train = tsne.fit(x_train)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     Iteration   50, KL divergence  5.7901, 50 iterations in 1.1000 sec
     Iteration  100, KL divergence  5.2511, 50 iterations in 0.9657 sec
@@ -110,13 +125,13 @@ We’ll first create an embedding on the training data.
     Wall time: 1min 8s
 
 
-.. code:: python
+.. code:: ipython3
 
     utils.plot(embedding_train, y_train, colors=utils.MACOSKO_COLORS)
 
 
 
-.. image:: output_11_0.png
+.. image:: output_12_0.png
 
 
 Transform
@@ -125,12 +140,12 @@ Transform
 openTSNE is currently the only library that allows embedding new points
 into an existing embedding.
 
-.. code:: python
+.. code:: ipython3
 
     %time embedding_test = embedding_train.transform(x_test)
 
 
-.. code-block:: text
+.. parsed-literal::
 
     Iteration   50, KL divergence  212552.5028, 50 iterations in 6.0102 sec
     Iteration  100, KL divergence  212498.8526, 50 iterations in 5.6037 sec
@@ -138,13 +153,13 @@ into an existing embedding.
     Wall time: 12.5 s
 
 
-.. code:: python
+.. code:: ipython3
 
     utils.plot(embedding_test, y_test, colors=utils.MACOSKO_COLORS)
 
 
 
-.. image:: output_14_0.png
+.. image:: output_15_0.png
 
 
 Together
@@ -153,7 +168,7 @@ Together
 We superimpose the transformed points onto the original embedding with
 larger opacity.
 
-.. code:: python
+.. code:: ipython3
 
     fig, ax = plt.subplots(figsize=(12, 8))
     utils.plot(embedding_train, y_train, colors=utils.MACOSKO_COLORS, alpha=0.25, ax=ax)
@@ -161,5 +176,6 @@ larger opacity.
 
 
 
-.. image:: output_16_0.png
+.. image:: output_17_0.png
+
 
