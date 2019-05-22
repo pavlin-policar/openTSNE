@@ -106,8 +106,8 @@ class CythonBuildExt(build_ext):
 
         # Optimization compiler/linker flags are added appropriately
         flags = self.COMPILER_FLAGS[self.compiler.compiler_type]
-        compile_flags = [flags["math"], flags["optimize"], flags["fast-optimize"]]
-        link_flags = [flags["math"], flags["optimize"], flags["fast-optimize"]]
+        compile_flags = [flags["math"], flags["optimize"], flags["fast-math"]]
+        link_flags = [flags["math"], flags["optimize"], flags["fast-math"]]
 
         # We don't want the compiler to optimize for system architecture if
         # we're building packages to be distributed by conda-forge
@@ -159,8 +159,8 @@ if has_c_library("fftw3"):
     extension_ = Extension(
         "openTSNE._matrix_mul.matrix_mul",
         ["openTSNE/_matrix_mul/matrix_mul_fftw3.pyx"],
-        extra_compile_args=["fftw", "math"],
-        extra_link_args=["fftw", "math"],
+        extra_compile_args=["fftw"],
+        extra_link_args=["fftw"],
     )
     extensions.append(extension_)
 else:
