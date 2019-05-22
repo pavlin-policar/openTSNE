@@ -181,7 +181,7 @@ except ImportError:
 
 
 def readme():
-    with open("README.md") as f:
+    with open("README.rst", encoding="utf-8") as f:
         return f.read()
 
 
