@@ -10,20 +10,24 @@ from os.path import join
 import setuptools
 from setuptools import setup, Extension
 
-try:
-    import numpy
-except ImportError:
-    from subprocess import call
-    call(["pip", "install", "numpy"])
 
-import numpy as np
+class get_numpy_include:
+    """Helper class to determine the numpy include path
+
+    The purpose of this class is to postpone importing numpy until it is
+    actually installed, so that the ``get_include()`` method can be invoked.
+
+    """
+    def __str__(self):
+        import numpy
+        return numpy.get_include()
 
 
 def get_include_dirs():
     """Get all the include directories which may contain headers that we need to
     compile the cython extensions."""
     return (
-        np.get_include(),
+        get_numpy_include(),
         os.path.join(sys.prefix, "include"),
         os.path.join(sys.prefix, "Library", "include"),
     )
