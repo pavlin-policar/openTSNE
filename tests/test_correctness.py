@@ -75,7 +75,7 @@ class TestTSNECorrectness(unittest.TestCase):
         self.assertLess(accuracy_score(predictions, y), 0.5)
 
         # Optimize the embedding for a small number of steps so tests run fast
-        embedding.optimize(50, inplace=True)
+        embedding.optimize(250, inplace=True)
 
         # Similar points should be grouped together, therefore KNN should do well
         knn.fit(embedding, y)
@@ -217,7 +217,7 @@ class TestTSNECorrectness(unittest.TestCase):
         embedding.optimize(n_iter=50, inplace=True)
 
         # The test set contains 50 samples, so let's verify on half of those
-        transform_params = dict(n_iter=0)
+        transform_params = dict(n_iter=0, early_exaggeration_iter=0)
         new_embedding_1 = embedding.transform(x_test, **transform_params)[:25]
         new_embedding_2 = embedding.transform(x_test[:25], **transform_params)
 
@@ -237,7 +237,7 @@ class TestTSNECorrectness(unittest.TestCase):
         embedding.optimize(n_iter=100, inplace=True)
 
         # The test set contains 50 samples, so let's verify on half of those
-        transform_params = dict(n_iter=0)
+        transform_params = dict(n_iter=0, early_exaggeration_iter=0)
         new_embedding_1 = embedding.transform(x_test, **transform_params)[:25]
         new_embedding_2 = embedding.transform(x_test[:25], **transform_params)
 

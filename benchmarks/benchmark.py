@@ -7,10 +7,10 @@ Choose one of the available methods:
 
 METHOD="openTSNEapprox";
 SAMPLE_SIZES=(1000 5000 10000 100000 250000 500000 750000 1000000);
-REPETITIONS=10;
+REPETITIONS=3;
 
 for size in ${SAMPLE_SIZES[@]}; do
-    cmd="python benchmark.py $METHOD run_multiple --n-samples $size --n $REPETITIONS 2>&1 | tee -a logs/$METHOD_$size.log";
+    cmd="python benchmark.py $METHOD run_multiple --n-samples $size --n $REPETITIONS 2>&1 | tee -a logs/${METHOD}_${size}.log";
     echo "$cmd";
     eval "$cmd";
 done;
@@ -29,6 +29,7 @@ from fitsne import FItSNE as FItSNE_
 from sklearn.manifold import TSNE as SKLTSNE
 
 import openTSNE
+import openTSNE.callbacks
 
 
 class TSNEBenchmark:
@@ -82,6 +83,7 @@ class openTSNEapprox(TSNEBenchmark):
             theta=0.5,
             min_num_intervals=10,
             ints_in_interval=1,
+            callbacks=[openTSNE.callbacks.ErrorLogger()],
         )
         embedding.optimize(250, exaggeration=12, momentum=0.8, inplace=True)
         embedding.optimize(750, momentum=0.5, inplace=True)

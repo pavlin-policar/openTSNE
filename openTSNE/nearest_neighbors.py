@@ -1,32 +1,7 @@
-import sys
-
 import numpy as np
 from sklearn import neighbors
 
-# In case we're running on a 32bit system, we have to properly handle numba's
-# ``parallel`` directive, which throws a ``RuntimeError``. It is important to
-# patch this before importing ``pynndescent`` which heavily relies on numba
-uns1 = sys.platform.startswith("win32") and sys.version_info[:2] == (2, 7)
-uns2 = sys.maxsize <= 2 ** 32
-if uns1 or uns2:
-    import numba
-
-    __njit_copy = numba.njit
-
-    # Ignore njit decorator and run raw Python function
-    def __njit_wrapper(*args, **kwargs):
-        return lambda f: f
-
-    numba.njit = __njit_wrapper
-
-    from . import pynndescent
-
-    pynndescent.pynndescent_.numba.njit = __njit_wrapper
-    pynndescent.distances.numba.njit = __njit_wrapper
-    pynndescent.rp_trees.numba.njit = __njit_wrapper
-    pynndescent.utils.numba.njit = __njit_wrapper
-
-from . import pynndescent
+from openTSNE import pynndescent
 
 
 class KNNIndex:

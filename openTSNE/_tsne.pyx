@@ -1,4 +1,3 @@
-# cython: profile=True
 # cython: boundscheck=False
 # cython: wraparound=False
 # cython: cdivision=True
@@ -61,14 +60,14 @@ cpdef double[:, ::1] compute_gaussian_perplexity(
                 sqrt_tau = sqrt(tau[i, h])
 
                 for j in range(k_neighbors):
-                    multiscale_P[i, h, j] = sqrt_tau * exp(-distances[i, j] ** 2 * tau[i, h] / 2)
+                    multiscale_P[i, h, j] = sqrt_tau * exp(-distances[i, j] ** 2 * tau[i, h] * 0.5)
                     sum_Pi = sum_Pi + multiscale_P[i, h, j]
                 sum_Pi = sum_Pi + EPSILON
 
                 for j in range(k_neighbors):
                     sum_PiDj = sum_PiDj + multiscale_P[i, h, j] / sum_Pi * distances[i, j] ** 2
 
-                entropy = tau[i, h] / 2 * sum_PiDj + log(sum_Pi) - log(tau[i, h]) / 2
+                entropy = tau[i, h] * 0.5 * sum_PiDj + log(sum_Pi) - log(tau[i, h]) * 0.5
                 entropy_diff = entropy - desired_entropies[h]
 
                 if fabs(entropy_diff) <= perplexity_tol:
@@ -79,13 +78,13 @@ cpdef double[:, ::1] compute_gaussian_perplexity(
                     if isinf(max_tau):
                         tau[i, h] *= 2
                     else:
-                        tau[i, h] = (tau[i, h] + max_tau) / 2
+                        tau[i, h] = (tau[i, h] + max_tau) * 0.5
                 else:
                     max_tau = tau[i, h]
                     if isinf(min_tau):
                         tau[i, h] /= 2
                     else:
-                        tau[i, h] = (tau[i, h] + min_tau) / 2
+                        tau[i, h] = (tau[i, h] + min_tau) * 0.5
 
         # Get the probability of the mixture of Gaussians with different precisions
         sum_Pi = 0
@@ -141,11 +140,11 @@ cpdef tuple estimate_positive_gradient_nn(
                 d_ij = 0
                 for d in range(n_dims):
                     diff[d] = embedding[i, d] - reference_embedding[j, d]
-                    d_ij = d_ij + diff[d] ** 2
+                    d_ij = d_ij + diff[d] * diff[d]
 
                 q_ij = dof / (dof + d_ij)
                 if dof != 1:
-                    q_ij = q_ij ** ((dof + 1) / 2)
+                    q_ij = q_ij ** ((dof + 1) * 0.5)
 
                 # Compute F_{attr} of point `j` on point `i`
                 for d in range(n_dims):
@@ -225,23 +224,24 @@ cdef void _estimate_negative_gradient_single(
 
     cdef:
         double distance = EPSILON
-        double q_ij
+        double q_ij, tmp
         Py_ssize_t d
 
     # Compute the squared euclidean disstance in the embedding space from the
     # new point to the center of mass
     for d in range(node.n_dims):
-        distance += (node.center_of_mass[d] - point[d]) ** 2
+        tmp = node.center_of_mass[d] - point[d]
+        distance += (tmp * tmp)
 
     # Check whether we can use this node as a summary
     if node.is_leaf or node.length / sqrt(distance) < theta:
         q_ij = dof / (dof + distance)
         if dof != 1:
-            q_ij = q_ij ** ((dof + 1) / 2)
+            q_ij = q_ij ** ((dof + 1) * 0.5)
         sum_Q[0] += node.num_points * q_ij
 
         for d in range(node.n_dims):
-            gradient[d] -= node.num_points * q_ij ** 2 * (point[d] - node.center_of_mass[d])
+            gradient[d] -= node.num_points * (q_ij * q_ij) * (point[d] - node.center_of_mass[d])
 
         return
 

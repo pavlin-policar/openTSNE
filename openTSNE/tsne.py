@@ -7,10 +7,10 @@ from types import SimpleNamespace
 import numpy as np
 from sklearn.base import BaseEstimator
 
-from . import _tsne
-from . import initialization as initialization_scheme
-from .affinity import Affinities, PerplexityBasedNN
-from .quad_tree import QuadTree
+from openTSNE import _tsne
+from openTSNE import initialization as initialization_scheme
+from openTSNE.affinity import Affinities, PerplexityBasedNN
+from openTSNE.quad_tree import QuadTree
 
 EPSILON = np.finfo(np.float64).eps
 
@@ -607,9 +607,21 @@ class TSNEEmbedding(np.ndarray):
 
         return embedding
 
-    def transform(self, X, perplexity=5, initialization="median", k=25,
-                  learning_rate=100, n_iter=100, exaggeration=2, momentum=0,
-                  max_grad_norm=0.05):
+    def transform(
+        self,
+        X,
+        perplexity=5,
+        initialization="median",
+        k=25,
+        learning_rate=100,
+        early_exaggeration=2,
+        early_exaggeration_iter=50,
+        exaggeration=None,
+        n_iter=50,
+        initial_momentum=0,
+        final_momentum=0,
+        max_grad_norm=0.01,
+    ):
         """Embed new points into the existing embedding.
 
         This procedure optimizes each point only with respect to the existing
@@ -648,18 +660,26 @@ class TSNEEmbedding(np.ndarray):
             may result in the points forming a "ball". This is also known as the
             crowding problem.
 
+        early_exaggeration_iter: int
+            The number of iterations to run in the *early exaggeration* phase.
+
+        early_exaggeration: float
+            The exaggeration factor to use during the *early exaggeration* phase.
+            Typical values range from 12 to 32.
+
         n_iter: int
             The number of iterations to run in the normal optimization regime.
-            Typically, the number of iterations needed when adding new data
-            points is much lower than with regular optimization.
 
         exaggeration: float
             The exaggeration factor to use during the normal optimization phase.
             This can be used to form more densely packed clusters and is useful
             for large data sets.
 
-        momentum: float
-            The momentum to use during optimization phase.
+        initial_momentum: float
+            The momentum to use during the *early exaggeration* phase.
+
+        final_momentum: float
+            The momentum to use during the normal optimization phase.
 
         max_grad_norm: float
             Maximum gradient norm. If the norm exceeds this value, it will be
@@ -695,10 +715,19 @@ class TSNEEmbedding(np.ndarray):
 
         try:
             embedding.optimize(
+                n_iter=early_exaggeration_iter,
+                learning_rate=learning_rate,
+                exaggeration=early_exaggeration,
+                momentum=initial_momentum,
+                inplace=True,
+                propagate_exception=True,
+                max_grad_norm=max_grad_norm,
+            )
+            embedding.optimize(
                 n_iter=n_iter,
                 learning_rate=learning_rate,
                 exaggeration=exaggeration,
-                momentum=momentum,
+                momentum=final_momentum,
                 inplace=True,
                 propagate_exception=True,
                 max_grad_norm=max_grad_norm,
@@ -911,7 +940,7 @@ class TSNE(BaseEstimator):
         exaggeration=None,
         theta=0.5,
         n_interpolation_points=3,
-        min_num_intervals=10,
+        min_num_intervals=50,
         ints_in_interval=1,
         initialization="pca",
         metric="euclidean",
@@ -1187,7 +1216,7 @@ class gradient_descent:
     def __call__(self, embedding, P, n_iter, objective_function, learning_rate=200,
                  momentum=0.5, exaggeration=None, dof=1, min_gain=0.01,
                  min_grad_norm=1e-8, max_grad_norm=None, theta=0.5,
-                 n_interpolation_points=3, min_num_intervals=10, ints_in_interval=1,
+                 n_interpolation_points=3, min_num_intervals=50, ints_in_interval=1,
                  reference_embedding=None, n_jobs=1,
                  use_callbacks=False, callbacks=None, callbacks_every_iters=50):
         """Perform batch gradient descent with momentum and gains.
