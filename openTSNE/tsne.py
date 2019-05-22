@@ -620,7 +620,7 @@ class TSNEEmbedding(np.ndarray):
         n_iter=50,
         initial_momentum=0,
         final_momentum=0,
-        max_grad_norm=0.05,
+        max_grad_norm=0.01,
     ):
         """Embed new points into the existing embedding.
 
