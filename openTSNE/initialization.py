@@ -26,7 +26,8 @@ def random(X, n_components=2, random_state=None):
 
     """
     random_state = check_random_state(random_state)
-    return random_state.normal(0, 1e-2, (X.shape[0], n_components))
+    embedding = random_state.normal(0, 1e-2, (X.shape[0], n_components))
+    return np.ascontiguousarray(embedding)
 
 
 def pca(X, n_components=2, random_state=None):
@@ -58,7 +59,7 @@ def pca(X, n_components=2, random_state=None):
     normalization = np.std(embedding[:, 0]) * 100
     embedding /= normalization
 
-    return embedding
+    return np.ascontiguousarray(embedding)
 
 
 def weighted_mean(X, embedding, neighbors, distances):
@@ -80,7 +81,7 @@ def weighted_mean(X, embedding, neighbors, distances):
     n_samples = X.shape[0]
     n_components = embedding.shape[1]
 
-    partial_embedding = np.zeros((n_samples, n_components))
+    partial_embedding = np.zeros((n_samples, n_components), order="C")
     for i in range(n_samples):
         partial_embedding[i] = np.average(
             embedding[neighbors[i]], axis=0, weights=distances[i],
@@ -103,4 +104,5 @@ def median(embedding, neighbors):
     np.ndarray
 
     """
-    return np.median(embedding[neighbors], axis=1)
+    embedding = np.median(embedding[neighbors], axis=1)
+    return np.ascontiguousarray(embedding)
