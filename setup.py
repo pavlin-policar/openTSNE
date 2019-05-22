@@ -87,7 +87,7 @@ class CythonBuildExt(build_ext):
             "openmp": "/openmp",
             "optimize": "/Ox",
             "fftw": "/lfftw3",
-            "math": "/lm",
+            "math": "",
             "fast-math": "/fp:fast",
             "native": "",
         },
