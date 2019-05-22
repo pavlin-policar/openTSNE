@@ -75,7 +75,7 @@ class TestTSNECorrectness(unittest.TestCase):
         self.assertLess(accuracy_score(predictions, y), 0.5)
 
         # Optimize the embedding for a small number of steps so tests run fast
-        embedding.optimize(50, inplace=True)
+        embedding.optimize(250, inplace=True)
 
         # Similar points should be grouped together, therefore KNN should do well
         knn.fit(embedding, y)
