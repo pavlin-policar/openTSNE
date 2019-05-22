@@ -97,10 +97,10 @@ class CythonBuildExt(build_ext):
         # Automatically append the file extension based on language.
         # ``cythonize`` does this for us automatically, so it's not necessary if
         # that was run
-        if not HAS_CYTHON:
-            for extension in self.extensions:
-                for idx, source in enumerate(extension.sources):
-                    base, ext = os.path.splitext(source)
+        for extension in extensions:
+            for idx, source in enumerate(extension.sources):
+                base, ext = os.path.splitext(source)
+                if ext == ".pyx":
                     base += ".cpp" if extension.language == "c++" else ".c"
                     extension.sources[idx] = base
 
