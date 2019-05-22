@@ -75,16 +75,22 @@ def has_c_library(library, extension=".c"):
 class CythonBuildExt(build_ext):
 
     COMPILER_FLAGS = {
-        "unix": {"openmp": "-fopenmp",
-                 "optimize": "-O3",
-                 "fftw": "-lfftw3",
-                 "math": "-lm",
-                 },
-        "msvc": {"openmp": "/openmp",
-                 "optimize": "/Ox",
-                 "fftw": "/lfftw3",
-                 "math": "/lm"
-                 },
+        "unix": {
+            "openmp": "-fopenmp",
+            "optimize": "-O3",
+            "fftw": "-lfftw3",
+            "math": "-lm",
+            "fast-math": "-ffast-math",
+            "native": "-march=native",
+        },
+        "msvc": {
+            "openmp": "/openmp",
+            "optimize": "/Ox",
+            "fftw": "/lfftw3",
+            "math": "/lm",
+            "fast-math": "/fp:fast",
+            "native": "",
+        },
     }
 
     def build_extensions(self):
@@ -100,8 +106,14 @@ class CythonBuildExt(build_ext):
 
         # Optimization compiler/linker flags are added appropriately
         flags = self.COMPILER_FLAGS[self.compiler.compiler_type]
-        compile_flags = [flags["optimize"]]
-        link_flags = [flags["optimize"]]
+        compile_flags = [flags["math"], flags["optimize"], flags["fast-optimize"]]
+        link_flags = [flags["math"], flags["optimize"], flags["fast-optimize"]]
+
+        # We don't want the compiler to optimize for system architecture if
+        # we're building packages to be distributed by conda-forge
+        if "CONDA_BUILD" not in os.environ:
+            compile_flags.append(flags["native"])
+            link_flags.append(flags["native"])
 
         # Map any existing compile/link flags into compiler specific ones
         def map_flags(ls):
@@ -144,19 +156,20 @@ extensions = [
 # Check if we have access to FFTW3 and if so, use that implementation
 if has_c_library("fftw3"):
     print("FFTW3 header files found. Using FFTW implementation of FFT.")
-    extensions.append(
-        Extension("openTSNE._matrix_mul.matrix_mul",
-                  ["openTSNE/_matrix_mul/matrix_mul_fftw3.pyx"],
-                  extra_compile_args=["fftw", "math"],
-                  extra_link_args=["fftw", "math"],
-                  )
-        )
+    extension_ = Extension(
+        "openTSNE._matrix_mul.matrix_mul",
+        ["openTSNE/_matrix_mul/matrix_mul_fftw3.pyx"],
+        extra_compile_args=["fftw", "math"],
+        extra_link_args=["fftw", "math"],
+    )
+    extensions.append(extension_)
 else:
     print("FFTW3 header files not found. Using numpy implementation of FFT.")
-    extensions.append(
-        Extension("openTSNE._matrix_mul.matrix_mul",
-                  ["openTSNE/_matrix_mul/matrix_mul_numpy.pyx"])
+    extension_ = Extension(
+        "openTSNE._matrix_mul.matrix_mul",
+        ["openTSNE/_matrix_mul/matrix_mul_numpy.pyx"],
     )
+    extensions.append(extension_)
 
 try:
     from Cython.Build import cythonize
