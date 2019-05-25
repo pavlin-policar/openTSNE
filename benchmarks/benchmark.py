@@ -221,5 +221,20 @@ class sklearn(TSNEBenchmark):
         print("scikit-learn t-SNE:", time.time() - start), sys.stdout.flush()
 
 
+class UMAP(TSNEBenchmark):
+    def run(self, n_samples=1000, random_state=None):
+        import umap
+
+        x, y = self.load_data(n_samples=n_samples)
+
+        print("-" * 80), sys.stdout.flush()
+        print("Random state", random_state)
+        print("-" * 80), sys.stdout.flush()
+
+        start = time.time()
+        umap.UMAP(random_state=random_state).fit_transform(x)
+        print("UMAP:", time.time() - start), sys.stdout.flush()
+
+
 if __name__ == "__main__":
     fire.Fire()
