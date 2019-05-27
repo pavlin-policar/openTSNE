@@ -44,6 +44,9 @@ learning_rate: float
 momentum: float
     Gradient descent with momentum keeps a sum exponentially decaying weights from previous iterations, speeding up convergence. In early stages of the optimization, this is typically set to a lower value (0.5 in most implementations) since points generally move around quite a bit in this phase and increased after the initial early exaggeration phase (typically to 0.8) to speed up convergence.
 
+max_grad_norm: float
+    By default, openTSNE does not apply gradient clipping. However, when embedding new data into an existing embedding, care must be taken that the data points do not "shoot off". Gradient clipping alevaites this issue.
+
 
 Barnes-Hut parameters
 ---------------------
