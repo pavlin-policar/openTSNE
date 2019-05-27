@@ -27,6 +27,12 @@ with Timer("Loading data..."):
 x = data["pca_50"]
 y, cluster_ids = data["CellType1"], data["CellType2"]
 
+# import sys; sys.path.append("FIt-SNE")
+# from fast_tsne import fast_tsne
+#
+# with Timer("Running fast_tsne..."):
+#     fast_tsne(x, nthreads=1)
+
 with Timer("Finding nearest neighbors..."):
     affinities = openTSNE.affinity.PerplexityBasedNN(
         x, perplexity=30, method="approx", n_jobs=1, random_state=3
