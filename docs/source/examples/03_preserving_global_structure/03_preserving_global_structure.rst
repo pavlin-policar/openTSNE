@@ -76,8 +76,8 @@ This will serve as a baseline comparison.
 
 .. parsed-literal::
 
-    CPU times: user 7min 38s, sys: 20.3 s, total: 7min 58s
-    Wall time: 1min 13s
+    CPU times: user 45min 48s, sys: 54.1 s, total: 46min 42s
+    Wall time: 1min 37s
 
 
 .. code:: ipython3
@@ -117,8 +117,8 @@ can be omitted.
 
 .. parsed-literal::
 
-    CPU times: user 7min 7s, sys: 18.4 s, total: 7min 26s
-    Wall time: 1min 7s
+    CPU times: user 42min 9s, sys: 49.8 s, total: 42min 59s
+    Wall time: 1min 28s
 
 
 .. code:: ipython3
@@ -157,8 +157,8 @@ parameter.
 
 .. parsed-literal::
 
-    CPU times: user 7min 13s, sys: 18.3 s, total: 7min 31s
-    Wall time: 1min 10s
+    CPU times: user 46min 27s, sys: 55.8 s, total: 47min 23s
+    Wall time: 1min 37s
 
 
 .. code:: ipython3
@@ -192,8 +192,8 @@ Lastly, let’s see how our embedding looks with both the changes.
 
 .. parsed-literal::
 
-    CPU times: user 7min 5s, sys: 17.9 s, total: 7min 23s
-    Wall time: 1min 8s
+    CPU times: user 44min 15s, sys: 52.6 s, total: 45min 7s
+    Wall time: 1min 32s
 
 
 .. code:: ipython3
@@ -273,8 +273,8 @@ Perplexity: 500
 
 .. parsed-literal::
 
-    CPU times: user 38min 2s, sys: 12.9 s, total: 38min 15s
-    Wall time: 6min 8s
+    CPU times: user 2h 27min 38s, sys: 2min 32s, total: 2h 30min 10s
+    Wall time: 7min 15s
 
 
 .. code:: ipython3
@@ -323,8 +323,8 @@ perplexity to something smaller to emphasize the local structure.
 
 .. parsed-literal::
 
-    CPU times: user 10min 10s, sys: 3.46 s, total: 10min 13s
-    Wall time: 2min 39s
+    CPU times: user 19min 3s, sys: 16.1 s, total: 19min 19s
+    Wall time: 3min 51s
 
 
 .. code:: ipython3
@@ -334,8 +334,8 @@ perplexity to something smaller to emphasize the local structure.
 
 .. parsed-literal::
 
-    CPU times: user 384 ms, sys: 12 ms, total: 396 ms
-    Wall time: 65.3 ms
+    CPU times: user 3.77 s, sys: 232 ms, total: 4 s
+    Wall time: 100 ms
 
 
 .. code:: ipython3
@@ -356,8 +356,8 @@ perplexity to something smaller to emphasize the local structure.
 
 .. parsed-literal::
 
-    CPU times: user 6min 50s, sys: 1.45 s, total: 6min 52s
-    Wall time: 51.6 s
+    CPU times: user 30min 56s, sys: 35 s, total: 31min 31s
+    Wall time: 48.2 s
 
 
 .. code:: ipython3
@@ -376,8 +376,8 @@ perplexity to something smaller to emphasize the local structure.
 
 .. parsed-literal::
 
-    CPU times: user 21min 19s, sys: 8 s, total: 21min 27s
-    Wall time: 2min 41s
+    CPU times: user 1h 36min 47s, sys: 1min 41s, total: 1h 38min 29s
+    Wall time: 2min 33s
 
 
 .. code:: ipython3
@@ -398,8 +398,8 @@ perplexity to something smaller to emphasize the local structure.
 
 .. parsed-literal::
 
-    CPU times: user 10.8 s, sys: 204 ms, total: 11 s
-    Wall time: 1.48 s
+    CPU times: user 19.3 s, sys: 1.26 s, total: 20.6 s
+    Wall time: 1.54 s
 
 
 .. code:: ipython3
@@ -409,8 +409,8 @@ perplexity to something smaller to emphasize the local structure.
 
 .. parsed-literal::
 
-    CPU times: user 4min 42s, sys: 11.9 s, total: 4min 54s
-    Wall time: 36.9 s
+    CPU times: user 31min 55s, sys: 39 s, total: 32min 34s
+    Wall time: 49.7 s
 
 
 .. code:: ipython3
@@ -450,8 +450,8 @@ much of the global structure.
 
 .. parsed-literal::
 
-    CPU times: user 11min 40s, sys: 5.19 s, total: 11min 45s
-    Wall time: 2min 54s
+    CPU times: user 21min 11s, sys: 38.3 s, total: 21min 50s
+    Wall time: 4min 13s
 
 
 .. code:: ipython3
@@ -461,8 +461,8 @@ much of the global structure.
 
 .. parsed-literal::
 
-    CPU times: user 440 ms, sys: 8 ms, total: 448 ms
-    Wall time: 74.2 ms
+    CPU times: user 9.72 s, sys: 455 ms, total: 10.2 s
+    Wall time: 255 ms
 
 
 .. code:: ipython3
@@ -483,8 +483,8 @@ Now, we just optimize just like we would standard t-SNE.
 
 .. parsed-literal::
 
-    CPU times: user 6min 31s, sys: 1.37 s, total: 6min 32s
-    Wall time: 49.1 s
+    CPU times: user 31min 24s, sys: 32.7 s, total: 31min 56s
+    Wall time: 48.6 s
 
 
 .. code:: ipython3
@@ -503,8 +503,8 @@ Now, we just optimize just like we would standard t-SNE.
 
 .. parsed-literal::
 
-    CPU times: user 21min 41s, sys: 10.7 s, total: 21min 52s
-    Wall time: 2min 44s
+    CPU times: user 1h 36min 12s, sys: 1min 38s, total: 1h 37min 51s
+    Wall time: 2min 38s
 
 
 .. code:: ipython3
@@ -545,6 +545,13 @@ Comparison to UMAP
     from umap import UMAP
     from itertools import product
 
+
+.. parsed-literal::
+
+    /home/ppolicar/local/miniconda3/envs/tsne/lib/python3.7/site-packages/scikit_learn-0.21.0-py3.7-linux-x86_64.egg/sklearn/externals/joblib/__init__.py:15: DeprecationWarning: sklearn.externals.joblib is deprecated in 0.21 and will be removed in 0.23. Please import this functionality directly from joblib, which can be installed with: pip install joblib. If this warning is raised when loading pickled models, you may need to re-serialize those models with scikit-learn 0.21+.
+      warnings.warn(msg, category=DeprecationWarning)
+
+
 .. code:: ipython3
 
     %%time
@@ -558,8 +565,8 @@ Comparison to UMAP
 
 .. parsed-literal::
 
-    CPU times: user 11min 18s, sys: 48 s, total: 12min 6s
-    Wall time: 8min 3s
+    CPU times: user 1h 11min 8s, sys: 4min 30s, total: 1h 15min 38s
+    Wall time: 12min 25s
 
 
 .. code:: ipython3
@@ -574,5 +581,4 @@ Comparison to UMAP
 
 
 .. image:: output_64_0.png
-
 

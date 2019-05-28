@@ -95,8 +95,8 @@ examples.
 
 .. parsed-literal::
 
-    CPU times: user 27 s, sys: 291 ms, total: 27.3 s
-    Wall time: 14 s
+    CPU times: user 1min 39s, sys: 2.15 s, total: 1min 41s
+    Wall time: 19.6 s
 
 
 **2. Generate initial coordinates for our embedding**
@@ -108,8 +108,8 @@ examples.
 
 .. parsed-literal::
 
-    CPU times: user 330 ms, sys: 3.59 ms, total: 333 ms
-    Wall time: 57.6 ms
+    CPU times: user 3.01 s, sys: 49.6 ms, total: 3.06 s
+    Wall time: 77.3 ms
 
 
 **3. Construct the ``TSNEEmbedding`` object**
@@ -135,13 +135,13 @@ examples.
 
 .. parsed-literal::
 
-    Iteration   50, KL divergence  5.7901, 50 iterations in 1.0475 sec
-    Iteration  100, KL divergence  5.2511, 50 iterations in 1.0043 sec
-    Iteration  150, KL divergence  5.1615, 50 iterations in 1.0565 sec
-    Iteration  200, KL divergence  5.1268, 50 iterations in 1.0170 sec
-    Iteration  250, KL divergence  5.1076, 50 iterations in 1.2683 sec
-    CPU times: user 40.9 s, sys: 56.9 ms, total: 40.9 s
-    Wall time: 5.44 s
+    Iteration   50, KL divergence  5.7889, 50 iterations in 1.1595 sec
+    Iteration  100, KL divergence  5.2496, 50 iterations in 1.1852 sec
+    Iteration  150, KL divergence  5.1563, 50 iterations in 1.1364 sec
+    Iteration  200, KL divergence  5.1203, 50 iterations in 1.1426 sec
+    Iteration  250, KL divergence  5.1018, 50 iterations in 1.1117 sec
+    CPU times: user 2min 52s, sys: 3.41 s, total: 2min 55s
+    Wall time: 5.79 s
 
 
 .. code:: ipython3
@@ -162,23 +162,23 @@ examples.
 
 .. parsed-literal::
 
-    Iteration   50, KL divergence  3.8025, 50 iterations in 1.0494 sec
-    Iteration  100, KL divergence  3.4117, 50 iterations in 1.5276 sec
-    Iteration  150, KL divergence  3.1974, 50 iterations in 1.2736 sec
-    Iteration  200, KL divergence  3.0556, 50 iterations in 1.5149 sec
-    Iteration  250, KL divergence  2.9535, 50 iterations in 1.8840 sec
-    Iteration  300, KL divergence  2.8751, 50 iterations in 2.0449 sec
-    Iteration  350, KL divergence  2.8137, 50 iterations in 2.5758 sec
-    Iteration  400, KL divergence  2.7644, 50 iterations in 3.6110 sec
-    Iteration  450, KL divergence  2.7245, 50 iterations in 3.3357 sec
-    Iteration  500, KL divergence  2.6918, 50 iterations in 3.8583 sec
-    Iteration  550, KL divergence  2.6652, 50 iterations in 5.1996 sec
-    Iteration  600, KL divergence  2.6436, 50 iterations in 4.6867 sec
-    Iteration  650, KL divergence  2.6260, 50 iterations in 5.3286 sec
-    Iteration  700, KL divergence  2.6112, 50 iterations in 6.6168 sec
-    Iteration  750, KL divergence  2.5991, 50 iterations in 7.2093 sec
-    CPU times: user 6min 36s, sys: 455 ms, total: 6min 36s
-    Wall time: 51.9 s
+    Iteration   50, KL divergence  3.7958, 50 iterations in 1.3252 sec
+    Iteration  100, KL divergence  3.4076, 50 iterations in 1.2355 sec
+    Iteration  150, KL divergence  3.1945, 50 iterations in 1.4455 sec
+    Iteration  200, KL divergence  3.0541, 50 iterations in 1.4912 sec
+    Iteration  250, KL divergence  2.9521, 50 iterations in 1.9103 sec
+    Iteration  300, KL divergence  2.8745, 50 iterations in 2.1101 sec
+    Iteration  350, KL divergence  2.8131, 50 iterations in 2.6402 sec
+    Iteration  400, KL divergence  2.7642, 50 iterations in 3.6373 sec
+    Iteration  450, KL divergence  2.7241, 50 iterations in 3.8347 sec
+    Iteration  500, KL divergence  2.6918, 50 iterations in 4.7176 sec
+    Iteration  550, KL divergence  2.6655, 50 iterations in 6.8521 sec
+    Iteration  600, KL divergence  2.6441, 50 iterations in 5.5079 sec
+    Iteration  650, KL divergence  2.6264, 50 iterations in 6.5560 sec
+    Iteration  700, KL divergence  2.6121, 50 iterations in 7.5798 sec
+    Iteration  750, KL divergence  2.6002, 50 iterations in 9.0642 sec
+    CPU times: user 27min 24s, sys: 32.9 s, total: 27min 57s
+    Wall time: 1min
 
 
 .. code:: ipython3
@@ -206,8 +206,8 @@ Transform
 
 .. parsed-literal::
 
-    CPU times: user 1.93 s, sys: 8 µs, total: 1.93 s
-    Wall time: 801 ms
+    CPU times: user 3.55 s, sys: 150 ms, total: 3.7 s
+    Wall time: 1.22 s
 
 
 .. code:: ipython3
@@ -232,10 +232,10 @@ Transform
 
 .. parsed-literal::
 
-    Iteration   50, KL divergence  212552.5028, 50 iterations in 6.6991 sec
-    Iteration  100, KL divergence  212498.8526, 50 iterations in 6.2299 sec
-    CPU times: user 1min 34s, sys: 89.6 ms, total: 1min 34s
-    Wall time: 13.1 s
+    Iteration   50, KL divergence  212577.9338, 50 iterations in 8.4328 sec
+    Iteration  100, KL divergence  212507.1902, 50 iterations in 6.1227 sec
+    CPU times: user 3min 14s, sys: 3.71 s, total: 3min 18s
+    Wall time: 14.7 s
 
 
 .. code:: ipython3
@@ -255,12 +255,11 @@ larger opacity.
 
 .. code:: ipython3
 
-    fig, ax = plt.subplots(figsize=(12, 8))
+    fig, ax = plt.subplots(figsize=(8, 8))
     utils.plot(embedding_train_2, y_train, colors=utils.MACOSKO_COLORS, alpha=0.25, ax=ax)
     utils.plot(embedding_test_1, y_test, colors=utils.MACOSKO_COLORS, alpha=0.75, ax=ax)
 
 
 
 .. image:: output_28_0.png
-
 
