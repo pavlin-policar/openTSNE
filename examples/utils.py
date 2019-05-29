@@ -349,3 +349,70 @@ def plot(
             bbox_to_anchor=(1, 0.5),
             frameon=False,
         )
+
+
+def evaluate_embedding(
+    embedding, labels, projection_embedding=None, projection_labels=None, sample=None
+):
+    """Evaluate the embedding using Moran's I index.
+
+    Parameters
+    ----------
+    embedding: np.ndarray
+        The data embedding.
+    labels: np.ndarray
+        A 1d numpy array containing the labels of each point.
+    projection_embedding: Optional[np.ndarray]
+        If this is given, the score will relate to how well the projection fits
+        the embedding.
+    projection_labels: Optional[np.ndarray]
+        A 1d numpy array containing the labels of each projection point.
+    sample: Optional[int]
+        If this is specified, the score will be computed on a sample of points.
+
+    Returns
+    -------
+    float
+        Moran's I index.
+
+    """
+    has_projection = projection_embedding is not None
+    if projection_embedding is None:
+        projection_embedding = embedding
+        if projection_labels is not None:
+            raise ValueError(
+                "If `projection_embedding` is None then `projection_labels make no sense`"
+            )
+        projection_labels = labels
+
+    if embedding.shape[0] != labels.shape[0]:
+        raise ValueError("The shape of the embedding and labels don't match")
+
+    if projection_embedding.shape[0] != projection_labels.shape[0]:
+        raise ValueError("The shape of the reference embedding and labels don't match")
+
+    if sample is not None:
+        n_samples = embedding.shape[0]
+        sample_indices = np.random.choice(
+            n_samples, size=min(sample, n_samples), replace=False
+        )
+        embedding = embedding[sample_indices]
+        labels = labels[sample_indices]
+
+        n_samples = projection_embedding.shape[0]
+        sample_indices = np.random.choice(
+            n_samples, size=min(sample, n_samples), replace=False
+        )
+        projection_embedding = projection_embedding[sample_indices]
+        projection_labels = projection_labels[sample_indices]
+
+    weights = projection_labels[:, None] == labels
+    if not has_projection:
+        np.fill_diagonal(weights, 0)
+
+    mu = np.asarray(embedding.mean(axis=0)).ravel()
+
+    numerator = np.sum(weights * ((projection_embedding - mu) @ (embedding - mu).T))
+    denominator = np.sum((projection_embedding - mu) ** 2)
+
+    return projection_embedding.shape[0] / np.sum(weights) * numerator / denominator
