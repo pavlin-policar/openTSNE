@@ -122,6 +122,16 @@ def log_normalize(data):
     return np.log2(data.astype(np.float64) + 1)
 
 
+def pca(x):
+    if sp.issparse(x):
+        x = x.toarray()
+    U, S, V = np.linalg.svd(x, full_matrices=False)
+    U[:, np.sum(V, axis=1) < 0] *= -1
+    x_reduced = np.dot(U, np.diag(S))
+    x_reduced = x_reduced[:, np.argsort(S)[::-1]][:, :50]
+    return x_reduced
+
+
 def select_genes(
     data,
     threshold=0,
