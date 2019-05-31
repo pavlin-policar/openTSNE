@@ -224,7 +224,8 @@ def readme():
 
 setup(
     name="openTSNE",
-    description=readme(),
+    description="Extensible, parallel implementations of t-SNE",
+    long_description=readme(),
     version="0.3.2",
     license="BSD-3-Clause",
 
