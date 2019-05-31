@@ -95,8 +95,8 @@ several places throughout the notebook, and can take a long time to run.
 
 .. parsed-literal::
 
-    CPU times: user 38min 48s, sys: 13.6 s, total: 39min 1s
-    Wall time: 25min 3s
+    CPU times: user 1h 2min 57s, sys: 1min 47s, total: 1h 4min 44s
+    Wall time: 37min 40s
 
 
 Standard t-SNE
@@ -111,8 +111,8 @@ First, let’s see what standard t-SNE does.
 
 .. parsed-literal::
 
-    CPU times: user 17.6 s, sys: 1.36 s, total: 19 s
-    Wall time: 3.19 s
+    CPU times: user 2min 46s, sys: 8.71 s, total: 2min 54s
+    Wall time: 5.27 s
 
 
 .. code:: ipython3
@@ -133,8 +133,8 @@ First, let’s see what standard t-SNE does.
 
 .. parsed-literal::
 
-    CPU times: user 2h 23min 6s, sys: 2min 8s, total: 2h 25min 15s
-    Wall time: 18min 46s
+    CPU times: user 4h 22min 22s, sys: 5min 47s, total: 4h 28min 10s
+    Wall time: 16min 1s
 
 
 .. code:: ipython3
@@ -162,8 +162,8 @@ clusters. Let’s see if that helps.
 
 .. parsed-literal::
 
-    CPU times: user 17.1 s, sys: 1.22 s, total: 18.3 s
-    Wall time: 3.07 s
+    CPU times: user 2min 47s, sys: 7.07 s, total: 2min 54s
+    Wall time: 5.55 s
 
 
 .. code:: ipython3
@@ -184,8 +184,8 @@ clusters. Let’s see if that helps.
 
 .. parsed-literal::
 
-    CPU times: user 2h 24min 55s, sys: 12min, total: 2h 36min 55s
-    Wall time: 27min 22s
+    CPU times: user 4h 19min 6s, sys: 4min 51s, total: 4h 23min 57s
+    Wall time: 15min 38s
 
 
 .. code:: ipython3
@@ -237,8 +237,8 @@ Create sample embedding
 
 .. parsed-literal::
 
-    CPU times: user 5min 8s, sys: 22.9 s, total: 5min 31s
-    Wall time: 1min 36s
+    CPU times: user 9min 18s, sys: 6.92 s, total: 9min 25s
+    Wall time: 2min 1s
 
 
 .. code:: ipython3
@@ -248,8 +248,8 @@ Create sample embedding
 
 .. parsed-literal::
 
-    CPU times: user 224 ms, sys: 8 ms, total: 232 ms
-    Wall time: 38.1 ms
+    CPU times: user 2.33 s, sys: 90.3 ms, total: 2.42 s
+    Wall time: 62.2 ms
 
 
 .. code:: ipython3
@@ -269,13 +269,13 @@ Create sample embedding
 
 .. parsed-literal::
 
-    Iteration   50, KL divergence  3.1707, 50 iterations in 6.2728 sec
-    Iteration  100, KL divergence  3.0522, 50 iterations in 6.1494 sec
-    Iteration  150, KL divergence  3.0464, 50 iterations in 6.0082 sec
-    Iteration  200, KL divergence  3.0449, 50 iterations in 5.9843 sec
-    Iteration  250, KL divergence  3.0443, 50 iterations in 5.9079 sec
-    CPU times: user 4min 4s, sys: 716 ms, total: 4min 5s
-    Wall time: 30.8 s
+    Iteration   50, KL divergence  3.1703, 50 iterations in 5.7042 sec
+    Iteration  100, KL divergence  3.0518, 50 iterations in 6.0842 sec
+    Iteration  150, KL divergence  3.0461, 50 iterations in 5.6341 sec
+    Iteration  200, KL divergence  3.0447, 50 iterations in 6.5530 sec
+    Iteration  250, KL divergence  3.0441, 50 iterations in 5.5155 sec
+    CPU times: user 12min, sys: 10 s, total: 12min 10s
+    Wall time: 29.9 s
 
 
 .. code:: ipython3
@@ -294,23 +294,23 @@ Create sample embedding
 
 .. parsed-literal::
 
-    Iteration   50, KL divergence  1.5281, 50 iterations in 6.0649 sec
-    Iteration  100, KL divergence  1.3389, 50 iterations in 5.9886 sec
-    Iteration  150, KL divergence  1.2583, 50 iterations in 6.0416 sec
-    Iteration  200, KL divergence  1.2150, 50 iterations in 6.1720 sec
-    Iteration  250, KL divergence  1.1948, 50 iterations in 6.3710 sec
-    Iteration  300, KL divergence  1.1771, 50 iterations in 6.5037 sec
-    Iteration  350, KL divergence  1.1670, 50 iterations in 6.4721 sec
-    Iteration  400, KL divergence  1.1595, 50 iterations in 7.4812 sec
-    Iteration  450, KL divergence  1.1536, 50 iterations in 6.7223 sec
-    Iteration  500, KL divergence  1.1494, 50 iterations in 6.9380 sec
-    Iteration  550, KL divergence  1.1456, 50 iterations in 7.0739 sec
-    Iteration  600, KL divergence  1.1432, 50 iterations in 6.9761 sec
-    Iteration  650, KL divergence  1.1411, 50 iterations in 6.8439 sec
-    Iteration  700, KL divergence  1.1397, 50 iterations in 6.8502 sec
-    Iteration  750, KL divergence  1.1383, 50 iterations in 6.8580 sec
-    CPU times: user 13min 11s, sys: 5.95 s, total: 13min 17s
-    Wall time: 1min 39s
+    Iteration   50, KL divergence  1.5264, 50 iterations in 6.6760 sec
+    Iteration  100, KL divergence  1.3347, 50 iterations in 6.5701 sec
+    Iteration  150, KL divergence  1.2537, 50 iterations in 5.7738 sec
+    Iteration  200, KL divergence  1.2109, 50 iterations in 6.0972 sec
+    Iteration  250, KL divergence  1.1856, 50 iterations in 6.1227 sec
+    Iteration  300, KL divergence  1.1694, 50 iterations in 5.8382 sec
+    Iteration  350, KL divergence  1.1599, 50 iterations in 6.1803 sec
+    Iteration  400, KL divergence  1.1536, 50 iterations in 5.6595 sec
+    Iteration  450, KL divergence  1.1500, 50 iterations in 6.1716 sec
+    Iteration  500, KL divergence  1.1465, 50 iterations in 6.5309 sec
+    Iteration  550, KL divergence  1.1440, 50 iterations in 6.5737 sec
+    Iteration  600, KL divergence  1.1418, 50 iterations in 6.4968 sec
+    Iteration  650, KL divergence  1.1402, 50 iterations in 5.2163 sec
+    Iteration  700, KL divergence  1.1388, 50 iterations in 5.6052 sec
+    Iteration  750, KL divergence  1.1373, 50 iterations in 6.2774 sec
+    CPU times: user 36min 50s, sys: 30.9 s, total: 37min 21s
+    Wall time: 1min 32s
 
 
 .. code:: ipython3
@@ -332,8 +332,8 @@ Learn the full embedding
 
 .. parsed-literal::
 
-    CPU times: user 50 s, sys: 1.72 s, total: 51.7 s
-    Wall time: 37.7 s
+    CPU times: user 2min 37s, sys: 652 ms, total: 2min 38s
+    Wall time: 1min 18s
 
 
 .. code:: ipython3
@@ -342,7 +342,7 @@ Learn the full embedding
 
 .. code:: ipython3
 
-    fig, ax = plt.subplots(figsize=(11, 10))
+    fig, ax = plt.subplots(figsize=(10, 10))
     plot(init_full, y, ax=ax)
 
 
@@ -360,7 +360,7 @@ Learn the full embedding
 
 .. parsed-literal::
 
-    array([0.0001    , 0.00011403])
+    array([1.00000000e-04, 1.14353061e-04])
 
 
 
@@ -383,23 +383,23 @@ Learn the full embedding
 
 .. parsed-literal::
 
-    Iteration   50, KL divergence  10.2843, 50 iterations in 84.8886 sec
-    Iteration  100, KL divergence  10.2803, 50 iterations in 83.2534 sec
-    Iteration  150, KL divergence  9.3190, 50 iterations in 83.9699 sec
-    Iteration  200, KL divergence  8.7463, 50 iterations in 170.2522 sec
-    Iteration  250, KL divergence  8.5086, 50 iterations in 224.0651 sec
-    Iteration  300, KL divergence  8.3858, 50 iterations in 210.9331 sec
-    Iteration  350, KL divergence  8.3118, 50 iterations in 202.5495 sec
-    Iteration  400, KL divergence  8.2644, 50 iterations in 208.5362 sec
-    Iteration  450, KL divergence  8.2318, 50 iterations in 215.3144 sec
-    Iteration  500, KL divergence  8.2095, 50 iterations in 206.5496 sec
-    CPU times: user 1h 24min 3s, sys: 21min 19s, total: 1h 45min 22s
-    Wall time: 28min 14s
+    Iteration   50, KL divergence  10.2843, 50 iterations in 48.5307 sec
+    Iteration  100, KL divergence  10.2803, 50 iterations in 48.2069 sec
+    Iteration  150, KL divergence  9.3181, 50 iterations in 47.9606 sec
+    Iteration  200, KL divergence  8.7442, 50 iterations in 48.3420 sec
+    Iteration  250, KL divergence  8.5049, 50 iterations in 48.1888 sec
+    Iteration  300, KL divergence  8.3797, 50 iterations in 48.1925 sec
+    Iteration  350, KL divergence  8.3061, 50 iterations in 48.5544 sec
+    Iteration  400, KL divergence  8.2591, 50 iterations in 48.4718 sec
+    Iteration  450, KL divergence  8.2273, 50 iterations in 48.4514 sec
+    Iteration  500, KL divergence  8.2049, 50 iterations in 48.4425 sec
+    CPU times: user 2h 15min 27s, sys: 2min 28s, total: 2h 17min 56s
+    Wall time: 8min 5s
 
 
 .. code:: ipython3
 
-    fig, ax = plt.subplots(figsize=(11, 10))
+    fig, ax = plt.subplots(figsize=(10, 10))
     plot(embedding1 @ rotate(90), y, ax=ax)
 
 
@@ -414,18 +414,18 @@ Learn the full embedding
 
 .. parsed-literal::
 
-    Iteration   50, KL divergence  7.6484, 50 iterations in 218.5987 sec
-    Iteration  100, KL divergence  7.4664, 50 iterations in 209.4354 sec
-    Iteration  150, KL divergence  7.3579, 50 iterations in 210.6941 sec
-    Iteration  200, KL divergence  7.2860, 50 iterations in 207.8783 sec
-    Iteration  250, KL divergence  7.2353, 50 iterations in 201.8076 sec
-    CPU times: user 40min 52s, sys: 14min 3s, total: 54min 55s
-    Wall time: 17min 34s
+    Iteration   50, KL divergence  7.6311, 50 iterations in 54.7087 sec
+    Iteration  100, KL divergence  7.4543, 50 iterations in 48.5959 sec
+    Iteration  150, KL divergence  7.3482, 50 iterations in 48.6267 sec
+    Iteration  200, KL divergence  7.2778, 50 iterations in 48.8663 sec
+    Iteration  250, KL divergence  7.2278, 50 iterations in 48.9803 sec
+    CPU times: user 1h 7min 26s, sys: 1min 16s, total: 1h 8min 43s
+    Wall time: 4min 12s
 
 
 .. code:: ipython3
 
-    fig, ax = plt.subplots(figsize=(11, 10))
+    fig, ax = plt.subplots(figsize=(10, 10))
     plot(embedding2 @ rotate(90), y, ax=ax)
 
 
@@ -440,18 +440,18 @@ Learn the full embedding
 
 .. parsed-literal::
 
-    Iteration   50, KL divergence  7.2002, 50 iterations in 208.8301 sec
-    Iteration  100, KL divergence  7.1705, 50 iterations in 146.0506 sec
-    Iteration  150, KL divergence  7.1464, 50 iterations in 82.0394 sec
-    Iteration  200, KL divergence  7.1272, 50 iterations in 82.2034 sec
-    Iteration  250, KL divergence  7.1109, 50 iterations in 122.4318 sec
-    CPU times: user 40min 16s, sys: 6min 40s, total: 46min 57s
-    Wall time: 10min 46s
+    Iteration   50, KL divergence  7.1927, 50 iterations in 47.5765 sec
+    Iteration  100, KL divergence  7.1623, 50 iterations in 47.2527 sec
+    Iteration  150, KL divergence  7.1375, 50 iterations in 47.1718 sec
+    Iteration  200, KL divergence  7.1169, 50 iterations in 47.1572 sec
+    Iteration  250, KL divergence  7.0995, 50 iterations in 47.5738 sec
+    CPU times: user 1h 6min 21s, sys: 1min 12s, total: 1h 7min 33s
+    Wall time: 3min 59s
 
 
 .. code:: ipython3
 
-    fig, ax = plt.subplots(figsize=(11, 10))
+    fig, ax = plt.subplots(figsize=(10, 10))
     plot(embedding3 @ rotate(90), y, ax=ax)
 
 
@@ -466,18 +466,18 @@ Learn the full embedding
 
 .. parsed-literal::
 
-    Iteration   50, KL divergence  7.0983, 50 iterations in 210.3227 sec
-    Iteration  100, KL divergence  7.0863, 50 iterations in 213.1101 sec
-    Iteration  150, KL divergence  7.0753, 50 iterations in 208.9319 sec
-    Iteration  200, KL divergence  7.0660, 50 iterations in 206.6566 sec
-    Iteration  250, KL divergence  7.0571, 50 iterations in 220.0835 sec
-    CPU times: user 41min 41s, sys: 14min 2s, total: 55min 44s
-    Wall time: 17min 45s
+    Iteration   50, KL divergence  7.0854, 50 iterations in 47.2708 sec
+    Iteration  100, KL divergence  7.0716, 50 iterations in 47.4487 sec
+    Iteration  150, KL divergence  7.0592, 50 iterations in 47.5619 sec
+    Iteration  200, KL divergence  7.0478, 50 iterations in 47.1930 sec
+    Iteration  250, KL divergence  7.0381, 50 iterations in 47.6492 sec
+    CPU times: user 1h 6min 45s, sys: 1min 14s, total: 1h 7min 59s
+    Wall time: 3min 59s
 
 
 .. code:: ipython3
 
-    fig, ax = plt.subplots(figsize=(11, 10))
+    fig, ax = plt.subplots(figsize=(10, 10))
     plot(embedding4 @ rotate(90), y, ax=ax)
 
 
@@ -492,6 +492,13 @@ Comparison to UMAP
 
     from umap import UMAP
 
+
+.. parsed-literal::
+
+    /home/ppolicar/local/miniconda3/envs/tsne/lib/python3.7/site-packages/scikit_learn-0.21.0-py3.7-linux-x86_64.egg/sklearn/externals/joblib/__init__.py:15: DeprecationWarning: sklearn.externals.joblib is deprecated in 0.21 and will be removed in 0.23. Please import this functionality directly from joblib, which can be installed with: pip install joblib. If this warning is raised when loading pickled models, you may need to re-serialize those models with scikit-learn 0.21+.
+      warnings.warn(msg, category=DeprecationWarning)
+
+
 .. code:: ipython3
 
     umap = UMAP(n_neighbors=15, min_dist=0.1, random_state=1)
@@ -503,8 +510,8 @@ Comparison to UMAP
 
 .. parsed-literal::
 
-    CPU times: user 2h 42min 35s, sys: 13min 32s, total: 2h 56min 7s
-    Wall time: 1h 19min 51s
+    CPU times: user 11h 1min 37s, sys: 18min 41s, total: 11h 20min 19s
+    Wall time: 1h 24min 29s
 
 
 .. code:: ipython3
@@ -514,5 +521,4 @@ Comparison to UMAP
 
 
 .. image:: output_52_0.png
-
 

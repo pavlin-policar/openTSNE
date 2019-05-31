@@ -37,21 +37,6 @@ single-cell literature making it suitable as an example.
 
 .. code:: ipython3
 
-    y
-
-
-
-
-.. parsed-literal::
-
-    array(['Retinal ganglion cells', 'Retinal ganglion cells',
-           'Retinal ganglion cells', ..., 'Retinal ganglion cells', 'Rods',
-           'Rods'], dtype='<U22')
-
-
-
-.. code:: ipython3
-
     print("Data set contains %d samples with %d features" % x.shape)
 
 
@@ -101,28 +86,28 @@ We’ll first create an embedding on the training data.
 
 .. parsed-literal::
 
-    Iteration   50, KL divergence  5.7901, 50 iterations in 1.1000 sec
-    Iteration  100, KL divergence  5.2511, 50 iterations in 0.9657 sec
-    Iteration  150, KL divergence  5.1615, 50 iterations in 0.9991 sec
-    Iteration  200, KL divergence  5.1268, 50 iterations in 0.9726 sec
-    Iteration  250, KL divergence  5.1076, 50 iterations in 1.0095 sec
-    Iteration   50, KL divergence  3.8025, 50 iterations in 1.0352 sec
-    Iteration  100, KL divergence  3.4117, 50 iterations in 1.0946 sec
-    Iteration  150, KL divergence  3.1974, 50 iterations in 1.2869 sec
-    Iteration  200, KL divergence  3.0556, 50 iterations in 1.4492 sec
-    Iteration  250, KL divergence  2.9535, 50 iterations in 1.8365 sec
-    Iteration  300, KL divergence  2.8751, 50 iterations in 2.0608 sec
-    Iteration  350, KL divergence  2.8137, 50 iterations in 2.5188 sec
-    Iteration  400, KL divergence  2.7644, 50 iterations in 3.5575 sec
-    Iteration  450, KL divergence  2.7245, 50 iterations in 3.2463 sec
-    Iteration  500, KL divergence  2.6918, 50 iterations in 3.6766 sec
-    Iteration  550, KL divergence  2.6652, 50 iterations in 5.4874 sec
-    Iteration  600, KL divergence  2.6436, 50 iterations in 4.5376 sec
-    Iteration  650, KL divergence  2.6260, 50 iterations in 4.8918 sec
-    Iteration  700, KL divergence  2.6112, 50 iterations in 6.3295 sec
-    Iteration  750, KL divergence  2.5991, 50 iterations in 7.0309 sec
-    CPU times: user 7min 34s, sys: 892 ms, total: 7min 35s
-    Wall time: 1min 8s
+    Iteration   50, KL divergence  5.7889, 50 iterations in 1.2277 sec
+    Iteration  100, KL divergence  5.2496, 50 iterations in 1.1978 sec
+    Iteration  150, KL divergence  5.1563, 50 iterations in 1.1671 sec
+    Iteration  200, KL divergence  5.1203, 50 iterations in 1.3511 sec
+    Iteration  250, KL divergence  5.1018, 50 iterations in 1.4377 sec
+    Iteration   50, KL divergence  3.7958, 50 iterations in 1.5298 sec
+    Iteration  100, KL divergence  3.4076, 50 iterations in 1.3780 sec
+    Iteration  150, KL divergence  3.1945, 50 iterations in 1.3263 sec
+    Iteration  200, KL divergence  3.0541, 50 iterations in 1.5235 sec
+    Iteration  250, KL divergence  2.9521, 50 iterations in 2.1700 sec
+    Iteration  300, KL divergence  2.8745, 50 iterations in 2.4172 sec
+    Iteration  350, KL divergence  2.8131, 50 iterations in 3.0004 sec
+    Iteration  400, KL divergence  2.7642, 50 iterations in 3.9832 sec
+    Iteration  450, KL divergence  2.7241, 50 iterations in 4.3934 sec
+    Iteration  500, KL divergence  2.6918, 50 iterations in 5.2797 sec
+    Iteration  550, KL divergence  2.6655, 50 iterations in 7.8413 sec
+    Iteration  600, KL divergence  2.6441, 50 iterations in 5.8196 sec
+    Iteration  650, KL divergence  2.6264, 50 iterations in 6.7464 sec
+    Iteration  700, KL divergence  2.6121, 50 iterations in 9.0360 sec
+    Iteration  750, KL divergence  2.6002, 50 iterations in 10.0276 sec
+    CPU times: user 34min 49s, sys: 41.8 s, total: 35min 31s
+    Wall time: 1min 32s
 
 
 .. code:: ipython3
@@ -131,7 +116,7 @@ We’ll first create an embedding on the training data.
 
 
 
-.. image:: output_12_0.png
+.. image:: output_11_0.png
 
 
 Transform
@@ -147,10 +132,10 @@ into an existing embedding.
 
 .. parsed-literal::
 
-    Iteration   50, KL divergence  212552.5028, 50 iterations in 6.0102 sec
-    Iteration  100, KL divergence  212498.8526, 50 iterations in 5.6037 sec
-    CPU times: user 1min 31s, sys: 155 ms, total: 1min 32s
-    Wall time: 12.5 s
+    Iteration   50, KL divergence  214515.0279, 50 iterations in 11.2446 sec
+    Iteration   50, KL divergence  204042.5486, 50 iterations in 11.1324 sec
+    CPU times: user 4min 13s, sys: 4.9 s, total: 4min 17s
+    Wall time: 24.2 s
 
 
 .. code:: ipython3
@@ -159,7 +144,7 @@ into an existing embedding.
 
 
 
-.. image:: output_15_0.png
+.. image:: output_14_0.png
 
 
 Together
@@ -170,12 +155,11 @@ larger opacity.
 
 .. code:: ipython3
 
-    fig, ax = plt.subplots(figsize=(12, 8))
+    fig, ax = plt.subplots(figsize=(8, 8))
     utils.plot(embedding_train, y_train, colors=utils.MACOSKO_COLORS, alpha=0.25, ax=ax)
     utils.plot(embedding_test, y_test, colors=utils.MACOSKO_COLORS, alpha=0.75, ax=ax)
 
 
 
-.. image:: output_17_0.png
-
+.. image:: output_16_0.png
 
