@@ -2,3 +2,4 @@ recursive-include openTSNE/ *.py *.h *.c *.cpp *.pyx *.pxd
 
 include LICENSE
 include README.rst
+include docs/source/images/macosko_2015.png

@@ -64,7 +64,6 @@ def get_include_dirs():
     """Get all the include directories which may contain headers that we need to
     compile the cython extensions."""
     return (
-        get_numpy_include(),
         os.path.join(sys.prefix, "include"),
         os.path.join(sys.prefix, "Library", "include"),
     )
@@ -181,6 +180,7 @@ class CythonBuildExt(build_ext):
         # Add numpy and system include directories
         for extension in self.extensions:
             extension.include_dirs.extend(get_include_dirs())
+            extension.include_dirs.append(get_numpy_include())
 
         super().build_extensions()
 
