@@ -30,7 +30,7 @@ def random(X, n_components=2, random_state=None):
     return np.ascontiguousarray(embedding)
 
 
-def pca(X, n_components=2, random_state=None):
+def pca(X, n_components=2, svd_solver="auto", random_state=None):
     """Initialize an embedding using the top principal components.
 
     Parameters
@@ -52,7 +52,9 @@ def pca(X, n_components=2, random_state=None):
     initialization: np.ndarray
 
     """
-    pca_ = PCA(n_components=n_components, random_state=random_state)
+    pca_ = PCA(
+        n_components=n_components, svd_solver=svd_solver, random_state=random_state
+    )
     embedding = pca_.fit_transform(X)
 
     # The PCA embedding may have high variance, which leads to poor convergence
@@ -84,7 +86,7 @@ def weighted_mean(X, embedding, neighbors, distances):
     partial_embedding = np.zeros((n_samples, n_components), order="C")
     for i in range(n_samples):
         partial_embedding[i] = np.average(
-            embedding[neighbors[i]], axis=0, weights=distances[i],
+            embedding[neighbors[i]], axis=0, weights=distances[i]
         )
 
     return partial_embedding
