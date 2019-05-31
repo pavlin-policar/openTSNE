@@ -445,21 +445,32 @@ class TSNEEmbedding(np.ndarray):
 
     """
 
-    def __new__(cls, embedding, affinities, random_state=None, optimizer=None,
-                **gradient_descent_params):
+    def __new__(
+        cls,
+        embedding,
+        affinities,
+        random_state=None,
+        optimizer=None,
+        negative_gradient_method="fft",
+        **gradient_descent_params,
+    ):
         init_checks.num_samples(embedding.shape[0], affinities.P.shape[0])
 
         obj = np.asarray(embedding, dtype=np.float64, order="C").view(TSNEEmbedding)
 
         obj.affinities = affinities  # type: Affinities
         obj.gradient_descent_params = gradient_descent_params  # type: dict
+        obj.gradient_descent_params["negative_gradient_method"] = negative_gradient_method
         obj.random_state = random_state
 
         if optimizer is None:
             optimizer = gradient_descent()
         elif not isinstance(optimizer, gradient_descent):
-            raise TypeError("`optimizer` must be an instance of `%s`, but got `%s`." % (
-                gradient_descent.__class__.__name__, type(optimizer)))
+            raise TypeError(
+                "`optimizer` must be an instance of `%s`, but got `%s`." % (
+                    gradient_descent.__class__.__name__, type(optimizer)
+                )
+            )
         obj.optimizer = optimizer
 
         obj.kl_divergence = None
