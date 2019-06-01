@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn import neighbors
 
-from openTSNE import pynndescent
+import pynndescent
 
 
 class KNNIndex:

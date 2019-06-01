@@ -1,10 +1,9 @@
-from sklearn import datasets
-
-import openTSNE
 import unittest
 from unittest.mock import patch
 
 import numpy as np
+import pynndescent
+from sklearn import datasets
 
 from openTSNE import nearest_neighbors
 from .test_tsne import check_mock_called_with_kwargs
@@ -79,7 +78,7 @@ class TestBallTree(KNNIndexTestMixin, unittest.TestCase):
 class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
     knn_index = nearest_neighbors.NNDescent
 
-    @patch("openTSNE.pynndescent.NNDescent", wraps=openTSNE.pynndescent.NNDescent)
+    @patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent)
     def test_random_state_being_passed_through(self, nndescent):
         random_state = 1
         knn_index = nearest_neighbors.NNDescent("euclidean", random_state=random_state)
