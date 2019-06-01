@@ -258,9 +258,9 @@ setup(
     python_requires=">=3.6",
     install_requires=[
         "numpy>1.14",
-        "numba>=0.38.1",
         "scikit-learn>=0.20",
         "scipy",
+        "pynndescent>=0.3",
     ],
 
     ext_modules=extensions,

@@ -212,7 +212,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         check_call_contains_kwargs(gradient_descent.mock_calls[0], params)
 
     @check_params({"metric": set(NNDescent.VALID_METRICS) - {"mahalanobis"}})
-    @patch("openTSNE.pynndescent.NNDescent")
+    @patch("pynndescent.NNDescent")
     def test_nndescent_distances(self, param_name, metric, nndescent: MagicMock):
         """Distance metrics should be properly passed down to NN descent"""
         assert param_name == "metric"
@@ -230,7 +230,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         self.assertEqual(nndescent.call_count, 1)
         check_call_contains_kwargs(nndescent.mock_calls[0], {"metric": metric})
 
-    @patch("openTSNE.pynndescent.NNDescent")
+    @patch("pynndescent.NNDescent")
     def test_nndescent_mahalanobis_distance(self, nndescent: MagicMock):
         """Distance metrics and additional params should be correctly passed down to NN descent"""
         metric = "mahalanobis"
