@@ -106,6 +106,7 @@ class NNDescent(KNNIndex):
             n_iters=n_iters,
             algorithm="standard",
             max_candidates=60,
+            n_jobs=self.n_jobs,
         )
 
         indices, distances = self.index.query(data, k=k + 1, queue_size=1)
