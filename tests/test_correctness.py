@@ -6,7 +6,6 @@ import openTSNE.affinity
 import openTSNE.initialization
 import numpy as np
 from openTSNE.callbacks import VerifyExaggerationError
-from openTSNE.tsne import TSNEEmbedding
 from sklearn import datasets
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
@@ -39,7 +38,7 @@ class TestTSNECorrectness(unittest.TestCase):
         """Verify that the advanced flow does not crash."""
         embedding = self.tsne.prepare_initial(self.x)
         embedding = embedding.optimize(20, exaggeration=12)
-        embedding = embedding.optimize(20)  # type: TSNEEmbedding
+        embedding = embedding.optimize(20)  # type: openTSNE.TSNEEmbedding
         self.assertFalse(np.any(np.isnan(embedding)))
 
         partial_embedding = embedding.prepare_partial(self.x_test)

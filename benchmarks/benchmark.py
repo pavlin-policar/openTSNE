@@ -18,7 +18,6 @@ done;
 """
 import gzip
 import pickle
-import sys
 import time
 from os import path
 
@@ -37,8 +36,8 @@ class TSNEBenchmark:
     learning_rate = 100
     n_jobs = 1
 
-    def run(self, n_samples=1000):
-        raise NotImplemented()
+    def run(self, n_samples=1000, random_state=None):
+        raise NotImplementedError()
 
     def run_multiple(self, n=5, n_samples=1000):
         for idx in range(n):
@@ -63,9 +62,9 @@ class openTSNEapprox(TSNEBenchmark):
     def run(self, n_samples=1000, random_state=None):
         x, y = self.load_data(n_samples=n_samples)
 
-        print("-" * 80), sys.stdout.flush()
+        print("-" * 80)
         print("Random state", random_state)
-        print("-" * 80), sys.stdout.flush()
+        print("-" * 80, flush=True)
 
         random_state = check_random_state(random_state)
 
@@ -78,7 +77,7 @@ class openTSNEapprox(TSNEBenchmark):
             n_jobs=self.n_jobs,
             random_state=random_state,
         )
-        print("openTSNE: NN search", time.time() - start_aff), sys.stdout.flush()
+        print("openTSNE: NN search", time.time() - start_aff, flush=True)
 
         init = openTSNE.initialization.random(
             x, n_components=2, random_state=random_state
@@ -97,16 +96,16 @@ class openTSNEapprox(TSNEBenchmark):
         embedding.optimize(250, exaggeration=12, momentum=0.8, inplace=True)
         embedding.optimize(750, momentum=0.5, inplace=True)
         print("openTSNE: Optimization", time.time() - start_optim)
-        print("openTSNE: Full", time.time() - start), sys.stdout.flush()
+        print("openTSNE: Full", time.time() - start, flush=True)
 
 
 class openTSNEexact(TSNEBenchmark):
     def run(self, n_samples=1000, random_state=None):
         x, y = self.load_data(n_samples=n_samples)
 
-        print("-" * 80), sys.stdout.flush()
+        print("-" * 80)
         print("Random state", random_state)
-        print("-" * 80), sys.stdout.flush()
+        print("-" * 80, flush=True)
 
         random_state = check_random_state(random_state)
 
@@ -119,7 +118,7 @@ class openTSNEexact(TSNEBenchmark):
             n_jobs=self.n_jobs,
             random_state=random_state,
         )
-        print("openTSNE: NN search", time.time() - start_aff), sys.stdout.flush()
+        print("openTSNE: NN search", time.time() - start_aff, flush=True)
 
         init = openTSNE.initialization.random(
             x, n_components=2, random_state=random_state
@@ -140,14 +139,14 @@ class openTSNEexact(TSNEBenchmark):
         embedding.optimize(250, exaggeration=12, momentum=0.8, inplace=True)
         embedding.optimize(750, momentum=0.5, inplace=True)
         print("openTSNE: Optimization", time.time() - start_optim)
-        print("openTSNE: Full", time.time() - start), sys.stdout.flush()
+        print("openTSNE: Full", time.time() - start, flush=True)
 
 
 class MulticoreTSNE(TSNEBenchmark):
     def run(self, n_samples=1000, random_state=None):
         x, y = self.load_data(n_samples=n_samples)
 
-        print("-" * 80), sys.stdout.flush()
+        print("-" * 80, flush=True)
         start = time.time()
         tsne = MulticoreTSNE_(
             early_exaggeration=12,
@@ -159,7 +158,7 @@ class MulticoreTSNE(TSNEBenchmark):
             random_state=random_state,
         )
         tsne.fit_transform(x)
-        print("Multicore t-SNE:", time.time() - start), sys.stdout.flush()
+        print("Multicore t-SNE:", time.time() - start, flush=True)
 
 
 class FItSNE(TSNEBenchmark):
@@ -171,9 +170,9 @@ class FItSNE(TSNEBenchmark):
 
         x, y = self.load_data(n_samples=n_samples)
 
-        print("-" * 80), sys.stdout.flush()
+        print("-" * 80)
         print("Random state", random_state)
-        print("-" * 80), sys.stdout.flush()
+        print("-" * 80, flush=True)
 
         if random_state == -1:
             init = openTSNE.initialization.random(x, n_components=2)
@@ -193,16 +192,16 @@ class FItSNE(TSNEBenchmark):
             nthreads=self.n_jobs,
             seed=random_state,
         )
-        print("FIt-SNE:", time.time() - start), sys.stdout.flush()
+        print("FIt-SNE:", time.time() - start, flush=True)
 
 
 class sklearn(TSNEBenchmark):
     def run(self, n_samples=1000, random_state=None):
         x, y = self.load_data(n_samples=n_samples)
 
-        print("-" * 80), sys.stdout.flush()
+        print("-" * 80)
         print("Random state", random_state)
-        print("-" * 80), sys.stdout.flush()
+        print("-" * 80, flush=True)
 
         init = openTSNE.initialization.random(
             x, n_components=2, random_state=random_state
@@ -218,7 +217,7 @@ class sklearn(TSNEBenchmark):
             verbose=True,
             random_state=random_state
         ).fit_transform(x)
-        print("scikit-learn t-SNE:", time.time() - start), sys.stdout.flush()
+        print("scikit-learn t-SNE:", time.time() - start, flush=True)
 
 
 class UMAP(TSNEBenchmark):
@@ -227,13 +226,13 @@ class UMAP(TSNEBenchmark):
 
         x, y = self.load_data(n_samples=n_samples)
 
-        print("-" * 80), sys.stdout.flush()
+        print("-" * 80)
         print("Random state", random_state)
-        print("-" * 80), sys.stdout.flush()
+        print("-" * 80, flush=True)
 
         start = time.time()
         umap.UMAP(random_state=random_state).fit_transform(x)
-        print("UMAP:", time.time() - start), sys.stdout.flush()
+        print("UMAP:", time.time() - start, flush=True)
 
 
 if __name__ == "__main__":

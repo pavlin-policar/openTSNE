@@ -44,12 +44,6 @@ class KNNIndexTestMixin:
             self.assertEqual(indices.shape, (n_samples, k))
             self.assertEqual(distances.shape, (n_samples, k))
 
-    def test_returns_proper_distances_query_train(self):
-        index: nearest_neighbors.KNNIndex = self.knn_index("euclidean")
-        index.build(self.iris, k=30)
-        indices, distances = index.build(self.iris, k=30)
-        self.assertTrue(np.isfinite(distances).all())
-
     def test_query_train_same_result_with_fixed_random_state(self):
         knn_index1 = self.knn_index("euclidean", random_state=1)
         indices1, distances1 = knn_index1.build(self.x1, k=20)
