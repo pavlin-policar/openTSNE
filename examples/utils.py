@@ -83,7 +83,7 @@ MOUSE_10X_COLORS = {
 
 def calculate_cpm(x, axis=1):
     """Calculate counts-per-million on data where the rows are genes.
-    
+
     Parameters
     ----------
     x : array_like
@@ -108,11 +108,11 @@ def calculate_cpm(x, axis=1):
 
 def log_normalize(data):
     """Perform log transform log(x + 1).
-    
+
     Parameters
     ----------
     data : array_like
-    
+
     """
     if sp.issparse(data):
         data = data.copy()
@@ -122,13 +122,13 @@ def log_normalize(data):
     return np.log2(data.astype(np.float64) + 1)
 
 
-def pca(x):
+def pca(x, n_components=50):
     if sp.issparse(x):
         x = x.toarray()
     U, S, V = np.linalg.svd(x, full_matrices=False)
     U[:, np.sum(V, axis=1) < 0] *= -1
     x_reduced = np.dot(U, np.diag(S))
-    x_reduced = x_reduced[:, np.argsort(S)[::-1]][:, :50]
+    x_reduced = x_reduced[:, np.argsort(S)[::-1]][:, :n_components]
     return x_reduced
 
 
@@ -148,7 +148,6 @@ def select_genes(
     labelsize=10,
     alpha=1,
 ):
-
     if sp.issparse(data):
         zeroRate = 1 - np.squeeze(np.array((data > threshold).mean(axis=0)))
         A = data.multiply(data > threshold)
