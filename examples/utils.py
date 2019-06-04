@@ -277,6 +277,8 @@ def plot(
     draw_centers=False,
     draw_cluster_labels=False,
     colors=None,
+    legend_kwargs=None,
+    label_order=None,
     **kwargs
 ):
     import matplotlib
@@ -290,7 +292,11 @@ def plot(
     plot_params = {"alpha": kwargs.get("alpha", 0.6), "s": kwargs.get("s", 1)}
 
     # Create main plot
-    classes = np.unique(y)
+    if label_order is not None:
+        assert all(np.isin(np.unique(y), label_order))
+        classes = [l for l in label_order if l in np.unique(y)]
+    else:
+        classes = np.unique(y)
     if colors is None:
         default_colors = matplotlib.rcParams["axes.prop_cycle"]
         colors = {k: v["color"] for k, v in zip(classes, default_colors())}
@@ -331,10 +337,10 @@ def plot(
             matplotlib.lines.Line2D(
                 [],
                 [],
-                marker="o",
+                marker="s",
                 color="w",
                 markerfacecolor=colors[yi],
-                ms=7,
+                ms=10,
                 alpha=1,
                 linewidth=0,
                 label=yi,
@@ -342,12 +348,10 @@ def plot(
             )
             for yi in classes
         ]
-        ax.legend(
-            handles=legend_handles,
-            loc="center left",
-            bbox_to_anchor=(1, 0.5),
-            frameon=False,
-        )
+        legend_kwargs_ = dict(loc="center left", bbox_to_anchor=(1, 0.5), frameon=False, )
+        if legend_kwargs is not None:
+            legend_kwargs_.update(legend_kwargs)
+        ax.legend(handles=legend_handles, **legend_kwargs_)
 
 
 def evaluate_embedding(
