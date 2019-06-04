@@ -6,6 +6,7 @@ import warnings
 from distutils import ccompiler
 from distutils.command.build_ext import build_ext
 from distutils.errors import CompileError, LinkError
+from distutils.sysconfig import customize_compiler
 from os.path import join
 
 import setuptools
@@ -95,6 +96,8 @@ def has_c_library(library, extension=".c"):
 
         # Get a compiler instance
         compiler = ccompiler.new_compiler()
+        # Configure compiler to do all the platform specific things
+        customize_compiler(compiler)
         # Add conda and numpy library include dirs
         for inc_dir in get_include_dirs():
             compiler.add_include_dir(inc_dir)
@@ -191,6 +194,7 @@ extensions = [
     Extension("openTSNE.kl_divergence", ["openTSNE/kl_divergence.pyx"]),
 ]
 
+
 # Check if we have access to FFTW3 and if so, use that implementation
 if has_c_library("fftw3"):
     print("FFTW3 header files found. Using FFTW implementation of FFT.")
@@ -212,9 +216,8 @@ else:
 try:
     from Cython.Build import cythonize
     extensions = cythonize(extensions)
-    HAS_CYTHON = True
 except ImportError:
-    HAS_CYTHON = False
+    pass
 
 
 def readme():
