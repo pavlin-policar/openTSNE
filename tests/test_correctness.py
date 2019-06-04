@@ -140,7 +140,7 @@ class TestTSNECorrectness(unittest.TestCase):
         # more reliable when we don't do gradient clipping and reduce the
         # learning rate. We increase the number of iterations so that the points
         # have time to move around
-        params = dict(n_iter=500, perplexity=5, learning_rate=1, max_grad_norm=None)
+        params = dict(perplexity=5)
         # Build up an embedding by adding points one by one
         new_embedding_1 = np.vstack(
             [embedding.transform(np.atleast_2d(point), **params) for point in x_test]
@@ -155,8 +155,9 @@ class TestTSNECorrectness(unittest.TestCase):
             embedding.prepare_partial(x_test, perplexity=params["perplexity"]),
             new_embedding_1,
         )
+
         # Check that both methods produced the same embedding
-        np.testing.assert_almost_equal(new_embedding_1, new_embedding_2, decimal=1)
+        np.testing.assert_almost_equal(new_embedding_1, new_embedding_2, decimal=2)
 
     def test_iris_bh_transform_correctness(self):
         x_train, x_test, y_train, y_test = train_test_split(
