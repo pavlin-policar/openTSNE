@@ -624,13 +624,13 @@ class TSNEEmbedding(np.ndarray):
         perplexity=5,
         initialization="median",
         k=25,
-        learning_rate=10,
+        learning_rate=0.1,
         early_exaggeration=2,
-        early_exaggeration_iter=50,
+        early_exaggeration_iter=0,
         exaggeration=None,
-        n_iter=50,
-        initial_momentum=0,
-        final_momentum=0,
+        n_iter=250,
+        initial_momentum=0.5,
+        final_momentum=0.8,
         max_grad_norm=0.25,
     ):
         """Embed new points into the existing embedding.

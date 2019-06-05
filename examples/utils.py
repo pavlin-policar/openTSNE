@@ -83,7 +83,7 @@ MOUSE_10X_COLORS = {
 
 def calculate_cpm(x, axis=1):
     """Calculate counts-per-million on data where the rows are genes.
-    
+
     Parameters
     ----------
     x : array_like
@@ -108,11 +108,11 @@ def calculate_cpm(x, axis=1):
 
 def log_normalize(data):
     """Perform log transform log(x + 1).
-    
+
     Parameters
     ----------
     data : array_like
-    
+
     """
     if sp.issparse(data):
         data = data.copy()
@@ -122,13 +122,13 @@ def log_normalize(data):
     return np.log2(data.astype(np.float64) + 1)
 
 
-def pca(x):
+def pca(x, n_components=50):
     if sp.issparse(x):
         x = x.toarray()
     U, S, V = np.linalg.svd(x, full_matrices=False)
     U[:, np.sum(V, axis=1) < 0] *= -1
     x_reduced = np.dot(U, np.diag(S))
-    x_reduced = x_reduced[:, np.argsort(S)[::-1]][:, :50]
+    x_reduced = x_reduced[:, np.argsort(S)[::-1]][:, :n_components]
     return x_reduced
 
 
@@ -148,7 +148,6 @@ def select_genes(
     labelsize=10,
     alpha=1,
 ):
-
     if sp.issparse(data):
         zeroRate = 1 - np.squeeze(np.array((data > threshold).mean(axis=0)))
         A = data.multiply(data > threshold)
@@ -278,6 +277,8 @@ def plot(
     draw_centers=False,
     draw_cluster_labels=False,
     colors=None,
+    legend_kwargs=None,
+    label_order=None,
     **kwargs
 ):
     import matplotlib
@@ -291,7 +292,11 @@ def plot(
     plot_params = {"alpha": kwargs.get("alpha", 0.6), "s": kwargs.get("s", 1)}
 
     # Create main plot
-    classes = np.unique(y)
+    if label_order is not None:
+        assert all(np.isin(np.unique(y), label_order))
+        classes = [l for l in label_order if l in np.unique(y)]
+    else:
+        classes = np.unique(y)
     if colors is None:
         default_colors = matplotlib.rcParams["axes.prop_cycle"]
         colors = {k: v["color"] for k, v in zip(classes, default_colors())}
@@ -332,10 +337,10 @@ def plot(
             matplotlib.lines.Line2D(
                 [],
                 [],
-                marker="o",
+                marker="s",
                 color="w",
                 markerfacecolor=colors[yi],
-                ms=7,
+                ms=10,
                 alpha=1,
                 linewidth=0,
                 label=yi,
@@ -343,12 +348,10 @@ def plot(
             )
             for yi in classes
         ]
-        ax.legend(
-            handles=legend_handles,
-            loc="center left",
-            bbox_to_anchor=(1, 0.5),
-            frameon=False,
-        )
+        legend_kwargs_ = dict(loc="center left", bbox_to_anchor=(1, 0.5), frameon=False, )
+        if legend_kwargs is not None:
+            legend_kwargs_.update(legend_kwargs)
+        ax.legend(handles=legend_handles, **legend_kwargs_)
 
 
 def evaluate_embedding(
