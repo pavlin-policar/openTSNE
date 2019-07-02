@@ -8,6 +8,7 @@ cache:
     pip: true
 
 install:
+    - pip install numpy>=1.14
     - python setup.py develop
     - pip install flake8
 
