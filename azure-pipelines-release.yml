@@ -1,0 +1,141 @@
+variables:
+  AZURE_BUILD: true
+
+trigger:
+  tags:
+    include:
+      - v*
+
+pr: none
+
+jobs:
+  - job: 'PackageWinOsx'
+    timeoutInMinutes: 0
+    cancelTimeoutInMinutes: 10
+    displayName: 'Build wheels ::'
+    pool:
+      vmImage: $(image.name)
+
+    strategy:
+      matrix:
+        osx - python36:
+          image.name: 'macos-10.13'
+          python.version: '3.6'
+        osx - python37:
+          image.name: 'macos-10.13'
+          python.version: '3.7'
+
+        windows - python36:
+          image.name: 'vs2017-win2016'
+          python.version: '3.6'
+        windows - python37:
+          image.name: 'vs2017-win2016'
+          python.version: '3.7'
+
+    steps:
+      - bash: |
+          case $AGENT_OS in
+            "Darwin") brew install libomp; echo `brew --prefix libomp` ;;
+          esac
+        displayName: 'Install openMP on OSX'
+
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: 'x64'
+        displayName: 'Use Python $(python.version)'
+
+      - script: |
+          python -m pip install --upgrade pip
+          python -m pip install setuptools wheel pytest
+          python -m pip install numpy
+        displayName: 'Install job dependencies'
+
+      - script: python setup.py sdist bdist_wheel
+        displayName: 'Build wheel'
+
+      # Since Python automatically adds `cwd` to `sys.path`, it's important we remove the local folder
+      # containing our code from the working directory. Otherwise, the tests will use the local copy
+      # instead of the installed package. We can easily achieve this by renaming the source folder.
+      - bash: mv openTSNE src
+        displayName: 'Remove source files from path'
+
+      - bash: ls -lRh dist
+        displayName: 'List built files'
+
+      - bash: python -m pip install --force-reinstall --find-links dist openTSNE
+        displayName: 'Install wheel'
+
+      - script: pytest -v
+        timeoutInMinutes: 15
+        displayName: 'Run unit tests'
+
+      - task: CopyFiles@2
+        condition: eq(variables['Agent.JobStatus'], 'Succeeded')
+        inputs:
+          contents: dist/**
+          targetFolder: $(Build.ArtifactStagingDirectory)
+
+      - task: PublishBuildArtifacts@1
+        condition: eq(variables['Agent.JobStatus'], 'Succeeded')
+        inputs:
+          artifactName: 'build'
+          pathtoPublish: $(Build.ArtifactStagingDirectory)
+
+
+  - job: 'PackageLinux'
+    timeoutInMinutes: 0
+    cancelTimeoutInMinutes: 10
+    displayName: 'Build wheels :: linux -'
+    pool:
+      vmImage: 'Ubuntu-16.04'
+
+    strategy:
+      matrix:
+        python36:
+          python: '/opt/python/cp36-cp36m/bin'
+        python37:
+          python: '/opt/python/cp37-cp37m/bin'
+
+    container:
+      image: quay.io/pypa/manylinux1_x86_64:latest
+      options: -e PLAT=manylinux1_x86_64
+
+    steps:
+
+      - bash: $(python)/pip install --user pytest
+        displayName: 'Install job dependencies'
+
+      # Build and install the wheel
+      - bash: .ci/build_wheels.sh
+        displayName: 'Build wheels'
+        env:
+          PYBIN: $(python)
+
+      # Since Python automatically adds `cwd` to `sys.path`, it's important we remove the local folder
+      # containing our code from the working directory. Otherwise, the tests will use the local copy
+      # instead of the installed package. We can easily achieve this by renaming the source folder.
+      - bash: mv openTSNE src
+        displayName: 'Remove source files from path'
+
+      - script: $(python)/python -m pytest -v
+        timeoutInMinutes: 15
+        displayName: 'Run unit tests'
+
+      - bash: |
+          ls -lRh wheelhouse
+          mkdir -p dist
+          cp wheelhouse/openTSNE*manylinux*.whl dist/
+        displayName: 'Copy files to dist folder'
+
+      - task: CopyFiles@2
+        condition: eq(variables['Agent.JobStatus'], 'Succeeded')
+        inputs:
+          contents: dist/**
+          targetFolder: $(Build.ArtifactStagingDirectory)
+
+      - task: PublishBuildArtifacts@1
+        condition: eq(variables['Agent.JobStatus'], 'Succeeded')
+        inputs:
+          artifactName: 'build'
+          pathtoPublish: $(Build.ArtifactStagingDirectory)
