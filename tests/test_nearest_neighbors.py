@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch
 
 import numpy as np
+from scipy.spatial.distance import pdist, cdist, squareform
 import pynndescent
 from sklearn import datasets
 
@@ -13,7 +14,7 @@ class KNNIndexTestMixin:
     knn_index = None
 
     def __init__(self, *args, **kwargs):
-        self.x1 = np.random.normal(100, 50, (100, 50))
+        self.x1 = np.random.normal(100, 50, (150, 50))
         self.x2 = np.random.normal(100, 50, (100, 50))
         self.iris = datasets.load_iris().data
         super().__init__(*args, **kwargs)
@@ -35,7 +36,7 @@ class KNNIndexTestMixin:
 
     def test_returns_correct_number_neighbors_query(self):
         ks = [1, 5, 10, 30, 50]
-        n_samples = self.x1.shape[0]
+        n_samples = self.x2.shape[0]
         index: nearest_neighbors.KNNIndex = self.knn_index("euclidean")
         index.build(self.x1, k=30)
 
@@ -67,6 +68,46 @@ class KNNIndexTestMixin:
 
 class TestBallTree(KNNIndexTestMixin, unittest.TestCase):
     knn_index = nearest_neighbors.BallTree
+
+    def test_cosine_distance(self):
+        k = 15
+        # Compute cosine distance nearest neighbors using ball tree
+        knn_index = nearest_neighbors.BallTree("cosine")
+        indices, distances = knn_index.build(self.x1, k=k)
+
+        # Compute the exact nearest neighbors as a reference
+        true_distances = squareform(pdist(self.x1, metric="cosine"))
+        true_indices_ = np.argsort(true_distances, axis=1)[:, 1:k + 1]
+        true_distances_ = np.vstack([d[i] for d, i in zip(true_distances, true_indices_)])
+
+        np.testing.assert_array_equal(
+            indices, true_indices_, err_msg="Nearest neighbors do not match"
+        )
+        np.testing.assert_array_equal(
+            distances, true_distances_, err_msg="Distances do not match"
+        )
+
+    def test_cosine_distance_query(self):
+        k = 15
+        # Compute cosine distance nearest neighbors using ball tree
+        knn_index = nearest_neighbors.BallTree("cosine")
+        knn_index.build(self.x1, k=k)
+
+        indices, distances = knn_index.query(self.x2, k=k)
+
+        # Compute the exact nearest neighbors as a reference
+        true_distances = cdist(self.x2, self.x1, metric="cosine")
+        true_indices_ = np.argsort(true_distances, axis=1)[:, :k]
+        true_distances_ = np.vstack([d[i] for d, i in zip(true_distances, true_indices_)])
+
+        np.testing.assert_array_equal(
+            indices, true_indices_, err_msg="Nearest neighbors do not match"
+        )
+        np.testing.assert_array_equal(
+            distances, true_distances_, err_msg="Distances do not match"
+        )
+
+
 
 
 class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):

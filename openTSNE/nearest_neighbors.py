@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn import neighbors
+from scipy.spatial.distance import cdist
 
 import pynndescent
 
@@ -9,7 +10,7 @@ class KNNIndex:
 
     def __init__(self, metric, metric_params=None, n_jobs=1, random_state=None):
         self.index = None
-        self.metric = metric
+        self.metric = self.check_metric(metric)
         self.metric_params = metric_params
         self.n_jobs = n_jobs
         self.random_state = random_state
@@ -60,27 +61,77 @@ class KNNIndex:
                 f"metric. Please choose one of the supported metrics: "
                 f"{', '.join(self.VALID_METRICS)}."
             )
+        return metric
 
 
 class BallTree(KNNIndex):
-    VALID_METRICS = neighbors.BallTree.valid_metrics
+    VALID_METRICS = neighbors.BallTree.valid_metrics + ["cosine"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__data = None
 
     def build(self, data, k):
-        self.check_metric(self.metric)
+        if self.metric == "cosine":
+            # The nearest neighbor ranking for cosine distance is the same as
+            # for euclidean distance on normalized data
+            effective_metric = "euclidean"
+            effective_data = data.copy()
+            effective_data = effective_data / np.linalg.norm(effective_data, axis=1)[:, None]
+            # In order to properly compute cosine distances when querying the
+            # index, we need to store the original data
+            self.__data = data
+        else:
+            effective_metric = self.metric
+            effective_data = data
+
         self.index = neighbors.NearestNeighbors(
             algorithm="ball_tree",
-            metric=self.metric,
+            metric=effective_metric,
             metric_params=self.metric_params,
             n_jobs=self.n_jobs,
         )
-        self.index.fit(data)
+        self.index.fit(effective_data)
 
         # Return the nearest neighbors in the training set
         distances, indices = self.index.kneighbors(n_neighbors=k)
+
+        # If using cosine distance, the computed distances will be wrong and
+        # need to be recomputed
+        if self.metric == "cosine":
+            distances = np.vstack([
+                cdist(np.atleast_2d(x), data[idx], metric="cosine")
+                for x, idx in zip(data, indices)
+            ])
+
         return indices, distances
 
     def query(self, query, k):
-        distances, indices = self.index.kneighbors(query, n_neighbors=k)
+        # The nearest neighbor ranking for cosine distance is the same as for
+        # euclidean distance on normalized data
+        if self.metric == "cosine":
+            effective_data = query.copy()
+            effective_data = effective_data / np.linalg.norm(effective_data, axis=1)[:, None]
+        else:
+            effective_data = query
+
+        distances, indices = self.index.kneighbors(effective_data, n_neighbors=k)
+
+        # If using cosine distance, the computed distances will be wrong and
+        # need to be recomputed
+        if self.metric == "cosine":
+            if self.__data is None:
+                raise RuntimeError(
+                    "The original data was unavailable when querying cosine "
+                    "distance. Did you change the distance metric after "
+                    "building the index? Please rebuild the index using cosine "
+                    "similarity."
+                )
+            distances = np.vstack([
+                cdist(np.atleast_2d(x), self.__data[idx], metric="cosine")
+                for x, idx in zip(query, indices)
+            ])
+
         return indices, distances
 
 
@@ -88,8 +139,6 @@ class NNDescent(KNNIndex):
     VALID_METRICS = pynndescent.distances.named_distances
 
     def build(self, data, k):
-        self.check_metric(self.metric)
-
         # These values were taken from UMAP, which we assume to be sensible defaults
         n_trees = 5 + int(round((data.shape[0]) ** 0.5 / 20))
         n_iters = max(5, int(round(np.log2(data.shape[0]))))

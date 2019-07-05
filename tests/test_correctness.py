@@ -84,7 +84,7 @@ class TestTSNECorrectness(unittest.TestCase):
     def test_iris_bh_transform_equivalency_with_one_by_one(self):
         """Compare one by one embedding vs all at once using BH gradients."""
         x_train, x_test = train_test_split(
-            self.iris.data, test_size=0.33, random_state=42
+            self.iris.data, test_size=0.1, random_state=42
         )
 
         # Set up the initial embedding
@@ -124,7 +124,7 @@ class TestTSNECorrectness(unittest.TestCase):
 
         """
         x_train, x_test = train_test_split(
-            self.iris.data, test_size=0.33, random_state=42
+            self.iris.data, test_size=0.1, random_state=42
         )
 
         # Set up the initial embedding
