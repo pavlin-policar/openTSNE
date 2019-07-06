@@ -1,8 +1,8 @@
-import numpy as np
-from sklearn import neighbors
-from scipy.spatial.distance import cdist
+import warnings
 
-import pynndescent
+import numpy as np
+from scipy.spatial.distance import cdist
+from sklearn import neighbors
 
 
 class KNNIndex:
@@ -136,12 +136,63 @@ class BallTree(KNNIndex):
 
 
 class NNDescent(KNNIndex):
-    VALID_METRICS = pynndescent.distances.named_distances
+    VALID_METRICS = [
+        # general minkowski distances
+        "euclidean",
+        "l2",
+        "manhattan",
+        "taxicab",
+        "l1",
+        "chebyshev",
+        "linfinity",
+        "linfty",
+        "linf",
+        "minkowski",
+        # Standardised/weighted distances
+        "seuclidean",
+        "standardised_euclidean",
+        "wminkowski",
+        "weighted_minkowski",
+        "mahalanobis",
+        # Other distances
+        "canberra",
+        "cosine",
+        "correlation",
+        "haversine",
+        "braycurtis",
+        # Binary distances
+        "hamming",
+        "jaccard",
+        "dice",
+        "matching",
+        "kulsinski",
+        "rogerstanimoto",
+        "russellrao",
+        "sokalsneath",
+        "sokalmichener",
+        "yule",
+    ]
+
+    def check_metric(self, *args, **kwargs):
+        import pynndescent
+
+        if not np.array_equal(pynndescent.distances.named_distances, self.VALID_METRICS):
+            warnings.warn(
+                "`pynndescent` has recently changed which distance metrics are supported, "
+                "and `openTSNE.nearest_neighbors` has not been updated. Please notify the "
+                "developers of this change."
+            )
+
+        return super().check_metric(*args, **kwargs)
 
     def build(self, data, k):
         # These values were taken from UMAP, which we assume to be sensible defaults
         n_trees = 5 + int(round((data.shape[0]) ** 0.5 / 20))
         n_iters = max(5, int(round(np.log2(data.shape[0]))))
+
+        # Numba takes a while to load up, so there's little point in loading it
+        # unless we're actually going to use it
+        import pynndescent
 
         # UMAP uses the "alternative" algorithm, but that sometimes causes
         # memory corruption, so use the standard one, which seems to work fine
