@@ -1,5 +1,6 @@
 import inspect
 import logging
+import pickle
 import unittest
 from functools import wraps, partial
 from typing import Callable, Any, Tuple, Optional
@@ -728,6 +729,12 @@ class TestGradientDescentOptimizer(unittest.TestCase):
         self.assertIs(partial0.optimizer, partial1.optimizer)
         self.assertIs(partial1.optimizer, partial2.optimizer)
 
+    def test_pickling(self):
+        obj = openTSNE.tsne.gradient_descent()
+        obj.gains = np.ones(5)
+        loaded_obj = pickle.loads(pickle.dumps(obj))
+        np.testing.assert_array_equal(loaded_obj.gains, np.ones(5))
+
 
 class TestAffinityIntegration(unittest.TestCase):
     @classmethod
@@ -756,3 +763,13 @@ class TestAffinityIntegration(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             embedding.transform(self.x_test)
+
+
+class TestTSNEEmebedding(unittest.TestCase):
+    def test_pickling(self):
+        tsne = TSNE(random_state=4)
+        embedding = tsne.fit(np.random.randn(100, 4))
+        loaded_obj = pickle.loads(pickle.dumps(embedding))
+        self.assertIsInstance(loaded_obj, openTSNE.TSNEEmbedding)
+        self.assertIsInstance(loaded_obj.affinities, openTSNE.affinity.Affinities)
+        self.assertEqual(4, loaded_obj.random_state)
