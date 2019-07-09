@@ -812,6 +812,29 @@ class TSNEEmbedding(np.ndarray):
             **self.gradient_descent_params,
         )
 
+    def __reduce__(self):
+        state = super().__reduce__()
+        new_state = state[2] + (
+            self.affinities,
+            self.gradient_descent_params,
+            self.random_state,
+            self.kl_divergence,
+        )
+        return state[0], state[1], new_state
+
+    def __setstate__(self, state):
+        self.kl_divergence = state[-1]
+        self.random_state = state[-2]
+        self.gradient_descent_params = state[-3]
+        self.affinities = state[-4]
+        super().__setstate__(state[0:-4])
+
+
+def _create_embedding(coords, affinities, random_state, optimizer, grad_params, kl_divergence):
+    embedding = TSNEEmbedding(coords, affinities, random_state, optimizer, **grad_params)
+    embedding.kl_divergence = kl_divergence
+    return embedding
+
 
 class TSNE(BaseEstimator):
     """t-Distributed Stochastic Neighbor Embedding.
