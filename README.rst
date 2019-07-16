@@ -3,45 +3,18 @@ openTSNE
 
 |Build Status| |Build status| |Codacy Badge|
 
-A visualization of 44,808 single cell transcriptomes from the mouse
-retina [5]_ embedded using the multiscale kernel trick for preserving
-global structure.
+openTSNE is a modular Python implementation of t-Distributed Stochasitc Neighbor Embedding (t-SNE), a popular dimensionality-reduction algorithm for visualizing high-dimensional data sets. openTSNE incorporates the latest improvements to the t-SNE algorithm, including the ability to add new data points to existing embeddings, massive speed improvements, enabling t-SNE to scale to millions of data points and various tricks to improve global alignment of the resulting visualizations.
 
 .. figure:: docs/source/images/macosko_2015.png
    :alt: Macosko 2015 mouse retina t-SNE embedding
    :align: center
 
-   Macosko 2015 mouse retina t-SNE embedding
+   A visualization of 44,808 single cell transcriptomes obtained from the mouse retina [5]_ embedded using the multiscale kernel trick to better preserve the global aligment of the clusters.
 
-The goal of this project is
-
-1. **Extensibility**. We provide efficient defaults for the typical use
-   case i.e. visualizing high dimensional data. We also make it very
-   simple to use various tricks that have been introduced to improve the
-   quality of t-SNE embeddings. The library is designed to it’s easy to
-   implement and use your own components and encourages experimentation.
-
-2. **Speed**. We provide two fast, parallel implementations of t-SNE,
-   which are comparable to their C++ counterparts in speed. Python does
-   incur some overhead, so if speed is your only requirement, consider
-   using `FIt-SNE <https://github.com/KlugerLab/FIt-SNE>`__. The
-   differences are often minute and become even less apparent when
-   utilizing multiple cores.
-
-3. **Interactivity**. This library was built for Orange, an interactive
-   machine learning toolkit. As such, we provide a powerful API which
-   can control all aspects of the t-SNE algorithm and makes it suitable
-   for interactive environments.
-
-4. **Ease of distribution**. FIt-SNE, the reference C++ implementation
-   for the interpolation based variant of t-SNE, is not easy to install
-   or distribute. It requires one to preinstall C libraries and requires
-   manual compilation. This package is installable either through
-   ``pip`` or ``conda`` with a single command, making it very easy to
-   include in other packages.
-
-Detailed documentation on t-SNE is available on `Read the
-Docs <http://opentsne.readthedocs.io>`__.
+- `Documentation <http://opentsne.readthedocs.io>`__
+- `User Guide and Tutorial <https://opentsne.readthedocs.io/en/latest/tsne_algorithm.html>`__
+- Examples: `basic <https://opentsne.readthedocs.io/en/latest/examples/01/01_simple_usage.html>`__, `advanced <https://opentsne.readthedocs.io/en/latest/examples/02/02_advanced_usage.html>`__, `preserving global alignment <https://opentsne.readthedocs.io/en/latest/examples/03/03_preserving_global_structure.html>`__, `embedding large data sets <https://opentsne.readthedocs.io/en/latest/examples/04/04_large_data_sets.html>`__
+- `Speed benchmarks <https://opentsne.readthedocs.io/en/latest/benchmarks.html>`__
 
 Installation
 ------------
@@ -85,142 +58,25 @@ openTSNE will use numpy’s implementation of the FFT, which is slightly
 slower than FFTW. The difference is only noticeable with large data sets
 containing millions of data points.
 
-Usage
------
+A hello world example
+---------------------
 
-We provide two modes of usage as well as a familliar scikit-learn API.
-
-scikit-learn API
-~~~~~~~~~~~~~~~~
-
-Most users are comfortable with the scikit-learn API so we provide a
-familliar wrapper to make openTSNE very easy to use.
+Getting started with openTSNE is very simple. First, we'll load up some data using scikit-learn
 
 .. code:: python
 
-   from openTSNE.sklearn import TSNE
    from sklearn import datasets
 
    iris = datasets.load_iris()
    x, y = iris["data"], iris["target"]
 
-   embedding = TSNE().fit_transform(x)
-
-This interface behaves in much the same way as scikit-learn’s t-SNE, but
-with richer functionality and improved speed. The interface allows us to
-create arbitrary t-SNE embeddings using the ``fit`` method and embed new
-instances into the existing embedding using the ``transform`` method.
-
-The scikit-learn interface is provides a familliar interface to t-SNE,
-but in doing so disables some of the more advanced functionality that
-openTSNE provides such as different affinity models, interactive
-optimization and callbacks. However, this basic functionality should
-cover the majority of use cases.
-
-Basic usage
-~~~~~~~~~~~
-
-We provide a basic interface somewhat similar to the one provided by
-scikit-learn.
+then, we'll import and run
 
 .. code:: python
 
    from openTSNE import TSNE
-   from sklearn import datasets
 
-   iris = datasets.load_iris()
-   x, y = iris["data"], iris["target"]
-
-   tsne = TSNE(
-       n_components=2, perplexity=30, learning_rate=200,
-       n_jobs=4, angle=0.5, initialization="pca", metric="euclidean",
-       early_exaggeration_iter=250, early_exaggeration=12, n_iter=750,
-       neighbors="exact", negative_gradient_method="bh",
-   )
-
-   embedding = tsne.fit(x)
-
-There are two parameters which you will want to watch out for: 1.
-``neighbors`` controls nearest neighbor search. If our data set is
-small, ``exact`` is the better choice. ``exact`` uses scikit-learn’s KD
-trees. For larger data, approximate search can be orders of magnitude
-faster. This is selected with ``approx``. Nearest neighbor search is
-performed only once at the beginning of the optmization, but can
-dominate runtime on large data sets, therefore this must be properly
-chosen. 2. ``negative_gradient_method`` controls which approximation
-technique to use to approximate pairwise interactions. These are
-computed at each step of the optimization. Van Der Maaten [2]_ proposed
-using the Barnes-Hut tree approximation and this has be the de-facto
-standard in most t-SNE implementations. This can be selected by passing
-``bh``. Asymptotically, this scales as O(n log n) in the number of
-points works well for up to 10,000 samples. More recently, Linderman et
-al. [3]_ developed another approximation using interpolation which scales
-linearly in the number of points O(n). This can be selected by passing
-``fft``. There is a bit of overhead to this method, making it slightly
-slower than Barnes-Hut for small numbers of points, but is very fast for
-larger data sets, while Barnes-Hut becomes completely unusable. For
-smaller data sets the difference is typically in the order of seconds,
-at most minutes, so a safe default is using the FFT approximation.
-
-Our ``tsne`` object acts as a fitter instance, and returns a
-``TSNEEmbedding`` instance. This acts as a regular numpy array, and can
-be used as such, but can be further optimized if we see fit or can be
-used for adding new points to the embedding.
-
-We don’t log any progress by default, but provide callbacks that can be
-run at any interval of the optimization process. A simple logger is
-provided as an example.
-
-.. code:: python
-
-   from openTSNE.callbacks import ErrorLogger
-
-   tsne = TSNE(callbacks=ErrorLogger(), callbacks_every_iters=50)
-
-A callback can be any callable object that accepts the following
-arguments.
-
-.. code:: python
-
-   def callback(iteration, error, embedding):
-       ...
-
-Callbacks are used to control the optimization i.e. every callback must
-return a boolean value indicating whether or not to stop the
-optimization. If we want to stop the optimization via callback we simply
-return ``True``.
-
-Additionally, a list of callbacks can also be passed, in which case all
-the callbacks must agree to continue the optimization, otherwise the
-process is terminated and the current embedding is returned.
-
-Advanced usage
-~~~~~~~~~~~~~~
-
-Recently, Kobak and Berens [4]_ demonstrate several tricks we can use to
-obtain better t-SNE embeddings. The main critique of t-SNE is that
-global structure is mainly thrown away. This is typically the main
-selling point for UMAP over t-SNE. In the preprint, several techniques
-are presented that enable t-SNE to capture more global structure. All of
-these tricks can easily be implemented using openTSNE and are shown in
-the notebook examples.
-
-To introduce the API, we will implement the standard t-SNE algorithm,
-the one implemented by ``TSNE.fit``.
-
-.. code:: python
-
-   from openTSNE import initialization, affinity
-   from openTSNE.tsne import TSNEEmbedding
-
-   init = initialization.pca(x)
-   affinities = affinity.PerplexityBasedNN(x, perplexity=30, method="approx", n_jobs=8)
-   embedding = TSNEEmbedding(
-       init, affinities, negative_gradient_method="fft",
-       learning_rate=200, n_jobs=8, callbacks=ErrorLogger(),
-   )
-   embedding.optimize(n_iter=250, exaggeration=12, momentum=0.5, inplace=True)
-   embedding.optimize(n_iter=750, momentum=0.8, inplace=True)
+   embedding = TSNE().fit(x)
 
 References
 ----------
@@ -231,9 +87,8 @@ References
 .. [2] Van Der Maaten, Laurens. `“Accelerating t-SNE using tree-based algorithms.”
     <http://www.jmlr.org/papers/volume15/vandermaaten14a/vandermaaten14a.pdf>`__
     The Journal of Machine Learning Research 15.1 (2014): 3221-3245.
-.. [3] Linderman, George C., et al. \ `“Efficient Algorithms for t-distributed Stochastic
-    Neighborhood Embedding.” <https://arxiv.org/pdf/1712.09005.pdf>`__ arXiv preprint
-    arXiv:1712.09005 (2017).
+.. [3] Linderman, George C., et al. `"Fast interpolation-based t-SNE for improved
+    visualization of single-cell RNA-seq data." <https://www.nature.com/articles/s41592-018-0308-4>`__ Nature methods 16.3 (2019): 243.
 .. [4] Kobak, Dmitry, and Philipp Berens. `“The art of using t-SNE for single-cell
     transcriptomics.” <https://www.biorxiv.org/content/early/2018/10/25/453449>`__
     bioRxiv (2018): 453449.
