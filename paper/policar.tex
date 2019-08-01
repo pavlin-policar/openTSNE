@@ -74,15 +74,15 @@ $^{\text{\sf 2}}$Department of Molecular and Human Genetics, Baylor College of M
 
 \abstract{\textbf{Summary:}
 Point-based visualisations of large, multi-dimensional data from
-molecular biology can reveal structures and clusters. One of the
+molecular biology can reveal meaningful clusters. One of the
 most popular techniques to construct such visualisations is t-distributed
 stochastic neighbor embedding (t-SNE), for which a number of extensions have
-recently been proposed to address speed and quality of the resulting
-visualisations. We propose openTSNE, a modular Python library that implements
+recently been proposed to address issues of scalability and the quality of the resulting
+visualisations. We introduce openTSNE, a modular Python library that implements
 the core t-SNE algorithm and its extensions. The library is orders of magnitude
 faster than existing popular implementations, including those from
-scikit-learn. Unique to openTSNE is also the mapping of new data to an existing embedding, which
-can surprisingly assist in solving batch effect problems.
+scikit-learn. Unique to openTSNE is also the mapping of new data to existing embeddings, which
+can surprisingly assist in solving batch effects.
 \\
 \textbf{Availability:} openTSNE is available at \url{https://github.com/pavlin-policar/openTSNE}.\\
 \textbf{Contact:} \href{pavlin.policar@fri.uni-lj.si}{pavlin.policar@fri.uni-lj.si}\\
@@ -100,32 +100,31 @@ dimensionality reduction include principal component analysis, multidimensional
 scaling, and uniform manifold approximation and projections~\citep{umap}. Among
 these, t-distributed stochastic neighbor embedding
 (t-SNE)~\citep{tsne} lately received much attention as it can
-address high volumes of data and reveal clustering structure. Most
-of the recent reports on single-cell gene expression data would start with an
+address high volumes of data and reveal meaningful clustering structure. Most
+of the recent reports on single-cell gene expression data start with an
 overview of the cell landscape, where t-SNE embeds high-dimensional expression
-profiles into two dimensional space~\citep{Macosko2015, Shekhar2016}.
-Fig.~\ref{fig:tsne}.a presents an example of such an embedding.
+profiles into a two-dimensional space~\citep{Macosko2015, Shekhar2016}.
+Fig.~\ref{fig:tsne}.a presents an example of one such embedding.
 
 Despite its utility, t-SNE has lately been criticized for insufficient speed
-when addressing huge data sets, lack of global organization \em t-SNE
+when addressing huge data sets, the lack of global organization \em t-SNE
 focuses on local clusters that are then arbitrarily scattered in the
 low-dimensional space \em and absence of theoretically-founded implementations to
-map new data into an existing embedding. Most of these shortcomings, however, were
-recently addressed~\citep{ding2018interpretable,becht2019dimensionality}.
-\citet{fi_tsne} sped-up the method through interpolation-based
-approximation, reducing the time complexity to be merely linear
-in the number of data items. \citet{art_of_using_tsne} proposed
+map new data into existing embeddings~\citep{ding2018interpretable,becht2019dimensionality}. Most of these shortcomings, however, were
+recently addressed.
+\citet{fi_tsne} sped-up the method through an interpolation-based
+approximation, reducing the time complexity to be merely linear dependent on the number of data items. \citet{art_of_using_tsne} proposed
 several techniques to improve global positioning, including estimating similarities with a mixture of
 Gaussian kernels. While no current popular
 software library supports mapping of new data into reference embedding,
 \citet{parametric_tsne} proposed a related approach with parametric mapping
 using neural networks.
 
-We here introduce \opentsne, a comprehensive Python library that
-implements t-SNE with all recently proposed extensions. The library is
-compatible with Python data science ecosystem (e.g., {\tt numpy}, {\tt
-sklearn}, {\tt scanpy}). Its modular design fosters extendibility and
-experimentation with various setting and changes in the analysis pipeline. For
+We introduce \opentsne, a comprehensive Python library that
+implements t-SNE and all its recently proposed extensions. The library is
+compatible with the Python data science ecosystem (e.g., {\tt numpy}, {\tt
+sklearn}, {\tt scanpy}). Its modular design encourages extendibility and
+experimentation with various settings and changes in the analysis pipeline. For
 example, the following code uses multiscale similarity kernels to construct the
 embedding from Fig.~\ref{fig:tsne}.b.
 
@@ -151,7 +150,7 @@ t-SNE used for Fig.~\ref{fig:tsne}.a is similar but uses only a single kernel
 \citet{Macosko2015} and \citet{Shekhar2016}. a) Standard t-SNE embedding using
 random initialization and perplexity of 30. b) t-SNE embedding using
 multi-scale affinities leads to better global cluster organization. Cluster
-annotations in both a) and b) are from Macosko~\etal c) Embedding of independent mouse retina cells from
+annotations in both a) and b) are from Macosko~\etal c) Embedding of independent mouse retinal cells from
 Shekhar~\etal (points in color) to a reference t-SNE visualization of data from
 Macosko~\etal (points in gray) places cells in the clusters that match
 classifications from original publications and alleviates batch effects.}
@@ -174,14 +173,14 @@ new_embedding = embedding.transform(
 \end{lstlisting}
 
 \noindent which loads and prepare the new data, defines the affinity model, and
-computes the embeddings. \opentsne embeds new data one data instance at the
-time, without changing the reference embedding. The example of combining two
+computes the embeddings. \opentsne embeds new data points independently of one 
+another, without changing the reference embedding. The example of combining two
 data sets with mouse retina cells is shown on Fig.~\ref{fig:tsne}.c, where the
-cells of the secondary data set get matched to the cells in the reference
+cells from the secondary data set are matched to the cells in the reference
 embedding. This
-procedure can therefore be used for handling batch effects~\citep{polivcar2019embedding}, a substantial
-problem in molecular biology when dealing with the data from different
-sources~\citep{batch_effect_causes}. The code for plotting of the data is not shown
+procedure can therefore be used to handle batch effects~\citep{polivcar2019embedding}, a substantial
+obstacle in molecular biology when dealing with the data from different
+sources~\citep{batch_effect_causes}. The code used to plot the embeddings is not shown
 for brevity, but is, together with other examples, available on {\opentsne}'s
 GitHub page. 
 
@@ -189,11 +188,11 @@ Our Python implementation introduces computational overhead: \opentsne is about
 25\% slower than {\tt FIt-SNE}~\citep{fi_tsne}, a recent t-SNE implementation
 in C++. However, \opentsne is still orders of magnitude faster than other
 Python implementations, including those from {\tt scikit-learn} and {\tt
-MulticoreTSNE} (see Benchmarks in \opentsne documentation on GitHub). An example data sets with 200,000 cells
-is processed in more than 90 minutes with scikit-learn and less than 4 minutes with \opentsne.
+MulticoreTSNE} (see Benchmarks in \opentsne documentation on GitHub). An example data set with 200,000 cells
+is processed in more than 90 minutes with scikit-learn and in less than 4 minutes with \opentsne.
 The framework includes controlled execution (callback-based progress monitoring and
 control), making it suitable for interactive data exploration environments such
-as Orange~\citep{scorange}. Pure Python implementation offers distinct
+as Orange~\citep{scorange}. A pure Python implementation offers distinct
 advantages that include integration with Python's rich data science
 infrastructure and ease of installation through PyPI and {\em conda}.
 
