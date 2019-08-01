@@ -36,7 +36,7 @@
   numberstyle=\tiny\color{gray},
   keywordstyle=\color{blue},
   commentstyle=\color{dkgreen},
-  stringstyle=\color{mauve},
+  stringstyle=\color{dkgreen},
   breaklines=true,
   breakatwhitespace=true,
   tabsize=3
@@ -97,13 +97,13 @@ The abundance of high-dimensional data sets in molecular biology calls for
 techniques for dimensionality reduction, and in particular for methods that can
 help in the construction of data visualizations. Popular approaches for
 dimensionality reduction include principal component analysis, multidimensional
-scaling, and uniform manifold approximation and projections~\citep{}. Among
+scaling, and uniform manifold approximation and projections~\citep{umap}. Among
 these, t-distributed stochastic neighbor embedding
-(t-SNE)~\citep{tsne,review-tsne} lately received much attention as it can
+(t-SNE)~\citep{tsne} lately received much attention as it can
 address high volumes of data and reveal clustering structure. Most
 of the recent reports on single-cell gene expression data would start with an
 overview of the cell landscape, where t-SNE embeds high-dimensional expression
-profiles into two dimensional space~\citep{Macosko2015, Shekhar2016,three}.
+profiles into two dimensional space~\citep{Macosko2015, Shekhar2016}.
 Fig.~\ref{fig:tsne}.a presents an example of such an embedding.
 
 Despite its utility, t-SNE has lately been criticized for insufficient speed
@@ -131,7 +131,8 @@ embedding from Fig.~\ref{fig:tsne}.b.
 
 \begin{lstlisting}
 adata = anndata.read_h5ad("macosko_2015.h5ad")
-affinities = openTSNE.affinity.Multiscale(adata.obsm["pca"], perplexities=[50, 500], metric="cosine")
+affinities = openTSNE.affinity.Multiscale(
+	adata.obsm["pca"], perplexities=[50, 500], metric="cosine")
 init = openTSNE.initialization.pca(adata.obsm["pca"])
 embedding = TSNEEmbedding(init, affinities)
 embedding.optimize(n_iter=250, exaggeration=12, momentum=0.5, inplace=True)
@@ -144,7 +145,20 @@ the typical two-stage t-SNE optimization. Notice that the code for the standard
 t-SNE used for Fig.~\ref{fig:tsne}.a is similar but uses only a single kernel
 ({\tt perplexities=[30]}).
 
-The proposed \opentsne library is currently the only Python t-SNE
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=0.7\linewidth]{policar-fig-1}}
+\caption{Example application of \opentsne on mouse retina cells from
+\citet{Macosko2015} and \citet{Shekhar2016}. a) Standard t-SNE embedding using
+random initialization and perplexity of 30. b) t-SNE embedding using
+multi-scale affinities leads to better global cluster organization. Cluster
+annotations in both a) and b) are from Macosko~\etal c) Embedding of independent mouse retina cells from
+Shekhar~\etal (points in color) to a reference t-SNE visualization of data from
+Macosko~\etal (points in gray) places cells in the clusters that match
+classifications from original publications and alleviates batch effects.}
+\label{fig:tsne}
+\end{figure}
+
+The proposed \opentsne library is currently the only Python t\nobreakdash -SNE
 implementation that supports adding new samples into constructed embedding. For
 example, we can reuse the {\tt embedding} created above to map new data into
 existing embedding space in the following code,
@@ -153,8 +167,10 @@ existing embedding space in the following code,
 new_data = anndata.read_h5ad("shekhar_2016.h5ad")
 adata, new_data = find_shared_genes(adata, new_data)
 gene_mask = select_genes(adata.X, n=1000)
-embedding.affinities = affinity.PerplexityBasedNN(adata[:, gene_mask].X, perplexity=30, metric="cosine")
-new_embedding = embedding.transform(new_data[:, gene_mask].X)
+embedding.affinities = affinity.PerplexityBasedNN(
+	adata[:, gene_mask].X, perplexity=30, metric="cosine")
+new_embedding = embedding.transform(
+	new_data[:, gene_mask].X)
 \end{lstlisting}
 
 \noindent which loads and prepare the new data, defines the affinity model, and
@@ -163,9 +179,9 @@ time, without changing the reference embedding. The example of combining two
 data sets with mouse retina cells is shown on Fig.~\ref{fig:tsne}.c, where the
 cells of the secondary data set get matched to the cells in the reference
 embedding. This
-procedure can therefore be used for handling batch effects~\cite{Pavlin2019-DS}, a substantial
+procedure can therefore be used for handling batch effects~\citep{polivcar2019embedding}, a substantial
 problem in molecular biology when dealing with the data from different
-sources~\cite{batch-effects}. The code for plotting of the data is not shown
+sources~\citep{batch_effect_causes}. The code for plotting of the data is not shown
 for brevity, but is, together with other examples, available on {\opentsne}'s
 GitHub page. 
 
@@ -177,7 +193,7 @@ MulticoreTSNE} (see Benchmarks in \opentsne documentation on GitHub). An example
 is processed in more than 90 minutes with scikit-learn and less than 4 minutes with \opentsne.
 The framework includes controlled execution (callback-based progress monitoring and
 control), making it suitable for interactive data exploration environments such
-as Orange~\cite{scorange}. Pure Python implementation offers distinct
+as Orange~\citep{scorange}. Pure Python implementation offers distinct
 advantages that include integration with Python's rich data science
 infrastructure and ease of installation through PyPI and {\em conda}.
 
@@ -193,19 +209,6 @@ Linderman and Dmitry Kobak for helpful discussions on extensions of t-SNE.
 
 % \begin{thebibliography}{}
 % \end{thebibliography}
-
-\begin{figure}[htbp]
-\centerline{\includegraphics[width=0.7\linewidth]{policar-fig-1}}
-\caption{Example application of \opentsne on mouse retina cells from
-\citet{Macosko2015} and \citet{Shekhar2016}. a) Standard t-SNE embedding using
-random initialization and perplexity of 30. b) t-SNE embedding using
-multi-scale affinities leads to better global cluster organization. Cluster
-annotations in both a) and b) are from Macosko~\etal c) Embedding of independent mouse retina cells from
-Shekhar~\etal (points in color) to a reference t-SNE visualization of data from
-Macosko~\etal (points in gray) places cells in the clusters that match
-classifications from original publications and alleviates batch effects.}
-\label{fig:tsne}
-\end{figure}
 
 
 
