@@ -6,7 +6,7 @@ environment:
     - PYTHON: "C:\\Python37-x64"
 
 install:
-  - "%PYTHON%\\python.exe -m pip install numpy"
+  - "%PYTHON%\\python.exe -m pip install numpy==1.16.4"
   - "%PYTHON%\\python.exe setup.py develop"
   - "%PYTHON%\\python.exe -m pip install pytest"
 
