@@ -92,7 +92,6 @@ can surprisingly assist in solving batch effects.
 \maketitle
 
 
-
 The abundance of high-dimensional data sets in molecular biology calls for
 techniques for dimensionality reduction, and in particular for methods that can
 help in the construction of data visualizations. Popular approaches for
@@ -106,18 +105,18 @@ overview of the cell landscape, where t-SNE embeds high-dimensional expression
 profiles into a two-dimensional space~\citep{Macosko2015, Shekhar2016}.
 Fig.~\ref{fig:tsne}.a presents an example of one such embedding.
 
-Despite its utility, t-SNE has lately been criticized for insufficient speed
-when addressing huge data sets, the lack of global organization \em t-SNE
-focuses on local clusters that are then arbitrarily scattered in the
+Despite its utility, t-SNE has been criticized for poor scalability
+when addressing large data sets, lack of global organization \em t-SNE
+focuses on local clusters that are arbitrarily scattered in the
 low-dimensional space \em and absence of theoretically-founded implementations to
-map new data into existing embeddings~\citep{ding2018interpretable,becht2019dimensionality}. Most of these shortcomings, however, were
-recently addressed.
+map new data into existing embeddings~\citep{ding2018interpretable,becht2019dimensionality}. Most of these shortcomings, have
+recently been addressed.
 \citet{fi_tsne} sped-up the method through an interpolation-based
-approximation, reducing the time complexity to be merely linear dependent on the number of data items. \citet{art_of_using_tsne} proposed
+approximation, reducing the time complexity to be merely linear dependent on the number of samples. \citet{art_of_using_tsne} proposed
 several techniques to improve global positioning, including estimating similarities with a mixture of
 Gaussian kernels. While no current popular
 software library supports mapping of new data into reference embedding,
-\citet{parametric_tsne} proposed a related approach with parametric mapping
+\citet{parametric_tsne} proposed a related approach
 using neural networks.
 
 We introduce \opentsne, a comprehensive Python library that
@@ -138,14 +137,9 @@ embedding.optimize(n_iter=250, exaggeration=12, momentum=0.5, inplace=True)
 embedding.optimize(n_iter=750, momentum=0.8, inplace=True)
 \end{lstlisting}
 
-\noindent Here, we first read the data, define the affinity model based on two
-Gaussian kernels with varying perplexity, use a PCA-based initialization, and run
-the typical two-stage t-SNE optimization. Notice that the code for the standard
-t-SNE used for Fig.~\ref{fig:tsne}.a is similar but uses only a single kernel
-({\tt perplexities=[30]}).
-
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=0.7\linewidth]{policar-fig-1}}
+\vspace{-3mm}
 \caption{Example application of \opentsne on mouse retina cells from
 \citet{Macosko2015} and \citet{Shekhar2016}. a) Standard t-SNE embedding using
 random initialization and perplexity of 30. b) t-SNE embedding using
@@ -156,6 +150,12 @@ Macosko~\etal (points in gray) places cells in the clusters that match
 classifications from original publications and alleviates batch effects.}
 \label{fig:tsne}
 \end{figure}
+
+\noindent Here, we first read the data, define the affinity model based on two
+Gaussian kernels with varying perplexity, use a PCA-based initialization, and run
+the typical two-stage t-SNE optimization. Notice that the code for the standard
+t-SNE used for Fig.~\ref{fig:tsne}.a is similar but uses only a single kernel
+({\tt perplexities=[30]}).
 
 The proposed \opentsne library is currently the only Python t\nobreakdash -SNE
 implementation that supports adding new samples into constructed embedding. For
@@ -178,7 +178,7 @@ another, without changing the reference embedding. The example of combining two
 data sets with mouse retina cells is shown on Fig.~\ref{fig:tsne}.c, where the
 cells from the secondary data set are matched to the cells in the reference
 embedding. This
-procedure can therefore be used to handle batch effects~\citep{polivcar2019embedding}, a substantial
+procedure can therefore be used to handle batch effects~\citep{polivcar2019embedding}, a key
 obstacle in molecular biology when dealing with the data from different
 sources~\citep{batch_effect_causes}. The code used to plot the embeddings is not shown
 for brevity, but is, together with other examples, available on {\opentsne}'s
@@ -196,12 +196,14 @@ as Orange~\citep{scorange}. A pure Python implementation offers distinct
 advantages that include integration with Python's rich data science
 infrastructure and ease of installation through PyPI and {\em conda}.
 
+\vspace{-6mm}
 \section*{Funding and Acknowledgements}
 The support for this work was provided by the Slovenian Research Agency Program
 Grant P2-0209, and by European Regional Development Fund and the Slovenian
 Ministry of Education through BioPharm project. We want to thank George
 Linderman and Dmitry Kobak for helpful discussions on extensions of t-SNE.
 
+\vspace{-6mm}
 \bibliographystyle{natbib}
 \bibliography{policar.bib}
 % \end{document}
