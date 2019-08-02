@@ -13,7 +13,7 @@ openTSNE is a modular Python implementation of t-Distributed Stochasitc Neighbor
 
 - `Documentation <http://opentsne.readthedocs.io>`__
 - `User Guide and Tutorial <https://opentsne.readthedocs.io/en/latest/tsne_algorithm.html>`__
-- Examples: `basic <https://opentsne.readthedocs.io/en/latest/examples/01/01_simple_usage.html>`__, `advanced <https://opentsne.readthedocs.io/en/latest/examples/02/02_advanced_usage.html>`__, `preserving global alignment <https://opentsne.readthedocs.io/en/latest/examples/03/03_preserving_global_structure.html>`__, `embedding large data sets <https://opentsne.readthedocs.io/en/latest/examples/04/04_large_data_sets.html>`__
+- Examples: `basic <https://opentsne.readthedocs.io/en/latest/examples/01_simple_usage/01_simple_usage.html>`__, `advanced <https://opentsne.readthedocs.io/en/latest/examples/02_advanced_usage/02_advanced_usage.html>`__, `preserving global alignment <https://opentsne.readthedocs.io/en/latest/examples/03_preserving_global_structure/03_preserving_global_structure.html>`__, `embedding large data sets <https://opentsne.readthedocs.io/en/latest/examples/04_large_data_sets/04_large_data_sets.html>`__
 - `Speed benchmarks <https://opentsne.readthedocs.io/en/latest/benchmarks.html>`__
 
 Installation
