@@ -85,7 +85,7 @@ scikit-learn. Unique to openTSNE is also the mapping of new data to existing emb
 can surprisingly assist in solving batch effects.
 \\
 \textbf{Availability:} openTSNE is available at \url{https://github.com/pavlin-policar/openTSNE}.\\
-\textbf{Contact:} \href{pavlin.policar@fri.uni-lj.si}{pavlin.policar@fri.uni-lj.si}\\
+\textbf{Contact:} \href{pavlin.policar@fri.uni-lj.si}{pavlin.policar@fri.uni-lj.si}, \href{blaz.zupan@fri.uni-lj.si}{blaz.zupan@fri.uni-lj.si}\\
 % \textbf{Supplementary information:} Supplementary data are available at \textit{Bioinformatics} online.
 }
 
@@ -163,13 +163,12 @@ example, we can reuse the {\tt embedding} created above to map new data into
 existing embedding space in the following code,
 
 \begin{lstlisting}
-new_data = anndata.read_h5ad("shekhar_2016.h5ad")
-adata, new_data = find_shared_genes(adata, new_data)
-gene_mask = select_genes(adata.X, n=1000)
+data = anndata.read_h5ad("shekhar_2016.h5ad")
+adata, data = find_shared_genes(adata, data)
+genes = select_genes(adata.X, n=1000)
 embedding.affinities = affinity.PerplexityBasedNN(
-	adata[:, gene_mask].X, perplexity=30, metric="cosine")
-new_embedding = embedding.transform(
-	new_data[:, gene_mask].X)
+	adata[:, genes].X, perplexity=30, metric="cosine")
+new_embedding = embedding.transform(data[:, genes].X)
 \end{lstlisting}
 
 \noindent which loads and prepare the new data, defines the affinity model, and
