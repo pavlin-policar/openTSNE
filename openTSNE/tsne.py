@@ -1181,7 +1181,6 @@ def kl_divergence_bh(embedding, P, dof, bh_params, reference_embedding=None,
         dof, num_threads=n_jobs, should_eval_error=should_eval_error,
     )
 
-    gradient *= 2 * (dof + 1) / dof
     # Computing positive gradients summed up only unnormalized q_ijs, so we
     # have to include normalziation term separately
     if should_eval_error:
@@ -1230,7 +1229,6 @@ def kl_divergence_fft(embedding, P, dof, fft_params, reference_embedding=None,
         dof, num_threads=n_jobs, should_eval_error=should_eval_error,
     )
 
-    gradient *= 2 * (dof + 1) / dof
     if should_eval_error:
         kl_divergence_ += sum_P * np.log(sum_Q + EPSILON)
 
