@@ -98,7 +98,7 @@ def has_c_library(library, extension=".c"):
         compiler = ccompiler.new_compiler()
         # Configure compiler to do all the platform specific things
         customize_compiler(compiler)
-        # Add conda and numpy library include dirs
+        # Add conda include dirs
         for inc_dir in get_include_dirs():
             compiler.add_include_dir(inc_dir)
         assert isinstance(compiler, ccompiler.CCompiler)
@@ -115,7 +115,7 @@ class CythonBuildExt(build_ext):
 
     COMPILER_FLAGS = {
         "unix": {
-            "openmp": "-fopenmp",
+            "openmp": "-Xpreprocessor -fopenmp" if sys.platform == "darwin" else "-fopenmp",
             "optimize": "-O3",
             "fftw": "-lfftw3",
             "math": "-lm",
@@ -151,7 +151,7 @@ class CythonBuildExt(build_ext):
         # We don't want the compiler to optimize for system architecture if
         # we're building packages to be distributed by conda-forge, but if the
         # package is being built locally, this is desired
-        if "CONDA_BUILD" not in os.environ:
+        if not ("AZURE_BUILD" in os.environ or "CONDA_BUILD" in os.environ):
             compile_flags.append(flags["native"])
             link_flags.append(flags["native"])
 

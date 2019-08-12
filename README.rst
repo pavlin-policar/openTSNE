@@ -1,7 +1,7 @@
 openTSNE
 ========
 
-|Build Status| |Build status| |Codacy Badge|
+|Build Status| |Codacy Badge|
 
 openTSNE is a modular Python implementation of t-Distributed Stochasitc Neighbor Embedding (t-SNE), a popular dimensionality-reduction algorithm for visualizing high-dimensional data sets. openTSNE incorporates the latest improvements to the t-SNE algorithm, including the ability to add new data points to existing embeddings, massive speed improvements, enabling t-SNE to scale to millions of data points and various tricks to improve global alignment of the resulting visualizations.
 
@@ -97,9 +97,7 @@ References
     <https://www.sciencedirect.com/science/article/pii/S0092867415005498>`__
     Cell 161.5 (2015): 1202-1214.
 
-.. |Build Status| image:: https://travis-ci.com/pavlin-policar/openTSNE.svg?branch=master
-   :target: https://travis-ci.com/pavlin-policar/openTSNE
-.. |Build status| image:: https://ci.appveyor.com/api/projects/status/6i5vv7b7ot6iws90?svg=true
-   :target: https://ci.appveyor.com/project/pavlin-policar/opentsne/branch/master
+.. |Build Status| image:: https://dev.azure.com/pavlingp/openTSNE/_apis/build/status/Test?branchName=master
+   :target: https://dev.azure.com/pavlingp/openTSNE/_build/latest?definitionId=1&branchName=master
 .. |Codacy Badge| image:: https://api.codacy.com/project/badge/Grade/ef67c21a74924b548acae5a514bc443d
    :target: https://app.codacy.com/app/pavlin-policar/openTSNE?utm_source=github.com&utm_medium=referral&utm_content=pavlin-policar/openTSNE&utm_campaign=Badge_Grade_Dashboard
