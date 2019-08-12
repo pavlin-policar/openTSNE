@@ -225,11 +225,15 @@ def readme():
         return f.read()
 
 
+# Read in version
+__version__: str = ""  # This is overridden by the next line
+exec(open(os.path.join("openTSNE", "version.py")).read())
+
 setup(
     name="openTSNE",
     description="Extensible, parallel implementations of t-SNE",
     long_description=readme(),
-    version="0.3.9",
+    version=__version__,
     license="BSD-3-Clause",
 
     author="Pavlin Poličar",
