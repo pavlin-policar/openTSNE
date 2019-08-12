@@ -229,7 +229,7 @@ setup(
     name="openTSNE",
     description="Extensible, parallel implementations of t-SNE",
     long_description=readme(),
-    version="0.3.8",
+    version="0.3.9",
     license="BSD-3-Clause",
 
     author="Pavlin Poličar",
