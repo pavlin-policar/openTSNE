@@ -78,6 +78,25 @@ then, we'll import and run
 
    embedding = TSNE().fit(x)
 
+Citation
+--------
+
+If you make use of openTSNE for your work we would appreciate it if you would cite the paper
+
+.. code::
+
+    @article {Poli{\v c}ar731877,
+        author = {Poli{\v c}ar, Pavlin G. and Stra{\v z}ar, Martin and Zupan, Bla{\v z}},
+        title = {openTSNE: a modular Python library for t-SNE dimensionality reduction and embedding},
+        year = {2019},
+        doi = {10.1101/731877},
+        publisher = {Cold Spring Harbor Laboratory},
+        URL = {https://www.biorxiv.org/content/early/2019/08/13/731877},
+        eprint = {https://www.biorxiv.org/content/early/2019/08/13/731877.full.pdf},
+        journal = {bioRxiv}
+    }
+
+
 References
 ----------
 
