@@ -51,7 +51,7 @@ jobs:
           python -m pip install numpy
         displayName: 'Install job dependencies'
 
-      - script: python setup.py sdist bdist_wheel
+      - script: python setup.py bdist_wheel
         displayName: 'Build wheel'
 
       # Since Python automatically adds `cwd` to `sys.path`, it's important we remove the local folder
@@ -127,6 +127,57 @@ jobs:
           mkdir -p dist
           cp wheelhouse/openTSNE*manylinux*.whl dist/
         displayName: 'Copy files to dist folder'
+
+      - task: CopyFiles@2
+        condition: eq(variables['Agent.JobStatus'], 'Succeeded')
+        inputs:
+          contents: dist/**
+          targetFolder: $(Build.ArtifactStagingDirectory)
+
+      - task: PublishBuildArtifacts@1
+        condition: eq(variables['Agent.JobStatus'], 'Succeeded')
+        inputs:
+          artifactName: 'build'
+          pathtoPublish: $(Build.ArtifactStagingDirectory)
+
+
+  - job: 'sdist'
+    timeoutInMinutes: 0
+    cancelTimeoutInMinutes: 10
+    displayName: 'Package source distribution'
+    pool:
+      vmImage: 'Ubuntu-16.04'
+
+    steps:
+      - task: UsePythonVersion@0
+        displayName: 'Use Python 3.7'
+        inputs:
+          versionSpec: '3.7'
+
+      - script: |
+          python -m pip install --upgrade pip
+          python -m pip install setuptools wheel pytest
+          python -m pip install numpy
+        displayName: 'Install job dependencies'
+
+      - script: python setup.py sdist
+        displayName: 'Build sdist'
+
+      # Since Python automatically adds `cwd` to `sys.path`, it's important we remove the local folder
+      # containing our code from the working directory. Otherwise, the tests will use the local copy
+      # instead of the installed package. We can easily achieve this by renaming the source folder.
+      - bash: mv openTSNE src
+        displayName: 'Remove source files from path'
+
+      - bash: ls -lRh dist
+        displayName: 'List built files'
+
+      - bash: python -m pip install --force-reinstall --find-links dist openTSNE
+        displayName: 'Install package'
+
+      - script: pytest -v
+        timeoutInMinutes: 15
+        displayName: 'Run unit tests'
 
       - task: CopyFiles@2
         condition: eq(variables['Agent.JobStatus'], 'Succeeded')
