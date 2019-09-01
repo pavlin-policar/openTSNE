@@ -189,12 +189,18 @@ class NNDescent(KNNIndex):
             from numba.targets.registry import CPUDispatcher
 
             if type(metric) is not CPUDispatcher:
-                raise TypeError(
-                    "You have passed a callable metric that is not numba-compiled. "
-                    "`pynndescent` requires callable metrics to be numba-compiled. "
-                    "You must either compile the function with numba.njit or "
-                    "set `neighbors`='exact' to use `scikit-learn`."
+                from numba import njit
+
+                warnings.warn(
+                    "`pynndescent` requires callable metrics to be compiled with numba, "
+                    "but you have passed a callable metric that is not compiled. "
+                    "`openTSNE.nearest_neighbors.NNDescent` will attempt to compile the function. "
+                    "If this results in an error, then the function is not "
+                    "compatible with numba.njit and must be rewritten. "
+                    "If the function cannot be rewritten to be compatible with numba.njit, "
+                    "then you must set `neighbors`='exact' to use `scikit-learn`."
                     )
+                metric = njit()(metric)
 
         return super().check_metric(metric, *args, **kwargs)
 
