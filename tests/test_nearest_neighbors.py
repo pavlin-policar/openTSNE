@@ -6,12 +6,15 @@ from scipy.spatial.distance import pdist, cdist, squareform
 import pynndescent
 from sklearn import datasets
 
+from numba import njit
+from numba.targets.registry import CPUDispatcher
+
 from openTSNE import nearest_neighbors
 from .test_tsne import check_mock_called_with_kwargs
 
 
 class KNNIndexTestMixin:
-    knn_index = None
+    knn_index = NotImplemented
 
     def __init__(self, *args, **kwargs):
         self.x1 = np.random.normal(100, 50, (150, 50))
@@ -65,6 +68,55 @@ class KNNIndexTestMixin:
         np.testing.assert_equal(indices1, indices2)
         np.testing.assert_equal(distances1, distances2)
 
+    def test_uncompiled_callable_metric_same_result(self):
+        k = 15
+
+        knn_index = self.knn_index("manhattan", random_state=1)
+        knn_index.build(self.x1, k=k)
+        true_indices_, true_distances_ = knn_index.query(self.x2, k=k)
+
+        def manhattan(x, y):
+            result = 0.0
+            for i in range(x.shape[0]):
+                result += np.abs(x[i] - y[i])
+
+            return result
+
+        knn_index = self.knn_index(manhattan, random_state=1)
+        knn_index.build(self.x1, k=k)
+        indices, distances = knn_index.query(self.x2, k=k)
+        np.testing.assert_array_equal(
+            indices, true_indices_, err_msg="Nearest neighbors do not match"
+        )
+        np.testing.assert_allclose(
+            distances, true_distances_, err_msg="Distances do not match"
+        )
+
+    def test_numba_compiled_callable_metric_same_result(self):
+        k = 15
+
+        knn_index = self.knn_index("manhattan", random_state=1)
+        knn_index.build(self.x1, k=k)
+        true_indices_, true_distances_ = knn_index.query(self.x2, k=k)
+
+        @njit(fastmath=True)
+        def manhattan(x, y):
+            result = 0.0
+            for i in range(x.shape[0]):
+                result += np.abs(x[i] - y[i])
+
+            return result
+
+        knn_index = self.knn_index(manhattan, random_state=1)
+        knn_index.build(self.x1, k=k)
+        indices, distances = knn_index.query(self.x2, k=k)
+        np.testing.assert_array_equal(
+            indices, true_indices_, err_msg="Nearest neighbors do not match"
+        )
+        np.testing.assert_allclose(
+            distances, true_distances_, err_msg="Distances do not match"
+        )
+
 
 class TestBallTree(KNNIndexTestMixin, unittest.TestCase):
     knn_index = nearest_neighbors.BallTree
@@ -108,8 +160,6 @@ class TestBallTree(KNNIndexTestMixin, unittest.TestCase):
         )
 
 
-
-
 class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
     knn_index = nearest_neighbors.NNDescent
 
@@ -121,3 +171,16 @@ class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
 
         nndescent.assert_called_once()
         check_mock_called_with_kwargs(nndescent, {"random_state": random_state})
+
+    def test_uncompiled_callable_is_compiled(self):
+        knn_index = nearest_neighbors.NNDescent("manhattan")
+
+        def manhattan(x, y):
+            result = 0.0
+            for i in range(x.shape[0]):
+                result += np.abs(x[i] - y[i])
+
+            return result
+
+        compiled_metric = knn_index.check_metric(manhattan)
+        self.assertTrue(isinstance(compiled_metric, CPUDispatcher))

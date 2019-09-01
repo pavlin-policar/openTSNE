@@ -55,12 +55,15 @@ class KNNIndex:
 
     def check_metric(self, metric):
         """Check that the metric is supported by the KNNIndex instance."""
-        if metric not in self.VALID_METRICS:
+        if callable(metric):
+            pass
+        elif metric not in self.VALID_METRICS:
             raise ValueError(
                 f"`{self.__class__.__name__}` does not support the `{metric}` "
                 f"metric. Please choose one of the supported metrics: "
                 f"{', '.join(self.VALID_METRICS)}."
             )
+
         return metric
 
 
@@ -173,7 +176,7 @@ class NNDescent(KNNIndex):
         "yule",
     ]
 
-    def check_metric(self, *args, **kwargs):
+    def check_metric(self, metric):
         import pynndescent
 
         if not np.array_equal(list(pynndescent.distances.named_distances), self.VALID_METRICS):
@@ -183,7 +186,24 @@ class NNDescent(KNNIndex):
                 "developers of this change."
             )
 
-        return super().check_metric(*args, **kwargs)
+        if callable(metric):
+            from numba.targets.registry import CPUDispatcher
+
+            if not isinstance(metric, CPUDispatcher):
+                warnings.warn(
+                    f"`pynndescent` requires callable metrics to be "
+                    f"compiled with `numba`, but `{metric.__name__}` is not compiled. "
+                    f"`openTSNE.nearest_neighbors.NNDescent` "
+                    f"will attempt to compile the function. "
+                    f"If this results in an error, then the function may not be "
+                    f"compatible with `numba.njit` and should be rewritten. "
+                    f"Otherwise, set `neighbors`='exact' to use `scikit-learn` "
+                    f"for calculating nearest neighbors."
+                    )
+                from numba import njit
+                metric = njit(fastmath=True)(metric)
+
+        return super().check_metric(metric)
 
     def build(self, data, k):
         # These values were taken from UMAP, which we assume to be sensible defaults
