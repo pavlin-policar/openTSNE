@@ -55,7 +55,9 @@ class KNNIndex:
 
     def check_metric(self, metric):
         """Check that the metric is supported by the KNNIndex instance."""
-        if metric not in self.VALID_METRICS:
+        if callable(metric):
+            pass
+        elif metric not in self.VALID_METRICS:
             raise ValueError(
                 f"`{self.__class__.__name__}` does not support the `{metric}` "
                 f"metric. Please choose one of the supported metrics: "
@@ -182,6 +184,17 @@ class NNDescent(KNNIndex):
                 "and `openTSNE.nearest_neighbors` has not been updated. Please notify the "
                 "developers of this change."
             )
+
+        if callable(metric):
+            from numba.targets.registry import CPUDispatcher
+
+            if type(metric) is not CPUDispatcher:
+                raise TypeError(
+                    "You have passed a callable metric that is not numba-compiled. "
+                    "`pynndescent` requires callable metrics to be numba-compiled. "
+                    "You must either compile the function with numba.njit or "
+                    "set `neighbors`='exact' to use `scikit-learn`."
+                    )
 
         return super().check_metric(*args, **kwargs)
 
