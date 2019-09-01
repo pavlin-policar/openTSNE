@@ -56,14 +56,14 @@ class KNNIndex:
     def check_metric(self, metric):
         """Check that the metric is supported by the KNNIndex instance."""
         if callable(metric):
-            pass
+            return metric
         elif metric not in self.VALID_METRICS:
             raise ValueError(
                 f"`{self.__class__.__name__}` does not support the `{metric}` "
                 f"metric. Please choose one of the supported metrics: "
                 f"{', '.join(self.VALID_METRICS)}."
             )
-        return metric
+            return metric
 
 
 class BallTree(KNNIndex):
@@ -175,7 +175,7 @@ class NNDescent(KNNIndex):
         "yule",
     ]
 
-    def check_metric(self, metric, *args, **kwargs):
+    def check_metric(self, *args, **kwargs):
         import pynndescent
 
         if not np.array_equal(pynndescent.distances.named_distances, self.VALID_METRICS):
@@ -185,24 +185,24 @@ class NNDescent(KNNIndex):
                 "developers of this change."
             )
 
-        if callable(metric):
-            from numba.targets.registry import CPUDispatcher
+        #if callable(metric):
+        #    from numba.targets.registry import CPUDispatcher
 
-            if type(metric) is not CPUDispatcher:
-                from numba import njit
+        #    if type(metric) is not CPUDispatcher:
+        #        from numba import njit
 
-                warnings.warn(
-                    "`pynndescent` requires callable metrics to be compiled with numba, "
-                    "but you have passed a callable metric that is not compiled. "
-                    "`openTSNE.nearest_neighbors.NNDescent` will attempt to compile the function. "
-                    "If this results in an error, then the function is not "
-                    "compatible with numba.njit and must be rewritten. "
-                    "If the function cannot be rewritten to be compatible with numba.njit, "
-                    "then you must set `neighbors`='exact' to use `scikit-learn`."
-                    )
-                metric = njit()(metric)
+        #        warnings.warn(
+        #            "`pynndescent` requires callable metrics to be compiled with numba, "
+        #            "but you have passed a callable metric that is not compiled. "
+        #            "`openTSNE.nearest_neighbors.NNDescent` will attempt to compile the function. "
+        #            "If this results in an error, then the function is not "
+        #            "compatible with numba.njit and must be rewritten. "
+        #            "If the function cannot be rewritten to be compatible with numba.njit, "
+        #            "then you must set `neighbors`='exact' to use `scikit-learn`."
+        #            )
+        #        metric = njit()(metric)
 
-        return super().check_metric(metric, *args, **kwargs)
+        return super().check_metric(*args, **kwargs)
 
     def build(self, data, k):
         # These values were taken from UMAP, which we assume to be sensible defaults
