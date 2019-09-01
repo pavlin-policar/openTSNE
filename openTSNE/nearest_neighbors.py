@@ -175,7 +175,7 @@ class NNDescent(KNNIndex):
         "yule",
     ]
 
-    def check_metric(self, *args, **kwargs):
+    def check_metric(self, metric, *args, **kwargs):
         import pynndescent
 
         if not np.array_equal(pynndescent.distances.named_distances, self.VALID_METRICS):
@@ -196,7 +196,7 @@ class NNDescent(KNNIndex):
                     "set `neighbors`='exact' to use `scikit-learn`."
                     )
 
-        return super().check_metric(*args, **kwargs)
+        return super().check_metric(metric, *args, **kwargs)
 
     def build(self, data, k):
         # These values were taken from UMAP, which we assume to be sensible defaults
