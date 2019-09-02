@@ -906,7 +906,7 @@ class TSNE(BaseEstimator):
         point positions have small variance (var(Y) < 0.0001), otherwise you may
         get poor embeddings.
 
-    metric: str
+    metric: Union[str, Callable]
         The metric to be used to compute affinities between points in the
         original space.
 
