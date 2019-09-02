@@ -175,7 +175,7 @@ class NNDescent(KNNIndex):
         "yule",
     ]
 
-    def check_metric(self, *args, **kwargs):
+    def check_metric(self, metric, *args, **kwargs):
         import pynndescent
 
         if not np.array_equal(pynndescent.distances.named_distances, self.VALID_METRICS):
@@ -185,24 +185,25 @@ class NNDescent(KNNIndex):
                 "developers of this change."
             )
 
-        #if callable(metric):
-        #    from numba.targets.registry import CPUDispatcher
+        if callable(metric):
+            from numba.targets.registry import CPUDispatcher
 
-        #    if type(metric) is not CPUDispatcher:
-        #        from numba import njit
+            if type(metric) is not CPUDispatcher:
 
-        #        warnings.warn(
-        #            "`pynndescent` requires callable metrics to be compiled with numba, "
-        #            "but you have passed a callable metric that is not compiled. "
-        #            "`openTSNE.nearest_neighbors.NNDescent` will attempt to compile the function. "
-        #            "If this results in an error, then the function is not "
-        #            "compatible with numba.njit and must be rewritten. "
-        #            "If the function cannot be rewritten to be compatible with numba.njit, "
-        #            "then you must set `neighbors`='exact' to use `scikit-learn`."
-        #            )
-        #        metric = njit()(metric)
+                warnings.warn(
+                    f"`pynndescent` requires callable metrics to be "
+                    f"compiled with `numba`, but `{metric.__name__}` is not compiled. "
+                    f"`openTSNE.nearest_neighbors.NNDescent` "
+                    f"will attempt to compile the function. "
+                    f"If this results in an error, then the function may not be "
+                    f"compatible with `numba.njit` and should be rewritten. "
+                    f"Otherwise, set `neighbors`='exact' to use `scikit-learn` "
+                    f"for calculating nearest neighbors."
+                    )
+                from numba import njit
+                metric = njit()(metric)
 
-        return super().check_metric(*args, **kwargs)
+        return super().check_metric(metric, *args, **kwargs)
 
     def build(self, data, k):
         # These values were taken from UMAP, which we assume to be sensible defaults
