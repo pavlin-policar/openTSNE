@@ -56,14 +56,15 @@ class KNNIndex:
     def check_metric(self, metric):
         """Check that the metric is supported by the KNNIndex instance."""
         if callable(metric):
-            return metric
+            pass
         elif metric not in self.VALID_METRICS:
             raise ValueError(
                 f"`{self.__class__.__name__}` does not support the `{metric}` "
                 f"metric. Please choose one of the supported metrics: "
                 f"{', '.join(self.VALID_METRICS)}."
             )
-            return metric
+
+        return metric
 
 
 class BallTree(KNNIndex):
@@ -175,7 +176,7 @@ class NNDescent(KNNIndex):
         "yule",
     ]
 
-    def check_metric(self, metric, *args, **kwargs):
+    def check_metric(self, metric):
         import pynndescent
 
         if not np.array_equal(pynndescent.distances.named_distances, self.VALID_METRICS):
@@ -188,7 +189,7 @@ class NNDescent(KNNIndex):
         if callable(metric):
             from numba.targets.registry import CPUDispatcher
 
-            if type(metric) is not CPUDispatcher:
+            if not isinstance(metric, CPUDispatcher):
 
                 warnings.warn(
                     f"`pynndescent` requires callable metrics to be "
@@ -203,7 +204,7 @@ class NNDescent(KNNIndex):
                 from numba import njit
                 metric = njit()(metric)
 
-        return super().check_metric(metric, *args, **kwargs)
+        return super().check_metric(metric)
 
     def build(self, data, k):
         # These values were taken from UMAP, which we assume to be sensible defaults
