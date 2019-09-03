@@ -202,7 +202,7 @@ class NNDescent(KNNIndex):
                     f"for calculating nearest neighbors."
                     )
                 from numba import njit
-                metric = njit()(metric)
+                metric = njit(fastmath=True)(metric)
 
         return super().check_metric(metric)
 
