@@ -83,7 +83,7 @@ class PerplexityBasedNN(Affinities):
         Specifies the nearest neighbor method to use. Can be either ``exact`` or
         ``approx``.
 
-    metric: str
+    metric: Union[str, Callable]
         The metric to be used to compute affinities between points in the
         original space.
 
@@ -390,7 +390,7 @@ class FixedSigmaNN(Affinities):
         Specifies the nearest neighbor method to use. Can be either ``exact`` or
         ``approx``.
 
-    metric: str
+    metric: Union[str, Callable]
         The metric to be used to compute affinities between points in the
         original space.
 
@@ -557,7 +557,7 @@ class MultiscaleMixture(Affinities):
         Specifies the nearest neighbor method to use. Can be either ``exact`` or
         ``approx``.
 
-    metric: str
+    metric: Union[str, Callable]
         The metric to be used to compute affinities between points in the
         original space.
 
@@ -796,7 +796,7 @@ class Multiscale(MultiscaleMixture):
         Specifies the nearest neighbor method to use. Can be either ``exact`` or
         ``approx``.
 
-    metric: str
+    metric: Union[str, Callable]
         The metric to be used to compute affinities between points in the
         original space.
 
