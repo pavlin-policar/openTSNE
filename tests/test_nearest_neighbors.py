@@ -103,7 +103,7 @@ class KNNIndexTestMixin:
         knn_index.build(self.x1, k=k)
         true_indices_, true_distances_ = knn_index.query(self.x2, k=k)
 
-        @numba.njit(fastmath=True)
+        @njit(fastmath=True)
         def manhattan(x, y):
             r"""Manhattan, taxicab, or l1 distance.
             .. math::
