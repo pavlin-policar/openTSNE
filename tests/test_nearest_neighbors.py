@@ -76,7 +76,15 @@ class KNNIndexTestMixin:
         true_indices_, true_distances_ = knn_index.query(self.x2, k=k)
 
         def manhattan(x, y):
-            return np.sum(np.abs(x - y))
+            r"""Manhattan, taxicab, or l1 distance.
+            .. math::
+                D(x, y) = \sum_i |x_i - y_i|
+            """
+            result = 0.0
+            for i in range(x.shape[0]):
+                result += np.abs(x[i] - y[i])
+
+            return result
 
         knn_index = self.knn_index(manhattan, random_state=1)
         knn_index.build(self.x1, k=k)
@@ -95,9 +103,17 @@ class KNNIndexTestMixin:
         knn_index.build(self.x1, k=k)
         true_indices_, true_distances_ = knn_index.query(self.x2, k=k)
 
-        @njit()
+        @numba.njit(fastmath=True)
         def manhattan(x, y):
-            return np.sum(np.abs(x - y))
+            r"""Manhattan, taxicab, or l1 distance.
+            .. math::
+                D(x, y) = \sum_i |x_i - y_i|
+            """
+            result = 0.0
+            for i in range(x.shape[0]):
+                result += np.abs(x[i] - y[i])
+
+            return result
 
         knn_index = self.knn_index(manhattan, random_state=1)
         knn_index.build(self.x1, k=k)
@@ -169,7 +185,15 @@ class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
         knn_index = nearest_neighbors.NNDescent("manhattan")
 
         def manhattan(x, y):
-            return np.sum(np.abs(x - y))
+            r"""Manhattan, taxicab, or l1 distance.
+            .. math::
+                D(x, y) = \sum_i |x_i - y_i|
+            """
+            result = 0.0
+            for i in range(x.shape[0]):
+                result += np.abs(x[i] - y[i])
+
+            return result
 
         compiled_metric = knn_index.check_metric(manhattan)
         self.assertTrue(isinstance(compiled_metric, CPUDispatcher))
