@@ -176,7 +176,7 @@ class NNDescent(KNNIndex):
     def check_metric(self, *args, **kwargs):
         import pynndescent
 
-        if not np.array_equal(pynndescent.distances.named_distances, self.VALID_METRICS):
+        if not np.array_equal(list(pynndescent.distances.named_distances), self.VALID_METRICS):
             warnings.warn(
                 "`pynndescent` has recently changed which distance metrics are supported, "
                 "and `openTSNE.nearest_neighbors` has not been updated. Please notify the "
