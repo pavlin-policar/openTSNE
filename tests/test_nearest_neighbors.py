@@ -69,6 +69,7 @@ class KNNIndexTestMixin:
         np.testing.assert_equal(distances1, distances2)
 
     def test_uncompiled_callable_metric_same_result(self):
+        k = 15
 
         knn_index = self.knn_index("manhattan")
         knn_index.build(self.x1, k=k)
@@ -88,6 +89,7 @@ class KNNIndexTestMixin:
         )
 
     def test_numba_compiled_callable_metric_same_result(self):
+        k = 15
 
         knn_index = self.knn_index("manhattan")
         knn_index.build(self.x1, k=k)
