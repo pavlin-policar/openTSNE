@@ -14,7 +14,7 @@ from .test_tsne import check_mock_called_with_kwargs
 
 
 class KNNIndexTestMixin:
-    knn_index = None
+    knn_index = NotImplemented
 
     def __init__(self, *args, **kwargs):
         self.x1 = np.random.normal(100, 50, (150, 50))
