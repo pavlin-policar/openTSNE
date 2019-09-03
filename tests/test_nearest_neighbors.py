@@ -71,14 +71,14 @@ class KNNIndexTestMixin:
     def test_uncompiled_callable_metric_same_result(self):
         k = 15
 
-        knn_index = self.knn_index("manhattan")
+        knn_index = self.knn_index("manhattan", random_state=1)
         knn_index.build(self.x1, k=k)
         true_indices_, true_distances_ = knn_index.query(self.x2, k=k)
 
         def manhattan(x, y):
             return np.sum(np.abs(x - y))
 
-        knn_index = self.knn_index(manhattan)
+        knn_index = self.knn_index(manhattan, random_state=1)
         knn_index.build(self.x1, k=k)
         indices, distances = knn_index.query(self.x2, k=k)
         np.testing.assert_array_equal(
@@ -91,7 +91,7 @@ class KNNIndexTestMixin:
     def test_numba_compiled_callable_metric_same_result(self):
         k = 15
 
-        knn_index = self.knn_index("manhattan")
+        knn_index = self.knn_index("manhattan", random_state=1)
         knn_index.build(self.x1, k=k)
         true_indices_, true_distances_ = knn_index.query(self.x2, k=k)
 
@@ -99,7 +99,7 @@ class KNNIndexTestMixin:
         def manhattan(x, y):
             return np.sum(np.abs(x - y))
 
-        knn_index = self.knn_index(manhattan)
+        knn_index = self.knn_index(manhattan, random_state=1)
         knn_index.build(self.x1, k=k)
         indices, distances = knn_index.query(self.x2, k=k)
         np.testing.assert_array_equal(
