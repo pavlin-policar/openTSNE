@@ -73,7 +73,7 @@ class KNNIndexTestMixin:
 
         knn_index = self.knn_index("manhattan")
         knn_index.build(self.x1, k=k)
-        true_indices, true_distances = knn_index.query(self.x2, k=k)
+        true_indices_, true_distances_ = knn_index.query(self.x2, k=k)
 
         def manhattan(x, y):
             return np.sum(np.abs(x - y))
@@ -93,7 +93,7 @@ class KNNIndexTestMixin:
 
         knn_index = self.knn_index("manhattan")
         knn_index.build(self.x1, k=k)
-        true_indices, true_distances = knn_index.query(self.x2, k=k)
+        true_indices_, true_distances_ = knn_index.query(self.x2, k=k)
 
         @njit()
         def manhattan(x, y):
