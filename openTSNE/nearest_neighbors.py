@@ -190,7 +190,6 @@ class NNDescent(KNNIndex):
             from numba.targets.registry import CPUDispatcher
 
             if not isinstance(metric, CPUDispatcher):
-
                 warnings.warn(
                     f"`pynndescent` requires callable metrics to be "
                     f"compiled with `numba`, but `{metric.__name__}` is not compiled. "

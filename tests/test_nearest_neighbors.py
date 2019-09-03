@@ -76,10 +76,6 @@ class KNNIndexTestMixin:
         true_indices_, true_distances_ = knn_index.query(self.x2, k=k)
 
         def manhattan(x, y):
-            r"""Manhattan, taxicab, or l1 distance.
-            .. math::
-                D(x, y) = \sum_i |x_i - y_i|
-            """
             result = 0.0
             for i in range(x.shape[0]):
                 result += np.abs(x[i] - y[i])
@@ -105,10 +101,6 @@ class KNNIndexTestMixin:
 
         @njit(fastmath=True)
         def manhattan(x, y):
-            r"""Manhattan, taxicab, or l1 distance.
-            .. math::
-                D(x, y) = \sum_i |x_i - y_i|
-            """
             result = 0.0
             for i in range(x.shape[0]):
                 result += np.abs(x[i] - y[i])
@@ -181,14 +173,9 @@ class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
         check_mock_called_with_kwargs(nndescent, {"random_state": random_state})
 
     def test_uncompiled_callable_is_compiled(self):
-
         knn_index = nearest_neighbors.NNDescent("manhattan")
 
         def manhattan(x, y):
-            r"""Manhattan, taxicab, or l1 distance.
-            .. math::
-                D(x, y) = \sum_i |x_i - y_i|
-            """
             result = 0.0
             for i in range(x.shape[0]):
                 result += np.abs(x[i] - y[i])
