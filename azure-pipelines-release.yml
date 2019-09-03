@@ -48,8 +48,12 @@ jobs:
       - script: |
           python -m pip install --upgrade pip
           python -m pip install setuptools wheel pytest
-          python -m pip install numpy
+          python -m pip install cython
+          python -m pip install numpy==1.14.6
         displayName: 'Install job dependencies'
+
+      - script: python -m pip freeze
+        displayName: 'List dependency versions'
 
       - script: python setup.py bdist_wheel
         displayName: 'Build wheel'
@@ -157,8 +161,12 @@ jobs:
       - script: |
           python -m pip install --upgrade pip
           python -m pip install setuptools wheel pytest
-          python -m pip install numpy
+          python -m pip install cython
+          python -m pip install numpy==1.14.6
         displayName: 'Install job dependencies'
+
+      - script: python -m pip freeze
+        displayName: 'List dependency versions'
 
       - script: python setup.py sdist
         displayName: 'Build sdist'
