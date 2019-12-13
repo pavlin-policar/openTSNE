@@ -267,7 +267,7 @@ setup(
         "numpy>=1.14.6",
         "scikit-learn>=0.20",
         "scipy",
-        "pynndescent>=0.3",
+        "pynndescent>=0.4",
     ],
 
     ext_modules=extensions,

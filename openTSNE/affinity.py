@@ -265,8 +265,7 @@ def build_knn_index(
     elif method not in methods:
         raise ValueError(
             "Unrecognized nearest neighbor algorithm `%s`. Please choose one "
-            "of the supported methods or provide a valid `KNNIndex` instance."
-            % method
+            "of the supported methods or provide a valid `KNNIndex` instance." % method
         )
     else:
         knn_index = methods[method](
@@ -341,7 +340,9 @@ def joint_probabilities_nn(
 
     # Compute asymmetric pairwise input similarities
     conditional_P = _tsne.compute_gaussian_perplexity(
-        distances, np.array(perplexities, dtype=float), num_threads=n_jobs
+        np.array(distances, dtype=float),
+        np.array(perplexities, dtype=float),
+        num_threads=n_jobs,
     )
     conditional_P = np.asarray(conditional_P)
 
@@ -440,7 +441,7 @@ class FixedSigmaNN(Affinities):
         self.knn_index = knn_index
 
         # Compute asymmetric pairwise input similarities
-        conditional_P = np.exp(-distances ** 2 / (2 * sigma ** 2))
+        conditional_P = np.exp(-(distances ** 2) / (2 * sigma ** 2))
         conditional_P /= np.sum(conditional_P, axis=1)[:, np.newaxis]
 
         P = sp.csr_matrix(
@@ -517,7 +518,7 @@ class FixedSigmaNN(Affinities):
         neighbors, distances = self.knn_index.query(data, k)
 
         # Compute asymmetric pairwise input similarities
-        conditional_P = np.exp(-distances ** 2 / (2 * sigma ** 2))
+        conditional_P = np.exp(-(distances ** 2) / (2 * sigma ** 2))
 
         # Convert weights to probabilities
         conditional_P /= np.sum(conditional_P, axis=1)[:, np.newaxis]

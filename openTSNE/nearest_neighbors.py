@@ -80,7 +80,9 @@ class BallTree(KNNIndex):
             # for euclidean distance on normalized data
             effective_metric = "euclidean"
             effective_data = data.copy()
-            effective_data = effective_data / np.linalg.norm(effective_data, axis=1)[:, None]
+            effective_data = (
+                effective_data / np.linalg.norm(effective_data, axis=1)[:, None]
+            )
             # In order to properly compute cosine distances when querying the
             # index, we need to store the original data
             self.__data = data
@@ -102,10 +104,12 @@ class BallTree(KNNIndex):
         # If using cosine distance, the computed distances will be wrong and
         # need to be recomputed
         if self.metric == "cosine":
-            distances = np.vstack([
-                cdist(np.atleast_2d(x), data[idx], metric="cosine")
-                for x, idx in zip(data, indices)
-            ])
+            distances = np.vstack(
+                [
+                    cdist(np.atleast_2d(x), data[idx], metric="cosine")
+                    for x, idx in zip(data, indices)
+                ]
+            )
 
         return indices, distances
 
@@ -114,7 +118,9 @@ class BallTree(KNNIndex):
         # euclidean distance on normalized data
         if self.metric == "cosine":
             effective_data = query.copy()
-            effective_data = effective_data / np.linalg.norm(effective_data, axis=1)[:, None]
+            effective_data = (
+                effective_data / np.linalg.norm(effective_data, axis=1)[:, None]
+            )
         else:
             effective_data = query
 
@@ -130,10 +136,12 @@ class BallTree(KNNIndex):
                     "building the index? Please rebuild the index using cosine "
                     "similarity."
                 )
-            distances = np.vstack([
-                cdist(np.atleast_2d(x), self.__data[idx], metric="cosine")
-                for x, idx in zip(query, indices)
-            ])
+            distances = np.vstack(
+                [
+                    cdist(np.atleast_2d(x), self.__data[idx], metric="cosine")
+                    for x, idx in zip(query, indices)
+                ]
+            )
 
         return indices, distances
 
@@ -161,8 +169,10 @@ class NNDescent(KNNIndex):
         "canberra",
         "cosine",
         "correlation",
+        "hellinger",
         "haversine",
         "braycurtis",
+        "spearmanr",
         # Binary distances
         "hamming",
         "jaccard",
@@ -179,7 +189,9 @@ class NNDescent(KNNIndex):
     def check_metric(self, metric):
         import pynndescent
 
-        if not np.array_equal(list(pynndescent.distances.named_distances), self.VALID_METRICS):
+        if not np.array_equal(
+            list(pynndescent.distances.named_distances), self.VALID_METRICS
+        ):
             warnings.warn(
                 "`pynndescent` has recently changed which distance metrics are supported, "
                 "and `openTSNE.nearest_neighbors` has not been updated. Please notify the "
@@ -199,8 +211,9 @@ class NNDescent(KNNIndex):
                     f"compatible with `numba.njit` and should be rewritten. "
                     f"Otherwise, set `neighbors`='exact' to use `scikit-learn` "
                     f"for calculating nearest neighbors."
-                    )
+                )
                 from numba import njit
+
                 metric = njit(fastmath=True)(metric)
 
         return super().check_metric(metric)
@@ -229,8 +242,8 @@ class NNDescent(KNNIndex):
             n_jobs=self.n_jobs,
         )
 
-        indices, distances = self.index.query(data, k=k + 1, queue_size=1)
+        indices, distances = self.index.query(data, k=k + 1)
         return indices[:, 1:], distances[:, 1:]
 
     def query(self, query, k):
-        return self.index.query(query, k=k, queue_size=1)
+        return self.index.query(query, k=k)
