@@ -100,17 +100,16 @@ If you make use of openTSNE for your work we would appreciate it if you would ci
 References
 ----------
 
-.. [1] Maaten, Laurens van der, and Geoffrey Hinton. `“Visualizing data using
+.. [1] Van Der Maaten, Laurens, and Hinton, Geoffrey. `“Visualizing data using
     t-SNE.” <http://www.jmlr.org/papers/volume9/vandermaaten08a/vandermaaten08a.pdf>`__
-    Journal of machine learning research 9.Nov (2008): 2579-2605.
+    Journal of Machine Learning Research 9.Nov (2008): 2579-2605.
 .. [2] Van Der Maaten, Laurens. `“Accelerating t-SNE using tree-based algorithms.”
     <http://www.jmlr.org/papers/volume15/vandermaaten14a/vandermaaten14a.pdf>`__
-    The Journal of Machine Learning Research 15.1 (2014): 3221-3245.
+    Journal of Machine Learning Research 15.1 (2014): 3221-3245.
 .. [3] Linderman, George C., et al. `"Fast interpolation-based t-SNE for improved
-    visualization of single-cell RNA-seq data." <https://www.nature.com/articles/s41592-018-0308-4>`__ Nature methods 16.3 (2019): 243.
-.. [4] Kobak, Dmitry, and Philipp Berens. `“The art of using t-SNE for single-cell
-    transcriptomics.” <https://www.biorxiv.org/content/early/2018/10/25/453449>`__
-    bioRxiv (2018): 453449.
+    visualization of single-cell RNA-seq data." <https://www.nature.com/articles/s41592-018-0308-4>`__ Nature Methods 16.3 (2019): 243.
+.. [4] Kobak, Dmitry, and Berens, Philipp. `“The art of using t-SNE for single-cell transcriptomics.” <https://www.nature.com/articles/s41467-019-13056-x>`__
+    Nature Communications 10, 5416 (2019).
 .. [5] Macosko, Evan Z., et al. \ `“Highly parallel genome-wide expression profiling of
     individual cells using nanoliter droplets.”
     <https://www.sciencedirect.com/science/article/pii/S0092867415005498>`__
