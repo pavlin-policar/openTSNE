@@ -229,8 +229,8 @@ class NNDescent(KNNIndex):
             n_jobs=self.n_jobs,
         )
 
-        indices, distances = self.index.query(data, k=k + 1, queue_size=1)
+        indices, distances = self.index.query(data, k=k + 1)
         return indices[:, 1:], distances[:, 1:]
 
     def query(self, query, k):
-        return self.index.query(query, k=k, queue_size=1)
+        return self.index.query(query, k=k)
