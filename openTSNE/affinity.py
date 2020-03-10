@@ -255,9 +255,17 @@ class PerplexityBasedNN(Affinities):
 def build_knn_index(
     data, method, k, metric, metric_params=None, n_jobs=1, random_state=None
 ):
+    if not sp.issparse(data) and metric in ["angular", "euclidean", "manhattan", "hamming", "dot"]:
+        approxmethod = nearest_neighbors.Annoy
+    else:
+        approxmethod = nearest_neighbors.NNDescent
+
     methods = {
         "exact": nearest_neighbors.BallTree,
-        "approx": nearest_neighbors.NNDescent,
+        "auto": approxmethod,
+        "approx": approxmethod,   # this is for backward compatibility
+        "annoy": nearest_neighbors.Annoy,
+        "pynndescent": nearest_neighbors.NNDescent,
     }
     if isinstance(method, nearest_neighbors.KNNIndex):
         knn_index = method
