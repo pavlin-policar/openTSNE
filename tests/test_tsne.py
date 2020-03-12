@@ -217,7 +217,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
     def test_nndescent_distances(self, param_name, metric, nndescent: MagicMock):
         """Distance metrics should be properly passed down to NN descent"""
         assert param_name == "metric"
-        tsne = TSNE(metric=metric, neighbors="approx")
+        tsne = TSNE(metric=metric, neighbors="pynndescent")
 
         # We don't care about what happens later, just that the NN method is
         # properly called
@@ -236,7 +236,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         """Distance metrics and additional params should be correctly passed down to NN descent"""
         metric = "mahalanobis"
         C = np.cov(self.x)
-        tsne = TSNE(metric=metric, metric_params={"V": C}, neighbors="approx")
+        tsne = TSNE(metric=metric, metric_params={"V": C}, neighbors="pynndescent")
 
         # We don't care about what happens later, just that the NN method is
         # properly called
@@ -557,7 +557,7 @@ class TestRandomState(unittest.TestCase):
         random_state = 1
 
         tsne = openTSNE.TSNE(
-            neighbors="approx",
+            neighbors="pynndescent",
             initialization="pca",
             random_state=random_state,
         )
