@@ -3,6 +3,7 @@ import logging
 import multiprocessing
 from collections import Iterable
 from types import SimpleNamespace
+from time import time
 
 import numpy as np
 from sklearn.base import BaseEstimator
@@ -11,6 +12,7 @@ from openTSNE import _tsne
 from openTSNE import initialization as initialization_scheme
 from openTSNE.affinity import Affinities, PerplexityBasedNN
 from openTSNE.quad_tree import QuadTree
+from openTSNE import utils
 
 EPSILON = np.finfo(np.float64).eps
 
@@ -971,6 +973,8 @@ class TSNE(BaseEstimator):
         be used as the random number generator. If the value is None, the random
         number generator is the RandomState instance used by `np.random`.
 
+    verbose: bool
+
     """
 
     def __init__(
@@ -999,6 +1003,7 @@ class TSNE(BaseEstimator):
         callbacks=None,
         callbacks_every_iters=50,
         random_state=None,
+        verbose=False,
     ):
         self.n_components = n_components
         self.perplexity = perplexity
@@ -1031,6 +1036,7 @@ class TSNE(BaseEstimator):
         self.callbacks_every_iters = callbacks_every_iters
 
         self.random_state = random_state
+        self.verbose = verbose
 
     def fit(self, X):
         """Fit a t-SNE embedding for a given data set.
@@ -1049,6 +1055,9 @@ class TSNE(BaseEstimator):
             A fully optimized t-SNE embedding.
 
         """
+        if self.verbose:
+            print("-" * 80, repr(self), "-" * 80, sep="\n")
+
         embedding = self.prepare_initial(X)
 
         try:
@@ -1128,6 +1137,7 @@ class TSNE(BaseEstimator):
             metric_params=self.metric_params,
             n_jobs=self.n_jobs,
             random_state=self.random_state,
+            verbose=self.verbose,
         )
 
         gradient_descent_params = {
@@ -1151,6 +1161,7 @@ class TSNE(BaseEstimator):
             "max_grad_norm": self.max_grad_norm,
 
             "n_jobs": self.n_jobs,
+            "verbose": self.verbose,
             # Callback params
             "callbacks": self.callbacks,
             "callbacks_every_iters": self.callbacks_every_iters,
@@ -1277,6 +1288,7 @@ class gradient_descent:
         use_callbacks=False,
         callbacks=None,
         callbacks_every_iters=50,
+        verbose=False,
     ):
         """Perform batch gradient descent with momentum and gains.
 
@@ -1414,9 +1426,20 @@ class gradient_descent:
                 # Only call function if present on object
                 getattr(callback, "optimization_about_to_start", lambda: ...)()
 
+        timer = utils.Timer(
+            f"Running optimization with exaggeration={exaggeration} for {n_iter} iterations...",
+            verbose=verbose,
+        )
+        timer.__enter__()
+
+        if verbose:
+            start_time = time()
+
         for iteration in range(n_iter):
             should_call_callback = use_callbacks and (iteration + 1) % callbacks_every_iters == 0
-            should_eval_error = should_call_callback
+            # Evaluate error on 50 iterations for logging, or when callbacks
+            should_eval_error = should_call_callback or \
+                (verbose and (iteration + 1) % 50 == 0)
 
             error, gradient = objective_function(
                 embedding, P, dof=dof, bh_params=bh_params, fft_params=fft_params,
@@ -1460,9 +1483,17 @@ class gradient_descent:
             if reference_embedding is None:
                 embedding -= np.mean(embedding, axis=0)
 
+            if verbose and (iteration + 1) % 50 == 0:
+                stop_time = time()
+                print("Iteration %4d, KL divergence %6.4f, 50 iterations in %.4f sec" % (
+                    iteration + 1, error, stop_time - start_time))
+                start_time = time()
+
             if np.linalg.norm(gradient) < min_grad_norm:
                 log.info("Gradient norm eps reached. Finished.")
                 break
+
+        timer.__exit__()
 
         # Make sure to un-exaggerate P so it's not corrupted in future runs
         if exaggeration != 1:

@@ -7,6 +7,7 @@ import scipy.sparse as sp
 
 from openTSNE import _tsne
 from openTSNE import nearest_neighbors
+from openTSNE import utils
 
 log = logging.getLogger(__name__)
 
@@ -117,22 +118,27 @@ class PerplexityBasedNN(Affinities):
         symmetrize=True,
         n_jobs=1,
         random_state=None,
+        verbose=False,
     ):
         self.n_samples = data.shape[0]
         self.perplexity = self.check_perplexity(perplexity)
+        self.verbose = verbose
 
         k_neighbors = min(self.n_samples - 1, int(3 * self.perplexity))
-        self.knn_index, self.__neighbors, self.__distances = build_knn_index(
-            data, method, k_neighbors, metric, metric_params, n_jobs, random_state
-        )
+        with utils.Timer(f"Finding {k_neighbors} nearest neighbors using {method} "
+                         f"search with {metric} metric...", self.verbose):
+            self.knn_index, self.__neighbors, self.__distances = build_knn_index(
+                data, method, k_neighbors, metric, metric_params, n_jobs, random_state
+            )
 
-        self.P = joint_probabilities_nn(
-            self.__neighbors,
-            self.__distances,
-            [self.perplexity],
-            symmetrize=symmetrize,
-            n_jobs=n_jobs,
-        )
+        with utils.Timer("Calcualting affinity matrix...", self.verbose):
+            self.P = joint_probabilities_nn(
+                self.__neighbors,
+                self.__distances,
+                [self.perplexity],
+                symmetrize=symmetrize,
+                n_jobs=n_jobs,
+            )
 
         self.n_jobs = n_jobs
 
@@ -169,13 +175,15 @@ class PerplexityBasedNN(Affinities):
             )
 
         self.perplexity = new_perplexity
-        self.P = joint_probabilities_nn(
-            self.__neighbors[:, :k_neighbors],
-            self.__distances[:, :k_neighbors],
-            [self.perplexity],
-            symmetrize=True,
-            n_jobs=self.n_jobs,
-        )
+
+        with utils.Timer("Perplexity changed. Recomputing affinity matrix...", self.verbose):
+            self.P = joint_probabilities_nn(
+                self.__neighbors[:, :k_neighbors],
+                self.__distances[:, :k_neighbors],
+                [self.perplexity],
+                symmetrize=True,
+                n_jobs=self.n_jobs,
+            )
 
     def to_new(self, data, perplexity=None, return_distances=False):
         """Compute the affinities of new samples to the initial samples.
@@ -221,17 +229,20 @@ class PerplexityBasedNN(Affinities):
         perplexity = self.check_perplexity(perplexity)
         k_neighbors = min(self.n_samples - 1, int(3 * perplexity))
 
-        neighbors, distances = self.knn_index.query(data, k_neighbors)
+        with utils.Timer(f"Finding {k_neighbors} nearest neighbors in existing"
+                         f"embedding...", self.verbose):
+            neighbors, distances = self.knn_index.query(data, k_neighbors)
 
-        P = joint_probabilities_nn(
-            neighbors,
-            distances,
-            [perplexity],
-            symmetrize=False,
-            normalization="point-wise",
-            n_reference_samples=self.n_samples,
-            n_jobs=self.n_jobs,
-        )
+        with utils.Timer("Calcualting affinity matrix...", self.verbose):
+            P = joint_probabilities_nn(
+                neighbors,
+                distances,
+                [perplexity],
+                symmetrize=False,
+                normalization="point-wise",
+                n_reference_samples=self.n_samples,
+                n_jobs=self.n_jobs,
+            )
 
         if return_distances:
             return P, neighbors, distances
@@ -434,27 +445,30 @@ class FixedSigmaNN(Affinities):
                 "`k` (%d) cannot be larger than N-1 (%d)." % (k, self.n_samples)
             )
 
-        knn_index, neighbors, distances = build_knn_index(
-            data, method, k, metric, metric_params, n_jobs, random_state
-        )
+        with utils.Timer(f"Finding {k} nearest neighbors using {method} "
+                         f"search with {metric} metric...", self.verbose):
+            knn_index, neighbors, distances = build_knn_index(
+                data, method, k, metric, metric_params, n_jobs, random_state
+            )
 
         self.knn_index = knn_index
 
-        # Compute asymmetric pairwise input similarities
-        conditional_P = np.exp(-(distances ** 2) / (2 * sigma ** 2))
-        conditional_P /= np.sum(conditional_P, axis=1)[:, np.newaxis]
+        with utils.Timer("Calcualting affinity matrix...", self.verbose):
+            # Compute asymmetric pairwise input similarities
+            conditional_P = np.exp(-(distances ** 2) / (2 * sigma ** 2))
+            conditional_P /= np.sum(conditional_P, axis=1)[:, np.newaxis]
 
-        P = sp.csr_matrix(
-            (conditional_P.ravel(), neighbors.ravel(), range(0, n_samples * k + 1, k)),
-            shape=(n_samples, n_samples),
-        )
+            P = sp.csr_matrix(
+                (conditional_P.ravel(), neighbors.ravel(), range(0, n_samples * k + 1, k)),
+                shape=(n_samples, n_samples),
+            )
 
-        # Symmetrize the probability matrix
-        if symmetrize:
-            P = (P + P.T) / 2
+            # Symmetrize the probability matrix
+            if symmetrize:
+                P = (P + P.T) / 2
 
-        # Convert weights to probabilities
-        P /= np.sum(P)
+            # Convert weights to probabilities
+            P /= np.sum(P)
 
         self.sigma = sigma
         self.k = k
@@ -515,18 +529,21 @@ class FixedSigmaNN(Affinities):
             sigma = self.sigma
 
         # Find nearest neighbors and the distances to the new points
-        neighbors, distances = self.knn_index.query(data, k)
+        with utils.Timer(f"Finding {k} nearest neighbors in existing"
+                         f"embedding...", self.verbose):
+            neighbors, distances = self.knn_index.query(data, k)
 
-        # Compute asymmetric pairwise input similarities
-        conditional_P = np.exp(-(distances ** 2) / (2 * sigma ** 2))
+        with utils.Timer("Calcualting affinity matrix...", self.verbose):
+            # Compute asymmetric pairwise input similarities
+            conditional_P = np.exp(-(distances ** 2) / (2 * sigma ** 2))
 
-        # Convert weights to probabilities
-        conditional_P /= np.sum(conditional_P, axis=1)[:, np.newaxis]
+            # Convert weights to probabilities
+            conditional_P /= np.sum(conditional_P, axis=1)[:, np.newaxis]
 
-        P = sp.csr_matrix(
-            (conditional_P.ravel(), neighbors.ravel(), range(0, n_samples * k + 1, k)),
-            shape=(n_samples, n_reference_samples),
-        )
+            P = sp.csr_matrix(
+                (conditional_P.ravel(), neighbors.ravel(), range(0, n_samples * k + 1, k)),
+                shape=(n_samples, n_reference_samples),
+            )
 
         if return_distances:
             return P, neighbors, distances
@@ -601,17 +618,20 @@ class MultiscaleMixture(Affinities):
         max_perplexity = np.max(perplexities)
         k_neighbors = min(self.n_samples - 1, int(3 * max_perplexity))
 
-        self.knn_index, self.__neighbors, self.__distances = build_knn_index(
-            data, method, k_neighbors, metric, metric_params, n_jobs, random_state
-        )
+        with utils.Timer(f"Finding {k_neighbors} nearest neighbors using {method} "
+                         f"search with {metric} metric...", self.verbose):
+            self.knn_index, self.__neighbors, self.__distances = build_knn_index(
+                data, method, k_neighbors, metric, metric_params, n_jobs, random_state
+            )
 
-        self.P = self._calculate_P(
-            self.__neighbors,
-            self.__distances,
-            perplexities,
-            symmetrize=symmetrize,
-            n_jobs=n_jobs,
-        )
+        with utils.Timer("Calcualting affinity matrix...", self.verbose):
+            self.P = self._calculate_P(
+                self.__neighbors,
+                self.__distances,
+                perplexities,
+                symmetrize=symmetrize,
+                n_jobs=n_jobs,
+            )
 
         self.perplexities = perplexities
         self.n_jobs = n_jobs
@@ -670,13 +690,14 @@ class MultiscaleMixture(Affinities):
             )
 
         self.perplexities = new_perplexities
-        self.P = self._calculate_P(
-            self.__neighbors[:, :k_neighbors],
-            self.__distances[:, :k_neighbors],
-            self.perplexities,
-            symmetrize=True,
-            n_jobs=self.n_jobs,
-        )
+        with utils.Timer("Perplexity changed. Recomputing affinity matrix...", self.verbose):
+            self.P = self._calculate_P(
+                self.__neighbors[:, :k_neighbors],
+                self.__distances[:, :k_neighbors],
+                self.perplexities,
+                symmetrize=True,
+                n_jobs=self.n_jobs,
+            )
 
     def to_new(self, data, perplexities=None, return_distances=False):
         """Compute the affinities of new samples to the initial samples.
@@ -725,17 +746,20 @@ class MultiscaleMixture(Affinities):
         max_perplexity = np.max(perplexities)
         k_neighbors = min(self.n_samples - 1, int(3 * max_perplexity))
 
-        neighbors, distances = self.knn_index.query(data, k_neighbors)
+        with utils.Timer(f"Finding {k_neighbors} nearest neighbors in existing"
+                         f"embedding...", self.verbose):
+            neighbors, distances = self.knn_index.query(data, k_neighbors)
 
-        P = self._calculate_P(
-            neighbors,
-            distances,
-            perplexities,
-            symmetrize=False,
-            normalization="point-wise",
-            n_reference_samples=self.n_samples,
-            n_jobs=self.n_jobs,
-        )
+        with utils.Timer("Calcualting affinity matrix...", self.verbose):
+            P = self._calculate_P(
+                neighbors,
+                distances,
+                perplexities,
+                symmetrize=False,
+                normalization="point-wise",
+                n_reference_samples=self.n_samples,
+                n_jobs=self.n_jobs,
+            )
 
         if return_distances:
             return P, neighbors, distances
