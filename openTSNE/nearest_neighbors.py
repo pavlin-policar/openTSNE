@@ -147,59 +147,87 @@ class BallTree(KNNIndex):
 
 
 class Annoy(KNNIndex):
-    VALID_METRICS = ["angular", "euclidean", "manhattan", "hamming", "dot"]
+    VALID_METRICS = [
+        "cosine",
+        "euclidean",
+        "manhattan",
+        "hamming",
+        "dot",
+        "l1",
+        "l2",
+        "taxicab",
+    ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.__data = None
+        annoy_aliases = {
+            "cosine": "angular",
+            "l1": "manhattan",
+            "l2": "euclidean",
+            "taxicab": "manhattan",
+        }
+        if self.metric in annoy_aliases:
+            self.metric = annoy_aliases[self.metric]
 
     def build(self, data, k):
         from annoy import AnnoyIndex
+
         N = data.shape[0]
 
         self.index = AnnoyIndex(data.shape[1], self.metric)
         for i in range(N):
-           self.index.add_item(i, data[i])
+            self.index.add_item(i, data[i])
 
         # Number of trees. FIt-SNE uses 50 by default.
         self.index.build(50)
 
         # Return the nearest neighbors in the training set
-        distances = np.zeros((N,k))
-        indices = np.zeros((N,k)).astype(int)
+        distances = np.zeros((N, k))
+        indices = np.zeros((N, k)).astype(int)
 
         def getnns(i):
             # Annoy returns the query point itself as the first element
-            indices_i, distances_i = self.index.get_nns_by_item(i, k+1, include_distances=True)
+            indices_i, distances_i = self.index.get_nns_by_item(
+                i, k + 1, include_distances=True
+            )
             indices[i] = indices_i[1:]
             distances[i] = distances_i[1:]
 
-        if self.n_jobs==1:
+        if self.n_jobs == 1:
             for i in range(N):
                 getnns(i)
         else:
             from joblib import Parallel, delayed
-            Parallel(n_jobs=self.n_jobs, require='sharedmem')(delayed(getnns)(i) for i in range(N))
+
+            Parallel(n_jobs=self.n_jobs, require="sharedmem")(
+                delayed(getnns)(i) for i in range(N)
+            )
 
         return indices, distances
 
     def query(self, query, k):
         N = query.shape[0]
-        distances = np.zeros((N,k))
-        indices = np.zeros((N,k)).astype(int)
+        distances = np.zeros((N, k))
+        indices = np.zeros((N, k)).astype(int)
 
         def getnns(v):
             # Annoy returns the query point itself as the first element
-            indices_i, distances_i = self.index.get_nns_by_vector(v, k+1, include_distances=True)
+            indices_i, distances_i = self.index.get_nns_by_vector(
+                v, k + 1, include_distances=True
+            )
             indices[i] = indices_i[1:]
             distances[i] = distances_i[1:]
 
-        if self.n_jobs==1:
+        if self.n_jobs == 1:
             for i in range(N):
                 getnns(query[i])
         else:
             from joblib import Parallel, delayed
-            Parallel(n_jobs=self.n_jobs, require='sharedmem')(delayed(getnns)(query[i]) for i in range(N))
+
+            Parallel(n_jobs=self.n_jobs, require="sharedmem")(
+                delayed(getnns)(query[i]) for i in range(N)
+            )
 
         return indices, distances
 
@@ -305,3 +333,4 @@ class NNDescent(KNNIndex):
 
     def query(self, query, k):
         return self.index.query(query, k=k)
+

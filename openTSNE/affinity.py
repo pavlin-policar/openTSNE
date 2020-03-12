@@ -255,15 +255,24 @@ class PerplexityBasedNN(Affinities):
 def build_knn_index(
     data, method, k, metric, metric_params=None, n_jobs=1, random_state=None
 ):
-    if not sp.issparse(data) and metric in ["angular", "euclidean", "manhattan", "hamming", "dot"]:
-        approxmethod = nearest_neighbors.Annoy
+    if not sp.issparse(data) and metric in [
+        "cosine",
+        "euclidean",
+        "manhattan",
+        "hamming",
+        "dot",
+        "l1",
+        "l2",
+        "taxicab",
+    ]:
+        approx_method = nearest_neighbors.Annoy
     else:
-        approxmethod = nearest_neighbors.NNDescent
+        approx_method = nearest_neighbors.NNDescent
 
     methods = {
         "exact": nearest_neighbors.BallTree,
-        "auto": approxmethod,
-        "approx": approxmethod,   # this is for backward compatibility
+        "auto": approx_method,
+        "approx": approx_method,  # this is for backward compatibility
         "annoy": nearest_neighbors.Annoy,
         "pynndescent": nearest_neighbors.NNDescent,
     }
@@ -862,3 +871,4 @@ class Multiscale(MultiscaleMixture):
             P = sp.diags(np.asarray(1 / P.sum(axis=1)).ravel()) @ P
 
         return P
+
