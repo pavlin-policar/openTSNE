@@ -26,10 +26,13 @@ class Affinities:
         The :math:`N \\times N` affinity matrix expressing interactions between
         :math:`N` initial data samples.
 
+    verbose: bool
+
     """
 
-    def __init__(self):
+    def __init__(self, verbose=False):
         self.P = None
+        self.verbose = verbose
 
     def to_new(self, data, return_distances=False):
         """Compute the affinities of new samples to the initial samples.
@@ -106,6 +109,8 @@ class PerplexityBasedNN(Affinities):
         be used as the random number generator. If the value is None, the random
         number generator is the RandomState instance used by `np.random`.
 
+    verbose: bool
+
     """
 
     def __init__(
@@ -125,8 +130,11 @@ class PerplexityBasedNN(Affinities):
         self.verbose = verbose
 
         k_neighbors = min(self.n_samples - 1, int(3 * self.perplexity))
-        with utils.Timer(f"Finding {k_neighbors} nearest neighbors using {method} "
-                         f"search with {metric} metric...", self.verbose):
+        with utils.Timer(
+            f"Finding {k_neighbors} nearest neighbors using {method} search "
+            f"with {metric} metric...",
+            self.verbose,
+        ):
             self.knn_index, self.__neighbors, self.__distances = build_knn_index(
                 data, method, k_neighbors, metric, metric_params, n_jobs, random_state
             )
@@ -176,7 +184,9 @@ class PerplexityBasedNN(Affinities):
 
         self.perplexity = new_perplexity
 
-        with utils.Timer("Perplexity changed. Recomputing affinity matrix...", self.verbose):
+        with utils.Timer(
+            "Perplexity changed. Recomputing affinity matrix...", self.verbose
+        ):
             self.P = joint_probabilities_nn(
                 self.__neighbors[:, :k_neighbors],
                 self.__distances[:, :k_neighbors],
@@ -229,8 +239,10 @@ class PerplexityBasedNN(Affinities):
         perplexity = self.check_perplexity(perplexity)
         k_neighbors = min(self.n_samples - 1, int(3 * perplexity))
 
-        with utils.Timer(f"Finding {k_neighbors} nearest neighbors in existing"
-                         f"embedding...", self.verbose):
+        with utils.Timer(
+            f"Finding {k_neighbors} nearest neighbors in existing" f"embedding...",
+            self.verbose,
+        ):
             neighbors, distances = self.knn_index.query(data, k_neighbors)
 
         with utils.Timer("Calcualting affinity matrix...", self.verbose):
@@ -256,8 +268,8 @@ class PerplexityBasedNN(Affinities):
         if self.n_samples - 1 < 3 * perplexity:
             old_perplexity, perplexity = perplexity, (self.n_samples - 1) / 3
             log.warning(
-                "Perplexity value %d is too high. Using perplexity %.2f "
-                "instead" % (old_perplexity, perplexity)
+                "Perplexity value %d is too high. Using perplexity %.2f instead"
+                % (old_perplexity, perplexity)
             )
 
         return perplexity
@@ -424,6 +436,8 @@ class FixedSigmaNN(Affinities):
         be used as the random number generator. If the value is None, the random
         number generator is the RandomState instance used by `np.random`.
 
+    verbose: bool
+
     """
 
     def __init__(
@@ -437,16 +451,20 @@ class FixedSigmaNN(Affinities):
         symmetrize=True,
         n_jobs=1,
         random_state=None,
+        verbose=False,
     ):
         self.n_samples = n_samples = data.shape[0]
+        self.verbose = verbose
 
         if k >= self.n_samples:
             raise ValueError(
                 "`k` (%d) cannot be larger than N-1 (%d)." % (k, self.n_samples)
             )
 
-        with utils.Timer(f"Finding {k} nearest neighbors using {method} "
-                         f"search with {metric} metric...", self.verbose):
+        with utils.Timer(
+            f"Finding {k} nearest neighbors using {method} search with {metric} metric...",
+            self.verbose,
+        ):
             knn_index, neighbors, distances = build_knn_index(
                 data, method, k, metric, metric_params, n_jobs, random_state
             )
@@ -459,7 +477,11 @@ class FixedSigmaNN(Affinities):
             conditional_P /= np.sum(conditional_P, axis=1)[:, np.newaxis]
 
             P = sp.csr_matrix(
-                (conditional_P.ravel(), neighbors.ravel(), range(0, n_samples * k + 1, k)),
+                (
+                    conditional_P.ravel(),
+                    neighbors.ravel(),
+                    range(0, n_samples * k + 1, k),
+                ),
                 shape=(n_samples, n_samples),
             )
 
@@ -529,8 +551,9 @@ class FixedSigmaNN(Affinities):
             sigma = self.sigma
 
         # Find nearest neighbors and the distances to the new points
-        with utils.Timer(f"Finding {k} nearest neighbors in existing"
-                         f"embedding...", self.verbose):
+        with utils.Timer(
+            f"Finding {k} nearest neighbors in existing" f"embedding...", self.verbose
+        ):
             neighbors, distances = self.knn_index.query(data, k)
 
         with utils.Timer("Calcualting affinity matrix...", self.verbose):
@@ -541,7 +564,11 @@ class FixedSigmaNN(Affinities):
             conditional_P /= np.sum(conditional_P, axis=1)[:, np.newaxis]
 
             P = sp.csr_matrix(
-                (conditional_P.ravel(), neighbors.ravel(), range(0, n_samples * k + 1, k)),
+                (
+                    conditional_P.ravel(),
+                    neighbors.ravel(),
+                    range(0, n_samples * k + 1, k),
+                ),
                 shape=(n_samples, n_reference_samples),
             )
 
@@ -597,6 +624,8 @@ class MultiscaleMixture(Affinities):
         be used as the random number generator. If the value is None, the random
         number generator is the RandomState instance used by `np.random`.
 
+    verbose: bool
+
     """
 
     def __init__(
@@ -609,8 +638,10 @@ class MultiscaleMixture(Affinities):
         symmetrize=True,
         n_jobs=1,
         random_state=None,
+        verbose=False,
     ):
         self.n_samples = data.shape[0]
+        self.verbose = verbose
 
         # We will compute the nearest neighbors to the max value of perplexity,
         # smaller values can just use indexing to truncate unneeded neighbors
@@ -618,8 +649,11 @@ class MultiscaleMixture(Affinities):
         max_perplexity = np.max(perplexities)
         k_neighbors = min(self.n_samples - 1, int(3 * max_perplexity))
 
-        with utils.Timer(f"Finding {k_neighbors} nearest neighbors using {method} "
-                         f"search with {metric} metric...", self.verbose):
+        with utils.Timer(
+            f"Finding {k_neighbors} nearest neighbors using {method} search "
+            f"with {metric} metric...",
+            self.verbose,
+        ):
             self.knn_index, self.__neighbors, self.__distances = build_knn_index(
                 data, method, k_neighbors, metric, metric_params, n_jobs, random_state
             )
@@ -690,7 +724,9 @@ class MultiscaleMixture(Affinities):
             )
 
         self.perplexities = new_perplexities
-        with utils.Timer("Perplexity changed. Recomputing affinity matrix...", self.verbose):
+        with utils.Timer(
+            "Perplexity changed. Recomputing affinity matrix...", self.verbose
+        ):
             self.P = self._calculate_P(
                 self.__neighbors[:, :k_neighbors],
                 self.__distances[:, :k_neighbors],
@@ -746,8 +782,10 @@ class MultiscaleMixture(Affinities):
         max_perplexity = np.max(perplexities)
         k_neighbors = min(self.n_samples - 1, int(3 * max_perplexity))
 
-        with utils.Timer(f"Finding {k_neighbors} nearest neighbors in existing"
-                         f"embedding...", self.verbose):
+        with utils.Timer(
+            f"Finding {k_neighbors} nearest neighbors in existing" f"embedding...",
+            self.verbose,
+        ):
             neighbors, distances = self.knn_index.query(data, k_neighbors)
 
         with utils.Timer("Calcualting affinity matrix...", self.verbose):
@@ -842,6 +880,8 @@ class Multiscale(MultiscaleMixture):
         number generator. If the value is a RandomState instance, then it will
         be used as the random number generator. If the value is None, the random
         number generator is the RandomState instance used by `np.random`.
+
+    verbose: bool
 
     """
 
