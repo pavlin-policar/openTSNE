@@ -1109,10 +1109,10 @@ class TSNE(BaseEstimator):
 
             embedding = np.array(self.initialization)
 
-            variance = np.var(embedding, axis=0)
-            if any(variance > 1e-4):
+            stddev = np.std(embedding, axis=0)
+            if any(stddev > 1e-4):
                 log.warning(
-                    "Variance of embedding is greater than 0.0001. Initial "
+                    "Standard deviation of embedding is greater than 0.0001. Initial "
                     "embeddings with high variance may have display poor convergence."
                 )
 
