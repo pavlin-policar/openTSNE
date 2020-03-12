@@ -178,10 +178,10 @@ class Annoy(KNNIndex):
             annoy_metric = annoy_aliases[annoy_metric]
 
         self.index = AnnoyIndex(data.shape[1], annoy_metric)
-        
+
         if self.random_state:
             self.index.set_seed(self.random_state)
-        
+
         for i in range(N):
             self.index.add_item(i, data[i])
 
