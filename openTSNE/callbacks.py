@@ -1,5 +1,6 @@
 import logging
 import time
+import warnings
 from functools import partial
 
 import numpy as np
@@ -9,6 +10,9 @@ from openTSNE import kl_divergence
 from openTSNE.tsne import TSNEEmbedding
 
 log = logging.getLogger(__name__)
+
+# Enable warnings for this module
+warnings.simplefilter("module")
 
 
 class Callback:
@@ -48,6 +52,11 @@ class ErrorLogger(Callback):
     """
 
     def __init__(self):
+        warnings.warn(
+            "`ErrorLogger` will be removed in upcoming version. Please use the "
+            "`verbose` flag instead.",
+            category=DeprecationWarning,
+        )
         self.iter_count = 0
         self.last_log_time = None
 
@@ -63,19 +72,24 @@ class ErrorLogger(Callback):
         n_iters = iteration - self.iter_count
         self.iter_count = iteration
 
-        print("Iteration % 4d, KL divergence % 6.4f, %d iterations in %.4f sec" % (
-            iteration, error, n_iters, duration))
+        print(
+            "Iteration % 4d, KL divergence % 6.4f, %d iterations in %.4f sec"
+            % (iteration, error, n_iters, duration)
+        )
 
 
 class VerifyExaggerationError(Callback):
     """Used to verify that the exaggeration correction implemented in
     `gradient_descent` is correct."""
+
     def __init__(self, embedding: TSNEEmbedding) -> None:
         self.embedding = embedding
         # Keep a copy of the unexaggerated affinity matrix
         self.P = self.embedding.affinities.P.copy()
 
-    def __call__(self, iteration: int, corrected_error: float, embedding: TSNEEmbedding):
+    def __call__(
+        self, iteration: int, corrected_error: float, embedding: TSNEEmbedding
+    ):
         params = self.embedding.gradient_descent_params
         method = params["negative_gradient_method"]
 
@@ -83,10 +97,12 @@ class VerifyExaggerationError(Callback):
             log.warning("Are you sure you are testing an exaggerated P matrix?")
 
         if method == "fft":
-            f = partial(kl_divergence.kl_divergence_approx_fft,
-                        n_interpolation_points=params["n_interpolation_points"],
-                        min_num_intervals=params["min_num_intervals"],
-                        ints_in_interval=params["ints_in_interval"])
+            f = partial(
+                kl_divergence.kl_divergence_approx_fft,
+                n_interpolation_points=params["n_interpolation_points"],
+                min_num_intervals=params["min_num_intervals"],
+                ints_in_interval=params["ints_in_interval"],
+            )
         elif method == "bh":
             f = partial(kl_divergence.kl_divergence_approx_bh, theta=params["theta"])
 
@@ -96,13 +112,16 @@ class VerifyExaggerationError(Callback):
         if abs(true_error - corrected_error) > 1e-8:
             raise RuntimeError("Correction term is wrong.")
         else:
-            log.info("Corrected: %.4f - True %.4f [eps %.4f]" % (
-                corrected_error, true_error, abs(true_error - corrected_error)))
+            log.info(
+                "Corrected: %.4f - True %.4f [eps %.4f]"
+                % (corrected_error, true_error, abs(true_error - corrected_error))
+            )
 
 
 class ErrorApproximations(Callback):
     """Check how good the error approximations are. Of course, we use an
     approximation for P so this itself is an approximation."""
+
     def __init__(self, P: csr_matrix):
         self.P = P.copy()
         self.exact_errors = []
@@ -112,9 +131,11 @@ class ErrorApproximations(Callback):
     def __call__(self, iteration: int, error: float, embedding: TSNEEmbedding):
         exact_error = kl_divergence.kl_divergence_exact(self.P.toarray(), embedding)
         bh_error = kl_divergence.kl_divergence_approx_bh(
-            self.P.indices, self.P.indptr, self.P.data, embedding)
+            self.P.indices, self.P.indptr, self.P.data, embedding
+        )
         fft_error = kl_divergence.kl_divergence_approx_fft(
-            self.P.indices, self.P.indptr, self.P.data, embedding)
+            self.P.indices, self.P.indptr, self.P.data, embedding
+        )
 
         self.exact_errors.append(exact_error)
         self.bh_errors.append(bh_error)
@@ -126,9 +147,13 @@ class ErrorApproximations(Callback):
         fft_errors = np.array(self.fft_errors)
 
         bh_diff = bh_errors - exact_errors
-        print("Barnes-Hut: mean difference %.4f (±%.4f)" % (
-            np.mean(bh_diff), np.std(bh_diff)))
+        print(
+            "Barnes-Hut: mean difference %.4f (±%.4f)"
+            % (np.mean(bh_diff), np.std(bh_diff))
+        )
 
         fft_diff = fft_errors - exact_errors
-        print("Interpolation: mean difference %.4f (±%.4f)" % (
-            np.mean(fft_diff), np.std(fft_diff)))
+        print(
+            "Interpolation: mean difference %.4f (±%.4f)"
+            % (np.mean(fft_diff), np.std(fft_diff))
+        )

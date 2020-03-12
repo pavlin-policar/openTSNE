@@ -3,6 +3,7 @@ import logging
 import multiprocessing
 from collections import Iterable
 from types import SimpleNamespace
+from time import time
 
 import numpy as np
 from sklearn.base import BaseEstimator
@@ -11,6 +12,7 @@ from openTSNE import _tsne
 from openTSNE import initialization as initialization_scheme
 from openTSNE.affinity import Affinities, PerplexityBasedNN
 from openTSNE.quad_tree import QuadTree
+from openTSNE import utils
 
 EPSILON = np.finfo(np.float64).eps
 
@@ -32,7 +34,7 @@ def _check_callbacks(callbacks):
     return callbacks
 
 
-def _handle_nice_params(optim_params: dict) -> None:
+def _handle_nice_params(embedding: np.ndarray, optim_params: dict) -> None:
     """Convert the user friendly params into something the optimizer can
     understand."""
     # Handle callbacks
@@ -69,6 +71,10 @@ def _handle_nice_params(optim_params: dict) -> None:
         n_jobs = 1
 
     optim_params["n_jobs"] = n_jobs
+
+    # Determine learning rate if requested
+    if optim_params.get("learning_rate", "auto") == "auto":
+        optim_params["learning_rate"] = max(200, embedding.shape[0] / 12)
 
 
 def __check_init_num_samples(num_samples, required_num_samples):
@@ -134,14 +140,17 @@ class PartialTSNEEmbedding(np.ndarray):
         The embedding into which the new samples are to be added.
 
     P : array_like
-        An :math:`N \\times M` affinity matrix containing the affinities from each new
-        data point :math:`n` to each data point in the existing embedding
-        :math:`m`.
+        An :math:`N \\times M` affinity matrix containing the affinities from
+        each new data point :math:`n` to each data point in the existing
+        embedding :math:`m`.
 
-    learning_rate: float
-        The learning rate for t-SNE optimization. Typical values range between
-        100 to 1000. Setting the learning rate too low or too high may result in
-        the points forming a "ball". This is also known as the crowding problem.
+    learning_rate: Union[str, float]
+        The learning rate for t-SNE optimization. When ``learning_rate="auto"``
+        the appropriate learning rate is selected according to max(200, N / 12)
+        as determined in Belkina et al. (2019), Nature Communications. Note that
+        this should *not* be used when adding samples into existing embeddings,
+        where the learning rate often needs to be much lower to obtain
+        convergence.
 
     exaggeration: float
         The exaggeration factor is used to increase the attractive forces of
@@ -238,11 +247,13 @@ class PartialTSNEEmbedding(np.ndarray):
         n_iter: int
             The number of optimization iterations.
 
-        learning_rate: float
-            The learning rate for t-SNE optimization. Typical values range
-            between 100 to 1000. Setting the learning rate too low or too high
-            may result in the points forming a "ball". This is also known as the
-            crowding problem.
+        learning_rate: Union[str, float]
+            The learning rate for t-SNE optimization. When
+            ``learning_rate="auto"`` the appropriate learning rate is selected
+            according to max(200, N / 12), as determined in Belkina et al.
+            (2019), Nature Communications. Note that this should *not* be used
+            when adding samples into existing embeddings, where the learning
+            rate often needs to be much lower to obtain convergence.
 
         exaggeration: float
             The exaggeration factor is used to increase the attractive forces of
@@ -336,8 +347,8 @@ class PartialTSNEEmbedding(np.ndarray):
         # over the defaults specified in the TSNE object
         optim_params = dict(self.gradient_descent_params)
         optim_params.update(gradient_descent_params)
-        _handle_nice_params(optim_params)
         optim_params["n_iter"] = n_iter
+        _handle_nice_params(embedding, optim_params)
 
         try:
             # Run gradient descent with the embedding optimizer so gains are
@@ -375,10 +386,10 @@ class TSNEEmbedding(np.ndarray):
         points to the points in the existing embedding. The affinity index also
         contains the affinity matrix :math:`P` used during optimization.
 
-    learning_rate: float
-        The learning rate for t-SNE optimization. Typical values range between
-        100 to 1000. Setting the learning rate too low or too high may result in
-        the points forming a "ball". This is also known as the crowding problem.
+    learning_rate: Union[str, float]
+        The learning rate for t-SNE optimization. When ``learning_rate="auto"``
+        the appropriate learning rate is selected according to max(200, N / 12),
+        as determined in Belkina et al. (2019), Nature Communications.
 
     exaggeration: float
         The exaggeration factor is used to increase the attractive forces of
@@ -488,11 +499,11 @@ class TSNEEmbedding(np.ndarray):
         n_iter: int
             The number of optimization iterations.
 
-        learning_rate: float
-            The learning rate for t-SNE optimization. Typical values range
-            between 100 to 1000. Setting the learning rate too low or too high
-            may result in the points forming a "ball". This is also known as the
-            crowding problem.
+        learning_rate: Union[str, float]
+            The learning rate for t-SNE optimization. When
+            ``learning_rate="auto"`` the appropriate learning rate is selected
+            according to max(200, N / 12), as determined in Belkina et al.
+            (2019), Nature Communications.
 
         exaggeration: float
             The exaggeration factor is used to increase the attractive forces of
@@ -536,10 +547,6 @@ class TSNEEmbedding(np.ndarray):
             The optimization process can be interrupted using callbacks. This
             flag indicates whether we should propagate that exception or to
             simply stop optimization and return the resulting embedding.
-
-        min_grad_norm: float
-            If the gradient norm is below this threshold, the optimization will
-            be stopped.
 
         max_grad_norm: float
             Maximum gradient norm. If the norm exceeds this value, it will be
@@ -598,8 +605,8 @@ class TSNEEmbedding(np.ndarray):
         # over the defaults specified in the TSNE object
         optim_params = dict(self.gradient_descent_params)
         optim_params.update(gradient_descent_params)
-        _handle_nice_params(optim_params)
         optim_params["n_iter"] = n_iter
+        _handle_nice_params(embedding, optim_params)
 
         try:
             # Run gradient descent with the embedding optimizer so gains are
@@ -665,11 +672,13 @@ class TSNEEmbedding(np.ndarray):
             because perplexity affects optimization while this only affects the
             initial point positions.
 
-        learning_rate: float
-            The learning rate for t-SNE optimization. Typical values range
-            between 100 to 1000. Setting the learning rate too low or too high
-            may result in the points forming a "ball". This is also known as the
-            crowding problem.
+        learning_rate: Union[str, float]
+            The learning rate for t-SNE optimization. When
+            ``learning_rate="auto"`` the appropriate learning rate is selected
+            according to max(200, N / 12), as determined in Belkina et al.
+            (2019), Nature Communications. Note that this should *not* be used
+            when adding samples into existing embeddings, where the learning
+            rate often needs to be much lower to obtain convergence.
 
         early_exaggeration_iter: int
             The number of iterations to run in the *early exaggeration* phase.
@@ -853,11 +862,10 @@ class TSNE(BaseEstimator):
         Perplexity can be thought of as the continuous :math:`k` number of
         nearest neighbors, for which t-SNE will attempt to preserve distances.
 
-    learning_rate: float
-        The learning rate for t-SNE optimization. Typical values range between
-        100 to 1000. Setting the learning rate too low or too high may
-        result in the points forming a "ball". This is also known as the
-        crowding problem.
+    learning_rate: Union[str, float]
+        The learning rate for t-SNE optimization. When ``learning_rate="auto"``
+        the appropriate learning rate is selected according to max(200, N / 12),
+        as determined in Belkina et al. (2019), Nature Communications.
 
     early_exaggeration_iter: int
         The number of iterations to run in the *early exaggeration* phase.
@@ -919,10 +927,6 @@ class TSNE(BaseEstimator):
     final_momentum: float
         The momentum to use during the normal optimization phase.
 
-    min_grad_norm: float
-        If the gradient norm is below this threshold, the optimization will
-        be stopped.
-
     max_grad_norm: float
         Maximum gradient norm. If the norm exceeds this value, it will be
         clipped. This is most beneficial when adding points into an existing
@@ -961,16 +965,18 @@ class TSNE(BaseEstimator):
         be used as the random number generator. If the value is None, the random
         number generator is the RandomState instance used by `np.random`.
 
+    verbose: bool
+
     """
 
     def __init__(
         self,
         n_components=2,
         perplexity=30,
-        learning_rate=200,
+        learning_rate="auto",
         early_exaggeration_iter=250,
         early_exaggeration=12,
-        n_iter=750,
+        n_iter=500,
         exaggeration=None,
         theta=0.5,
         n_interpolation_points=3,
@@ -981,7 +987,6 @@ class TSNE(BaseEstimator):
         metric_params=None,
         initial_momentum=0.5,
         final_momentum=0.8,
-        min_grad_norm=1e-8,
         max_grad_norm=None,
         n_jobs=1,
         neighbors="approx",
@@ -989,6 +994,7 @@ class TSNE(BaseEstimator):
         callbacks=None,
         callbacks_every_iters=50,
         random_state=None,
+        verbose=False,
     ):
         self.n_components = n_components
         self.perplexity = perplexity
@@ -1011,7 +1017,6 @@ class TSNE(BaseEstimator):
         self.metric_params = metric_params
         self.initial_momentum = initial_momentum
         self.final_momentum = final_momentum
-        self.min_grad_norm = min_grad_norm
         self.max_grad_norm = max_grad_norm
         self.n_jobs = n_jobs
         self.neighbors_method = neighbors
@@ -1021,6 +1026,7 @@ class TSNE(BaseEstimator):
         self.callbacks_every_iters = callbacks_every_iters
 
         self.random_state = random_state
+        self.verbose = verbose
 
     def fit(self, X):
         """Fit a t-SNE embedding for a given data set.
@@ -1039,6 +1045,9 @@ class TSNE(BaseEstimator):
             A fully optimized t-SNE embedding.
 
         """
+        if self.verbose:
+            print("-" * 80, repr(self), "-" * 80, sep="\n")
+
         embedding = self.prepare_initial(X)
 
         try:
@@ -1090,10 +1099,10 @@ class TSNE(BaseEstimator):
 
             embedding = np.array(self.initialization)
 
-            variance = np.var(embedding, axis=0)
-            if any(variance > 1e-4):
+            stddev = np.std(embedding, axis=0)
+            if any(stddev > 1e-4):
                 log.warning(
-                    "Variance of embedding is greater than 0.0001. Initial "
+                    "Standard deviation of embedding is greater than 0.0001. Initial "
                     "embeddings with high variance may have display poor convergence."
                 )
 
@@ -1118,6 +1127,7 @@ class TSNE(BaseEstimator):
             metric_params=self.metric_params,
             n_jobs=self.n_jobs,
             random_state=self.random_state,
+            verbose=self.verbose,
         )
 
         gradient_descent_params = {
@@ -1137,10 +1147,10 @@ class TSNE(BaseEstimator):
             "min_num_intervals": self.min_num_intervals,
             "ints_in_interval": self.ints_in_interval,
 
-            "min_grad_norm": self.min_grad_norm,
             "max_grad_norm": self.max_grad_norm,
 
             "n_jobs": self.n_jobs,
+            "verbose": self.verbose,
             # Callback params
             "callbacks": self.callbacks,
             "callbacks_every_iters": self.callbacks_every_iters,
@@ -1245,12 +1255,29 @@ class gradient_descent:
             optimizer.gains = np.copy(self.gains)
         return optimizer
 
-    def __call__(self, embedding, P, n_iter, objective_function, learning_rate=200,
-                 momentum=0.5, exaggeration=None, dof=1, min_gain=0.01,
-                 min_grad_norm=1e-8, max_grad_norm=None, theta=0.5,
-                 n_interpolation_points=3, min_num_intervals=50, ints_in_interval=1,
-                 reference_embedding=None, n_jobs=1,
-                 use_callbacks=False, callbacks=None, callbacks_every_iters=50):
+    def __call__(
+        self,
+        embedding,
+        P,
+        n_iter,
+        objective_function,
+        learning_rate=200,
+        momentum=0.5,
+        exaggeration=None,
+        dof=1,
+        min_gain=0.01,
+        max_grad_norm=None,
+        theta=0.5,
+        n_interpolation_points=3,
+        min_num_intervals=50,
+        ints_in_interval=1,
+        reference_embedding=None,
+        n_jobs=1,
+        use_callbacks=False,
+        callbacks=None,
+        callbacks_every_iters=50,
+        verbose=False,
+    ):
         """Perform batch gradient descent with momentum and gains.
 
         Parameters
@@ -1268,11 +1295,11 @@ class gradient_descent:
             A callable that evaluates the error and gradient for the current
             embedding.
 
-        learning_rate: float
-            The learning rate for t-SNE optimization. Typical values range
-            between 100 to 1000. Setting the learning rate too low or too high
-            may result in the points forming a "ball". This is also known as the
-            crowding problem.
+        learning_rate: Union[str, float]
+            The learning rate for t-SNE optimization. When
+            ``learning_rate="auto"`` the appropriate learning rate is selected
+            according to max(200, N / 12), as determined in Belkina et al.
+            (2019), Nature Communications.
 
         momentum: float
             Momentum accounts for gradient directions from previous iterations,
@@ -1287,10 +1314,6 @@ class gradient_descent:
 
         min_gain: float
             Minimum individual gain for each parameter.
-
-        min_grad_norm: float
-            If the gradient norm is below this threshold, the optimization will
-            be stopped.
 
         max_grad_norm: float
             Maximum gradient norm. If the norm exceeds this value, it will be
@@ -1387,9 +1410,20 @@ class gradient_descent:
                 # Only call function if present on object
                 getattr(callback, "optimization_about_to_start", lambda: ...)()
 
+        timer = utils.Timer(
+            f"Running optimization with exaggeration={exaggeration} for {n_iter} iterations...",
+            verbose=verbose,
+        )
+        timer.__enter__()
+
+        if verbose:
+            start_time = time()
+
         for iteration in range(n_iter):
             should_call_callback = use_callbacks and (iteration + 1) % callbacks_every_iters == 0
-            should_eval_error = should_call_callback
+            # Evaluate error on 50 iterations for logging, or when callbacks
+            should_eval_error = should_call_callback or \
+                (verbose and (iteration + 1) % 50 == 0)
 
             error, gradient = objective_function(
                 embedding, P, dof=dof, bh_params=bh_params, fft_params=fft_params,
@@ -1433,9 +1467,13 @@ class gradient_descent:
             if reference_embedding is None:
                 embedding -= np.mean(embedding, axis=0)
 
-            if np.linalg.norm(gradient) < min_grad_norm:
-                log.info("Gradient norm eps reached. Finished.")
-                break
+            if verbose and (iteration + 1) % 50 == 0:
+                stop_time = time()
+                print("Iteration %4d, KL divergence %6.4f, 50 iterations in %.4f sec" % (
+                    iteration + 1, error, stop_time - start_time))
+                start_time = time()
+
+        timer.__exit__()
 
         # Make sure to un-exaggerate P so it's not corrupted in future runs
         if exaggeration != 1:

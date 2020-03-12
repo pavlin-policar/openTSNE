@@ -88,7 +88,6 @@ class TestTSNEParameterFlow(unittest.TestCase):
         "n_interpolation_points": [3, 5],
         "min_num_intervals": [10, 20, 30],
         "ints_in_interval": [1, 2, 5],
-        "min_grad_norm": [0.01, 0.1],
         "max_grad_norm": [None, 0.5, 1],
         "n_jobs": [1, 2, 4],
         "callbacks": [None, [lambda *args, **kwargs: ...]],
@@ -592,7 +591,9 @@ class TestDefaultParameterSettings(unittest.TestCase):
             openTSNE.TSNE,
             openTSNE.tsne.gradient_descent.__call__,
         )
-        mismatching = list(filter(lambda x: x[0] not in ("n_iter",), mismatching))
+        # Some default parameters should be different between TSNE and gradient_descent
+        allowed_mismatches = ("n_iter", "learning_rate")
+        mismatching = list(filter(lambda x: x[0] not in allowed_mismatches, mismatching))
         self.assertEqual(mismatching, [])
 
 
