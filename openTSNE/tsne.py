@@ -548,10 +548,6 @@ class TSNEEmbedding(np.ndarray):
             flag indicates whether we should propagate that exception or to
             simply stop optimization and return the resulting embedding.
 
-        min_grad_norm: float
-            If the gradient norm is below this threshold, the optimization will
-            be stopped.
-
         max_grad_norm: float
             Maximum gradient norm. If the norm exceeds this value, it will be
             clipped. This is most beneficial when adding points into an existing
@@ -931,10 +927,6 @@ class TSNE(BaseEstimator):
     final_momentum: float
         The momentum to use during the normal optimization phase.
 
-    min_grad_norm: float
-        If the gradient norm is below this threshold, the optimization will
-        be stopped.
-
     max_grad_norm: float
         Maximum gradient norm. If the norm exceeds this value, it will be
         clipped. This is most beneficial when adding points into an existing
@@ -995,7 +987,6 @@ class TSNE(BaseEstimator):
         metric_params=None,
         initial_momentum=0.5,
         final_momentum=0.8,
-        min_grad_norm=1e-8,
         max_grad_norm=None,
         n_jobs=1,
         neighbors="approx",
@@ -1026,7 +1017,6 @@ class TSNE(BaseEstimator):
         self.metric_params = metric_params
         self.initial_momentum = initial_momentum
         self.final_momentum = final_momentum
-        self.min_grad_norm = min_grad_norm
         self.max_grad_norm = max_grad_norm
         self.n_jobs = n_jobs
         self.neighbors_method = neighbors
@@ -1157,7 +1147,6 @@ class TSNE(BaseEstimator):
             "min_num_intervals": self.min_num_intervals,
             "ints_in_interval": self.ints_in_interval,
 
-            "min_grad_norm": self.min_grad_norm,
             "max_grad_norm": self.max_grad_norm,
 
             "n_jobs": self.n_jobs,
@@ -1277,7 +1266,6 @@ class gradient_descent:
         exaggeration=None,
         dof=1,
         min_gain=0.01,
-        min_grad_norm=1e-8,
         max_grad_norm=None,
         theta=0.5,
         n_interpolation_points=3,
@@ -1326,10 +1314,6 @@ class gradient_descent:
 
         min_gain: float
             Minimum individual gain for each parameter.
-
-        min_grad_norm: float
-            If the gradient norm is below this threshold, the optimization will
-            be stopped.
 
         max_grad_norm: float
             Maximum gradient norm. If the norm exceeds this value, it will be
@@ -1488,10 +1472,6 @@ class gradient_descent:
                 print("Iteration %4d, KL divergence %6.4f, 50 iterations in %.4f sec" % (
                     iteration + 1, error, stop_time - start_time))
                 start_time = time()
-
-            if np.linalg.norm(gradient) < min_grad_norm:
-                log.info("Gradient norm eps reached. Finished.")
-                break
 
         timer.__exit__()
 
