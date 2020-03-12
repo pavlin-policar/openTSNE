@@ -591,7 +591,9 @@ class TestDefaultParameterSettings(unittest.TestCase):
             openTSNE.TSNE,
             openTSNE.tsne.gradient_descent.__call__,
         )
-        mismatching = list(filter(lambda x: x[0] not in ("n_iter",), mismatching))
+        # Some default parameters should be different between TSNE and gradient_descent
+        allowed_mismatches = ("n_iter", "learning_rate")
+        mismatching = list(filter(lambda x: x[0] not in allowed_mismatches, mismatching))
         self.assertEqual(mismatching, [])
 
 
