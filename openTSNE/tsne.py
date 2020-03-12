@@ -970,7 +970,7 @@ class TSNE(BaseEstimator):
         learning_rate=200,
         early_exaggeration_iter=250,
         early_exaggeration=12,
-        n_iter=750,
+        n_iter=500,
         exaggeration=None,
         theta=0.5,
         n_interpolation_points=3,
