@@ -161,21 +161,23 @@ class Annoy(KNNIndex):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.__data = None
-        annoy_aliases = {
-            "cosine": "angular",
-            "l1": "manhattan",
-            "l2": "euclidean",
-            "taxicab": "manhattan",
-        }
-        if self.metric in annoy_aliases:
-            self.metric = annoy_aliases[self.metric]
 
     def build(self, data, k):
         from annoy import AnnoyIndex
 
         N = data.shape[0]
 
-        self.index = AnnoyIndex(data.shape[1], self.metric)
+        annoy_metric = self.metric
+        annoy_aliases = {
+            "cosine": "angular",
+            "l1": "manhattan",
+            "l2": "euclidean",
+            "taxicab": "manhattan",
+        }
+        if annoy_metric in annoy_aliases:
+            annoy_metric = annoy_aliases[annoy_metric]
+
+        self.index = AnnoyIndex(data.shape[1], annoy_metric)
         for i in range(N):
             self.index.add_item(i, data[i])
 

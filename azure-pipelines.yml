@@ -58,10 +58,6 @@ jobs:
   - bash: mv openTSNE src
     displayName: 'Remove source files from path'
 
-  - script: |
-      python -m pip install annoy
-    displayName: 'Install optional dependencies'
-
   - script: pytest -v
     timeoutInMinutes: 15
     displayName: 'Run unit tests'
