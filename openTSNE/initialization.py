@@ -41,6 +41,9 @@ def pca(X, n_components=2, svd_solver="auto", random_state=None):
     n_components: int
         The dimension of the embedding space.
 
+    svd_solver: str
+        See sklearn.decomposition.PCA documentation.
+
     random_state: Union[int, RandomState]
         If the value is an int, random_state is the seed used by the random
         number generator. If the value is a RandomState instance, then it will
