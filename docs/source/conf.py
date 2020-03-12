@@ -20,13 +20,13 @@ sys.path.insert(0, os.path.abspath('openTSNE'))
 # -- Project information -----------------------------------------------------
 
 project = 'openTSNE'
-copyright = u'2018, Pavlin Poličar'
+copyright = u'2020, Pavlin Poličar'
 author = u'Pavlin Poličar'
 
 # The short X.Y version
 version = ''
 # The full version, including alpha/beta/rc tags
-release = '0.2.10'
+release = '0.3.13'
 
 
 # -- General configuration ---------------------------------------------------
@@ -72,7 +72,7 @@ language = None
 exclude_patterns = []
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = None
+pygments_style = 'sphinx'
 
 
 # -- Options for HTML output -------------------------------------------------
