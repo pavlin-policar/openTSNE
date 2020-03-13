@@ -967,9 +967,8 @@ class TSNE(BaseEstimator):
         Specifies the nearest neighbor method to use. Can be ``exact``, ``annoy``,
         ``pynndescent``, ``approx``, or ``auto`` (default). ``approx`` uses Annoy
         if the input data matrix is not a sparse object and if Annoy supports
-        the given metric. Otherwise it uses Pynndescent. ``auto`` uses exact 
+        the given metric. Otherwise it uses Pynndescent. ``auto`` uses exact
         nearest neighbors for N<1000 and the same heuristic as ``approx`` for N>=1000.
-
 
     negative_gradient_method: str
         Specifies the negative gradient approximation method to use. For smaller
