@@ -268,6 +268,7 @@ setup(
         "scikit-learn>=0.20",
         "scipy",
         "pynndescent>=0.4",
+        "annoy>=1.16.3",
     ],
 
     ext_modules=extensions,

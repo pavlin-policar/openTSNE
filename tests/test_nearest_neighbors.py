@@ -68,6 +68,52 @@ class KNNIndexTestMixin:
         np.testing.assert_equal(indices1, indices2)
         np.testing.assert_equal(distances1, distances2)
 
+
+class TestAnnoy(KNNIndexTestMixin, unittest.TestCase):
+    knn_index = nearest_neighbors.Annoy
+
+
+class TestBallTree(KNNIndexTestMixin, unittest.TestCase):
+    knn_index = nearest_neighbors.BallTree
+
+    def test_cosine_distance(self):
+        k = 15
+        # Compute cosine distance nearest neighbors using ball tree
+        knn_index = nearest_neighbors.BallTree("cosine")
+        indices, distances = knn_index.build(self.x1, k=k)
+
+        # Compute the exact nearest neighbors as a reference
+        true_distances = squareform(pdist(self.x1, metric="cosine"))
+        true_indices_ = np.argsort(true_distances, axis=1)[:, 1:k + 1]
+        true_distances_ = np.vstack([d[i] for d, i in zip(true_distances, true_indices_)])
+
+        np.testing.assert_array_equal(
+            indices, true_indices_, err_msg="Nearest neighbors do not match"
+        )
+        np.testing.assert_array_equal(
+            distances, true_distances_, err_msg="Distances do not match"
+        )
+
+    def test_cosine_distance_query(self):
+        k = 15
+        # Compute cosine distance nearest neighbors using ball tree
+        knn_index = nearest_neighbors.BallTree("cosine")
+        knn_index.build(self.x1, k=k)
+
+        indices, distances = knn_index.query(self.x2, k=k)
+
+        # Compute the exact nearest neighbors as a reference
+        true_distances = cdist(self.x2, self.x1, metric="cosine")
+        true_indices_ = np.argsort(true_distances, axis=1)[:, :k]
+        true_distances_ = np.vstack([d[i] for d, i in zip(true_distances, true_indices_)])
+
+        np.testing.assert_array_equal(
+            indices, true_indices_, err_msg="Nearest neighbors do not match"
+        )
+        np.testing.assert_array_equal(
+            distances, true_distances_, err_msg="Distances do not match"
+        )
+
     def test_uncompiled_callable_metric_same_result(self):
         k = 15
 
@@ -118,48 +164,6 @@ class KNNIndexTestMixin:
         )
 
 
-class TestBallTree(KNNIndexTestMixin, unittest.TestCase):
-    knn_index = nearest_neighbors.BallTree
-
-    def test_cosine_distance(self):
-        k = 15
-        # Compute cosine distance nearest neighbors using ball tree
-        knn_index = nearest_neighbors.BallTree("cosine")
-        indices, distances = knn_index.build(self.x1, k=k)
-
-        # Compute the exact nearest neighbors as a reference
-        true_distances = squareform(pdist(self.x1, metric="cosine"))
-        true_indices_ = np.argsort(true_distances, axis=1)[:, 1:k + 1]
-        true_distances_ = np.vstack([d[i] for d, i in zip(true_distances, true_indices_)])
-
-        np.testing.assert_array_equal(
-            indices, true_indices_, err_msg="Nearest neighbors do not match"
-        )
-        np.testing.assert_array_equal(
-            distances, true_distances_, err_msg="Distances do not match"
-        )
-
-    def test_cosine_distance_query(self):
-        k = 15
-        # Compute cosine distance nearest neighbors using ball tree
-        knn_index = nearest_neighbors.BallTree("cosine")
-        knn_index.build(self.x1, k=k)
-
-        indices, distances = knn_index.query(self.x2, k=k)
-
-        # Compute the exact nearest neighbors as a reference
-        true_distances = cdist(self.x2, self.x1, metric="cosine")
-        true_indices_ = np.argsort(true_distances, axis=1)[:, :k]
-        true_distances_ = np.vstack([d[i] for d, i in zip(true_distances, true_indices_)])
-
-        np.testing.assert_array_equal(
-            indices, true_indices_, err_msg="Nearest neighbors do not match"
-        )
-        np.testing.assert_array_equal(
-            distances, true_distances_, err_msg="Distances do not match"
-        )
-
-
 class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
     knn_index = nearest_neighbors.NNDescent
 
@@ -184,3 +188,53 @@ class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
 
         compiled_metric = knn_index.check_metric(manhattan)
         self.assertTrue(isinstance(compiled_metric, CPUDispatcher))
+
+    def test_uncompiled_callable_metric_same_result(self):
+        k = 15
+
+        knn_index = self.knn_index("manhattan", random_state=1)
+        knn_index.build(self.x1, k=k)
+        true_indices_, true_distances_ = knn_index.query(self.x2, k=k)
+
+        def manhattan(x, y):
+            result = 0.0
+            for i in range(x.shape[0]):
+                result += np.abs(x[i] - y[i])
+
+            return result
+
+        knn_index = self.knn_index(manhattan, random_state=1)
+        knn_index.build(self.x1, k=k)
+        indices, distances = knn_index.query(self.x2, k=k)
+        np.testing.assert_array_equal(
+            indices, true_indices_, err_msg="Nearest neighbors do not match"
+        )
+        np.testing.assert_allclose(
+            distances, true_distances_, err_msg="Distances do not match"
+        )
+
+    def test_numba_compiled_callable_metric_same_result(self):
+        k = 15
+
+        knn_index = self.knn_index("manhattan", random_state=1)
+        knn_index.build(self.x1, k=k)
+        true_indices_, true_distances_ = knn_index.query(self.x2, k=k)
+
+        @njit(fastmath=True)
+        def manhattan(x, y):
+            result = 0.0
+            for i in range(x.shape[0]):
+                result += np.abs(x[i] - y[i])
+
+            return result
+
+        knn_index = self.knn_index(manhattan, random_state=1)
+        knn_index.build(self.x1, k=k)
+        indices, distances = knn_index.query(self.x2, k=k)
+        np.testing.assert_array_equal(
+            indices, true_indices_, err_msg="Nearest neighbors do not match"
+        )
+        np.testing.assert_allclose(
+            distances, true_distances_, err_msg="Distances do not match"
+        )
+

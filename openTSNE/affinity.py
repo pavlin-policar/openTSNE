@@ -84,8 +84,11 @@ class PerplexityBasedNN(Affinities):
         nearest neighbors, for which t-SNE will attempt to preserve distances.
 
     method: str
-        Specifies the nearest neighbor method to use. Can be either ``exact`` or
-        ``approx``.
+        Specifies the nearest neighbor method to use. Can be ``exact``, ``annoy``,
+        ``pynndescent``, ``approx``, or ``auto`` (default). ``approx`` uses Annoy
+        if the input data matrix is not a sparse object and if Annoy supports
+        the given metric. Otherwise it uses Pynndescent. ``auto`` uses exact
+        nearest neighbors for N<1000 and the same heuristic as ``approx`` for N>=1000.
 
     metric: Union[str, Callable]
         The metric to be used to compute affinities between points in the
@@ -117,7 +120,7 @@ class PerplexityBasedNN(Affinities):
         self,
         data,
         perplexity=30,
-        method="approx",
+        method="auto",
         metric="euclidean",
         metric_params=None,
         symmetrize=True,
@@ -278,9 +281,31 @@ class PerplexityBasedNN(Affinities):
 def build_knn_index(
     data, method, k, metric, metric_params=None, n_jobs=1, random_state=None
 ):
+    if not sp.issparse(data) and metric in [
+        "cosine",
+        "euclidean",
+        "manhattan",
+        "hamming",
+        "dot",
+        "l1",
+        "l2",
+        "taxicab",
+    ]:
+        preferred_approx_method = nearest_neighbors.Annoy
+    else:
+        preferred_approx_method = nearest_neighbors.NNDescent
+
+    if data.shape[0] < 1000:
+        preferred_method = nearest_neighbors.BallTree
+    else:
+        preferred_method = preferred_approx_method
+
     methods = {
         "exact": nearest_neighbors.BallTree,
-        "approx": nearest_neighbors.NNDescent,
+        "auto": preferred_method,
+        "approx": preferred_approx_method,
+        "annoy": nearest_neighbors.Annoy,
+        "pynndescent": nearest_neighbors.NNDescent,
     }
     if isinstance(method, nearest_neighbors.KNNIndex):
         knn_index = method
@@ -411,8 +436,12 @@ class FixedSigmaNN(Affinities):
         The number of nearest neighbors to consider for each kernel.
 
     method: str
-        Specifies the nearest neighbor method to use. Can be either ``exact`` or
-        ``approx``.
+        Specifies the nearest neighbor method to use. Can be ``exact``, ``annoy``,
+        ``pynndescent``, ``approx``, or ``auto`` (default). ``approx`` uses Annoy
+        if the input data matrix is not a sparse object and if Annoy supports
+        the given metric. Otherwise it uses Pynndescent. ``auto`` uses exact
+        nearest neighbors for N<1000 and the same heuristic as ``approx`` for N>=1000.
+
 
     metric: Union[str, Callable]
         The metric to be used to compute affinities between points in the
@@ -445,7 +474,7 @@ class FixedSigmaNN(Affinities):
         data,
         sigma,
         k=30,
-        method="approx",
+        method="auto",
         metric="euclidean",
         metric_params=None,
         symmetrize=True,
@@ -599,8 +628,12 @@ class MultiscaleMixture(Affinities):
         preserve distances.
 
     method: str
-        Specifies the nearest neighbor method to use. Can be either ``exact`` or
-        ``approx``.
+        Specifies the nearest neighbor method to use. Can be ``exact``, ``annoy``,
+        ``pynndescent``, ``approx``, or ``auto`` (default). ``approx`` uses Annoy
+        if the input data matrix is not a sparse object and if Annoy supports
+        the given metric. Otherwise it uses Pynndescent. ``auto`` uses exact
+        nearest neighbors for N<1000 and the same heuristic as ``approx`` for N>=1000.
+
 
     metric: Union[str, Callable]
         The metric to be used to compute affinities between points in the
@@ -632,7 +665,7 @@ class MultiscaleMixture(Affinities):
         self,
         data,
         perplexities,
-        method="approx",
+        method="auto",
         metric="euclidean",
         metric_params=None,
         symmetrize=True,
@@ -856,8 +889,12 @@ class Multiscale(MultiscaleMixture):
         preserve distances.
 
     method: str
-        Specifies the nearest neighbor method to use. Can be either ``exact`` or
-        ``approx``.
+        Specifies the nearest neighbor method to use. Can be ``exact``, ``annoy``,
+        ``pynndescent``, ``approx``, or ``auto`` (default). ``approx`` uses Annoy
+        if the input data matrix is not a sparse object and if Annoy supports
+        the given metric. Otherwise it uses Pynndescent. ``auto`` uses exact
+        nearest neighbors for N<1000 and the same heuristic as ``approx`` for N>=1000.
+
 
     metric: Union[str, Callable]
         The metric to be used to compute affinities between points in the
@@ -918,3 +955,4 @@ class Multiscale(MultiscaleMixture):
             P = sp.diags(np.asarray(1 / P.sum(axis=1)).ravel()) @ P
 
         return P
+
