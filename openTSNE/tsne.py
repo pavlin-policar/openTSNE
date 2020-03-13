@@ -48,8 +48,10 @@ def _handle_nice_params(optim_params: dict) -> None:
     elif negative_gradient_method in {"fft", "FFT", "interpolation"}:
         negative_gradient_method = kl_divergence_fft
     else:
-        raise ValueError("Unrecognized gradient method. Please choose one of "
-                         "the supported methods or provide a valid callback.")
+        raise ValueError(
+            "Unrecognized gradient method. Please choose one of "
+            "the supported methods or provide a valid callback."
+        )
     # `gradient_descent` uses the more informative name `objective_function`
     optim_params["objective_function"] = negative_gradient_method
 
@@ -64,8 +66,10 @@ def _handle_nice_params(optim_params: dict) -> None:
     # If the number of jobs, after this correction is still <= 0, then the user
     # probably thought they had more cores, so we'll default to 1
     if n_jobs <= 0:
-        log.warning("`n_jobs` receieved value %d but only %d cores are available. "
-                    "Defaulting to single job." % (optim_params["n_jobs"], n_cores))
+        log.warning(
+            "`n_jobs` receieved value %d but only %d cores are available. "
+            "Defaulting to single job." % (optim_params["n_jobs"], n_cores)
+        )
         n_jobs = 1
 
     optim_params["n_jobs"] = n_jobs
@@ -75,8 +79,8 @@ def __check_init_num_samples(num_samples, required_num_samples):
     if num_samples != required_num_samples:
         raise ValueError(
             "The provided initialization contains a different number "
-            "of points (%d) than the data provided (%d)." % (
-                num_samples, required_num_samples)
+            "of points (%d) than the data provided (%d)."
+            % (num_samples, required_num_samples)
         )
 
 
@@ -84,14 +88,13 @@ def __check_init_num_dimensions(num_dimensions, required_num_dimensions):
     if num_dimensions != required_num_dimensions:
         raise ValueError(
             "The provided initialization contains a different number "
-            "of components (%d) than the embedding (%d)." % (
-                num_dimensions, required_num_dimensions)
+            "of components (%d) than the embedding (%d)."
+            % (num_dimensions, required_num_dimensions)
         )
 
 
 init_checks = SimpleNamespace(
-    num_samples=__check_init_num_samples,
-    num_dimensions=__check_init_num_dimensions,
+    num_samples=__check_init_num_samples, num_dimensions=__check_init_num_dimensions,
 )
 
 
@@ -108,7 +111,7 @@ class OptimizationInterrupt(InterruptedError):
         raised.
 
     """
-    
+
     def __init__(self, error, final_embedding):
         super().__init__()
         self.error = error
@@ -208,11 +211,19 @@ class PartialTSNEEmbedding(np.ndarray):
 
     """
 
-    def __new__(cls, embedding, reference_embedding, P, optimizer=None,
-                **gradient_descent_params):
+    def __new__(
+        cls,
+        embedding,
+        reference_embedding,
+        P,
+        optimizer=None,
+        **gradient_descent_params,
+    ):
         init_checks.num_samples(embedding.shape[0], P.shape[0])
 
-        obj = np.asarray(embedding, dtype=np.float64, order="C").view(PartialTSNEEmbedding)
+        obj = np.asarray(embedding, dtype=np.float64, order="C").view(
+            PartialTSNEEmbedding
+        )
 
         obj.reference_embedding = reference_embedding
         obj.P = P
@@ -221,16 +232,23 @@ class PartialTSNEEmbedding(np.ndarray):
         if optimizer is None:
             optimizer = gradient_descent()
         elif not isinstance(optimizer, gradient_descent):
-            raise TypeError("`optimizer` must be an instance of `%s`, but got `%s`." % (
-                gradient_descent.__class__.__name__, type(optimizer)))
+            raise TypeError(
+                "`optimizer` must be an instance of `%s`, but got `%s`."
+                % (gradient_descent.__class__.__name__, type(optimizer))
+            )
         obj.optimizer = optimizer
 
         obj.kl_divergence = None
 
         return obj
 
-    def optimize(self, n_iter, inplace=False, propagate_exception=False,
-                 **gradient_descent_params):
+    def optimize(
+        self,
+        n_iter,
+        inplace=False,
+        propagate_exception=False,
+        **gradient_descent_params,
+    ):
         """Run optmization on the embedding for a given number of steps.
 
         Parameters
@@ -460,16 +478,17 @@ class TSNEEmbedding(np.ndarray):
 
         obj.affinities = affinities  # type: Affinities
         obj.gradient_descent_params = gradient_descent_params  # type: dict
-        obj.gradient_descent_params["negative_gradient_method"] = negative_gradient_method
+        obj.gradient_descent_params[
+            "negative_gradient_method"
+        ] = negative_gradient_method
         obj.random_state = random_state
 
         if optimizer is None:
             optimizer = gradient_descent()
         elif not isinstance(optimizer, gradient_descent):
             raise TypeError(
-                "`optimizer` must be an instance of `%s`, but got `%s`." % (
-                    gradient_descent.__class__.__name__, type(optimizer)
-                )
+                "`optimizer` must be an instance of `%s`, but got `%s`."
+                % (gradient_descent.__class__.__name__, type(optimizer))
             )
         obj.optimizer = optimizer
 
@@ -477,8 +496,13 @@ class TSNEEmbedding(np.ndarray):
 
         return obj
 
-    def optimize(self, n_iter, inplace=False, propagate_exception=False,
-                 **gradient_descent_params):
+    def optimize(
+        self,
+        n_iter,
+        inplace=False,
+        propagate_exception=False,
+        **gradient_descent_params,
+    ):
         """Run optmization on the embedding for a given number of steps.
 
         Please see the :ref:`parameter-guide` for more information.
@@ -795,7 +819,9 @@ class TSNEEmbedding(np.ndarray):
 
         # Random initialization with isotropic normal distribution
         elif initialization == "random":
-            embedding = initialization_scheme.random(X, self.shape[1], self.random_state)
+            embedding = initialization_scheme.random(
+                X, self.shape[1], self.random_state
+            )
         elif initialization == "weighted":
             embedding = initialization_scheme.weighted_mean(
                 X, self, neighbors[:, :k], distances[:, :k]
@@ -806,10 +832,7 @@ class TSNEEmbedding(np.ndarray):
             raise ValueError(f"Unrecognized initialization scheme `{initialization}`.")
 
         return PartialTSNEEmbedding(
-            embedding,
-            reference_embedding=self,
-            P=P,
-            **self.gradient_descent_params,
+            embedding, reference_embedding=self, P=P, **self.gradient_descent_params,
         )
 
     def __reduce__(self):
@@ -830,8 +853,12 @@ class TSNEEmbedding(np.ndarray):
         super().__setstate__(state[0:-4])
 
 
-def _create_embedding(coords, affinities, random_state, optimizer, grad_params, kl_divergence):
-    embedding = TSNEEmbedding(coords, affinities, random_state, optimizer, **grad_params)
+def _create_embedding(
+    coords, affinities, random_state, optimizer, grad_params, kl_divergence
+):
+    embedding = TSNEEmbedding(
+        coords, affinities, random_state, optimizer, **grad_params
+    )
     embedding.kl_divergence = kl_divergence
     return embedding
 
@@ -1127,23 +1154,19 @@ class TSNE(BaseEstimator):
         gradient_descent_params = {
             # Degrees of freedom of the Student's t-distribution. The
             # suggestion degrees_of_freedom = n_components - 1 comes from [3]_.
-            "dof":  max(self.n_components - 1, 1),
-
+            "dof": max(self.n_components - 1, 1),
             "negative_gradient_method": self.negative_gradient_method,
             "learning_rate": self.learning_rate,
             # By default, use the momentum used in unexaggerated phase
             "momentum": self.final_momentum,
-
             # Barnes-Hut params
             "theta": self.theta,
             # Interpolation params
             "n_interpolation_points": self.n_interpolation_points,
             "min_num_intervals": self.min_num_intervals,
             "ints_in_interval": self.ints_in_interval,
-
             "min_grad_norm": self.min_grad_norm,
             "max_grad_norm": self.max_grad_norm,
-
             "n_jobs": self.n_jobs,
             # Callback params
             "callbacks": self.callbacks,
@@ -1158,8 +1181,16 @@ class TSNE(BaseEstimator):
         )
 
 
-def kl_divergence_bh(embedding, P, dof, bh_params, reference_embedding=None,
-                     should_eval_error=False, n_jobs=1, **_):
+def kl_divergence_bh(
+    embedding,
+    P,
+    dof,
+    bh_params,
+    reference_embedding=None,
+    should_eval_error=False,
+    n_jobs=1,
+    **_,
+):
     gradient = np.zeros_like(embedding, dtype=np.float64, order="C")
 
     # In the event that we wish to embed new points into an existing embedding
@@ -1174,15 +1205,27 @@ def kl_divergence_bh(embedding, P, dof, bh_params, reference_embedding=None,
     # Compute negative gradient
     tree = QuadTree(reference_embedding)
     sum_Q = _tsne.estimate_negative_gradient_bh(
-        tree, embedding, gradient, **bh_params, dof=dof, num_threads=n_jobs,
+        tree,
+        embedding,
+        gradient,
+        **bh_params,
+        dof=dof,
+        num_threads=n_jobs,
         pairwise_normalization=pairwise_normalization,
     )
     del tree
 
     # Compute positive gradient
     sum_P, kl_divergence_ = _tsne.estimate_positive_gradient_nn(
-        P.indices, P.indptr, P.data, embedding, reference_embedding, gradient,
-        dof, num_threads=n_jobs, should_eval_error=should_eval_error,
+        P.indices,
+        P.indptr,
+        P.data,
+        embedding,
+        reference_embedding,
+        gradient,
+        dof,
+        num_threads=n_jobs,
+        should_eval_error=should_eval_error,
     )
 
     # Computing positive gradients summed up only unnormalized q_ijs, so we
@@ -1193,15 +1236,25 @@ def kl_divergence_bh(embedding, P, dof, bh_params, reference_embedding=None,
     return kl_divergence_, gradient
 
 
-def kl_divergence_fft(embedding, P, dof, fft_params, reference_embedding=None,
-                      should_eval_error=False, n_jobs=1, **_):
+def kl_divergence_fft(
+    embedding,
+    P,
+    dof,
+    fft_params,
+    reference_embedding=None,
+    should_eval_error=False,
+    n_jobs=1,
+    **_,
+):
     gradient = np.zeros_like(embedding, dtype=np.float64, order="C")
 
     # Compute negative gradient.
     if embedding.ndim == 1 or embedding.shape[1] == 1:
         if reference_embedding is not None:
             sum_Q = _tsne.estimate_negative_gradient_fft_1d_with_reference(
-                embedding.ravel(), reference_embedding.ravel(), gradient.ravel(),
+                embedding.ravel(),
+                reference_embedding.ravel(),
+                gradient.ravel(),
                 **fft_params,
             )
         else:
@@ -1229,8 +1282,15 @@ def kl_divergence_fft(embedding, P, dof, fft_params, reference_embedding=None,
 
     # Compute positive gradient
     sum_P, kl_divergence_ = _tsne.estimate_positive_gradient_nn(
-        P.indices, P.indptr, P.data, embedding, reference_embedding, gradient,
-        dof, num_threads=n_jobs, should_eval_error=should_eval_error,
+        P.indices,
+        P.indptr,
+        P.data,
+        embedding,
+        reference_embedding,
+        gradient,
+        dof,
+        num_threads=n_jobs,
+        should_eval_error=should_eval_error,
     )
 
     if should_eval_error:
@@ -1249,12 +1309,29 @@ class gradient_descent:
             optimizer.gains = np.copy(self.gains)
         return optimizer
 
-    def __call__(self, embedding, P, n_iter, objective_function, learning_rate=200,
-                 momentum=0.5, exaggeration=None, dof=1, min_gain=0.01,
-                 min_grad_norm=1e-8, max_grad_norm=None, theta=0.5,
-                 n_interpolation_points=3, min_num_intervals=50, ints_in_interval=1,
-                 reference_embedding=None, n_jobs=1,
-                 use_callbacks=False, callbacks=None, callbacks_every_iters=50):
+    def __call__(
+        self,
+        embedding,
+        P,
+        n_iter,
+        objective_function,
+        learning_rate=200,
+        momentum=0.5,
+        exaggeration=None,
+        dof=1,
+        min_gain=0.01,
+        min_grad_norm=1e-8,
+        max_grad_norm=None,
+        theta=0.5,
+        n_interpolation_points=3,
+        min_num_intervals=50,
+        ints_in_interval=1,
+        reference_embedding=None,
+        n_jobs=1,
+        use_callbacks=False,
+        callbacks=None,
+        callbacks_every_iters=50,
+    ):
         """Perform batch gradient descent with momentum and gains.
 
         Parameters
@@ -1360,23 +1437,27 @@ class gradient_descent:
             If the provided callback interrupts the optimization, this is raised.
 
         """
-        assert isinstance(embedding, np.ndarray), \
-            "`embedding` must be an instance of `np.ndarray`. Got `%s` instead" \
+        assert isinstance(embedding, np.ndarray), (
+            "`embedding` must be an instance of `np.ndarray`. Got `%s` instead"
             % type(embedding)
+        )
 
         if reference_embedding is not None:
-            assert isinstance(reference_embedding, np.ndarray), \
-                "`reference_embedding` must be an instance of `np.ndarray`. Got " \
+            assert isinstance(reference_embedding, np.ndarray), (
+                "`reference_embedding` must be an instance of `np.ndarray`. Got "
                 "`%s` instead" % type(reference_embedding)
+            )
 
         update = np.zeros_like(embedding)
         if self.gains is None:
             self.gains = np.ones_like(embedding)
 
         bh_params = {"theta": theta}
-        fft_params = {"n_interpolation_points": n_interpolation_points,
-                      "min_num_intervals": min_num_intervals,
-                      "ints_in_interval": ints_in_interval}
+        fft_params = {
+            "n_interpolation_points": n_interpolation_points,
+            "min_num_intervals": min_num_intervals,
+            "ints_in_interval": ints_in_interval,
+        }
 
         # Lie about the P values for bigger attraction forces
         if exaggeration is None:
@@ -1392,12 +1473,19 @@ class gradient_descent:
                 getattr(callback, "optimization_about_to_start", lambda: ...)()
 
         for iteration in range(n_iter):
-            should_call_callback = use_callbacks and (iteration + 1) % callbacks_every_iters == 0
+            should_call_callback = (
+                use_callbacks and (iteration + 1) % callbacks_every_iters == 0
+            )
             should_eval_error = should_call_callback
 
             error, gradient = objective_function(
-                embedding, P, dof=dof, bh_params=bh_params, fft_params=fft_params,
-                reference_embedding=reference_embedding, n_jobs=n_jobs,
+                embedding,
+                P,
+                dof=dof,
+                bh_params=bh_params,
+                fft_params=fft_params,
+                reference_embedding=reference_embedding,
+                n_jobs=n_jobs,
                 should_eval_error=should_eval_error,
             )
 
@@ -1417,7 +1505,9 @@ class gradient_descent:
 
             if should_call_callback:
                 # Continue only if all the callbacks say so
-                should_stop = any((bool(c(iteration + 1, error, embedding)) for c in callbacks))
+                should_stop = any(
+                    (bool(c(iteration + 1, error, embedding)) for c in callbacks)
+                )
                 if should_stop:
                     # Make sure to un-exaggerate P so it's not corrupted in future runs
                     if exaggeration != 1:
@@ -1428,7 +1518,9 @@ class gradient_descent:
             grad_direction_flipped = np.sign(update) != np.sign(gradient)
             grad_direction_same = np.invert(grad_direction_flipped)
             self.gains[grad_direction_flipped] += 0.2
-            self.gains[grad_direction_same] = self.gains[grad_direction_same] * 0.8 + min_gain
+            self.gains[grad_direction_same] = (
+                self.gains[grad_direction_same] * 0.8 + min_gain
+            )
             update = momentum * update - learning_rate * self.gains * gradient
             embedding += update
 
@@ -1449,9 +1541,15 @@ class gradient_descent:
         # embedding. We need to return the error for the actual final embedding, so
         # compute that at the end before returning
         error, _ = objective_function(
-            embedding, P, dof=dof, bh_params=bh_params, fft_params=fft_params,
-            reference_embedding=reference_embedding, n_jobs=n_jobs,
+            embedding,
+            P,
+            dof=dof,
+            bh_params=bh_params,
+            fft_params=fft_params,
+            reference_embedding=reference_embedding,
+            n_jobs=n_jobs,
             should_eval_error=True,
         )
 
         return error, embedding
+

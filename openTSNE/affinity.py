@@ -272,7 +272,7 @@ def build_knn_index(
     else:
         preferred_approx_method = nearest_neighbors.NNDescent
 
-    if data.shape[0]<1000:
+    if data.shape[0] < 1000:
         preferred_method = nearest_neighbors.BallTree
     else:
         preferred_method = preferred_approx_method
@@ -280,7 +280,7 @@ def build_knn_index(
     methods = {
         "exact": nearest_neighbors.BallTree,
         "auto": preferred_method,
-        "approx": preferred_approx_method,  
+        "approx": preferred_approx_method,
         "annoy": nearest_neighbors.Annoy,
         "pynndescent": nearest_neighbors.NNDescent,
     }
