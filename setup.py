@@ -266,7 +266,7 @@ setup(
     install_requires=[
         "numpy>=1.14.6",
         "scikit-learn>=0.20",
-        "scipy>=1.4.1",
+        "scipy",
         "pynndescent>=0.4",
         "annoy>=1.16.3",
     ],
