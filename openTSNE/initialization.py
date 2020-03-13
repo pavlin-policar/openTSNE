@@ -26,7 +26,7 @@ def random(X, n_components=2, random_state=None):
 
     """
     random_state = check_random_state(random_state)
-    embedding = random_state.normal(0, 1e-2, (X.shape[0], n_components))
+    embedding = random_state.normal(0, 1e-4, (X.shape[0], n_components))
     return np.ascontiguousarray(embedding)
 
 
@@ -40,6 +40,9 @@ def pca(X, n_components=2, svd_solver="auto", random_state=None):
 
     n_components: int
         The dimension of the embedding space.
+
+    svd_solver: str
+        See sklearn.decomposition.PCA documentation.
 
     random_state: Union[int, RandomState]
         If the value is an int, random_state is the seed used by the random
@@ -58,7 +61,8 @@ def pca(X, n_components=2, svd_solver="auto", random_state=None):
     embedding = pca_.fit_transform(X)
 
     # The PCA embedding may have high variance, which leads to poor convergence
-    normalization = np.std(embedding[:, 0]) * 100
+    normalization = np.std(embedding[:, 0])
+    normalization /= 0.0001
     embedding /= normalization
 
     return np.ascontiguousarray(embedding)
