@@ -114,6 +114,55 @@ class TestBallTree(KNNIndexTestMixin, unittest.TestCase):
             distances, true_distances_, err_msg="Distances do not match"
         )
 
+    def test_uncompiled_callable_metric_same_result(self):
+        k = 15
+
+        knn_index = self.knn_index("manhattan", random_state=1)
+        knn_index.build(self.x1, k=k)
+        true_indices_, true_distances_ = knn_index.query(self.x2, k=k)
+
+        def manhattan(x, y):
+            result = 0.0
+            for i in range(x.shape[0]):
+                result += np.abs(x[i] - y[i])
+
+            return result
+
+        knn_index = self.knn_index(manhattan, random_state=1)
+        knn_index.build(self.x1, k=k)
+        indices, distances = knn_index.query(self.x2, k=k)
+        np.testing.assert_array_equal(
+            indices, true_indices_, err_msg="Nearest neighbors do not match"
+        )
+        np.testing.assert_allclose(
+            distances, true_distances_, err_msg="Distances do not match"
+        )
+
+    def test_numba_compiled_callable_metric_same_result(self):
+        k = 15
+
+        knn_index = self.knn_index("manhattan", random_state=1)
+        knn_index.build(self.x1, k=k)
+        true_indices_, true_distances_ = knn_index.query(self.x2, k=k)
+
+        @njit(fastmath=True)
+        def manhattan(x, y):
+            result = 0.0
+            for i in range(x.shape[0]):
+                result += np.abs(x[i] - y[i])
+
+            return result
+
+        knn_index = self.knn_index(manhattan, random_state=1)
+        knn_index.build(self.x1, k=k)
+        indices, distances = knn_index.query(self.x2, k=k)
+        np.testing.assert_array_equal(
+            indices, true_indices_, err_msg="Nearest neighbors do not match"
+        )
+        np.testing.assert_allclose(
+            distances, true_distances_, err_msg="Distances do not match"
+        )
+
 
 class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
     knn_index = nearest_neighbors.NNDescent
