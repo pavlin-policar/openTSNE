@@ -936,10 +936,10 @@ class TSNE(BaseEstimator):
 
     initialization: Union[np.ndarray, str]
         The initial point positions to be used in the embedding space. Can be a
-        precomputed numpy array, ``pca`` or ``random``. Please note that when
-        passing in a precomputed positions, it is highly recommended that the
-        point positions have small variance (var(Y) < 0.0001), otherwise you may
-        get poor embeddings.
+        precomputed numpy array, ``pca``, ``spectral`` or ``random``. Please
+        note that when passing in a precomputed positions, it is highly
+        recommended that the point positions have small variance
+        (std(Y) < 0.0001), otherwise you may get poor embeddings.
 
     metric: Union[str, Callable]
         The metric to be used to compute affinities between points in the
@@ -1122,6 +1122,18 @@ class TSNE(BaseEstimator):
             optimization.
 
         """
+
+        affinities = PerplexityBasedNN(
+            X,
+            self.perplexity,
+            method=self.neighbors_method,
+            metric=self.metric,
+            metric_params=self.metric_params,
+            n_jobs=self.n_jobs,
+            random_state=self.random_state,
+            verbose=self.verbose,
+        )
+
         # If initial positions are given in an array, use a copy of that
         if isinstance(self.initialization, np.ndarray):
             init_checks.num_samples(self.initialization.shape[0], X.shape[0])
@@ -1144,21 +1156,14 @@ class TSNE(BaseEstimator):
             embedding = initialization_scheme.random(
                 X, self.n_components, random_state=self.random_state
             )
+        elif self.initialization == "spectral":
+            embedding = initialization_scheme.spectral(
+                affinities.P, self.n_components, random_state=self.random_state
+            )
         else:
             raise ValueError(
                 f"Unrecognized initialization scheme `{self.initialization}`."
             )
-
-        affinities = PerplexityBasedNN(
-            X,
-            self.perplexity,
-            method=self.neighbors_method,
-            metric=self.metric,
-            metric_params=self.metric_params,
-            n_jobs=self.n_jobs,
-            random_state=self.random_state,
-            verbose=self.verbose,
-        )
 
         gradient_descent_params = {
             # Degrees of freedom of the Student's t-distribution. The
