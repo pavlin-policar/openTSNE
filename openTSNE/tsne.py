@@ -1142,7 +1142,7 @@ class TSNE(BaseEstimator):
             embedding = np.array(self.initialization)
 
             stddev = np.std(embedding, axis=0)
-            if any(stddev > 1e-4):
+            if any(stddev > 1e-2):
                 log.warning(
                     "Standard deviation of embedding is greater than 0.0001. Initial "
                     "embeddings with high variance may have display poor convergence."
@@ -1150,15 +1150,24 @@ class TSNE(BaseEstimator):
 
         elif self.initialization == "pca":
             embedding = initialization_scheme.pca(
-                X, self.n_components, random_state=self.random_state
+                X,
+                self.n_components,
+                random_state=self.random_state,
+                verbose=self.verbose,
             )
         elif self.initialization == "random":
             embedding = initialization_scheme.random(
-                X, self.n_components, random_state=self.random_state
+                X,
+                self.n_components,
+                random_state=self.random_state,
+                verbose=self.verbose,
             )
         elif self.initialization == "spectral":
             embedding = initialization_scheme.spectral(
-                affinities.P, self.n_components, random_state=self.random_state
+                affinities.P,
+                self.n_components,
+                random_state=self.random_state,
+                verbose=self.verbose,
             )
         else:
             raise ValueError(
@@ -1483,7 +1492,8 @@ class gradient_descent:
                 getattr(callback, "optimization_about_to_start", lambda: ...)()
 
         timer = utils.Timer(
-            f"Running optimization with exaggeration={exaggeration} for {n_iter} iterations...",
+            f"Running optimization with exaggeration={exaggeration}, "
+            f"lr={learning_rate} for {n_iter} iterations...",
             verbose=verbose,
         )
         timer.__enter__()

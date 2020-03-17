@@ -133,16 +133,11 @@ class PerplexityBasedNN(Affinities):
         self.verbose = verbose
 
         k_neighbors = min(self.n_samples - 1, int(3 * self.perplexity))
-        with utils.Timer(
-            f"Finding {k_neighbors} nearest neighbors using {method} search "
-            f"with {metric} metric...",
-            self.verbose,
-        ):
-            self.knn_index, self.__neighbors, self.__distances = build_knn_index(
-                data, method, k_neighbors, metric, metric_params, n_jobs, random_state
-            )
+        self.knn_index, self.__neighbors, self.__distances = build_knn_index(
+            data, method, k_neighbors, metric, metric_params, n_jobs, random_state, verbose
+        )
 
-        with utils.Timer("Calcualting affinity matrix...", self.verbose):
+        with utils.Timer("Calculating affinity matrix...", self.verbose):
             self.P = joint_probabilities_nn(
                 self.__neighbors,
                 self.__distances,
@@ -242,13 +237,9 @@ class PerplexityBasedNN(Affinities):
         perplexity = self.check_perplexity(perplexity)
         k_neighbors = min(self.n_samples - 1, int(3 * perplexity))
 
-        with utils.Timer(
-            f"Finding {k_neighbors} nearest neighbors in existing" f"embedding...",
-            self.verbose,
-        ):
-            neighbors, distances = self.knn_index.query(data, k_neighbors)
+        neighbors, distances = self.knn_index.query(data, k_neighbors)
 
-        with utils.Timer("Calcualting affinity matrix...", self.verbose):
+        with utils.Timer("Calculating affinity matrix...", self.verbose):
             P = joint_probabilities_nn(
                 neighbors,
                 distances,
@@ -279,7 +270,7 @@ class PerplexityBasedNN(Affinities):
 
 
 def build_knn_index(
-    data, method, k, metric, metric_params=None, n_jobs=1, random_state=None
+    data, method, k, metric, metric_params=None, n_jobs=1, random_state=None, verbose=False
 ):
     if not sp.issparse(data) and metric in [
         "cosine",
@@ -321,6 +312,7 @@ def build_knn_index(
             metric_params=metric_params,
             n_jobs=n_jobs,
             random_state=random_state,
+            verbose=verbose,
         )
 
     neighbors, distances = knn_index.build(data, k=k)
@@ -490,17 +482,13 @@ class FixedSigmaNN(Affinities):
                 "`k` (%d) cannot be larger than N-1 (%d)." % (k, self.n_samples)
             )
 
-        with utils.Timer(
-            f"Finding {k} nearest neighbors using {method} search with {metric} metric...",
-            self.verbose,
-        ):
-            knn_index, neighbors, distances = build_knn_index(
-                data, method, k, metric, metric_params, n_jobs, random_state
-            )
+        knn_index, neighbors, distances = build_knn_index(
+            data, method, k, metric, metric_params, n_jobs, random_state, self.verbose
+        )
 
         self.knn_index = knn_index
 
-        with utils.Timer("Calcualting affinity matrix...", self.verbose):
+        with utils.Timer("Calculating affinity matrix...", self.verbose):
             # Compute asymmetric pairwise input similarities
             conditional_P = np.exp(-(distances ** 2) / (2 * sigma ** 2))
             conditional_P /= np.sum(conditional_P, axis=1)[:, np.newaxis]
@@ -580,12 +568,9 @@ class FixedSigmaNN(Affinities):
             sigma = self.sigma
 
         # Find nearest neighbors and the distances to the new points
-        with utils.Timer(
-            f"Finding {k} nearest neighbors in existing" f"embedding...", self.verbose
-        ):
-            neighbors, distances = self.knn_index.query(data, k)
+        neighbors, distances = self.knn_index.query(data, k)
 
-        with utils.Timer("Calcualting affinity matrix...", self.verbose):
+        with utils.Timer("Calculating affinity matrix...", self.verbose):
             # Compute asymmetric pairwise input similarities
             conditional_P = np.exp(-(distances ** 2) / (2 * sigma ** 2))
 
@@ -682,16 +667,11 @@ class MultiscaleMixture(Affinities):
         max_perplexity = np.max(perplexities)
         k_neighbors = min(self.n_samples - 1, int(3 * max_perplexity))
 
-        with utils.Timer(
-            f"Finding {k_neighbors} nearest neighbors using {method} search "
-            f"with {metric} metric...",
-            self.verbose,
-        ):
-            self.knn_index, self.__neighbors, self.__distances = build_knn_index(
-                data, method, k_neighbors, metric, metric_params, n_jobs, random_state
-            )
+        self.knn_index, self.__neighbors, self.__distances = build_knn_index(
+            data, method, k_neighbors, metric, metric_params, n_jobs, random_state, verbose
+        )
 
-        with utils.Timer("Calcualting affinity matrix...", self.verbose):
+        with utils.Timer("Calculating affinity matrix...", self.verbose):
             self.P = self._calculate_P(
                 self.__neighbors,
                 self.__distances,
@@ -815,13 +795,9 @@ class MultiscaleMixture(Affinities):
         max_perplexity = np.max(perplexities)
         k_neighbors = min(self.n_samples - 1, int(3 * max_perplexity))
 
-        with utils.Timer(
-            f"Finding {k_neighbors} nearest neighbors in existing" f"embedding...",
-            self.verbose,
-        ):
-            neighbors, distances = self.knn_index.query(data, k_neighbors)
+        neighbors, distances = self.knn_index.query(data, k_neighbors)
 
-        with utils.Timer("Calcualting affinity matrix...", self.verbose):
+        with utils.Timer("Calculating affinity matrix...", self.verbose):
             P = self._calculate_P(
                 neighbors,
                 distances,

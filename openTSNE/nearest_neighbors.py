@@ -4,16 +4,21 @@ import numpy as np
 from scipy.spatial.distance import cdist
 from sklearn import neighbors
 
+from openTSNE import utils
+
 
 class KNNIndex:
     VALID_METRICS = []
 
-    def __init__(self, metric, metric_params=None, n_jobs=1, random_state=None):
+    def __init__(
+        self, metric, metric_params=None, n_jobs=1, random_state=None, verbose=False
+    ):
         self.index = None
         self.metric = self.check_metric(metric)
         self.metric_params = metric_params
         self.n_jobs = n_jobs
         self.random_state = random_state
+        self.verbose = verbose
 
     def build(self, data, k):
         """Build the nearest neighbor index on the training data.
@@ -75,6 +80,13 @@ class BallTree(KNNIndex):
         self.__data = None
 
     def build(self, data, k):
+        timer = utils.Timer(
+            f"Finding {k} nearest neighbors using exact search using "
+            f"{self.metric} distance...",
+            verbose=self.verbose,
+        )
+        timer.__enter__()
+
         if self.metric == "cosine":
             # The nearest neighbor ranking for cosine distance is the same as
             # for euclidean distance on normalized data
@@ -111,9 +123,17 @@ class BallTree(KNNIndex):
                 ]
             )
 
+        timer.__exit__()
+
         return indices, distances
 
     def query(self, query, k):
+        timer = utils.Timer(
+            f"Finding {k} nearest neighbors in existing embedding using exact search...",
+            self.verbose,
+        )
+        timer.__enter__()
+
         # The nearest neighbor ranking for cosine distance is the same as for
         # euclidean distance on normalized data
         if self.metric == "cosine":
@@ -143,6 +163,8 @@ class BallTree(KNNIndex):
                 ]
             )
 
+        timer.__exit__()
+
         return indices, distances
 
 
@@ -163,6 +185,13 @@ class Annoy(KNNIndex):
         self.__data = None
 
     def build(self, data, k):
+        timer = utils.Timer(
+            f"Finding {k} nearest neighbors using Annoy approximate search using "
+            f"{self.metric} distance...",
+            verbose=self.verbose,
+        )
+        timer.__enter__()
+
         from annoy import AnnoyIndex
 
         N = data.shape[0]
@@ -210,9 +239,18 @@ class Annoy(KNNIndex):
                 delayed(getnns)(i) for i in range(N)
             )
 
+        timer.__exit__()
+
         return indices, distances
 
     def query(self, query, k):
+        timer = utils.Timer(
+            f"Finding {k} nearest neighbors in existing embedding using Annoy "
+            f"approximate search...",
+            self.verbose,
+        )
+        timer.__enter__()
+
         N = query.shape[0]
         distances = np.zeros((N, k))
         indices = np.zeros((N, k)).astype(int)
@@ -234,6 +272,8 @@ class Annoy(KNNIndex):
             Parallel(n_jobs=self.n_jobs, require="sharedmem")(
                 delayed(getnns)(query[i]) for i in range(N)
             )
+
+        timer.__exit__()
 
         return indices, distances
 
@@ -311,6 +351,13 @@ class NNDescent(KNNIndex):
         return super().check_metric(metric)
 
     def build(self, data, k):
+        timer = utils.Timer(
+            f"Finding {k} nearest neighbors using NN descent approximate search using "
+            f"{self.metric} distance...",
+            verbose=self.verbose,
+        )
+        timer.__enter__()
+
         # These values were taken from UMAP, which we assume to be sensible defaults
         n_trees = 5 + int(round((data.shape[0]) ** 0.5 / 20))
         n_iters = max(5, int(round(np.log2(data.shape[0]))))
@@ -335,8 +382,21 @@ class NNDescent(KNNIndex):
         )
 
         indices, distances = self.index.query(data, k=k + 1)
+
+        timer.__exit__()
+
         return indices[:, 1:], distances[:, 1:]
 
     def query(self, query, k):
-        return self.index.query(query, k=k)
+        timer = utils.Timer(
+            f"Finding {k} nearest neighbors in existing embedding using NN Descent "
+            f"approxmimate search...",
+            self.verbose,
+        )
+        timer.__enter__()
 
+        indices, distances = self.index.query(query, k=k)
+
+        timer.__exit__()
+
+        return indices, distances
