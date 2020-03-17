@@ -142,7 +142,7 @@ class PerplexityBasedNN(Affinities):
                 data, method, k_neighbors, metric, metric_params, n_jobs, random_state
             )
 
-        with utils.Timer("Calcualting affinity matrix...", self.verbose):
+        with utils.Timer("Calculating affinity matrix...", self.verbose):
             self.P = joint_probabilities_nn(
                 self.__neighbors,
                 self.__distances,
@@ -248,7 +248,7 @@ class PerplexityBasedNN(Affinities):
         ):
             neighbors, distances = self.knn_index.query(data, k_neighbors)
 
-        with utils.Timer("Calcualting affinity matrix...", self.verbose):
+        with utils.Timer("Calculating affinity matrix...", self.verbose):
             P = joint_probabilities_nn(
                 neighbors,
                 distances,
@@ -500,7 +500,7 @@ class FixedSigmaNN(Affinities):
 
         self.knn_index = knn_index
 
-        with utils.Timer("Calcualting affinity matrix...", self.verbose):
+        with utils.Timer("Calculating affinity matrix...", self.verbose):
             # Compute asymmetric pairwise input similarities
             conditional_P = np.exp(-(distances ** 2) / (2 * sigma ** 2))
             conditional_P /= np.sum(conditional_P, axis=1)[:, np.newaxis]
@@ -585,7 +585,7 @@ class FixedSigmaNN(Affinities):
         ):
             neighbors, distances = self.knn_index.query(data, k)
 
-        with utils.Timer("Calcualting affinity matrix...", self.verbose):
+        with utils.Timer("Calculating affinity matrix...", self.verbose):
             # Compute asymmetric pairwise input similarities
             conditional_P = np.exp(-(distances ** 2) / (2 * sigma ** 2))
 
@@ -691,7 +691,7 @@ class MultiscaleMixture(Affinities):
                 data, method, k_neighbors, metric, metric_params, n_jobs, random_state
             )
 
-        with utils.Timer("Calcualting affinity matrix...", self.verbose):
+        with utils.Timer("Calculating affinity matrix...", self.verbose):
             self.P = self._calculate_P(
                 self.__neighbors,
                 self.__distances,
@@ -821,7 +821,7 @@ class MultiscaleMixture(Affinities):
         ):
             neighbors, distances = self.knn_index.query(data, k_neighbors)
 
-        with utils.Timer("Calcualting affinity matrix...", self.verbose):
+        with utils.Timer("Calculating affinity matrix...", self.verbose):
             P = self._calculate_P(
                 neighbors,
                 distances,
