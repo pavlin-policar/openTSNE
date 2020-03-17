@@ -1149,19 +1149,26 @@ class TSNE(BaseEstimator):
                 )
 
         elif self.initialization == "pca":
-            with utils.Timer("Calculating PCA-based initialization...", self.verbose):
-                embedding = initialization_scheme.pca(
-                    X, self.n_components, random_state=self.random_state
-                )
+            embedding = initialization_scheme.pca(
+                X,
+                self.n_components,
+                random_state=self.random_state,
+                verbose=self.verbose,
+            )
         elif self.initialization == "random":
             embedding = initialization_scheme.random(
-                X, self.n_components, random_state=self.random_state
+                X,
+                self.n_components,
+                random_state=self.random_state,
+                verbose=self.verbose,
             )
         elif self.initialization == "spectral":
-            with utils.Timer("Calculating spectral initialization...", self.verbose):
-                embedding = initialization_scheme.spectral(
-                    affinities.P, self.n_components, random_state=self.random_state
-                )
+            embedding = initialization_scheme.spectral(
+                affinities.P,
+                self.n_components,
+                random_state=self.random_state,
+                verbose=self.verbose,
+            )
         else:
             raise ValueError(
                 f"Unrecognized initialization scheme `{self.initialization}`."
