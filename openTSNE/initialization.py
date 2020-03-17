@@ -3,8 +3,10 @@ import scipy.sparse as sp
 from sklearn.decomposition import PCA
 from sklearn.utils import check_random_state
 
+from openTSNE import utils
 
-def random(X, n_components=2, random_state=None):
+
+def random(X, n_components=2, random_state=None, verbose=False):
     """Initialize an embedding using samples from an isotropic Gaussian.
 
     Parameters
@@ -21,6 +23,8 @@ def random(X, n_components=2, random_state=None):
         be used as the random number generator. If the value is None, the random
         number generator is the RandomState instance used by `np.random`.
 
+    verbose: bool
+
     Returns
     -------
     initialization: np.ndarray
@@ -31,7 +35,7 @@ def random(X, n_components=2, random_state=None):
     return np.ascontiguousarray(embedding)
 
 
-def pca(X, n_components=2, svd_solver="auto", random_state=None):
+def pca(X, n_components=2, svd_solver="auto", random_state=None, verbose=False):
     """Initialize an embedding using the top principal components.
 
     Parameters
@@ -51,11 +55,16 @@ def pca(X, n_components=2, svd_solver="auto", random_state=None):
         be used as the random number generator. If the value is None, the random
         number generator is the RandomState instance used by `np.random`.
 
+    verbose: bool
+
     Returns
     -------
     initialization: np.ndarray
 
     """
+    timer = utils.Timer("Calculating PCA-based initialization...", verbose)
+    timer.__enter__()
+
     pca_ = PCA(
         n_components=n_components, svd_solver=svd_solver, random_state=random_state
     )
@@ -66,10 +75,12 @@ def pca(X, n_components=2, svd_solver="auto", random_state=None):
     normalization /= 0.0001
     embedding /= normalization
 
+    timer.__exit__()
+
     return np.ascontiguousarray(embedding)
 
 
-def spectral(A, n_components=2, tol=1e-4, max_iter=None):
+def spectral(A, n_components=2, tol=1e-4, max_iter=None, verbose=False):
     """Initialize an embedding using the spectral embedding of the KNN graph.
 
     Specifically, we initialize data points by computing the diffusion map on
@@ -90,6 +101,8 @@ def spectral(A, n_components=2, tol=1e-4, max_iter=None):
     max_iter: float
         See scipy.sparse.linalg.eigsh documentation.
 
+    verbose: bool
+
     Returns
     -------
     initialization: np.ndarray
@@ -99,6 +112,9 @@ def spectral(A, n_components=2, tol=1e-4, max_iter=None):
         raise ValueError("The graph adjacency matrix must be a 2-dimensional matrix.")
     if A.shape[0] != A.shape[1]:
         raise ValueError("The graph adjacency matrix must be a square matrix.")
+
+    timer = utils.Timer("Calculating spectral initialization...", verbose)
+    timer.__enter__()
 
     D = sp.diags(np.ravel(np.sum(A, axis=1)))
 
@@ -123,10 +139,12 @@ def spectral(A, n_components=2, tol=1e-4, max_iter=None):
     normalization /= 0.0001
     embedding /= normalization
 
+    timer.__exit__()
+
     return embedding
 
 
-def weighted_mean(X, embedding, neighbors, distances):
+def weighted_mean(X, embedding, neighbors, distances, verbose=False):
     """Initialize points onto an existing embedding by placing them in the
     weighted mean position of their nearest neighbors on the reference embedding.
 
@@ -136,6 +154,7 @@ def weighted_mean(X, embedding, neighbors, distances):
     embedding: TSNEEmbedding
     neighbors: np.ndarray
     distances: np.ndarray
+    verbose: bool
 
     Returns
     -------
@@ -145,16 +164,17 @@ def weighted_mean(X, embedding, neighbors, distances):
     n_samples = X.shape[0]
     n_components = embedding.shape[1]
 
-    partial_embedding = np.zeros((n_samples, n_components), order="C")
-    for i in range(n_samples):
-        partial_embedding[i] = np.average(
-            embedding[neighbors[i]], axis=0, weights=distances[i]
-        )
+    with utils.Timer("Calculating weighted-mean initialization...", verbose):
+        partial_embedding = np.zeros((n_samples, n_components), order="C")
+        for i in range(n_samples):
+            partial_embedding[i] = np.average(
+                embedding[neighbors[i]], axis=0, weights=distances[i]
+            )
 
     return partial_embedding
 
 
-def median(embedding, neighbors):
+def median(embedding, neighbors, verbose=False):
     """Initialize points onto an existing embedding by placing them in the
     median position of their nearest neighbors on the reference embedding.
 
@@ -162,11 +182,13 @@ def median(embedding, neighbors):
     ----------
     embedding: TSNEEmbedding
     neighbors: np.ndarray
+    verbose: bool
 
     Returns
     -------
     np.ndarray
 
     """
-    embedding = np.median(embedding[neighbors], axis=1)
+    with utils.Timer("Calculating meadian initialization...", verbose):
+        embedding = np.median(embedding[neighbors], axis=1)
     return np.ascontiguousarray(embedding)
