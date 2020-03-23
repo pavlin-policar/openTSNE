@@ -70,6 +70,9 @@ jobs:
       - bash: python -m pip install --force-reinstall --find-links dist openTSNE
         displayName: 'Install wheel'
 
+      - script: pip install pynndescent
+        displayName: 'Install optional dependencies'
+
       - script: pytest -v
         timeoutInMinutes: 15
         displayName: 'Run unit tests'
@@ -121,6 +124,9 @@ jobs:
       # instead of the installed package. We can easily achieve this by renaming the source folder.
       - bash: mv openTSNE src
         displayName: 'Remove source files from path'
+
+      - script: pip install pynndescent
+        displayName: 'Install optional dependencies'
 
       - script: $(python)/python -m pytest -v
         timeoutInMinutes: 15
@@ -182,6 +188,9 @@ jobs:
 
       - bash: python -m pip install --force-reinstall --find-links dist openTSNE
         displayName: 'Install package'
+
+      - script: pip install pynndescent
+        displayName: 'Install optional dependencies'
 
       - script: pytest -v
         timeoutInMinutes: 15

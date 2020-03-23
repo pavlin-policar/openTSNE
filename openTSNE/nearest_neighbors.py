@@ -180,10 +180,6 @@ class Annoy(KNNIndex):
         "taxicab",
     ]
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.__data = None
-
     def build(self, data, k):
         timer = utils.Timer(
             f"Finding {k} nearest neighbors using Annoy approximate search using "
@@ -317,6 +313,16 @@ class NNDescent(KNNIndex):
         "sokalmichener",
         "yule",
     ]
+
+    def __init__(self, *args, **kwargs):
+        try:
+            import pynndescent  # pylint: disable=unused-import,unused-variable
+        except ImportError:
+            raise ImportError(
+                "Please install pynndescent: `conda install -c conda-forge "
+                "pynndescent` or `pip install pynndescent`."
+            )
+        super().__init__(*args, **kwargs)
 
     def check_metric(self, metric):
         import pynndescent
