@@ -251,22 +251,19 @@ class Annoy(KNNIndex):
         distances = np.zeros((N, k))
         indices = np.zeros((N, k)).astype(int)
 
-        def getnns(v):
-            # Annoy returns the query point itself as the first element
-            indices_i, distances_i = self.index.get_nns_by_vector(
-                v, k + 1, include_distances=True
+        def getnns(i):
+            indices[i], distances[i] = self.index.get_nns_by_vector(
+                query[i], k, include_distances=True
             )
-            indices[i] = indices_i[1:]
-            distances[i] = distances_i[1:]
 
         if self.n_jobs == 1:
             for i in range(N):
-                getnns(query[i])
+                getnns(i)
         else:
             from joblib import Parallel, delayed
 
             Parallel(n_jobs=self.n_jobs, require="sharedmem")(
-                delayed(getnns)(query[i]) for i in range(N)
+                delayed(getnns)(i) for i in range(N)
             )
 
         timer.__exit__()
