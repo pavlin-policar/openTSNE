@@ -1492,8 +1492,9 @@ class gradient_descent:
                 getattr(callback, "optimization_about_to_start", lambda: ...)()
 
         timer = utils.Timer(
-            f"Running optimization with exaggeration={exaggeration}, "
-            f"lr={learning_rate} for {n_iter} iterations...",
+            "Running optimization with exaggeration=%.2f, lr=%.2f for %d iterations..." % (
+                exaggeration, learning_rate, n_iter
+            ),
             verbose=verbose,
         )
         timer.__enter__()
