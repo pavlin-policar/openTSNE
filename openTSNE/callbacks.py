@@ -102,9 +102,14 @@ class VerifyExaggerationError(Callback):
                 n_interpolation_points=params["n_interpolation_points"],
                 min_num_intervals=params["min_num_intervals"],
                 ints_in_interval=params["ints_in_interval"],
+                dof=params["dof"],
             )
         elif method == "bh":
-            f = partial(kl_divergence.kl_divergence_approx_bh, theta=params["theta"])
+            f = partial(
+                kl_divergence.kl_divergence_approx_bh,
+                theta=params["theta"],
+                dof=params["dof"],
+            )
 
         P = self.P
 

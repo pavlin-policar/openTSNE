@@ -79,11 +79,12 @@ def check_mock_called_with_kwargs(mock: MagicMock, params: dict) -> None:
 
 
 class TestTSNEParameterFlow(unittest.TestCase):
-    """est that the optimization parameters get properly propagated."""
+    """Test that the optimization parameters get properly propagated."""
 
     grad_descent_params = {
         "negative_gradient_method": [kl_divergence_bh, kl_divergence_fft],
         "learning_rate": [1, 10, 100],
+        "dof": [0.5, 1, 1.5],
         "theta": [0.2, 0.5, 0.8],
         "n_interpolation_points": [3, 5],
         "min_num_intervals": [10, 20, 30],

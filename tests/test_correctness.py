@@ -242,3 +242,16 @@ class TestTSNECorrectness(unittest.TestCase):
         new_embedding_2 = embedding.transform(x_test[:25], **transform_params)
 
         np.testing.assert_equal(new_embedding_1, new_embedding_2)
+
+
+class TestTSNECorrectnessUsingNonStandardDof(TestTSNECorrectness):
+    @classmethod
+    def setUpClass(cls):
+        cls.tsne = TSNE(early_exaggeration_iter=20, n_iter=100, dof=0.8)
+        # Set up two modalities, if we want to viually inspect test results
+        random_state = np.random.RandomState(0)
+        cls.x = np.vstack(
+            (random_state.normal(+1, 1, (100, 4)), random_state.normal(-1, 1, (100, 4)))
+        )
+        cls.x_test = random_state.normal(0, 1, (25, 4))
+        cls.iris = datasets.load_iris()

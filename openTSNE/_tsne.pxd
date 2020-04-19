@@ -44,6 +44,7 @@ cpdef double estimate_negative_gradient_fft_1d(
     Py_ssize_t n_interpolation_points=*,
     Py_ssize_t min_num_intervals=*,
     double ints_in_interval=*,
+    double dof=*,
 )
 
 cpdef double estimate_negative_gradient_fft_1d_with_reference(
@@ -53,6 +54,7 @@ cpdef double estimate_negative_gradient_fft_1d_with_reference(
     Py_ssize_t n_interpolation_points=*,
     Py_ssize_t min_num_intervals=*,
     double ints_in_interval=*,
+    double dof=*,
 )
 
 cpdef double estimate_negative_gradient_fft_2d(
@@ -61,6 +63,7 @@ cpdef double estimate_negative_gradient_fft_2d(
     Py_ssize_t n_interpolation_points=*,
     Py_ssize_t min_num_intervals=*,
     double ints_in_interval=*,
+    double dof=*,
 )
 
 cpdef double estimate_negative_gradient_fft_2d_with_reference(
@@ -70,4 +73,5 @@ cpdef double estimate_negative_gradient_fft_2d_with_reference(
     Py_ssize_t n_interpolation_points=*,
     Py_ssize_t min_num_intervals=*,
     double ints_in_interval=*,
+    double dof=*,
 )
