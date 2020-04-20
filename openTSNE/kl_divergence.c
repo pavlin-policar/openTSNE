@@ -1250,9 +1250,9 @@ struct __pyx_opt_args_8openTSNE_5_tsne_compute_gaussian_perplexity;
 struct __pyx_opt_args_8openTSNE_5_tsne_estimate_positive_gradient_nn;
 struct __pyx_opt_args_8openTSNE_5_tsne_estimate_negative_gradient_bh;
 struct __pyx_opt_args_8openTSNE_5_tsne_estimate_negative_gradient_fft_1d;
-struct __pyx_opt_args_8openTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_reference;
+struct __pyx_opt_args_8openTSNE_5_tsne_prepare_negative_gradient_fft_interpolation_grid_1d;
 struct __pyx_opt_args_8openTSNE_5_tsne_estimate_negative_gradient_fft_2d;
-struct __pyx_opt_args_8openTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_reference;
+struct __pyx_opt_args_8openTSNE_5_tsne_prepare_negative_gradient_fft_interpolation_grid_2d;
 
 /* "_tsne.pxd":11
  * 
@@ -1315,19 +1315,20 @@ struct __pyx_opt_args_8openTSNE_5_tsne_estimate_negative_gradient_fft_1d {
 /* "_tsne.pxd":50
  * )
  * 
- * cpdef double estimate_negative_gradient_fft_1d_with_reference(             # <<<<<<<<<<<<<<
- *     double[::1] embedding,
+ * cpdef tuple prepare_negative_gradient_fft_interpolation_grid_1d(             # <<<<<<<<<<<<<<
  *     double[::1] reference_embedding,
+ *     Py_ssize_t n_interpolation_points=*,
  */
-struct __pyx_opt_args_8openTSNE_5_tsne_estimate_negative_gradient_fft_1d_with_reference {
+struct __pyx_opt_args_8openTSNE_5_tsne_prepare_negative_gradient_fft_interpolation_grid_1d {
   int __pyx_n;
   Py_ssize_t n_interpolation_points;
   Py_ssize_t min_num_intervals;
   double ints_in_interval;
   double dof;
+  double padding;
 };
 
-/* "_tsne.pxd":60
+/* "_tsne.pxd":68
  * )
  * 
  * cpdef double estimate_negative_gradient_fft_2d(             # <<<<<<<<<<<<<<
@@ -1342,19 +1343,20 @@ struct __pyx_opt_args_8openTSNE_5_tsne_estimate_negative_gradient_fft_2d {
   double dof;
 };
 
-/* "_tsne.pxd":69
+/* "_tsne.pxd":77
  * )
  * 
- * cpdef double estimate_negative_gradient_fft_2d_with_reference(             # <<<<<<<<<<<<<<
- *     double[:, ::1] embedding,
+ * cpdef tuple prepare_negative_gradient_fft_interpolation_grid_2d(             # <<<<<<<<<<<<<<
  *     double[:, ::1] reference_embedding,
+ *     Py_ssize_t n_interpolation_points=*,
  */
-struct __pyx_opt_args_8openTSNE_5_tsne_estimate_negative_gradient_fft_2d_with_reference {
+struct __pyx_opt_args_8openTSNE_5_tsne_prepare_negative_gradient_fft_interpolation_grid_2d {
   int __pyx_n;
   Py_ssize_t n_interpolation_points;
   Py_ssize_t min_num_intervals;
   double ints_in_interval;
   double dof;
+  double padding;
 };
 struct __pyx_opt_args_8openTSNE_13kl_divergence_kl_divergence_approx_bh;
 struct __pyx_opt_args_8openTSNE_13kl_divergence_kl_divergence_approx_fft;
