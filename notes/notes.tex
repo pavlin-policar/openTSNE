@@ -268,10 +268,71 @@ KL(P \mid \mid Q) &= \sum_{ij} p_{ij} \log \frac{p_{ij}}{q_{ij}}
 
 The first term is computed by the gradient method (since it only knows about the scaled $P$), the second term can easily be computed post-optimization, allowing us to get the correct KL divergence.
 
-\subsection{Single Kernel in interpolation}
+\subsection{Variable Degrees of Freedom}
 
-%% TODO
+Kobak \textit{et al.}~\cite{kobak2019heavy} suggest that using variable degrees of freedom can be used to improve embeddings.
 
+Standard t-SNE uses the t-distribution with a single degree of freedom. This is defined as 
+
+\begin{equation}
+q_{ij} \propto \left ( 1 + || \mathbf{y}_i - \mathbf{y}_j ||^2 / \alpha \right )^{-\alpha} = \frac{1}{\left( 1 + || \mathbf{y}_i - \mathbf{y}_j ||^2 / \alpha \right)^\alpha }.
+\end{equation}
+
+In standard t-SNE $\alpha=1$ so this simplifies to the standard formulation
+\begin{equation}
+q_{ij} \propto \left ( 1 + || \mathbf{y}_i - \mathbf{y}_j ||^2 \right )^{-1} = \frac{1}{1 + || \mathbf{y}_i - \mathbf{y}_j ||^2 }
+\end{equation}
+where we have omitted the normalization constant.
+
+The gradient of the t-SNE loss function then becomes
+\begin{align}
+\frac{\partial C}{\partial \mathbf{y}_i} &= 4 \sum_{j \neq i} \left ( p_{ij} - q_{ij} \right ) q_{ij}^{1/\alpha} \left ( \mathbf{y}_i - \mathbf{y}_j \right )
+\end{align}
+where $q_{ij}$ is, again, the unnormalized kernel between points $i$ and $j$.
+
+Decomposing this into the attractive and repulsive forces gives us
+\begin{align}
+\mathbf{F}_{\text{attr}} &= 4 \sum_j p_{ij} q_{ij}^{1/\alpha} (\mathbf{y}_i - \mathbf{y}_j), \\
+\mathbf{F}_{\text{rep}} &= - 4 \sum_j q_{ij}^{\frac{\alpha+1}{\alpha}} / Z (\mathbf{y}_i - \mathbf{y}_j).
+\end{align}
+
+See the original publication for more details.
+
+\subsubsection{Implementation}
+
+Adapting the implementation for computing the attractive forces and the Barnes-Hut repulsive forces is straightforward. Adapting the interpolation based computation of repulsive forces is a bit more involved.
+
+The direct implementation of the approach described in the paper leads to a solution requiring two different kernels. We describe the 1D case, but the extension to the 2D case is straightforward.
+
+\begin{align}
+\mathbf{F}_\text{rep} &= \sum_{j \neq i} q_{ij}^{\frac{\alpha+1}{\alpha}} Z \left ( \mathbf{y}_i - \mathbf{y}_j \right ) \\
+&=
+\sum_{j \neq i} \left( \frac{\left ( 1 + || \mathbf{y}_i - \mathbf{y}_j ||^2 / \alpha \right )^{-\alpha}}{\sum_{k \neq l} \left ( 1 + || \mathbf{y}_k - \mathbf{y}_l ||^2 / \alpha \right )^{-\alpha}} \right) ^{\frac{\alpha+1}{\alpha}}
+\frac{\mathbf{y}_i - \mathbf{y}_j}{\sum_{k \neq l}\left ( 1 + || \mathbf{y}_k - \mathbf{y}_l ||^2 / \alpha \right )^{\alpha}} \\
+&=
+\sum_{j \neq i} \frac{\mathbf{y}_i - \mathbf{y}_j}{\left ( 1 + || \mathbf{y}_i - \mathbf{y}_j ||^2 / \alpha \right )^{\alpha \left( \frac{\alpha+1}{\alpha} \right)}}
+\bigg/
+\left( \sum_{k \neq l} \frac{\left( 1 + || \mathbf{y}_k - \mathbf{y}_l ||^2 / \alpha \right)^\alpha}{\left( 1 + || \mathbf{y}_k - \mathbf{y}_l ||^2 / \alpha \right)^{\alpha \left(\frac{\alpha+1}{\alpha} \right) }} \right) \\
+&=
+\sum_{j \neq i} \frac{\mathbf{y}_i - \mathbf{y}_j}{\left ( 1 + || \mathbf{y}_i - \mathbf{y}_j ||^2 / \alpha \right )^{\alpha + 1}}
+\bigg/
+\left( \sum_{k \neq l} \frac{1}{\left( 1 + || \mathbf{y}_k - \mathbf{y}_l ||^2 / \alpha \right)} \right)
+\end{align}
+
+Evaluating this sum using the interpolation scheme would require two separate kernels with three terms
+\begin{align}
+\phi_{1,j} &= \sum_{j \neq i} \frac{1}{\left( 1 + || \mathbf{y}_j - \mathbf{y}_i ||^2 / \alpha \right)^{\alpha+1}}, \\
+\phi_{2,j} &= \sum_{j \neq i} \frac{\mathbf{y}_j}{\left( 1 + || \mathbf{y}_j - \mathbf{y}_i ||^2 / \alpha \right)^{\alpha+1}}, \\
+\phi_{3,j} &= \sum_{j \neq i} \frac{1}{\left( 1 + || \mathbf{y}_j - \mathbf{y}_i ||^2 / \alpha \right)}.
+\end{align}
+Then, we can calculate the necessary quantities
+\begin{align}
+N_i &= \mathbf{y}_i \phi_{1,j} - \phi_{2,j} \\
+Z &= \sum_j \phi_{3,j}
+\end{align}
+where $N_i$ is the unnormalized numerator of the repulsive forces.
+
+%
 \section{Transform}
 
 \subsection{Direct optimization}

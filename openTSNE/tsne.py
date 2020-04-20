@@ -269,9 +269,11 @@ class PartialTSNEEmbedding(np.ndarray):
             The learning rate for t-SNE optimization. When
             ``learning_rate="auto"`` the appropriate learning rate is selected
             according to max(200, N / 12), as determined in Belkina et al.
-            (2019), Nature Communications. Note that this should *not* be used
-            when adding samples into existing embeddings, where the learning
-            rate often needs to be much lower to obtain convergence.
+            "Automated optimized parameters for t-distributed stochastic
+            neighbor embedding improve visualization and analysis of large
+            datasets", 2019. Note that this should *not* be used when adding
+            samples into existing embeddings, where the learning rate often
+            needs to be much lower to obtain convergence.
 
         exaggeration: float
             The exaggeration factor is used to increase the attractive forces of
@@ -407,11 +409,17 @@ class TSNEEmbedding(np.ndarray):
     learning_rate: Union[str, float]
         The learning rate for t-SNE optimization. When ``learning_rate="auto"``
         the appropriate learning rate is selected according to max(200, N / 12),
-        as determined in Belkina et al. (2019), Nature Communications.
+        as determined in Belkina et al. "Automated optimized parameters for
+        T-distributed stochastic neighbor embedding improve visualization and
+        analysis of large datasets", 2019.
 
     exaggeration: float
         The exaggeration factor is used to increase the attractive forces of
         nearby points, producing more compact clusters.
+
+    dof: float
+        Degrees of freedom as described in Kobak et al. "Heavy-tailed kernels
+        reveal a finer cluster structure in t-SNE visualisations", 2019.
 
     momentum: float
         Momentum accounts for gradient directions from previous iterations,
@@ -527,11 +535,17 @@ class TSNEEmbedding(np.ndarray):
             The learning rate for t-SNE optimization. When
             ``learning_rate="auto"`` the appropriate learning rate is selected
             according to max(200, N / 12), as determined in Belkina et al.
-            (2019), Nature Communications.
+            "Automated optimized parameters for t-distributed stochastic
+            neighbor embedding improve visualization and analysis of large
+            datasets", 2019.
 
         exaggeration: float
             The exaggeration factor is used to increase the attractive forces of
             nearby points, producing more compact clusters.
+
+        dof: float
+            Degrees of freedom as described in Kobak et al. "Heavy-tailed kernels
+            reveal a finer cluster structure in t-SNE visualisations", 2019.
 
         momentum: float
             Momentum accounts for gradient directions from previous iterations,
@@ -700,9 +714,11 @@ class TSNEEmbedding(np.ndarray):
             The learning rate for t-SNE optimization. When
             ``learning_rate="auto"`` the appropriate learning rate is selected
             according to max(200, N / 12), as determined in Belkina et al.
-            (2019), Nature Communications. Note that this should *not* be used
-            when adding samples into existing embeddings, where the learning
-            rate often needs to be much lower to obtain convergence.
+            "Automated optimized parameters for t-distributed stochastic
+            neighbor embedding improve visualization and analysis of large
+            datasets", 2019. Note that this should *not* be used when adding
+            samples into existing embeddings, where the learning rate often
+            needs to be much lower to obtain convergence.
 
         early_exaggeration_iter: int
             The number of iterations to run in the *early exaggeration* phase.
@@ -892,7 +908,9 @@ class TSNE(BaseEstimator):
     learning_rate: Union[str, float]
         The learning rate for t-SNE optimization. When ``learning_rate="auto"``
         the appropriate learning rate is selected according to max(200, N / 12),
-        as determined in Belkina et al. (2019), Nature Communications.
+        as determined in Belkina et al. "Automated optimized parameters for
+        T-distributed stochastic neighbor embedding improve visualization and
+        analysis of large datasets", 2019.
 
     early_exaggeration_iter: int
         The number of iterations to run in the *early exaggeration* phase.
@@ -908,6 +926,10 @@ class TSNE(BaseEstimator):
         The exaggeration factor to use during the normal optimization phase.
         This can be used to form more densely packed clusters and is useful
         for large data sets.
+
+    dof: float
+        Degrees of freedom as described in Kobak et al. "Heavy-tailed kernels
+        reveal a finer cluster structure in t-SNE visualisations", 2019.
 
     theta: float
         Only used when ``negative_gradient_method="bh"`` or its other aliases.
@@ -1008,6 +1030,7 @@ class TSNE(BaseEstimator):
         early_exaggeration=12,
         n_iter=500,
         exaggeration=None,
+        dof=1,
         theta=0.5,
         n_interpolation_points=3,
         min_num_intervals=50,
@@ -1033,6 +1056,7 @@ class TSNE(BaseEstimator):
         self.early_exaggeration_iter = early_exaggeration_iter
         self.n_iter = n_iter
         self.exaggeration = exaggeration
+        self.dof = dof
         self.theta = theta
         self.n_interpolation_points = n_interpolation_points
         self.min_num_intervals = min_num_intervals
@@ -1175,9 +1199,7 @@ class TSNE(BaseEstimator):
             )
 
         gradient_descent_params = {
-            # Degrees of freedom of the Student's t-distribution. The
-            # suggestion degrees_of_freedom = n_components - 1 comes from [3]_.
-            "dof": max(self.n_components - 1, 1),
+            "dof": self.dof,
             "negative_gradient_method": self.negative_gradient_method,
             "learning_rate": self.learning_rate,
             # By default, use the momentum used in unexaggerated phase
@@ -1279,19 +1301,20 @@ def kl_divergence_fft(
                 reference_embedding.ravel(),
                 gradient.ravel(),
                 **fft_params,
+                dof=dof,
             )
         else:
             sum_Q = _tsne.estimate_negative_gradient_fft_1d(
-                embedding.ravel(), gradient.ravel(), **fft_params,
+                embedding.ravel(), gradient.ravel(), **fft_params, dof=dof
             )
     elif embedding.shape[1] == 2:
         if reference_embedding is not None:
             sum_Q = _tsne.estimate_negative_gradient_fft_2d_with_reference(
-                embedding, reference_embedding, gradient, **fft_params,
+                embedding, reference_embedding, gradient, **fft_params, dof=dof
             )
         else:
             sum_Q = _tsne.estimate_negative_gradient_fft_2d(
-                embedding, gradient, **fft_params,
+                embedding, gradient, **fft_params, dof=dof
             )
     else:
         raise RuntimeError(
@@ -1376,7 +1399,9 @@ class gradient_descent:
             The learning rate for t-SNE optimization. When
             ``learning_rate="auto"`` the appropriate learning rate is selected
             according to max(200, N / 12), as determined in Belkina et al.
-            (2019), Nature Communications.
+            "Automated optimized parameters for t-distributed stochastic
+            neighbor embedding improve visualization and analysis of large
+            datasets", 2019.
 
         momentum: float
             Momentum accounts for gradient directions from previous iterations,

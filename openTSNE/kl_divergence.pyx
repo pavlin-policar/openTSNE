@@ -64,6 +64,7 @@ cpdef double kl_divergence_approx_bh(
     double[:] P_data,
     double[:, ::1] embedding,
     double theta=0.5,
+    double dof=1,
 ):
     """Compute the KL divergence using the Barnes-Hut approximation."""
     cdef:
@@ -78,9 +79,17 @@ cpdef double kl_divergence_approx_bh(
         double sum_P = 0, sum_Q = 0
         double kl_divergence = 0
 
-    sum_Q = estimate_negative_gradient_bh(tree, embedding, gradient, theta)
+    sum_Q = estimate_negative_gradient_bh(tree, embedding, gradient, theta, dof)
     sum_P, kl_divergence = estimate_positive_gradient_nn(
-        indices, indptr, P_data, embedding, embedding, gradient, should_eval_error=True)
+        indices,
+        indptr,
+        P_data,
+        embedding,
+        embedding,
+        gradient,
+        dof=dof,
+        should_eval_error=True,
+    )
 
     kl_divergence += sum_P * log(sum_Q + EPSILON)
 
@@ -93,6 +102,7 @@ cpdef double kl_divergence_approx_fft(
     int[:] indptr,
     double[:] P_data,
     double[:, ::1] embedding,
+    double dof=1,
     Py_ssize_t n_interpolation_points=3,
     Py_ssize_t min_num_intervals=10,
     double ints_in_interval=1,
@@ -113,19 +123,35 @@ cpdef double kl_divergence_approx_fft(
 
     if n_dims == 1:
         sum_Q = estimate_negative_gradient_fft_1d(
-            embedding.ravel(), gradient.ravel(), n_interpolation_points,
-            min_num_intervals, ints_in_interval,
+            embedding.ravel(),
+            gradient.ravel(),
+            n_interpolation_points,
+            min_num_intervals,
+            ints_in_interval,
+            dof,
         )
     elif n_dims == 2:
         sum_Q = estimate_negative_gradient_fft_2d(
-            embedding, gradient, n_interpolation_points,
-            min_num_intervals, ints_in_interval,
+            embedding,
+            gradient,
+            n_interpolation_points,
+            min_num_intervals,
+            ints_in_interval,
+            dof,
         )
     else:
         return -1
 
     sum_P, kl_divergence = estimate_positive_gradient_nn(
-        indices, indptr, P_data, embedding, embedding, gradient, should_eval_error=True)
+        indices,
+        indptr,
+        P_data,
+        embedding,
+        embedding,
+        gradient,
+        dof=dof,
+        should_eval_error=True,
+    )
 
     kl_divergence += sum_P * log(sum_Q + EPSILON)
 
