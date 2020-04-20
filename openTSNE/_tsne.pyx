@@ -484,18 +484,16 @@ cpdef double estimate_negative_gradient_fft_1d(
     return sum_Q
 
 
-cpdef double estimate_negative_gradient_fft_1d_with_reference(
-    double[::1] embedding,
+cpdef tuple prepare_negative_gradient_fft_interpolation_grid_1d(
     double[::1] reference_embedding,
-    double[::1] gradient,
     Py_ssize_t n_interpolation_points=3,
     Py_ssize_t min_num_intervals=10,
     double ints_in_interval=1,
     double dof=1,
+    double padding=0,
 ):
     cdef:
         Py_ssize_t i, j, d, box_idx
-        Py_ssize_t n_samples = embedding.shape[0]
         Py_ssize_t n_reference_samples = reference_embedding.shape[0]
 
         double y_max = -INFINITY, y_min = INFINITY
@@ -506,12 +504,17 @@ cpdef double estimate_negative_gradient_fft_1d_with_reference(
             y_min = reference_embedding[i]
         elif reference_embedding[i] > y_max:
             y_max = reference_embedding[i]
-    # And check the new embedding points
-    for i in range(n_samples):
-        if embedding[i] < y_min:
-            y_min = embedding[i]
-        elif embedding[i] > y_max:
-            y_max = embedding[i]
+
+    # We assume here that the embedding is centered and we want to generate an
+    # equal grid in both negative and positive lines
+    if fabs(y_min) > fabs(y_max):
+        coord_max = -y_min
+    elif fabs(y_max) > fabs(y_min):
+        coord_min = -y_max
+
+    # Apply padding to the min/max coordinates
+    y_min *= 1 + padding
+    y_max *= 1 + padding
 
     cdef int n_boxes = <int>fmax(min_num_intervals, (y_max - y_min) / ints_in_interval)
     cdef double box_width = (y_max - y_min) / n_boxes
@@ -533,17 +536,6 @@ cpdef double estimate_negative_gradient_fft_1d_with_reference(
             box_idx = n_boxes - 1
 
         reference_point_box_idx[i] = box_idx
-
-    # Determine which box each new point belongs to
-    cdef int *point_box_idx = <int *>PyMem_Malloc(n_samples * sizeof(int))
-    for i in range(n_samples):
-        box_idx = <int>((embedding[i] - y_min) / box_width)
-        # The right most point maps directly into `n_boxes`, while it should
-        # belong to the last box
-        if box_idx >= n_boxes:
-            box_idx = n_boxes - 1
-
-        point_box_idx[i] = box_idx
 
     cdef int n_interpolation_points_1d = n_interpolation_points * n_boxes
     # Prepare the interpolants for a single interval, so we can use their
@@ -605,6 +597,46 @@ cpdef double estimate_negative_gradient_fft_1d_with_reference(
     else:
         matrix_multiply_fft_1d(sq_kernel_tilde, w_coefficients, y_tilde_values)
 
+    PyMem_Free(reference_point_box_idx)
+
+    return np.asarray(y_tilde_values), np.asarray(box_lower_bounds)
+
+
+cpdef double estimate_negative_gradient_fft_1d_with_grid(
+    double[::1] embedding,
+    double[::1] gradient,
+    double[:, ::1] y_tilde_values,
+    double[::1] box_lower_bounds,
+    Py_ssize_t n_interpolation_points,
+    double dof,
+):
+    cdef:
+        Py_ssize_t i, j, d, box_idx
+        Py_ssize_t n_samples = embedding.shape[0]
+        Py_ssize_t n_terms = y_tilde_values.shape[1]
+        Py_ssize_t n_boxes = box_lower_bounds.shape[0]
+        double y_min = box_lower_bounds[0]
+        double box_width = box_lower_bounds[1] - box_lower_bounds[0]
+
+    # Determine which box each point belongs to
+    cdef int *point_box_idx = <int *>PyMem_Malloc(n_samples * sizeof(int))
+    for i in range(n_samples):
+        box_idx = <int>((embedding[i] - y_min) / box_width)
+        # The right most point maps directly into `n_boxes`, while it should
+        # belong to the last box
+        if box_idx >= n_boxes:
+            box_idx = n_boxes - 1
+
+        point_box_idx[i] = box_idx
+
+    # Prepare the interpolants for a single interval, so we can use their
+    # relative positions later on
+    cdef double[::1] y_tilde = np.empty(n_interpolation_points, dtype=float)
+    cdef double h = 1. / n_interpolation_points
+    y_tilde[0] = h / 2
+    for i in range(1, n_interpolation_points):
+        y_tilde[i] = y_tilde[i - 1] + h
+
     # STEP 3: Compute the potentials \tilde{\phi(y_i)}
     # Compute the relative position of each new embedding point in its box
     cdef double[::1] y_in_box = np.empty(n_samples, dtype=float)
@@ -623,7 +655,6 @@ cpdef double estimate_negative_gradient_fft_1d_with_reference(
             for d in range(n_terms):
                 phi[i, d] += interpolated_values[i, j] * y_tilde_values[box_idx + j, d]
 
-    PyMem_Free(reference_point_box_idx)
     PyMem_Free(point_box_idx)
 
     # Compute the normalization term Z or sum of q_{ij}s
@@ -870,20 +901,17 @@ cpdef double estimate_negative_gradient_fft_2d(
     return sum_Q
 
 
-cpdef double estimate_negative_gradient_fft_2d_with_reference(
-    double[:, ::1] embedding,
+cpdef tuple prepare_negative_gradient_fft_interpolation_grid_2d(
     double[:, ::1] reference_embedding,
-    double[:, ::1] gradient,
     Py_ssize_t n_interpolation_points=3,
     Py_ssize_t min_num_intervals=10,
     double ints_in_interval=1,
     double dof=1,
+    double padding=0,
 ):
     cdef:
         Py_ssize_t i, j, d, box_idx
-        Py_ssize_t n_samples = embedding.shape[0]
         Py_ssize_t n_reference_samples = reference_embedding.shape[0]
-        Py_ssize_t n_dims = embedding.shape[1]
 
         double coord_max = -INFINITY, coord_min = INFINITY
     # Determine the min/max values of the embedding
@@ -897,16 +925,17 @@ cpdef double estimate_negative_gradient_fft_2d_with_reference(
             coord_min = reference_embedding[i, 1]
         elif reference_embedding[i, 1] > coord_max:
             coord_max = reference_embedding[i, 1]
-    # And check the new embedding points
-    for i in range(n_samples):
-        if embedding[i, 0] < coord_min:
-            coord_min = embedding[i, 0]
-        elif embedding[i, 0] > coord_max:
-            coord_max = embedding[i, 0]
-        if embedding[i, 1] < coord_min:
-            coord_min = embedding[i, 1]
-        elif embedding[i, 1] > coord_max:
-            coord_max = embedding[i, 1]
+
+    # We assume here that the embedding is centered and we want to generate an
+    # equal grid in all quadrants
+    if fabs(coord_min) > fabs(coord_max):
+        coord_max = -coord_min
+    elif fabs(coord_max) > fabs(coord_min):
+        coord_min = -coord_max
+
+    # Apply padding to the min/max coordinates
+    coord_min *= 1 + padding
+    coord_max *= 1 + padding
 
     cdef int n_boxes_1d = <int>fmax(min_num_intervals, (coord_max - coord_min) / ints_in_interval)
     cdef int n_total_boxes = n_boxes_1d ** 2
@@ -941,20 +970,6 @@ cpdef double estimate_negative_gradient_fft_2d_with_reference(
             box_y_idx = n_boxes_1d - 1
 
         reference_point_box_idx[i] = box_y_idx * n_boxes_1d + box_x_idx
-
-    # Determine which box each new point belongs to
-    cdef int *point_box_idx = <int *>PyMem_Malloc(n_samples * sizeof(int))
-    for i in range(n_samples):
-        box_x_idx = <int>((embedding[i, 0] - coord_min) / box_width)
-        box_y_idx = <int>((embedding[i, 1] - coord_min) / box_width)
-        # The right most point maps directly into `n_boxes`, while it should
-        # belong to the last box
-        if box_x_idx >= n_boxes_1d:
-            box_x_idx = n_boxes_1d - 1
-        if box_y_idx >= n_boxes_1d:
-            box_y_idx = n_boxes_1d - 1
-
-        point_box_idx[i] = box_y_idx * n_boxes_1d + box_x_idx
 
     # Prepare the interpolants for a single interval, so we can use their
     # relative positions later on
@@ -1039,12 +1054,60 @@ cpdef double estimate_negative_gradient_fft_2d_with_reference(
     else:
         matrix_multiply_fft_2d(sq_kernel_tilde, w_coefficients, y_tilde_values)
 
+    return (
+        np.asarray(y_tilde_values),
+        np.asarray(box_x_lower_bounds),
+        np.asarray(box_y_lower_bounds),
+    )
+
+
+cpdef double estimate_negative_gradient_fft_2d_with_grid(
+    double[:, ::1] embedding,
+    double[:, ::1] gradient,
+    double[:, ::1] y_tilde_values,
+    double[::1] box_x_lower_bounds,
+    double[::1] box_y_lower_bounds,
+    Py_ssize_t n_interpolation_points,
+    double dof,
+):
+    cdef:
+        Py_ssize_t i, j, d, box_idx
+        Py_ssize_t n_samples = embedding.shape[0]
+        Py_ssize_t n_terms = y_tilde_values.shape[1]
+        Py_ssize_t n_boxes_1d = int(sqrt(box_x_lower_bounds.shape[0]))
+        double coord_min = box_x_lower_bounds[0]
+        double box_width = box_x_lower_bounds[1] - box_x_lower_bounds[0]
+
+    # Determine which box each point belongs to
+    cdef int box_x_idx, box_y_idx
+    cdef int *point_box_idx = <int *>PyMem_Malloc(n_samples * sizeof(int))
+    for i in range(n_samples):
+        box_x_idx = <int>((embedding[i, 0] - coord_min) / box_width)
+        box_y_idx = <int>((embedding[i, 1] - coord_min) / box_width)
+        # The right most point maps directly into `n_boxes`, while it should
+        # belong to the last box
+        if box_x_idx >= n_boxes_1d:
+            box_x_idx = n_boxes_1d - 1
+        if box_y_idx >= n_boxes_1d:
+            box_y_idx = n_boxes_1d - 1
+
+        point_box_idx[i] = box_y_idx * n_boxes_1d + box_x_idx
+
+    # Prepare the interpolants for a single interval, so we can use their
+    # relative positions later on
+    cdef double[::1] y_tilde = np.empty(n_interpolation_points, dtype=float)
+    cdef double h = 1. / n_interpolation_points
+    y_tilde[0] = h / 2
+    for i in range(1, n_interpolation_points):
+        y_tilde[i] = y_tilde[i - 1] + h
+
     # STEP 3: Compute the potentials \tilde{\phi(y_i)}
     # Compute the relative position of each new embedding point in its box
     cdef:
         double[::1] x_in_box = np.empty(n_samples, dtype=float)
         double[::1] y_in_box = np.empty(n_samples, dtype=float)
 
+    cdef double y_min, x_min
     for i in range(n_samples):
         box_idx = point_box_idx[i]
         x_min = box_x_lower_bounds[box_idx]
@@ -1057,6 +1120,8 @@ cpdef double estimate_negative_gradient_fft_2d_with_reference(
     cdef double[:, ::1] y_interpolated_values = interpolate(y_in_box, y_tilde)
 
     # Actually compute \tilde{\phi(y_i)}
+    cdef Py_ssize_t box_i, box_j, interp_i, interp_j, idx
+
     cdef double[:, ::1] phi = np.zeros((n_samples, n_terms), dtype=float)
     for i in range(n_samples):
         box_idx = point_box_idx[i]
@@ -1073,7 +1138,6 @@ cpdef double estimate_negative_gradient_fft_2d_with_reference(
                                  y_interpolated_values[i, interp_j] * \
                                  y_tilde_values[idx, d]
 
-    PyMem_Free(reference_point_box_idx)
     PyMem_Free(point_box_idx)
 
     # Compute the normalization term Z or sum of q_{ij}s

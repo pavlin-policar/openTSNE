@@ -486,9 +486,13 @@ class TSNEEmbedding(np.ndarray):
         cls,
         embedding,
         affinities,
+        dof=1,
+        n_interpolation_points=3,
+        min_num_intervals=50,
+        ints_in_interval=1,
+        negative_gradient_method="fft",
         random_state=None,
         optimizer=None,
-        negative_gradient_method="fft",
         **gradient_descent_params,
     ):
         init_checks.num_samples(embedding.shape[0], affinities.P.shape[0])
@@ -497,9 +501,13 @@ class TSNEEmbedding(np.ndarray):
 
         obj.affinities = affinities  # type: Affinities
         obj.gradient_descent_params = gradient_descent_params  # type: dict
-        obj.gradient_descent_params[
-            "negative_gradient_method"
-        ] = negative_gradient_method
+        obj.gradient_descent_params.update({
+            "negative_gradient_method": negative_gradient_method,
+            "n_interpolation_points": n_interpolation_points,
+            "min_num_intervals": min_num_intervals,
+            "ints_in_interval": ints_in_interval,
+            "dof": dof,
+        })
         obj.random_state = random_state
 
         if optimizer is None:
@@ -512,6 +520,11 @@ class TSNEEmbedding(np.ndarray):
         obj.optimizer = optimizer
 
         obj.kl_divergence = None
+
+        # Interpolation grid variables
+        obj.interp_coeffs = None
+        obj.box_x_lower_bounds = None
+        obj.box_y_lower_bounds = None
 
         return obj
 
@@ -670,9 +683,9 @@ class TSNEEmbedding(np.ndarray):
         initialization="median",
         k=25,
         learning_rate=0.1,
-        early_exaggeration=2,
+        early_exaggeration=4,
         early_exaggeration_iter=0,
-        exaggeration=None,
+        exaggeration=2,
         n_iter=250,
         initial_momentum=0.5,
         final_momentum=0.8,
@@ -769,6 +782,9 @@ class TSNEEmbedding(np.ndarray):
                 "points to the embedding." % PerplexityBasedNN.__name__
             )
 
+        # Center the current embedding
+        self -= (np.max(self, axis=0) + np.min(self, axis=0)) / 2
+
         embedding = self.prepare_partial(
             X, perplexity=perplexity, initialization=initialization, k=k
         )
@@ -841,7 +857,6 @@ class TSNEEmbedding(np.ndarray):
             init_checks.num_dimensions(initialization.shape[1], self.shape[1])
 
             embedding = np.array(initialization)
-
         # Random initialization with isotropic normal distribution
         elif initialization == "random":
             embedding = initialization_scheme.random(
@@ -857,8 +872,48 @@ class TSNEEmbedding(np.ndarray):
             raise ValueError(f"Unrecognized initialization scheme `{initialization}`.")
 
         return PartialTSNEEmbedding(
-            embedding, reference_embedding=self, P=P, **self.gradient_descent_params,
+            embedding, self, P=P, **self.gradient_descent_params,
         )
+
+    def prepare_interpolation_grid(self, padding=0.25):
+        """Evaluate and save the interpolation grid coefficients.
+
+        Parameters
+        ----------
+        padding: float
+            During standard optimization, the grid hugs the embedding points as
+            closely as possible, but this is not what we want when performing
+            transform. This paraemter specifies how much empty space should be
+            appended in each dimension. The values are given in percentages.
+
+        """
+        # Center embedding into our grid
+        self -= (np.max(self, axis=0) + np.min(self, axis=0)) / 2
+
+        if self.shape[1] == 1:
+            f = _tsne.prepare_negative_gradient_fft_interpolation_grid_1d
+        elif self.shape[1] == 2:
+            f = _tsne.prepare_negative_gradient_fft_interpolation_grid_2d
+        else:
+            raise RuntimeError("Cannot prepare interpolation grid for >2d embeddings")
+
+        result = f(
+            self.ravel() if self.shape[1] == 1 else self,
+            self.gradient_descent_params["n_interpolation_points"],
+            self.gradient_descent_params["min_num_intervals"],
+            self.gradient_descent_params["ints_in_interval"],
+            self.gradient_descent_params["dof"],
+            padding=padding,
+        )
+
+        if len(result) == 2:  # 1d case
+            self.interp_coeffs, self.box_x_lower_bounds = result
+        elif len(result) == 3:  # 2d case
+            self.interp_coeffs, self.box_x_lower_bounds, self.box_y_lower_bounds = result
+        else:
+            raise RuntimeError(
+                "Prepare interpolation grid function returned >3 values!"
+            )
 
     def __reduce__(self):
         state = super().__reduce__()
@@ -867,15 +922,21 @@ class TSNEEmbedding(np.ndarray):
             self.gradient_descent_params,
             self.random_state,
             self.kl_divergence,
+            self.interp_coeffs,
+            self.box_x_lower_bounds,
+            self.box_y_lower_bounds,
         )
         return state[0], state[1], new_state
 
     def __setstate__(self, state):
-        self.kl_divergence = state[-1]
-        self.random_state = state[-2]
-        self.gradient_descent_params = state[-3]
-        self.affinities = state[-4]
-        super().__setstate__(state[0:-4])
+        self.box_y_lower_bounds = state[-1]
+        self.box_x_lower_bounds = state[-2]
+        self.interp_coeffs = state[-3]
+        self.kl_divergence = state[-4]
+        self.random_state = state[-5]
+        self.gradient_descent_params = state[-6]
+        self.affinities = state[-7]
+        super().__setstate__(state[0:-7])
 
 
 class TSNE(BaseEstimator):
@@ -1281,16 +1342,21 @@ def kl_divergence_fft(
     n_jobs=1,
     **_,
 ):
+    # If the interpolation grid has not yet been evaluated, do it now
+    if reference_embedding is not None and reference_embedding.interp_coeffs is None:
+        reference_embedding.prepare_interpolation_grid()
+
     gradient = np.zeros_like(embedding, dtype=np.float64, order="C")
 
     # Compute negative gradient.
     if embedding.ndim == 1 or embedding.shape[1] == 1:
         if reference_embedding is not None:
-            sum_Q = _tsne.estimate_negative_gradient_fft_1d_with_reference(
+            sum_Q = _tsne.estimate_negative_gradient_fft_1d_with_grid(
                 embedding.ravel(),
                 reference_embedding.ravel(),
-                gradient.ravel(),
-                **fft_params,
+                reference_embedding.interp_coeffs,
+                reference_embedding.box_x_lower_bounds,
+                fft_params["n_interpolation_points"],
                 dof=dof,
             )
         else:
@@ -1299,8 +1365,14 @@ def kl_divergence_fft(
             )
     elif embedding.shape[1] == 2:
         if reference_embedding is not None:
-            sum_Q = _tsne.estimate_negative_gradient_fft_2d_with_reference(
-                embedding, reference_embedding, gradient, **fft_params, dof=dof
+            sum_Q = _tsne.estimate_negative_gradient_fft_2d_with_grid(
+                embedding,
+                gradient,
+                reference_embedding.interp_coeffs,
+                reference_embedding.box_x_lower_bounds,
+                reference_embedding.box_y_lower_bounds,
+                fft_params["n_interpolation_points"],
+                dof=dof,
             )
         else:
             sum_Q = _tsne.estimate_negative_gradient_fft_2d(
@@ -1482,6 +1554,15 @@ class gradient_descent:
                 "`%s` instead" % type(reference_embedding)
             )
 
+        # If we're running transform and using the interpolation scheme, then we
+        # should limit the range where new points can go to
+        should_limit_range = False
+        if reference_embedding is not None:
+            if reference_embedding.box_x_lower_bounds is not None:
+                should_limit_range = True
+                lower_limit = reference_embedding.box_x_lower_bounds[0]
+                upper_limit = reference_embedding.box_x_lower_bounds[-1]
+
         update = np.zeros_like(embedding)
         if self.gains is None:
             self.gains = np.ones_like(embedding)
@@ -1573,6 +1654,22 @@ class gradient_descent:
             # otherwise this will reset point positions
             if reference_embedding is None:
                 embedding -= np.mean(embedding, axis=0)
+
+            # Limit any new points within the circle defined by the interpolation grid
+            if should_limit_range:
+                if embedding.shape[1] == 1:
+                    mask = (lower_limit < embedding) & (embedding < upper_limit)
+                    np.clip(embedding, lower_limit, upper_limit, out=embedding)
+                elif embedding.shape[1] == 2:
+                    r = np.linalg.norm(embedding, axis=1)
+                    phi = np.arctan2(embedding[:, 0], embedding[:, 1])
+                    mask = (lower_limit < embedding) & (embedding < upper_limit)
+                    mask = np.any(mask, axis=1)
+                    np.clip(r, lower_limit, upper_limit, out=r)
+                    embedding[:, 0] = r * np.cos(phi)
+                    embedding[:, 1] = r * np.sin(phi)
+                # Zero out the momentum terms for the points that hit the boundary
+                self.gains[~mask] = 0
 
             if verbose and (iteration + 1) % 50 == 0:
                 stop_time = time()
