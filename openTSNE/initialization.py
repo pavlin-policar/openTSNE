@@ -98,7 +98,7 @@ def pca(X, n_components=2, svd_solver="auto", random_state=None, verbose=False):
     return np.ascontiguousarray(embedding)
 
 
-def spectral(A, n_components=2, tol=1e-4, max_iter=None, verbose=False):
+def spectral(A, n_components=2, tol=1e-4, max_iter=None, random_state=None, verbose=False):
     """Initialize an embedding using the spectral embedding of the KNN graph.
 
     Specifically, we initialize data points by computing the diffusion map on
@@ -118,6 +118,9 @@ def spectral(A, n_components=2, tol=1e-4, max_iter=None, verbose=False):
 
     max_iter: float
         See scipy.sparse.linalg.eigsh documentation.
+
+    random_state: Any
+        Unused, but kept for consistency between initialization schemes.
 
     verbose: bool
 
