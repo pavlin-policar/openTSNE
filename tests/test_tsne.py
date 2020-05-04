@@ -775,3 +775,9 @@ class TestTSNEEmebedding(unittest.TestCase):
         self.assertIsInstance(loaded_obj, openTSNE.TSNEEmbedding)
         self.assertIsInstance(loaded_obj.affinities, openTSNE.affinity.Affinities)
         self.assertEqual(4, loaded_obj.random_state)
+
+    def test_pickling_with_transform(self):
+        tsne = TSNE(random_state=4)
+        embedding: openTSNE.TSNEEmbedding = tsne.fit(np.random.randn(100, 4))
+        loaded_obj: openTSNE.TSNEEmbedding = pickle.loads(pickle.dumps(embedding))
+        loaded_obj.transform(np.random.randn(100, 4))
