@@ -43,11 +43,23 @@ openTSNE is also available through ``pip`` and can be installed with
 
 `PyPi package <https://pypi.org/project/openTSNE>`__
 
-Note that openTSNE requires a C/C++ compiler. ``numpy`` must also be
-installed.
+Installing from source
+~~~~~~~~~~~~~~~~~~~~~~
+
+If you wish to install openTSNE from source, please run
+
+::
+
+   python setup.py install
+
+
+in the root directory to install the appropriate dependencies and compile the necessary binary files.
+
+Please note that openTSNE requires a C/C++ compiler to be available on the system. Additionally,
+``numpy`` must be pre-installed in the active environment.
 
 In order for openTSNE to utilize multiple threads, the C/C++ compiler
-must also implement ``OpenMP``. In practice, almost all compilers
+must support ``OpenMP``. In practice, almost all compilers
 implement this with the exception of older version of ``clang`` on OSX
 systems.
 
