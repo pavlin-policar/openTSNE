@@ -70,7 +70,7 @@ jobs:
       - bash: python -m pip install --force-reinstall --find-links dist openTSNE
         displayName: 'Install wheel'
 
-      - script: pip install pynndescent
+      - script: python -m pip install pynndescent
         displayName: 'Install optional dependencies'
 
       - script: pytest -v
@@ -125,7 +125,7 @@ jobs:
       - bash: mv openTSNE src
         displayName: 'Remove source files from path'
 
-      - script: pip install pynndescent
+      - script: $(python)/pip install pynndescent
         displayName: 'Install optional dependencies'
 
       - script: $(python)/python -m pytest -v
@@ -189,7 +189,7 @@ jobs:
       - bash: python -m pip install --force-reinstall --find-links dist openTSNE
         displayName: 'Install package'
 
-      - script: pip install pynndescent
+      - script: python -m pip install pynndescent
         displayName: 'Install optional dependencies'
 
       - script: pytest -v
