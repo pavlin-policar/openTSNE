@@ -6,6 +6,28 @@ from sklearn.utils import check_random_state
 from openTSNE import utils
 
 
+def rescale(x, inplace=False):
+    """Rescale an embedding so optimization will not have convergence issues.
+
+    Parameters
+    ----------
+    x: np.ndarray
+    inplace: bool
+
+    Returns
+    -------
+    np.ndarray
+        A scaled-down version of ``x``.
+
+    """
+    if not inplace:
+        x = np.array(x, copy=True)
+
+    x /= np.std(x[:, 0]) * 10000
+
+    return x
+
+
 def random(X, n_components=2, random_state=None, verbose=False):
     """Initialize an embedding using samples from an isotropic Gaussian.
 
@@ -69,11 +91,7 @@ def pca(X, n_components=2, svd_solver="auto", random_state=None, verbose=False):
         n_components=n_components, svd_solver=svd_solver, random_state=random_state
     )
     embedding = pca_.fit_transform(X)
-
-    # The PCA embedding may have high variance, which leads to poor convergence
-    normalization = np.std(embedding[:, 0])
-    normalization /= 0.0001
-    embedding /= normalization
+    rescale(embedding, inplace=True)
 
     timer.__exit__()
 
@@ -134,10 +152,7 @@ def spectral(A, n_components=2, tol=1e-4, max_iter=None, verbose=False):
     # Drop the leading eigenvector
     embedding = eigvecs[:, 1:]
 
-    # Ensure low variance
-    normalization = np.std(embedding[:, 0])
-    normalization /= 0.0001
-    embedding /= normalization
+    rescale(embedding, inplace=True)
 
     timer.__exit__()
 
