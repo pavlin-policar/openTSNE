@@ -1,5 +1,6 @@
 import logging
 import operator
+from typing import Iterable
 from functools import reduce
 
 import numpy as np
@@ -813,7 +814,7 @@ class MultiscaleMixture(Affinities):
 
         return P
 
-    def check_perplexities(self, perplexities):
+    def check_perplexities(self, perplexities: Iterable[float]) -> Iterable[float]:
         """Check and correct/truncate perplexities.
 
         If a perplexity is too large, it is corrected to the largest allowed
@@ -823,6 +824,9 @@ class MultiscaleMixture(Affinities):
         """
         usable_perplexities = []
         for perplexity in sorted(perplexities):
+            if perplexity <= 0:
+                raise ValueError("Perplexity must be >=0. %.2f given" % perplexity)
+
             if 3 * perplexity > self.n_samples - 1:
                 new_perplexity = (self.n_samples - 1) / 3
 
