@@ -1,6 +1,6 @@
 import logging
 import operator
-from collections import Iterable
+from typing import Iterable
 from functools import reduce
 
 import numpy as np
