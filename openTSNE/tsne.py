@@ -685,7 +685,7 @@ class TSNEEmbedding(np.ndarray):
         learning_rate=0.1,
         early_exaggeration=4,
         early_exaggeration_iter=0,
-        exaggeration=2,
+        exaggeration=1.5,
         n_iter=250,
         initial_momentum=0.5,
         final_momentum=0.8,
