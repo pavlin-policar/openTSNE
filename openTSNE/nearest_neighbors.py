@@ -180,10 +180,6 @@ class Annoy(KNNIndex):
         "taxicab",
     ]
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.__data = None
-
     def build(self, data, k):
         timer = utils.Timer(
             f"Finding {k} nearest neighbors using Annoy approximate search using "
@@ -255,22 +251,19 @@ class Annoy(KNNIndex):
         distances = np.zeros((N, k))
         indices = np.zeros((N, k)).astype(int)
 
-        def getnns(v):
-            # Annoy returns the query point itself as the first element
-            indices_i, distances_i = self.index.get_nns_by_vector(
-                v, k + 1, include_distances=True
+        def getnns(i):
+            indices[i], distances[i] = self.index.get_nns_by_vector(
+                query[i], k, include_distances=True
             )
-            indices[i] = indices_i[1:]
-            distances[i] = distances_i[1:]
 
         if self.n_jobs == 1:
             for i in range(N):
-                getnns(query[i])
+                getnns(i)
         else:
             from joblib import Parallel, delayed
 
             Parallel(n_jobs=self.n_jobs, require="sharedmem")(
-                delayed(getnns)(query[i]) for i in range(N)
+                delayed(getnns)(i) for i in range(N)
             )
 
         timer.__exit__()
@@ -317,6 +310,16 @@ class NNDescent(KNNIndex):
         "sokalmichener",
         "yule",
     ]
+
+    def __init__(self, *args, **kwargs):
+        try:
+            import pynndescent  # pylint: disable=unused-import,unused-variable
+        except ImportError:
+            raise ImportError(
+                "Please install pynndescent: `conda install -c conda-forge "
+                "pynndescent` or `pip install pynndescent`."
+            )
+        super().__init__(*args, **kwargs)
 
     def check_metric(self, metric):
         import pynndescent

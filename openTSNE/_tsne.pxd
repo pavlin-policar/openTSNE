@@ -44,15 +44,25 @@ cpdef double estimate_negative_gradient_fft_1d(
     Py_ssize_t n_interpolation_points=*,
     Py_ssize_t min_num_intervals=*,
     double ints_in_interval=*,
+    double dof=*,
 )
 
-cpdef double estimate_negative_gradient_fft_1d_with_reference(
-    double[::1] embedding,
+cpdef tuple prepare_negative_gradient_fft_interpolation_grid_1d(
     double[::1] reference_embedding,
-    double[::1] gradient,
     Py_ssize_t n_interpolation_points=*,
     Py_ssize_t min_num_intervals=*,
     double ints_in_interval=*,
+    double dof=*,
+    double padding=*,
+)
+
+cpdef double estimate_negative_gradient_fft_1d_with_grid(
+    double[::1] embedding,
+    double[::1] gradient,
+    double[:, ::1] y_tilde_values,
+    double[::1] box_lower_bounds,
+    Py_ssize_t n_interpolation_points,
+    double dof,
 )
 
 cpdef double estimate_negative_gradient_fft_2d(
@@ -61,13 +71,24 @@ cpdef double estimate_negative_gradient_fft_2d(
     Py_ssize_t n_interpolation_points=*,
     Py_ssize_t min_num_intervals=*,
     double ints_in_interval=*,
+    double dof=*,
 )
 
-cpdef double estimate_negative_gradient_fft_2d_with_reference(
-    double[:, ::1] embedding,
+cpdef tuple prepare_negative_gradient_fft_interpolation_grid_2d(
     double[:, ::1] reference_embedding,
-    double[:, ::1] gradient,
     Py_ssize_t n_interpolation_points=*,
     Py_ssize_t min_num_intervals=*,
     double ints_in_interval=*,
+    double dof=*,
+    double padding=*,
+)
+
+cpdef double estimate_negative_gradient_fft_2d_with_grid(
+    double[:, ::1] embedding,
+    double[:, ::1] gradient,
+    double[:, ::1] y_tilde_values,
+    double[::1] box_x_lower_bounds,
+    double[::1] box_y_lower_bounds,
+    Py_ssize_t n_interpolation_points,
+    double dof,
 )

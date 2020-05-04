@@ -30,9 +30,10 @@ cdef extern from 'fftw3.h':
     fftw_plan fftw_plan_dft_c2r_2d(int, int, fftw_complex*, double*, unsigned)
 
 
-cdef double[:, ::1] matrix_multiply_fft_1d(
+cdef void matrix_multiply_fft_1d(
     double[::1] kernel_tilde,
     double[:, ::1] w_coefficients,
+    double[:, ::1] out,
 ):
     """Multiply the the kernel vectr K tilde with the w coefficients.
     
@@ -48,19 +49,14 @@ cdef double[:, ::1] matrix_multiply_fft_1d(
         The coefficients calculated in Step 1 of the paper, a
         (n_total_interp, n_terms) matrix. The coefficients are embedded into a
         larger matrix in this function, so no prior embedding is needed.
-        
-    Returns
-    -------
-    memoryview
-        Contains the kernel values at the equspaced interpolation nodes.
+    out : memoryview
+        Output matrix. Must be same size as ``w_coefficients``.
     
     """
     cdef:
         Py_ssize_t n_interpolation_points_1d = w_coefficients.shape[0]
         Py_ssize_t n_terms = w_coefficients.shape[1]
         Py_ssize_t n_fft_coeffs = kernel_tilde.shape[0]
-
-        double[:, ::1] y_tilde_values = np.empty((n_interpolation_points_1d, n_terms), dtype=float)
 
         complex[::1] fft_kernel_tilde = np.empty(n_fft_coeffs, dtype=complex)
         complex[::1] fft_w_coeffs = np.empty(n_fft_coeffs, dtype=complex)
@@ -111,17 +107,16 @@ cdef double[:, ::1] matrix_multiply_fft_1d(
             # FFTW doesn't perform IDFT normalization, so we have to do it
             # ourselves. This is done by multiplying the result with the number
             #  of points in the input
-            y_tilde_values[i, d] = fft_out_buffer[n_interpolation_points_1d + i].real / n_fft_coeffs
+            out[i, d] = fft_out_buffer[n_interpolation_points_1d + i].real / n_fft_coeffs
 
     fftw_destroy_plan(plan_dft)
     fftw_destroy_plan(plan_idft)
 
-    return y_tilde_values
 
-
-cdef double[:, ::1] matrix_multiply_fft_2d(
+cdef void matrix_multiply_fft_2d(
     double[:, ::1] kernel_tilde,
     double[:, ::1] w_coefficients,
+    double[:, ::1] out,
 ):
     """Multiply the the kernel matrix K tilde with the w coefficients.
     
@@ -137,11 +132,8 @@ cdef double[:, ::1] matrix_multiply_fft_2d(
         The coefficients calculated in Step 1 of the paper, a
         (n_total_interp, n_terms) matrix. The coefficients are embedded into a
         larger matrix in this function, so no prior embedding is needed.
-        
-    Returns
-    -------
-    memoryview
-        Contains the kernel values at the equspaced interpolation nodes.
+    out : memoryview
+        Output matrix. Must be same size as ``w_coefficients``.
     
     """
     cdef:
@@ -149,8 +141,6 @@ cdef double[:, ::1] matrix_multiply_fft_2d(
         Py_ssize_t n_terms = w_coefficients.shape[1]
         Py_ssize_t n_fft_coeffs = kernel_tilde.shape[0]
         Py_ssize_t n_interpolation_points_1d = n_fft_coeffs / 2
-
-        double[:, ::1] y_tilde_values = np.empty((total_interpolation_points, n_terms))
 
         fftw_plan plan_dft, plan_idft
         complex[::1] fft_w_coefficients = np.empty(n_fft_coeffs * (n_fft_coeffs / 2 + 1), dtype=complex)
@@ -203,10 +193,8 @@ cdef double[:, ::1] matrix_multiply_fft_2d(
         for i in range(n_interpolation_points_1d):
             for j in range(n_interpolation_points_1d):
                 idx = i * n_interpolation_points_1d + j
-                y_tilde_values[idx, d] = fft_out_buffer[n_interpolation_points_1d + i,
+                out[idx, d] = fft_out_buffer[n_interpolation_points_1d + i,
                                                         n_interpolation_points_1d + j] / n_fft_coeffs ** 2
 
     fftw_destroy_plan(plan_dft)
     fftw_destroy_plan(plan_idft)
-
-    return y_tilde_values
