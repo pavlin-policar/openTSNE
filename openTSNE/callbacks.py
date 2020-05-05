@@ -11,9 +11,6 @@ from openTSNE.tsne import TSNEEmbedding
 
 log = logging.getLogger(__name__)
 
-# Enable warnings for this module
-warnings.simplefilter("module")
-
 
 class Callback:
     def optimization_about_to_start(self):
@@ -55,7 +52,7 @@ class ErrorLogger(Callback):
         warnings.warn(
             "`ErrorLogger` will be removed in upcoming version. Please use the "
             "`verbose` flag instead.",
-            category=DeprecationWarning,
+            category=FutureWarning,
         )
         self.iter_count = 0
         self.last_log_time = None
