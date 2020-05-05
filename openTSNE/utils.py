@@ -2,9 +2,6 @@ from functools import wraps
 from time import time
 import warnings
 
-# Enable warnings for this module
-warnings.simplefilter("module")
-
 
 class Timer:
     def __init__(self, message, verbose=False):
@@ -30,7 +27,7 @@ def deprecate_parameter(parameter):
                 warnings.warn(
                     f"The parameter `{parameter}` has been deprecated and will be "
                     f"removed in future versions",
-                    category=DeprecationWarning,
+                    category=FutureWarning,
                 )
             return f(*args, **kwargs)
         return func
