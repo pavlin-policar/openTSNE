@@ -62,11 +62,18 @@ class get_numpy_include:
 
 
 def get_include_dirs():
-    """Get all the include directories which may contain headers that we need to
-    compile the cython extensions."""
+    """Get include dirs for the compiler."""
     return (
         os.path.join(sys.prefix, "include"),
         os.path.join(sys.prefix, "Library", "include"),
+    )
+
+
+def get_library_dirs():
+    """Get library dirs for the compiler."""
+    return (
+        os.path.join(sys.prefix, "lib"),
+        os.path.join(sys.prefix, "Library", "lib"),
     )
 
 
@@ -117,7 +124,6 @@ class CythonBuildExt(build_ext):
         "unix": {
             "openmp": "-Xpreprocessor -fopenmp" if sys.platform == "darwin" else "-fopenmp",
             "optimize": "-O3",
-            "fftw": "-lfftw3",
             "math": "-lm",
             "fast-math": "-ffast-math",
             "native": "-march=native",
@@ -125,7 +131,6 @@ class CythonBuildExt(build_ext):
         "msvc": {
             "openmp": "/openmp",
             "optimize": "/Ox",
-            "fftw": "/lfftw3",
             "math": "",
             "fast-math": "/fp:fast",
             "native": "",
@@ -185,6 +190,10 @@ class CythonBuildExt(build_ext):
             extension.include_dirs.extend(get_include_dirs())
             extension.include_dirs.append(get_numpy_include())
 
+        # Add numpy and system include directories
+        for extension in self.extensions:
+            extension.library_dirs.extend(get_library_dirs())
+
         super().build_extensions()
 
 
@@ -201,8 +210,7 @@ if has_c_library("fftw3"):
     extension_ = Extension(
         "openTSNE._matrix_mul.matrix_mul",
         ["openTSNE/_matrix_mul/matrix_mul_fftw3.pyx"],
-        extra_compile_args=["fftw"],
-        extra_link_args=["fftw"],
+        libraries=["fftw3"],
     )
     extensions.append(extension_)
 else:
