@@ -41,7 +41,15 @@ jobs:
     steps:
       - bash: |
           case $AGENT_OS in
-            "Darwin") brew install libomp; echo `brew --prefix libomp` ;;
+            "Darwin")
+              brew install libomp;
+              echo `brew --prefix libomp`;
+              echo $CPATH; echo $LIBRARY_PATH;
+              export CPATH="$(brew --prefix libomp)/include";
+              export LIBRARY_PATH="$(brew --prefix libomp)/lib";
+              echo "Overriding CPATH and LIBRARY_PATH...";
+              echo $CPATH; echo $LIBRARY_PATH;
+              ;;
           esac
         displayName: 'Install openMP on OSX'
 
@@ -110,13 +118,15 @@ jobs:
         python37:
           python: '/opt/python/cp37-cp37m/bin'
         python38:
-          python: '/opt/python/cp38-cp38m/bin'
+          python: '/opt/python/cp38-cp38/bin'
 
     container:
       image: quay.io/pypa/manylinux1_x86_64:latest
       options: -e PLAT=manylinux1_x86_64
 
     steps:
+      - bash: ls -R /opt/python
+        displayName: 'List available Python binaries'
 
       - bash: $(python)/pip install --user pytest
         displayName: 'Install job dependencies'

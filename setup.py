@@ -162,7 +162,10 @@ class CythonBuildExt(build_ext):
         # is only really an issue with OSX clang
         if has_c_library("omp"):
             print("Found openmp. Compiling with openmp flags...")
-            if compiler == "unix":
+            if platform.system() == "Darwin" and compiler == "unix":
+                extra_compile_args += ["-Xpreprocessor", "-fopenmp"]
+                extra_link_args += ["-lomp"]
+            elif compiler == "unix":
                 extra_compile_args += ["-fopenmp"]
                 extra_link_args += ["-fopenmp"]
             elif compiler == "msvc":
