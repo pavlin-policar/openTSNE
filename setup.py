@@ -120,24 +120,6 @@ def has_c_library(library, extension=".c"):
 
 
 class CythonBuildExt(build_ext):
-
-    COMPILER_FLAGS = {
-        "unix": {
-            "openmp": "-Xpreprocessor -fopenmp" if sys.platform == "darwin" else "-fopenmp",
-            "optimize": "-O3",
-            "math": "-lm",
-            "fast-math": "-ffast-math",
-            "native": "-march=native",
-        },
-        "msvc": {
-            "openmp": "/openmp",
-            "optimize": "/Ox",
-            "math": "",
-            "fast-math": "/fp:fast",
-            "native": "",
-        },
-    }
-
     def build_extensions(self):
         # Automatically append the file extension based on language.
         # ``cythonize`` does this for us automatically, so it's not necessary if
@@ -149,31 +131,41 @@ class CythonBuildExt(build_ext):
                     base += ".cpp" if extension.language == "c++" else ".c"
                     extension.sources[idx] = base
 
+        extra_compile_args = []
+        extra_link_args = []
+
         # Optimization compiler/linker flags are added appropriately
-        flags = self.COMPILER_FLAGS[self.compiler.compiler_type]
-        compile_flags = [flags["math"], flags["optimize"]]
-        link_flags = [flags["math"], flags["optimize"]]
+        compiler = self.compiler.compiler_type
+        if compiler == "unix":
+            extra_compile_args += ["-O3", "-ffast-math"]
+            extra_link_args += ["-lm"]
+        elif compiler == "msvc":
+            extra_compile_args += ["/Ox", "/fp:fast"]
 
         # We don't want the compiler to optimize for system architecture if
         # we're building packages to be distributed by conda-forge, but if the
         # package is being built locally, this is desired
         if not ("AZURE_BUILD" in os.environ or "CONDA_BUILD" in os.environ):
-            compile_flags.append(flags["native"])
-            link_flags.append(flags["native"])
+            if platform.machine() == "ppc64le":
+                extra_compile_args += ["-mcpu=native"]
+            if platform.machine() == "x86_64":
+                extra_compile_args += ["-march=native"]
 
-        # Map any existing compile/link flags into compiler specific ones
-        def map_flags(ls):
-            return list(map(lambda flag: flags.get(flag, flag), ls))
-
-        for extension in self.extensions:
-            extension.extra_compile_args = map_flags(extension.extra_compile_args)
-            extension.extra_link_args = map_flags(extension.extra_link_args)
+        # Annoy #349: something with OS X Mojave causes libstd not to be found
+        if platform.system() == "Darwin":
+            extra_compile_args += ["-std=c++11", "-mmacosx-version-min=10.9"]
+            extra_link_args += ["-stdlib=libc++", "-mmacosx-version-min=10.9"]
 
         # We will disable openmp flags if the compiler doesn"t support it. This
         # is only really an issue with OSX clang
         if has_c_library("omp"):
             print("Found openmp. Compiling with openmp flags...")
-            compile_flags.append(flags["openmp"]), link_flags.append(flags["openmp"])
+            if compiler == "unix":
+                extra_compile_args += ["-fopenmp"]
+                extra_link_args += ["-fopenmp"]
+            elif compiler == "msvc":
+                extra_compile_args += ["/openmp"]
+                extra_link_args += ["/openmp"]
         else:
             warnings.warn(
                 "You appear to be using a compiler which does not support "
@@ -183,8 +175,8 @@ class CythonBuildExt(build_ext):
             )
 
         for extension in self.extensions:
-            extension.extra_compile_args.extend(compile_flags)
-            extension.extra_link_args.extend(link_flags)
+            extension.extra_compile_args += extra_compile_args
+            extension.extra_link_args += extra_link_args
 
         # Add numpy and system include directories
         for extension in self.extensions:
@@ -201,16 +193,11 @@ class CythonBuildExt(build_ext):
 # Prepare the Annoy extension
 # Adapted from annoy setup.py
 # Various platform-dependent extras
-extra_compile_args = ["-D_CRT_SECURE_NO_WARNINGS"]
+extra_compile_args = []
 extra_link_args = []
 
 if os.name != "nt":
     extra_compile_args += ["-fno-associative-math"]
-
-# #349: something with OS X Mojave causes libstd not to be found
-if platform.system() == "Darwin":
-    extra_compile_args += ["-std=c++11", "-mmacosx-version-min=10.9"]
-    extra_link_args += ["-stdlib=libc++", "-mmacosx-version-min=10.9"]
 
 annoy_path = "openTSNE/dependencies/annoy/"
 annoy = Extension(
@@ -224,9 +211,9 @@ annoy = Extension(
 
 # Other extensions
 extensions = [
-    Extension("openTSNE.quad_tree", ["openTSNE/quad_tree.pyx"]),
-    Extension("openTSNE._tsne", ["openTSNE/_tsne.pyx"]),
-    Extension("openTSNE.kl_divergence", ["openTSNE/kl_divergence.pyx"]),
+    Extension("openTSNE.quad_tree", ["openTSNE/quad_tree.pyx"], language="c++"),
+    Extension("openTSNE._tsne", ["openTSNE/_tsne.pyx"], language="c++"),
+    Extension("openTSNE.kl_divergence", ["openTSNE/kl_divergence.pyx"], language="c++"),
     annoy
 ]
 
@@ -238,6 +225,7 @@ if has_c_library("fftw3"):
         "openTSNE._matrix_mul.matrix_mul",
         ["openTSNE/_matrix_mul/matrix_mul_fftw3.pyx"],
         libraries=["fftw3"],
+        language="c++",
     )
     extensions.append(extension_)
 else:
@@ -245,6 +233,7 @@ else:
     extension_ = Extension(
         "openTSNE._matrix_mul.matrix_mul",
         ["openTSNE/_matrix_mul/matrix_mul_numpy.pyx"],
+        language="c++",
     )
     extensions.append(extension_)
 
