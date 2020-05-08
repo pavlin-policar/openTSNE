@@ -6,3 +6,4 @@ build/
 __pycache__/
 dist/
 .ipynb_checkpoints/
+.DS_STORE

@@ -1,5 +1,6 @@
 import distutils
 import os
+import platform
 import sys
 import tempfile
 import warnings
@@ -197,10 +198,36 @@ class CythonBuildExt(build_ext):
         super().build_extensions()
 
 
+# Prepare the Annoy extension
+# Adapted from annoy setup.py
+# Various platform-dependent extras
+extra_compile_args = ["-D_CRT_SECURE_NO_WARNINGS"]
+extra_link_args = []
+
+if os.name != "nt":
+    extra_compile_args += ["-fno-associative-math"]
+
+# #349: something with OS X Mojave causes libstd not to be found
+if platform.system() == "Darwin":
+    extra_compile_args += ["-std=c++11", "-mmacosx-version-min=10.9"]
+    extra_link_args += ["-stdlib=libc++", "-mmacosx-version-min=10.9"]
+
+annoy_path = "openTSNE/dependencies/annoy/"
+annoy = Extension(
+    "openTSNE.dependencies.annoy.annoylib",
+    [annoy_path + "annoymodule.cc"],
+    depends=[annoy_path + f for f in ["annoylib.h", "kissrandom.h", "mman.h"]],
+    language="c++",
+    extra_compile_args=extra_compile_args,
+    extra_link_args=extra_link_args,
+)
+
+# Other extensions
 extensions = [
     Extension("openTSNE.quad_tree", ["openTSNE/quad_tree.pyx"]),
     Extension("openTSNE._tsne", ["openTSNE/_tsne.pyx"]),
     Extension("openTSNE.kl_divergence", ["openTSNE/kl_divergence.pyx"]),
+    annoy
 ]
 
 
@@ -275,7 +302,6 @@ setup(
         "numpy>=1.14.6",
         "scikit-learn>=0.20",
         "scipy",
-        "annoy>=1.16.3",
     ],
 
     ext_modules=extensions,
