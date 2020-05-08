@@ -136,9 +136,11 @@ class CythonBuildExt(build_ext):
 
         # Optimization compiler/linker flags are added appropriately
         compiler = self.compiler.compiler_type
-        if compiler == "unix":
-            extra_compile_args += ["-O3", "-ffast-math"]
-            extra_link_args += ["-lm"]
+        if compiler == "unix" and platform.platform():
+            extra_compile_args += ["-O3"]
+            # For some reason fast math causes segfaults on linux but works on mac
+            if platform.system() == "Darwin":
+                extra_compile_args += ["-ffast-math", "-fno-associative-math"]
         elif compiler == "msvc":
             extra_compile_args += ["/Ox", "/fp:fast"]
 
@@ -195,9 +197,6 @@ class CythonBuildExt(build_ext):
 # Various platform-dependent extras
 extra_compile_args = []
 extra_link_args = []
-
-if os.name != "nt":
-    extra_compile_args += ["-fno-associative-math"]
 
 annoy_path = "openTSNE/dependencies/annoy/"
 annoy = Extension(
