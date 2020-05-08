@@ -188,7 +188,7 @@ class Annoy(KNNIndex):
         )
         timer.__enter__()
 
-        from annoy import AnnoyIndex
+        from openTSNE.dependencies.annoy import AnnoyIndex
 
         N = data.shape[0]
 

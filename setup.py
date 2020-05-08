@@ -1,5 +1,6 @@
 import distutils
 import os
+import platform
 import sys
 import tempfile
 import warnings
@@ -62,11 +63,18 @@ class get_numpy_include:
 
 
 def get_include_dirs():
-    """Get all the include directories which may contain headers that we need to
-    compile the cython extensions."""
+    """Get include dirs for the compiler."""
     return (
         os.path.join(sys.prefix, "include"),
         os.path.join(sys.prefix, "Library", "include"),
+    )
+
+
+def get_library_dirs():
+    """Get library dirs for the compiler."""
+    return (
+        os.path.join(sys.prefix, "lib"),
+        os.path.join(sys.prefix, "Library", "lib"),
     )
 
 
@@ -112,26 +120,6 @@ def has_c_library(library, extension=".c"):
 
 
 class CythonBuildExt(build_ext):
-
-    COMPILER_FLAGS = {
-        "unix": {
-            "openmp": "-Xpreprocessor -fopenmp" if sys.platform == "darwin" else "-fopenmp",
-            "optimize": "-O3",
-            "fftw": "-lfftw3",
-            "math": "-lm",
-            "fast-math": "-ffast-math",
-            "native": "-march=native",
-        },
-        "msvc": {
-            "openmp": "/openmp",
-            "optimize": "/Ox",
-            "fftw": "/lfftw3",
-            "math": "",
-            "fast-math": "/fp:fast",
-            "native": "",
-        },
-    }
-
     def build_extensions(self):
         # Automatically append the file extension based on language.
         # ``cythonize`` does this for us automatically, so it's not necessary if
@@ -143,31 +131,43 @@ class CythonBuildExt(build_ext):
                     base += ".cpp" if extension.language == "c++" else ".c"
                     extension.sources[idx] = base
 
+        extra_compile_args = []
+        extra_link_args = []
+
         # Optimization compiler/linker flags are added appropriately
-        flags = self.COMPILER_FLAGS[self.compiler.compiler_type]
-        compile_flags = [flags["math"], flags["optimize"]]
-        link_flags = [flags["math"], flags["optimize"]]
+        compiler = self.compiler.compiler_type
+        if compiler == "unix" and platform.platform():
+            extra_compile_args += ["-O3"]
+            # For some reason fast math causes segfaults on linux but works on mac
+            if platform.system() == "Darwin":
+                extra_compile_args += ["-ffast-math", "-fno-associative-math"]
+        elif compiler == "msvc":
+            extra_compile_args += ["/Ox", "/fp:fast"]
 
         # We don't want the compiler to optimize for system architecture if
         # we're building packages to be distributed by conda-forge, but if the
         # package is being built locally, this is desired
         if not ("AZURE_BUILD" in os.environ or "CONDA_BUILD" in os.environ):
-            compile_flags.append(flags["native"])
-            link_flags.append(flags["native"])
+            if platform.machine() == "ppc64le":
+                extra_compile_args += ["-mcpu=native"]
+            if platform.machine() == "x86_64":
+                extra_compile_args += ["-march=native"]
 
-        # Map any existing compile/link flags into compiler specific ones
-        def map_flags(ls):
-            return list(map(lambda flag: flags.get(flag, flag), ls))
-
-        for extension in self.extensions:
-            extension.extra_compile_args = map_flags(extension.extra_compile_args)
-            extension.extra_link_args = map_flags(extension.extra_link_args)
+        # Annoy #349: something with OS X Mojave causes libstd not to be found
+        if platform.system() == "Darwin":
+            extra_compile_args += ["-std=c++11", "-mmacosx-version-min=10.9"]
+            extra_link_args += ["-stdlib=libc++", "-mmacosx-version-min=10.9"]
 
         # We will disable openmp flags if the compiler doesn"t support it. This
         # is only really an issue with OSX clang
         if has_c_library("omp"):
             print("Found openmp. Compiling with openmp flags...")
-            compile_flags.append(flags["openmp"]), link_flags.append(flags["openmp"])
+            if compiler == "unix":
+                extra_compile_args += ["-fopenmp"]
+                extra_link_args += ["-fopenmp"]
+            elif compiler == "msvc":
+                extra_compile_args += ["/openmp"]
+                extra_link_args += ["/openmp"]
         else:
             warnings.warn(
                 "You appear to be using a compiler which does not support "
@@ -177,21 +177,43 @@ class CythonBuildExt(build_ext):
             )
 
         for extension in self.extensions:
-            extension.extra_compile_args.extend(compile_flags)
-            extension.extra_link_args.extend(link_flags)
+            extension.extra_compile_args += extra_compile_args
+            extension.extra_link_args += extra_link_args
 
         # Add numpy and system include directories
         for extension in self.extensions:
             extension.include_dirs.extend(get_include_dirs())
             extension.include_dirs.append(get_numpy_include())
 
+        # Add numpy and system include directories
+        for extension in self.extensions:
+            extension.library_dirs.extend(get_library_dirs())
+
         super().build_extensions()
 
 
+# Prepare the Annoy extension
+# Adapted from annoy setup.py
+# Various platform-dependent extras
+extra_compile_args = []
+extra_link_args = []
+
+annoy_path = "openTSNE/dependencies/annoy/"
+annoy = Extension(
+    "openTSNE.dependencies.annoy.annoylib",
+    [annoy_path + "annoymodule.cc"],
+    depends=[annoy_path + f for f in ["annoylib.h", "kissrandom.h", "mman.h"]],
+    language="c++",
+    extra_compile_args=extra_compile_args,
+    extra_link_args=extra_link_args,
+)
+
+# Other extensions
 extensions = [
-    Extension("openTSNE.quad_tree", ["openTSNE/quad_tree.pyx"]),
-    Extension("openTSNE._tsne", ["openTSNE/_tsne.pyx"]),
-    Extension("openTSNE.kl_divergence", ["openTSNE/kl_divergence.pyx"]),
+    Extension("openTSNE.quad_tree", ["openTSNE/quad_tree.pyx"], language="c++"),
+    Extension("openTSNE._tsne", ["openTSNE/_tsne.pyx"], language="c++"),
+    Extension("openTSNE.kl_divergence", ["openTSNE/kl_divergence.pyx"], language="c++"),
+    annoy
 ]
 
 
@@ -201,8 +223,8 @@ if has_c_library("fftw3"):
     extension_ = Extension(
         "openTSNE._matrix_mul.matrix_mul",
         ["openTSNE/_matrix_mul/matrix_mul_fftw3.pyx"],
-        extra_compile_args=["fftw"],
-        extra_link_args=["fftw"],
+        libraries=["fftw3"],
+        language="c++",
     )
     extensions.append(extension_)
 else:
@@ -210,6 +232,7 @@ else:
     extension_ = Extension(
         "openTSNE._matrix_mul.matrix_mul",
         ["openTSNE/_matrix_mul/matrix_mul_numpy.pyx"],
+        language="c++",
     )
     extensions.append(extension_)
 
@@ -267,7 +290,6 @@ setup(
         "numpy>=1.14.6",
         "scikit-learn>=0.20",
         "scipy",
-        "annoy>=1.16.3",
     ],
 
     ext_modules=extensions,

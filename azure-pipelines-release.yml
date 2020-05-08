@@ -24,6 +24,9 @@ jobs:
         osx - python37:
           image.name: 'macos-10.14'
           python.version: '3.7'
+        osx - python38:
+          image.name: 'macos-10.14'
+          python.version: '3.8'
 
         windows - python36:
           image.name: 'vs2017-win2016'
@@ -31,6 +34,9 @@ jobs:
         windows - python37:
           image.name: 'vs2017-win2016'
           python.version: '3.7'
+        windows - python38:
+          image.name: 'vs2017-win2016'
+          python.version: '3.8'
 
     steps:
       - bash: |
@@ -67,7 +73,7 @@ jobs:
       - bash: ls -lRh dist
         displayName: 'List built files'
 
-      - bash: python -m pip install --force-reinstall --find-links dist openTSNE
+      - bash: python -m pip install -vv --force-reinstall --find-links dist openTSNE
         displayName: 'Install wheel'
 
       - script: python -m pip install pynndescent
@@ -103,6 +109,8 @@ jobs:
           python: '/opt/python/cp36-cp36m/bin'
         python37:
           python: '/opt/python/cp37-cp37m/bin'
+        python38:
+          python: '/opt/python/cp38-cp38m/bin'
 
     container:
       image: quay.io/pypa/manylinux1_x86_64:latest
