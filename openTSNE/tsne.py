@@ -607,6 +607,11 @@ class TSNEEmbedding(np.ndarray):
             the embedding, causing the interpolation method to compute a very
             large grid, and leads to worse results.
 
+        max_step_norm: float
+            Maximum update norm. If the norm exceeds this value, it will be
+            clipped. This prevents points from "shooting off" from
+            the embedding.
+
         random_state: Union[int, RandomState]
             The random state parameter follows the convention used in
             scikit-learn. If the value is an int, random_state is the seed used
@@ -690,6 +695,7 @@ class TSNEEmbedding(np.ndarray):
         initial_momentum=0.5,
         final_momentum=0.8,
         max_grad_norm=0.25,
+        max_step_norm=None,
     ):
         """Embed new points into the existing embedding.
 
@@ -762,6 +768,11 @@ class TSNEEmbedding(np.ndarray):
             the embedding, causing the interpolation method to compute a very
             large grid, and leads to worse results.
 
+        max_step_norm: float
+            Maximum update norm. If the norm exceeds this value, it will be
+            clipped. This prevents points from "shooting off" from
+            the embedding.
+
         Returns
         -------
         PartialTSNEEmbedding
@@ -798,6 +809,7 @@ class TSNEEmbedding(np.ndarray):
                 inplace=True,
                 propagate_exception=True,
                 max_grad_norm=max_grad_norm,
+                max_step_norm=max_step_norm,
             )
             embedding.optimize(
                 n_iter=n_iter,
@@ -807,6 +819,7 @@ class TSNEEmbedding(np.ndarray):
                 inplace=True,
                 propagate_exception=True,
                 max_grad_norm=max_grad_norm,
+                max_step_norm=max_step_norm,
             )
 
         except OptimizationInterrupt as ex:
@@ -1035,6 +1048,11 @@ class TSNE(BaseEstimator):
         the embedding, causing the interpolation method to compute a very
         large grid, and leads to worse results.
 
+    max_step_norm: float
+        Maximum update norm. If the norm exceeds this value, it will be
+        clipped. This prevents points from "shooting off" from
+        the embedding.
+
     n_jobs: int
         The number of threads to use while running t-SNE. This follows the
         scikit-learn convention, ``-1`` meaning all processors, ``-2`` meaning
@@ -1092,6 +1110,7 @@ class TSNE(BaseEstimator):
         initial_momentum=0.5,
         final_momentum=0.8,
         max_grad_norm=None,
+        max_step_norm=5,
         n_jobs=1,
         neighbors="auto",
         negative_gradient_method="fft",
@@ -1123,6 +1142,7 @@ class TSNE(BaseEstimator):
         self.initial_momentum = initial_momentum
         self.final_momentum = final_momentum
         self.max_grad_norm = max_grad_norm
+        self.max_step_norm = max_step_norm
         self.n_jobs = n_jobs
         self.neighbors_method = neighbors
         self.negative_gradient_method = negative_gradient_method
@@ -1262,6 +1282,7 @@ class TSNE(BaseEstimator):
             "min_num_intervals": self.min_num_intervals,
             "ints_in_interval": self.ints_in_interval,
             "max_grad_norm": self.max_grad_norm,
+            "max_step_norm": self.max_step_norm,
             "n_jobs": self.n_jobs,
             "verbose": self.verbose,
             # Callback params
@@ -1429,6 +1450,7 @@ class gradient_descent:
         dof=1,
         min_gain=0.01,
         max_grad_norm=None,
+        max_step_norm=5,
         theta=0.5,
         n_interpolation_points=3,
         min_num_intervals=50,
@@ -1486,6 +1508,11 @@ class gradient_descent:
             leading to large gradients. This can make points "shoot off" from
             the embedding, causing the interpolation method to compute a very
             large grid, and leads to worse results.
+
+        max_step_norm: float
+            Maximum update norm. If the norm exceeds this value, it will be
+            clipped. This prevents points from "shooting off" from
+            the embedding.
 
         theta: float
             This is the trade-off parameter between speed and accuracy of the
@@ -1648,6 +1675,14 @@ class gradient_descent:
                 self.gains[grad_direction_same] * 0.8 + min_gain
             )
             update = momentum * update - learning_rate * self.gains * gradient
+
+            # Clip the update sizes
+            if max_step_norm is not None:
+                update_norms = np.linalg.norm(update, axis=1, keepdims=True)
+                mask = update_norms.squeeze() > max_step_norm
+                update[mask] /= update_norms[mask]
+                update[mask] *= max_step_norm
+
             embedding += update
 
             # Zero-mean the embedding only if we're not adding new data points,
