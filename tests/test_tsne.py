@@ -90,6 +90,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         "min_num_intervals": [10, 20, 30],
         "ints_in_interval": [1, 2, 5],
         "max_grad_norm": [None, 0.5, 1],
+        "max_step_norm": [None, 1, 5],
         "n_jobs": [1, 2, 4],
         "callbacks": [None, [lambda *args, **kwargs: ...]],
         "callbacks_every_iters": [25, 50],
@@ -161,6 +162,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         "initial_momentum": [0.2, 0.5, 0.8],
         "final_momentum": [0.2, 0.5, 0.8],
         "max_grad_norm": [None, 0.5, 1],
+        "max_step_norm": [None, 1, 5],
     })
     @patch("openTSNE.tsne.gradient_descent.__call__")
     def test_embedding_transform(self, param_name, param_value, gradient_descent):
@@ -191,6 +193,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         "exaggeration": [None, 2, 5],
         "momentum": [0.2, 0.5, 0.8],
         "max_grad_norm": [None, 0.5, 1],
+        "max_step_norm": [None, 1, 5],
     }})
     @patch("openTSNE.tsne.gradient_descent.__call__")
     def test_partial_embedding_optimize(self, param_name, param_value, gradient_descent):
