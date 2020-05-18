@@ -380,7 +380,7 @@ class NNDescent(KNNIndex):
         n_jobs_pynndescent = self.n_jobs
         import scipy.sparse as sp
 
-        if sp.issparse(data) and self.n_jobs > 1:
+        if sp.issparse(data) and self.n_jobs != 1:
             warnings.warn(
                 f"Running `pynndescent` with n_jobs=1 because it does not "
                 f"currently support n_jobs>1 with sparse inputs. See "
