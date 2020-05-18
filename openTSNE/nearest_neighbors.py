@@ -375,12 +375,17 @@ class NNDescent(KNNIndex):
         else:
             n_neighbors_build = 15
 
-        # due to a bug, pynndescent currently does not support n_jobs>1
+        # Due to a bug, pynndescent currently does not support n_jobs>1
         # for sparse inputs. This should be removed once it's fixed.
         n_jobs_pynndescent = self.n_jobs
         import scipy.sparse as sp
 
-        if sp.issparse(data):
+        if sp.issparse(data) and self.n_jobs > 1:
+            warnings.warn(
+                f"Running `pynndescent` with n_jobs=1 because it does not "
+                f"currently support n_jobs>1 with sparse inputs. See "
+                f"https://github.com/lmcinnes/pynndescent/issues/94."
+            )
             n_jobs_pynndescent = 1
 
         # UMAP uses the "alternative" algorithm, but that sometimes causes
@@ -405,16 +410,28 @@ class NNDescent(KNNIndex):
         if k > 15:
             indices, distances = self.index.query(data, k=k + 1)
 
-        # as a workaround, we let the failed points group together
+        # As a workaround, we let the failed points group together
         if np.sum(mask) > 0:
-            warnings.warn(
-                f"`pynndescent` failed to find neighbors for some of the points."
-                f"As a workaround, openTSNE considers all such points similar to "
-                f"each other, so they will likely form a cluster in the embedding."
-            )
+            if self.verbose:
+                opt = np.get_printoptions()
+                np.set_printoptions(threshold=np.inf)
+                warnings.warn(
+                    f"`pynndescent` failed to find neighbors for some of the points. "
+                    f"As a workaround, openTSNE considers all such points similar to "
+                    f"each other, so they will likely form a cluster in the embedding."
+                    f"The indices of the failed points are:\n{np.where(mask)[0]}"
+                )
+                np.set_printoptions(**opt)
+            else:
+                warnings.warn(
+                    f"`pynndescent` failed to find neighbors for some of the points. "
+                    f"As a workaround, openTSNE considers all such points similar to "
+                    f"each other, so they will likely form a cluster in the embedding. "
+                    f"Run with verbose=True, to see indices of the failed points."
+                )
             distances[mask] = 1
             fake_indices = np.random.choice(
-                np.sum(mask), size=np.sum(mask) * indices.shape[1]
+                np.sum(mask), size=np.sum(mask) * indices.shape[1], replace=True
             )
             fake_indices = np.where(mask)[0][fake_indices]
             indices[mask] = np.reshape(fake_indices, (np.sum(mask), indices.shape[1]))
