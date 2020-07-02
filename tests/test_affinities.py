@@ -14,6 +14,7 @@ Multiscale = partial(affinity.Multiscale, method="exact")
 MultiscaleMixture = partial(affinity.MultiscaleMixture, method="exact")
 PerplexityBasedNN = partial(affinity.PerplexityBasedNN, method="exact")
 FixedSigmaNN = partial(affinity.FixedSigmaNN, method="exact")
+Uniform = partial(affinity.Uniform, method="exact")
 
 
 class TestPerplexityBased(unittest.TestCase):
@@ -123,12 +124,35 @@ class TestMultiscale(unittest.TestCase):
             ms.set_perplexities([20, 30])
 
 
+class TestUniform(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.x = np.random.normal(100, 50, (91, 4))
+        cls.y = np.random.normal(100, 50, (31, 4))
+
+    def test_all_unsymmetrized_values_the_same(self):
+        aff = Uniform(self.x, k_neighbors=10, symmetrize=False)
+        values = aff.P.data
+        np.testing.assert_allclose(values, values[0])
+
+    def test_to_new_all_equal(self):
+        aff = Uniform(self.x, k_neighbors=10, symmetrize=False)
+        new_p = aff.to_new(self.y)
+
+        values = new_p.data
+        np.testing.assert_allclose(values, values[0])
+
+        new_p = new_p.toarray()
+        np.testing.assert_allclose(new_p.sum(axis=1), np.ones(self.y.shape[0]))
+
+
 class TestAffinityMatrixCorrectness(unittest.TestCase):
     affinity_classes = [
         ("PerplexityBasedNN", PerplexityBasedNN),
         ("FixedSigmaNN", partial(FixedSigmaNN, sigma=1)),
         ("MultiscaleMixture", partial(MultiscaleMixture, perplexities=[10, 20])),
         ("Multiscale", partial(Multiscale, perplexities=[10, 20])),
+        ("Uniform", partial(Uniform, k_neighbors=5)),
     ]
 
     @classmethod

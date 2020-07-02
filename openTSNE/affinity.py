@@ -936,3 +936,159 @@ class Multiscale(MultiscaleMixture):
 
         return P
 
+
+class Uniform(Affinities):
+    """Compute affinities using using nearest neighbors and uniform kernel in
+    the ambient space.
+
+    Parameters
+    ----------
+    data: np.ndarray
+        The data matrix.
+
+    k_neighbors: int
+
+    method: str
+        Specifies the nearest neighbor method to use. Can be ``exact``, ``annoy``,
+        ``pynndescent``, ``approx``, or ``auto`` (default). ``approx`` uses Annoy
+        if the input data matrix is not a sparse object and if Annoy supports
+        the given metric. Otherwise it uses Pynndescent. ``auto`` uses exact
+        nearest neighbors for N<1000 and the same heuristic as ``approx`` for N>=1000.
+
+
+    metric: Union[str, Callable]
+        The metric to be used to compute affinities between points in the
+        original space.
+
+    metric_params: dict
+        Additional keyword arguments for the metric function.
+
+    symmetrize: bool
+        Symmetrize affinity matrix. Standard t-SNE symmetrizes the interactions
+        but when embedding new data, symmetrization is not performed.
+
+    n_jobs: int
+        The number of threads to use while running t-SNE. This follows the
+        scikit-learn convention, ``-1`` meaning all processors, ``-2`` meaning
+        all but one, etc.
+
+    random_state: Union[int, RandomState]
+        If the value is an int, random_state is the seed used by the random
+        number generator. If the value is a RandomState instance, then it will
+        be used as the random number generator. If the value is None, the random
+        number generator is the RandomState instance used by `np.random`.
+
+    verbose: bool
+
+    """
+
+    def __init__(
+        self,
+        data,
+        k_neighbors=30,
+        method="auto",
+        metric="euclidean",
+        metric_params=None,
+        symmetrize=True,
+        n_jobs=1,
+        random_state=None,
+        verbose=False,
+    ):
+        self.n_samples = data.shape[0]
+        self.k_neighbors = k_neighbors
+        self.verbose = verbose
+        self.n_jobs = n_jobs
+
+        if k_neighbors >= self.n_samples:
+            raise ValueError(
+                "`k_neighbors` (%d) cannot be larger than N-1 (%d)." %
+                (k_neighbors, self.n_samples)
+            )
+
+        self.knn_index, neighbors, distances = build_knn_index(
+            data, method, k_neighbors, metric, metric_params, n_jobs, random_state, verbose
+        )
+        P = sp.csr_matrix(
+            (
+                np.ones_like(distances).ravel(),
+                neighbors.ravel(),
+                range(0, self.n_samples * self.k_neighbors + 1, self.k_neighbors),
+            ),
+            shape=(self.n_samples, self.n_samples),
+        )
+
+        # Symmetrize the probability matrix
+        if symmetrize:
+            P = (P + P.T) / 2
+
+        # Convert weights to probabilities
+        P /= np.sum(P)
+
+        self.P = P
+
+    def to_new(self, data, k_neighbors=None, return_distances=False):
+        """Compute the affinities of new samples to the initial samples.
+
+        This is necessary for embedding new data points into an existing
+        embedding.
+
+        Parameters
+        ----------
+        data: np.ndarray
+            The data points to be added to the existing embedding.
+
+        k_neighbors: int
+            The number of nearest neighbors to consider.
+
+        return_distances: bool
+            If needed, the function can return the indices of the nearest
+            neighbors and their corresponding distances.
+
+        Returns
+        -------
+        P: array_like
+            An :math:`N \\times M` affinity matrix expressing interactions
+            between :math:`N` new data points the initial :math:`M` data
+            samples.
+
+        indices: np.ndarray
+            Returned if ``return_distances=True``. The indices of the :math:`k`
+            nearest neighbors in the existing embedding for every new data
+            point.
+
+        distances: np.ndarray
+            Returned if ``return_distances=True``. The distances to the
+            :math:`k` nearest neighbors in the existing embedding for every new
+            data point.
+
+        """
+        n_samples = data.shape[0]
+        n_reference_samples = self.n_samples
+
+        if k_neighbors is None:
+            k_neighbors = self.k_neighbors
+        elif k_neighbors >= n_reference_samples:
+            raise ValueError(
+                "`k` (%d) cannot be larger than the number of reference "
+                "samples (%d)." % (k_neighbors, self.n_samples)
+            )
+
+        # Find nearest neighbors and the distances to the new points
+        neighbors, distances = self.knn_index.query(data, k_neighbors)
+
+        values = np.ones_like(distances)
+        values /= np.sum(values, axis=1)[:, np.newaxis]
+
+        P = sp.csr_matrix(
+            (
+                values.ravel(),
+                neighbors.ravel(),
+                range(0, n_samples * k_neighbors + 1, k_neighbors),
+            ),
+            shape=(n_samples, n_reference_samples),
+        )
+
+        if return_distances:
+            return P, neighbors, distances
+
+        return P
