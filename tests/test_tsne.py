@@ -383,6 +383,27 @@ class TestTSNECallbackParams(unittest.TestCase):
         self.assertEqual(callback.call_count, 1)
 
 
+class TestAffinityAsParameter(unittest.TestCase):
+    def test_fails_if_incorrect_class(self):
+        aff = "definitely not an instance of Affinity"
+        with self.assertRaises(ValueError):
+            TSNE(affinities=aff)
+
+    def test_affinities_passed_to_embedding(self):
+        x = np.random.normal(100, 50, (25, 4))
+        aff = affinity.PerplexityBasedNN(x, 5, method="exact")
+        tsne = TSNE(affinities=aff)
+        embedding = tsne.prepare_initial(x)
+        self.assertIs(embedding.affinities, aff)
+
+    def test_optimize_runs_properly(self):
+        x = np.random.normal(100, 50, (25, 4))
+        aff = affinity.PerplexityBasedNN(x, 5, method="exact")
+        tsne = TSNE(affinities=aff)
+        embedding = tsne.fit(x)
+        self.assertIs(embedding.affinities, aff)
+
+
 class TSNEInitialization(unittest.TestCase):
     transform_initializations = ["random", "median", "weighted"]
 
