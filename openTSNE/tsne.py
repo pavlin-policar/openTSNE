@@ -1151,7 +1151,7 @@ class TSNE(BaseEstimator):
         self.max_step_norm = max_step_norm
         self.n_jobs = n_jobs
 
-        if not isinstance(affinities, Affinities):
+        if affinities is not None and not isinstance(affinities, Affinities):
             raise ValueError(
                 "`affinities` must be an instance of `openTSNE.affinity.Affinities`"
             )
