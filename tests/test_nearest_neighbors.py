@@ -1,13 +1,15 @@
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import numpy as np
+import scipy.sparse as sp
 from scipy.spatial.distance import pdist, cdist, squareform
 import pynndescent
 from sklearn import datasets
 
 from numba import njit
 from numba.targets.registry import CPUDispatcher
+from sklearn.utils import check_random_state
 
 from openTSNE import nearest_neighbors
 from .test_tsne import check_mock_called_with_kwargs
@@ -238,3 +240,70 @@ class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
             distances, true_distances_, err_msg="Distances do not match"
         )
 
+    @patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent)
+    def test_building_with_lt15_builds_proper_graph(self, nndescent):
+        knn_index = nearest_neighbors.NNDescent("euclidean")
+        indices, distances = knn_index.build(self.x1, k=10)
+
+        self.assertEqual(indices.shape, (self.x1.shape[0], 10))
+        self.assertEqual(distances.shape, (self.x1.shape[0], 10))
+        self.assertFalse(np.all(indices[:, 0] == np.arange(self.x1.shape[0])))
+
+        # Should be called with 11 because nearest neighbor in pynndescent is itself
+        check_mock_called_with_kwargs(nndescent, dict(n_neighbors=11))
+
+    @patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent)
+    def test_building_with_gt15_calls_query(self, nndescent):
+        nndescent.query = MagicMock(wraps=nndescent.query)
+        knn_index = nearest_neighbors.NNDescent("euclidean")
+        indices, distances = knn_index.build(self.x1, k=30)
+
+        self.assertEqual(indices.shape, (self.x1.shape[0], 30))
+        self.assertEqual(distances.shape, (self.x1.shape[0], 30))
+        self.assertFalse(np.all(indices[:, 0] == np.arange(self.x1.shape[0])))
+
+        # The index should be built with 15 neighbors
+        check_mock_called_with_kwargs(nndescent, dict(n_neighbors=15))
+        # And subsequently queried with the correct number of neighbors. Check
+        # for 31 neighbors because query will return the original point as well,
+        # which we don't consider.
+        check_mock_called_with_kwargs(nndescent.query, dict(k=31))
+
+    @patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent)
+    def test_runs_with_correct_njobs_if_dense_input(self, nndescent):
+        knn_index = nearest_neighbors.NNDescent("euclidean", n_jobs=4)
+        knn_index.build(self.x1, k=5)
+        check_mock_called_with_kwargs(nndescent, dict(n_jobs=4))
+
+    @patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent)
+    def test_runs_with_njobs1_if_sparse_input(self, nndescent):
+        x_sparse = sp.csr_matrix(self.x1)
+        knn_index = nearest_neighbors.NNDescent("euclidean", n_jobs=4)
+        knn_index.build(x_sparse, k=5)
+        check_mock_called_with_kwargs(nndescent, dict(n_jobs=1))
+
+    def test_random_cluster_when_invalid_indices(self):
+        class MockIndex:
+            def __init__(self, data, n_neighbors, **_):
+                n_samples = data.shape[0]
+
+                rs = check_random_state(0)
+                indices = rs.randint(0, n_samples, size=(n_samples, n_neighbors))
+                distances = rs.exponential(5, (n_samples, n_neighbors))
+
+                # Set some of the points to have invalid indices
+                indices[:10] = -1
+                distances[:10] = -1
+
+                self.neighbor_graph = indices, distances
+
+        with patch("pynndescent.NNDescent", wraps=MockIndex):
+            knn_index = nearest_neighbors.NNDescent("euclidean", n_jobs=4)
+            indices, distances = knn_index.build(self.x1, k=5)
+
+            # Check that indices were replaced by something
+            self.assertTrue(np.all(indices[:10] != -1))
+            # Check that that "something" are all indices of failed points
+            self.assertTrue(np.all(indices[:10] < 10))
+            # And check that the distances were set to something positive
+            self.assertTrue(np.all(distances[:10] > 0))

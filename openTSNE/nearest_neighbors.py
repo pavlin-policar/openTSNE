@@ -3,6 +3,7 @@ import warnings
 import numpy as np
 from scipy.spatial.distance import cdist
 from sklearn import neighbors
+from sklearn.utils import check_random_state
 
 from openTSNE import utils
 
@@ -430,7 +431,8 @@ class NNDescent(KNNIndex):
                     f"Run with verbose=True, to see indices of the failed points."
                 )
             distances[mask] = 1
-            fake_indices = np.random.choice(
+            rs = check_random_state(self.random_state)
+            fake_indices = rs.choice(
                 np.sum(mask), size=np.sum(mask) * indices.shape[1], replace=True
             )
             fake_indices = np.where(mask)[0][fake_indices]
