@@ -335,7 +335,7 @@ class NNDescent(KNNIndex):
             )
 
         if callable(metric):
-            from numba.targets.registry import CPUDispatcher
+            from numba.core.registry import CPUDispatcher
 
             if not isinstance(metric, CPUDispatcher):
                 warnings.warn(

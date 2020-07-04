@@ -8,7 +8,7 @@ import pynndescent
 from sklearn import datasets
 
 from numba import njit
-from numba.targets.registry import CPUDispatcher
+from numba.core.registry import CPUDispatcher
 from sklearn.utils import check_random_state
 
 from openTSNE import nearest_neighbors
