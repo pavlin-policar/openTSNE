@@ -1058,6 +1058,11 @@ class TSNE(BaseEstimator):
         scikit-learn convention, ``-1`` meaning all processors, ``-2`` meaning
         all but one, etc.
 
+    affinities: openTSNE.affinity.Affinities
+        A precomputed affinity object. If specified, other affinity-related
+        parameters are ignored e.g. `perplexity` and anything nearest-neighbor
+        search related.
+
     neighbors: str
         Specifies the nearest neighbor method to use. Can be ``exact``, ``annoy``,
         ``pynndescent``, ``approx``, or ``auto`` (default). ``approx`` uses Annoy
@@ -1112,6 +1117,7 @@ class TSNE(BaseEstimator):
         max_grad_norm=None,
         max_step_norm=5,
         n_jobs=1,
+        affinities=None,
         neighbors="auto",
         negative_gradient_method="fft",
         callbacks=None,
@@ -1144,6 +1150,13 @@ class TSNE(BaseEstimator):
         self.max_grad_norm = max_grad_norm
         self.max_step_norm = max_step_norm
         self.n_jobs = n_jobs
+
+        if affinities is not None and not isinstance(affinities, Affinities):
+            raise ValueError(
+                "`affinities` must be an instance of `openTSNE.affinity.Affinities`"
+            )
+        self.affinities = affinities
+
         self.neighbors_method = neighbors
         self.negative_gradient_method = negative_gradient_method
 
@@ -1218,16 +1231,23 @@ class TSNE(BaseEstimator):
 
         """
 
-        affinities = PerplexityBasedNN(
-            X,
-            self.perplexity,
-            method=self.neighbors_method,
-            metric=self.metric,
-            metric_params=self.metric_params,
-            n_jobs=self.n_jobs,
-            random_state=self.random_state,
-            verbose=self.verbose,
-        )
+        if self.affinities is None:
+            affinities = PerplexityBasedNN(
+                X,
+                self.perplexity,
+                method=self.neighbors_method,
+                metric=self.metric,
+                metric_params=self.metric_params,
+                n_jobs=self.n_jobs,
+                random_state=self.random_state,
+                verbose=self.verbose,
+            )
+        else:
+            log.info(
+                "Precomputed affinities provided. Ignoring perplexity-related "
+                "parameters."
+            )
+            affinities = self.affinities
 
         # If initial positions are given in an array, use a copy of that
         if isinstance(self.initialization, np.ndarray):
