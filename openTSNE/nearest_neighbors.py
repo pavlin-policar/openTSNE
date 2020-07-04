@@ -3,6 +3,7 @@ import warnings
 import numpy as np
 from scipy.spatial.distance import cdist
 from sklearn import neighbors
+from sklearn.utils import check_random_state
 
 from openTSNE import utils
 
@@ -334,7 +335,7 @@ class NNDescent(KNNIndex):
             )
 
         if callable(metric):
-            from numba.targets.registry import CPUDispatcher
+            from numba.core.registry import CPUDispatcher
 
             if not isinstance(metric, CPUDispatcher):
                 warnings.warn(
@@ -369,11 +370,30 @@ class NNDescent(KNNIndex):
         # unless we're actually going to use it
         import pynndescent
 
+        # Will use query() only for k>15
+        if k <= 15:
+            n_neighbors_build = k + 1
+        else:
+            n_neighbors_build = 15
+
+        # Due to a bug, pynndescent currently does not support n_jobs>1
+        # for sparse inputs. This should be removed once it's fixed.
+        n_jobs_pynndescent = self.n_jobs
+        import scipy.sparse as sp
+
+        if sp.issparse(data) and self.n_jobs != 1:
+            warnings.warn(
+                f"Running `pynndescent` with n_jobs=1 because it does not "
+                f"currently support n_jobs>1 with sparse inputs. See "
+                f"https://github.com/lmcinnes/pynndescent/issues/94."
+            )
+            n_jobs_pynndescent = 1
+
         # UMAP uses the "alternative" algorithm, but that sometimes causes
         # memory corruption, so use the standard one, which seems to work fine
         self.index = pynndescent.NNDescent(
             data,
-            n_neighbors=15,
+            n_neighbors=n_neighbors_build,
             metric=self.metric,
             metric_kwds=self.metric_params,
             random_state=self.random_state,
@@ -381,10 +401,42 @@ class NNDescent(KNNIndex):
             n_iters=n_iters,
             algorithm="standard",
             max_candidates=60,
-            n_jobs=self.n_jobs,
+            n_jobs=n_jobs_pynndescent,
         )
 
-        indices, distances = self.index.query(data, k=k + 1)
+        # -1 in indices means that pynndescent failed
+        indices, distances = self.index.neighbor_graph
+        mask = np.sum(indices == -1, axis=1) > 0
+
+        if k > 15:
+            indices, distances = self.index.query(data, k=k + 1)
+
+        # As a workaround, we let the failed points group together
+        if np.sum(mask) > 0:
+            if self.verbose:
+                opt = np.get_printoptions()
+                np.set_printoptions(threshold=np.inf)
+                warnings.warn(
+                    f"`pynndescent` failed to find neighbors for some of the points. "
+                    f"As a workaround, openTSNE considers all such points similar to "
+                    f"each other, so they will likely form a cluster in the embedding."
+                    f"The indices of the failed points are:\n{np.where(mask)[0]}"
+                )
+                np.set_printoptions(**opt)
+            else:
+                warnings.warn(
+                    f"`pynndescent` failed to find neighbors for some of the points. "
+                    f"As a workaround, openTSNE considers all such points similar to "
+                    f"each other, so they will likely form a cluster in the embedding. "
+                    f"Run with verbose=True, to see indices of the failed points."
+                )
+            distances[mask] = 1
+            rs = check_random_state(self.random_state)
+            fake_indices = rs.choice(
+                np.sum(mask), size=np.sum(mask) * indices.shape[1], replace=True
+            )
+            fake_indices = np.where(mask)[0][fake_indices]
+            indices[mask] = np.reshape(fake_indices, (np.sum(mask), indices.shape[1]))
 
         timer.__exit__()
 
@@ -403,3 +455,4 @@ class NNDescent(KNNIndex):
         timer.__exit__()
 
         return indices, distances
+
