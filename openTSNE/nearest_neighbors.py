@@ -389,8 +389,6 @@ class NNDescent(KNNIndex):
             )
             n_jobs_pynndescent = 1
 
-        # UMAP uses the "alternative" algorithm, but that sometimes causes
-        # memory corruption, so use the standard one, which seems to work fine
         self.index = pynndescent.NNDescent(
             data,
             n_neighbors=n_neighbors_build,
@@ -399,7 +397,6 @@ class NNDescent(KNNIndex):
             random_state=self.random_state,
             n_trees=n_trees,
             n_iters=n_iters,
-            algorithm="standard",
             max_candidates=60,
             n_jobs=n_jobs_pynndescent,
         )
