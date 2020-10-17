@@ -28,6 +28,9 @@ jobs:
         osx - python38:
           image.name: 'macos-10.14'
           python.version: '3.8'
+        osx - python39:
+          image.name: 'macos-10.14'
+          python.version: '3.9'
 
         windows - python36:
           image.name: 'vs2017-win2016'
@@ -38,6 +41,9 @@ jobs:
         windows - python38:
           image.name: 'vs2017-win2016'
           python.version: '3.8'
+        windows - python39:
+          image.name: 'vs2017-win2016'
+          python.version: '3.9'
 
     steps:
       - task: UsePythonVersion@0
@@ -108,6 +114,8 @@ jobs:
           python: '/opt/python/cp37-cp37m/bin'
         python38:
           python: '/opt/python/cp38-cp38/bin'
+        python39:
+          python: '/opt/python/cp39-cp39/bin'
 
     container:
       image: quay.io/pypa/manylinux1_x86_64:latest
