@@ -271,14 +271,14 @@ class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
 
     @patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent)
     def test_runs_with_correct_njobs_if_dense_input(self, nndescent):
-        knn_index = nearest_neighbors.NNDescent("euclidean", n_jobs=4)
+        knn_index = nearest_neighbors.NNDescent("euclidean", n_jobs=2)
         knn_index.build(self.x1, k=5)
-        check_mock_called_with_kwargs(nndescent, dict(n_jobs=4))
+        check_mock_called_with_kwargs(nndescent, dict(n_jobs=2))
 
     @patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent)
     def test_runs_with_njobs1_if_sparse_input(self, nndescent):
         x_sparse = sp.csr_matrix(self.x1)
-        knn_index = nearest_neighbors.NNDescent("euclidean", n_jobs=4)
+        knn_index = nearest_neighbors.NNDescent("euclidean", n_jobs=2)
         knn_index.build(x_sparse, k=5)
         check_mock_called_with_kwargs(nndescent, dict(n_jobs=1))
 
@@ -298,7 +298,7 @@ class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
                 self.neighbor_graph = indices, distances
 
         with patch("pynndescent.NNDescent", wraps=MockIndex):
-            knn_index = nearest_neighbors.NNDescent("euclidean", n_jobs=4)
+            knn_index = nearest_neighbors.NNDescent("euclidean", n_jobs=2)
             indices, distances = knn_index.build(self.x1, k=5)
 
             # Check that indices were replaced by something
