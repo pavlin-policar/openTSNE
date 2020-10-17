@@ -136,13 +136,32 @@ class CythonBuildExt(build_ext):
 
         # Optimization compiler/linker flags are added appropriately
         compiler = self.compiler.compiler_type
-        if compiler == "unix" and platform.platform():
+        if compiler == "unix":
             extra_compile_args += ["-O3"]
-            # For some reason fast math causes segfaults on linux but works on mac
-            if platform.system() == "Darwin":
-                extra_compile_args += ["-ffast-math", "-fno-associative-math"]
         elif compiler == "msvc":
             extra_compile_args += ["/Ox", "/fp:fast"]
+
+        if compiler == "unix" and platform.system() == "Darwin":
+            # For some reason fast math causes segfaults on linux but works on mac
+            extra_compile_args += ["-ffast-math", "-fno-associative-math"]
+
+        # Annoy specific flags
+        annoy_ext = None
+        for extension in extensions:
+            if "annoy.annoylib" in extension.name:
+                annoy_ext = extension
+        assert annoy_ext is not None, "Annoy extension not found!"
+
+        if compiler == "unix":
+            annoy_ext.extra_compile_args += ["-std=c++14"]
+            annoy_ext.extra_compile_args += ["-DANNOYLIB_MULTITHREADED_BUILD"]
+        elif compiler == "msvc":
+            annoy_ext.extra_compile_args += ["/std:c++14"]
+
+        # Annoy #349: something with OS X Mojave causes libstd not to be found
+        if compiler == "unix" and platform.system() == "Darwin":
+            annoy_ext.extra_compile_args += ["-mmacosx-version-min=10.12"]
+            annoy_ext.extra_link_args += ["-stdlib=libc++", "-mmacosx-version-min=10.12"]
 
         # We don't want the compiler to optimize for system architecture if
         # we're building packages to be distributed by conda-forge, but if the
@@ -152,11 +171,6 @@ class CythonBuildExt(build_ext):
                 extra_compile_args += ["-mcpu=native"]
             if platform.machine() == "x86_64":
                 extra_compile_args += ["-march=native"]
-
-        # Annoy #349: something with OS X Mojave causes libstd not to be found
-        if platform.system() == "Darwin":
-            extra_compile_args += ["-std=c++11", "-mmacosx-version-min=10.9"]
-            extra_link_args += ["-stdlib=libc++", "-mmacosx-version-min=10.9"]
 
         # We will disable openmp flags if the compiler doesn"t support it. This
         # is only really an issue with OSX clang

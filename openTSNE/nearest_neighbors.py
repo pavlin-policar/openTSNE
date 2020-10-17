@@ -212,7 +212,7 @@ class Annoy(KNNIndex):
             self.index.add_item(i, data[i])
 
         # Number of trees. FIt-SNE uses 50 by default.
-        self.index.build(50)
+        self.index.build(50, n_jobs=self.n_jobs)
 
         # Return the nearest neighbors in the training set
         distances = np.zeros((N, k))
