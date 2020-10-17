@@ -1157,7 +1157,7 @@ class TSNE(BaseEstimator):
             )
         self.affinities = affinities
 
-        self.neighbors_method = neighbors
+        self.neighbors = neighbors
         self.negative_gradient_method = negative_gradient_method
 
         self.callbacks = callbacks
@@ -1165,6 +1165,18 @@ class TSNE(BaseEstimator):
 
         self.random_state = random_state
         self.verbose = verbose
+
+    @property
+    def neighbors_method(self):
+        import warnings
+
+        warnings.warn(
+            f"The `neighbors_method` attribute has been deprecated and will be "
+            f"removed in future versions. Please use the new `neighbors` "
+            f"attribute",
+            category=FutureWarning,
+        )
+        return self.neighbors
 
     def fit(self, X):
         """Fit a t-SNE embedding for a given data set.
@@ -1235,7 +1247,7 @@ class TSNE(BaseEstimator):
             affinities = PerplexityBasedNN(
                 X,
                 self.perplexity,
-                method=self.neighbors_method,
+                method=self.neighbors,
                 metric=self.metric,
                 metric_params=self.metric_params,
                 n_jobs=self.n_jobs,
