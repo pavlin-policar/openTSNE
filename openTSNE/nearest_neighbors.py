@@ -390,7 +390,7 @@ class NNDescent(KNNIndex):
             n_iters=n_iters,
             max_candidates=60,
             n_jobs=self.n_jobs,
-            verbose=1 if self.verbose>1 else 0,
+            verbose=self.verbose > 1,
         )
 
         # -1 in indices means that pynndescent failed

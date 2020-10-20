@@ -276,11 +276,11 @@ class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
         check_mock_called_with_kwargs(nndescent, dict(n_jobs=2))
 
     @patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent)
-    def test_runs_with_njobs1_if_sparse_input(self, nndescent):
+    def test_runs_with_correct_njobs_if_sparse_input(self, nndescent):
         x_sparse = sp.csr_matrix(self.x1)
         knn_index = nearest_neighbors.NNDescent("euclidean", n_jobs=2)
         knn_index.build(x_sparse, k=5)
-        check_mock_called_with_kwargs(nndescent, dict(n_jobs=1))
+        check_mock_called_with_kwargs(nndescent, dict(n_jobs=2))
 
     def test_random_cluster_when_invalid_indices(self):
         class MockIndex:
