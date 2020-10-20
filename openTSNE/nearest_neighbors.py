@@ -277,6 +277,7 @@ class NNDescent(KNNIndex):
         # general minkowski distances
         "euclidean",
         "l2",
+        "sqeuclidean",
         "manhattan",
         "taxicab",
         "l1",
@@ -294,11 +295,14 @@ class NNDescent(KNNIndex):
         # Other distances
         "canberra",
         "cosine",
+        "dot",
         "correlation",
         "hellinger",
         "haversine",
         "braycurtis",
         "spearmanr",
+        "kantorovich",
+        "wasserstein",
         # Binary distances
         "hamming",
         "jaccard",
@@ -376,19 +380,6 @@ class NNDescent(KNNIndex):
         else:
             n_neighbors_build = 15
 
-        # Due to a bug, pynndescent currently does not support n_jobs>1
-        # for sparse inputs. This should be removed once it's fixed.
-        n_jobs_pynndescent = self.n_jobs
-        import scipy.sparse as sp
-
-        if sp.issparse(data) and self.n_jobs != 1:
-            warnings.warn(
-                f"Running `pynndescent` with n_jobs=1 because it does not "
-                f"currently support n_jobs>1 with sparse inputs. See "
-                f"https://github.com/lmcinnes/pynndescent/issues/94."
-            )
-            n_jobs_pynndescent = 1
-
         self.index = pynndescent.NNDescent(
             data,
             n_neighbors=n_neighbors_build,
@@ -398,7 +389,8 @@ class NNDescent(KNNIndex):
             n_trees=n_trees,
             n_iters=n_iters,
             max_candidates=60,
-            n_jobs=n_jobs_pynndescent,
+            n_jobs=self.n_jobs,
+            verbose=1 if self.verbose>1 else 0,
         )
 
         # -1 in indices means that pynndescent failed
