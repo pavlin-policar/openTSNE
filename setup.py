@@ -307,6 +307,7 @@ setup(
         "numpy>=1.14.6",
         "scikit-learn>=0.20",
         "scipy",
+        "hnswlib~=0.4.0"
     ],
 
     ext_modules=extensions,

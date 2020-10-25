@@ -298,6 +298,7 @@ def build_knn_index(
         "approx": preferred_approx_method,
         "annoy": nearest_neighbors.Annoy,
         "pynndescent": nearest_neighbors.NNDescent,
+        "hnswlib": nearest_neighbors.HNSW
     }
     if isinstance(method, nearest_neighbors.KNNIndex):
         knn_index = method

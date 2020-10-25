@@ -12,7 +12,7 @@ class KNNIndex:
     VALID_METRICS = []
 
     def __init__(
-        self, metric, metric_params=None, n_jobs=1, random_state=None, verbose=False
+            self, metric, metric_params=None, n_jobs=1, random_state=None, verbose=False
     ):
         self.index = None
         self.metric = self.check_metric(metric)
@@ -94,7 +94,7 @@ class BallTree(KNNIndex):
             effective_metric = "euclidean"
             effective_data = data.copy()
             effective_data = (
-                effective_data / np.linalg.norm(effective_data, axis=1)[:, None]
+                    effective_data / np.linalg.norm(effective_data, axis=1)[:, None]
             )
             # In order to properly compute cosine distances when querying the
             # index, we need to store the original data
@@ -140,7 +140,7 @@ class BallTree(KNNIndex):
         if self.metric == "cosine":
             effective_data = query.copy()
             effective_data = (
-                effective_data / np.linalg.norm(effective_data, axis=1)[:, None]
+                    effective_data / np.linalg.norm(effective_data, axis=1)[:, None]
             )
         else:
             effective_data = query
@@ -330,7 +330,7 @@ class NNDescent(KNNIndex):
         import pynndescent
 
         if not np.array_equal(
-            list(pynndescent.distances.named_distances), self.VALID_METRICS
+                list(pynndescent.distances.named_distances), self.VALID_METRICS
         ):
             warnings.warn(
                 "`pynndescent` has recently changed which distance metrics are supported, "
@@ -445,3 +445,77 @@ class NNDescent(KNNIndex):
 
         return indices, distances
 
+
+class HNSW(KNNIndex):
+    VALID_METRICS = [
+        "cosine",
+        "euclidean",
+        "dot",
+        "l2",
+        "ip",
+    ]
+
+    def build(self, data, k: int):
+        timer = utils.Timer(
+            f"Finding {k} nearest neighbors using HNSWlib approximate search using "
+            f"{self.metric} distance...",
+            verbose=self.verbose,
+        )
+        timer.__enter__()
+
+        from hnswlib import Index
+
+        hnsw_space = {
+            "cosine": "cosine",
+            "dot": "ip",
+            "euclidean": "l2"
+        }[self.metric]
+
+        self.index = Index(space=hnsw_space, dim=data.shape[1])
+
+        metric_params = self.metric_params
+        if metric_params is None:
+            metric_params = {
+                'max_elements': data.shape[0],
+                'ef_construction': 200,
+                'M': 16,
+                'random_seed': self.random_state or 100
+            }
+
+        # Initialize HNSW Index
+        self.index.init_index(**metric_params)
+
+        # Build index tree from data
+        self.index.add_items(data, num_threads=self.n_jobs)
+
+        # Set ef parameter for (ideal) precision/recall
+        self.index.set_ef(2 * k)
+
+        # Query for kNN
+        indices, distances = self.index.knn_query(data, k=k + 1, num_threads=self.n_jobs)
+
+        # Stop timer
+        timer.__exit__()
+
+        # return indices and distances, skip first entry, which is always the point itself
+        return indices[:, 1:], distances[:, 1:]
+
+    def query(self, query, k):
+        timer = utils.Timer(
+            f"Finding {k} nearest neighbors in existing embedding using HNSWlib "
+            f"approximate search...",
+            self.verbose,
+        )
+        timer.__enter__()
+
+        # Set ef parameter for (ideal) precision/recall
+        self.index.set_ef(2 * k)
+
+        # Query for kNN
+        indices, distances = self.index.knn_query(query, k=k, num_threads=self.n_jobs)
+
+        # Stop timer
+        timer.__exit__()
+
+        # return indices and distances
+        return indices, distances
