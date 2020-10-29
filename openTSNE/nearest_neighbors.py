@@ -455,6 +455,16 @@ class HNSW(KNNIndex):
         "ip",
     ]
 
+    def __init__(self, *args, **kwargs):
+        try:
+            from hnswlib import Index  # pylint: disable=unused-import,unused-variable
+        except ImportError:
+            raise ImportError(
+                "Please install hnswlib: `conda install -c conda-forge "
+                "hnswlib` or `pip install hnswlib`."
+            )
+        super().__init__(*args, **kwargs)
+
     def build(self, data, k: int):
         timer = utils.Timer(
             f"Finding {k} nearest neighbors using HNSWlib approximate search using "
@@ -468,19 +478,21 @@ class HNSW(KNNIndex):
         hnsw_space = {
             "cosine": "cosine",
             "dot": "ip",
-            "euclidean": "l2"
+            "euclidean": "l2",
+            "ip": "ip",
+            "l2": "l2"
         }[self.metric]
 
         self.index = Index(space=hnsw_space, dim=data.shape[1])
 
-        metric_params = self.metric_params
-        if metric_params is None:
-            metric_params = {
-                'max_elements': data.shape[0],
-                'ef_construction': 200,
-                'M': 16,
-                'random_seed': self.random_state or 100
-            }
+        metric_params = {
+            'max_elements': data.shape[0],
+            'ef_construction': 200,
+            'M': 16,
+            'random_seed': self.random_state or 100
+        }
+        if self.metric_params is not None:
+            metric_params.update(self.metric_params)
 
         # Initialize HNSW Index
         self.index.init_index(**metric_params)

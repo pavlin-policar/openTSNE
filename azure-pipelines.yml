@@ -61,7 +61,9 @@ jobs:
   - script: pip install -vv .
     displayName: 'Install package'
 
-  - script: pip install pynndescent
+  - script: |
+      pip install pynndescent
+      pip install hnswlib
     displayName: 'Install optional dependencies'
 
   # Since Python automatically adds `cwd` to `sys.path`, it's important we remove the local folder
