@@ -1,5 +1,6 @@
 variables:
   AZURE_BUILD: true
+  MACOSX_DEPLOYMENT_TARGET: '10.6'
 
 trigger:
   tags:
