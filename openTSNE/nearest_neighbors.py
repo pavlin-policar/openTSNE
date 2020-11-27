@@ -12,7 +12,7 @@ class KNNIndex:
     VALID_METRICS = []
 
     def __init__(
-            self, metric, metric_params=None, n_jobs=1, random_state=None, verbose=False
+        self, metric, metric_params=None, n_jobs=1, random_state=None, verbose=False
     ):
         self.index = None
         self.metric = self.check_metric(metric)
@@ -94,7 +94,7 @@ class BallTree(KNNIndex):
             effective_metric = "euclidean"
             effective_data = data.copy()
             effective_data = (
-                    effective_data / np.linalg.norm(effective_data, axis=1)[:, None]
+                effective_data / np.linalg.norm(effective_data, axis=1)[:, None]
             )
             # In order to properly compute cosine distances when querying the
             # index, we need to store the original data
@@ -140,7 +140,7 @@ class BallTree(KNNIndex):
         if self.metric == "cosine":
             effective_data = query.copy()
             effective_data = (
-                    effective_data / np.linalg.norm(effective_data, axis=1)[:, None]
+                effective_data / np.linalg.norm(effective_data, axis=1)[:, None]
             )
         else:
             effective_data = query
@@ -330,7 +330,7 @@ class NNDescent(KNNIndex):
         import pynndescent
 
         if not np.array_equal(
-                list(pynndescent.distances.named_distances), self.VALID_METRICS
+            list(pynndescent.distances.named_distances), self.VALID_METRICS
         ):
             warnings.warn(
                 "`pynndescent` has recently changed which distance metrics are supported, "
