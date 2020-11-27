@@ -5,6 +5,7 @@ import numpy as np
 import scipy.sparse as sp
 from scipy.spatial.distance import pdist, cdist, squareform
 import pynndescent
+import hnswlib
 from sklearn import datasets
 
 from numba import njit
@@ -73,6 +74,10 @@ class KNNIndexTestMixin:
 
 class TestAnnoy(KNNIndexTestMixin, unittest.TestCase):
     knn_index = nearest_neighbors.Annoy
+
+
+class TestHNSW(KNNIndexTestMixin, unittest.TestCase):
+    knn_index = nearest_neighbors.HNSW
 
 
 class TestBallTree(KNNIndexTestMixin, unittest.TestCase):

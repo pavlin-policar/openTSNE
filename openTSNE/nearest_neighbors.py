@@ -445,3 +445,85 @@ class NNDescent(KNNIndex):
 
         return indices, distances
 
+
+class HNSW(KNNIndex):
+    VALID_METRICS = [
+        "cosine",
+        "euclidean",
+        "dot",
+        "l2",
+        "ip",
+    ]
+
+    def __init__(self, *args, **kwargs):
+        try:
+            from hnswlib import Index  # pylint: disable=unused-import,unused-variable
+        except ImportError:
+            raise ImportError(
+                "Please install hnswlib: `conda install -c conda-forge "
+                "hnswlib` or `pip install hnswlib`."
+            )
+        super().__init__(*args, **kwargs)
+
+    def build(self, data, k: int):
+        timer = utils.Timer(
+            f"Finding {k} nearest neighbors using HNSWlib approximate search using "
+            f"{self.metric} distance...",
+            verbose=self.verbose,
+        )
+        timer.__enter__()
+
+        from hnswlib import Index
+
+        hnsw_space = {
+            "cosine": "cosine",
+            "dot": "ip",
+            "euclidean": "l2",
+            "ip": "ip",
+            "l2": "l2",
+        }[self.metric]
+
+        self.index = Index(space=hnsw_space, dim=data.shape[1])
+
+        # Initialize HNSW Index
+        self.index.init_index(
+            max_elements=data.shape[0],
+            ef_construction=200,
+            M=16,
+            random_seed=self.random_state or 100,
+        )
+
+        # Build index tree from data
+        self.index.add_items(data, num_threads=self.n_jobs)
+
+        # Set ef parameter for (ideal) precision/recall
+        self.index.set_ef(min(2 * k, self.index.get_current_count()))
+
+        # Query for kNN
+        indices, distances = self.index.knn_query(data, k=k + 1, num_threads=self.n_jobs)
+
+        # Stop timer
+        timer.__exit__()
+
+        # return indices and distances, skip first entry, which is always the point itself
+        return indices[:, 1:], distances[:, 1:]
+
+    def query(self, query, k):
+        timer = utils.Timer(
+            f"Finding {k} nearest neighbors in existing embedding using HNSWlib "
+            f"approximate search...",
+            self.verbose,
+        )
+        timer.__enter__()
+
+        # Set ef parameter for (ideal) precision/recall
+        self.index.set_ef(min(2 * k, self.index.get_current_count()))
+
+        # Query for kNN
+        indices, distances = self.index.knn_query(query, k=k, num_threads=self.n_jobs)
+
+        # Stop timer
+        timer.__exit__()
+
+        # return indices and distances
+        return indices, distances
