@@ -77,10 +77,12 @@ jobs:
       - bash: python -m pip install -vv --force-reinstall --find-links dist openTSNE
         displayName: 'Install wheel'
 
-      - script: |
-          python -m pip install pynndescent
-          python -m pip install hnswlib
-        displayName: 'Install optional dependencies'
+      - script: pip install pynndescent
+        displayName: 'Install optional dependencies - pynndescent'
+        condition: ne(variables['python.version'], '3.9')
+
+      - script: pip install hnswlib
+        displayName: 'Install optional dependencies - hnswlib'
 
       - script: pytest -v
         timeoutInMinutes: 15
@@ -110,12 +112,16 @@ jobs:
       matrix:
         python36:
           python: '/opt/python/cp36-cp36m/bin'
+          python.version: '3.6'
         python37:
           python: '/opt/python/cp37-cp37m/bin'
+          python.version: '3.7'
         python38:
           python: '/opt/python/cp38-cp38/bin'
+          python.version: '3.8'
         python39:
           python: '/opt/python/cp39-cp39/bin'
+          python.version: '3.9'
 
     container:
       image: quay.io/pypa/manylinux1_x86_64:latest
@@ -140,10 +146,12 @@ jobs:
       - bash: mv openTSNE src
         displayName: 'Remove source files from path'
 
-      - script: |
-          $(python)/pip install pynndescent
-          $(python)/pip install hnswlib
-        displayName: 'Install optional dependencies'
+      - script: $(python)/pip install pynndescent
+        displayName: 'Install optional dependencies - pynndescent'
+        condition: ne(variables['python.version'], '3.9')
+
+      - script: $(python)/pip install hnswlib
+        displayName: 'Install optional dependencies - hnswlib'
 
       - script: $(python)/python -m pytest -v
         timeoutInMinutes: 15

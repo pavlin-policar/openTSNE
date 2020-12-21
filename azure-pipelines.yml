@@ -70,10 +70,12 @@ jobs:
   - script: pip install -vv .
     displayName: 'Install package'
 
-  - script: |
-      pip install pynndescent
-      pip install hnswlib
-    displayName: 'Install optional dependencies'
+  - script: pip install pynndescent
+    displayName: 'Install optional dependencies - pynndescent'
+    condition: ne(variables['python.version'], '3.9')
+
+  - script: pip install hnswlib
+    displayName: 'Install optional dependencies - hnswlib'
 
   # Since Python automatically adds `cwd` to `sys.path`, it's important we remove the local folder
   # containing our code from the working directory. Otherwise, the tests will use the local copy
