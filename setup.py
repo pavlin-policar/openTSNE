@@ -158,10 +158,10 @@ class CythonBuildExt(build_ext):
         elif compiler == "msvc":
             annoy_ext.extra_compile_args += ["/std:c++14"]
 
-        # Annoy #349: something with OS X Mojave causes libstd not to be found
+        # Set minimum deployment version for MacOS
         if compiler == "unix" and platform.system() == "Darwin":
-            annoy_ext.extra_compile_args += ["-mmacosx-version-min=10.12"]
-            annoy_ext.extra_link_args += ["-stdlib=libc++", "-mmacosx-version-min=10.12"]
+            extra_compile_args += ["-mmacosx-version-min=10.12"]
+            extra_link_args += ["-stdlib=libc++", "-mmacosx-version-min=10.12"]
 
         # We don't want the compiler to optimize for system architecture if
         # we're building packages to be distributed by conda-forge, but if the
@@ -304,7 +304,7 @@ setup(
     packages=setuptools.find_packages(include=["openTSNE", "openTSNE.*"]),
     python_requires=">=3.6",
     install_requires=[
-        "numpy>=1.14.6",
+        "numpy>=1.16.6",
         "scikit-learn>=0.20",
         "scipy",
     ],

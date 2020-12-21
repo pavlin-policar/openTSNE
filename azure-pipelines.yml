@@ -57,6 +57,9 @@ jobs:
       architecture: 'x64'
     displayName: 'Use Python $(python.version)'
 
+  - script: env
+    displayName: 'List enviromental variables'
+
   - script: |
       python -m pip install --upgrade pip
       python -m pip install flake8 pytest

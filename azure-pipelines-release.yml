@@ -1,6 +1,5 @@
 variables:
   AZURE_BUILD: true
-  MACOSX_DEPLOYMENT_TARGET: '10.6'
 
 trigger:
   tags:
@@ -52,11 +51,14 @@ jobs:
           architecture: 'x64'
         displayName: 'Use Python $(python.version)'
 
+      - script: env
+        displayName: 'List enviromental variables'
+
       - script: |
           python -m pip install --upgrade pip
           python -m pip install setuptools wheel pytest
           python -m pip install cython
-          python -m pip install numpy==1.14.6
+          python -m pip install numpy==1.16.6
         displayName: 'Install job dependencies'
 
       - script: python -m pip freeze
@@ -124,8 +126,8 @@ jobs:
           python.version: '3.9'
 
     container:
-      image: quay.io/pypa/manylinux1_x86_64:latest
-      options: -e PLAT=manylinux1_x86_64
+      image: quay.io/pypa/manylinux2010_x86_64:latest
+      options: -e PLAT=manylinux2010_x86_64
 
     steps:
       - bash: ls -R /opt/python
@@ -193,7 +195,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install setuptools wheel pytest
           python -m pip install cython
-          python -m pip install numpy==1.14.6
+          python -m pip install numpy==1.16.6
         displayName: 'Install job dependencies'
 
       - script: python -m pip freeze

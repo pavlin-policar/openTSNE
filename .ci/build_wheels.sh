@@ -8,13 +8,13 @@ echo "Building for ${PYBIN}..."
 ${PYBIN}/pip install --user cython
 
 # Numpy must be available for openTSNE to be built
-${PYBIN}/pip install --user numpy==1.14.6
+${PYBIN}/pip install --user numpy==1.16.6
 
 # List installed dependency versions
 ${PYBIN}/pip freeze
 
 # Force wheel to use old version of numpy, otherwise it tries to download latest version
-echo numpy==1.14.6 > requirements_numpy.txt
+echo numpy==1.16.6 > requirements_numpy.txt
 # Compile openTSNE wheels
 ${PYBIN}/pip wheel -w wheelhouse/ -r requirements_numpy.txt .
 
