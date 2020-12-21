@@ -15,6 +15,7 @@ from openTSNE import affinity, initialization
 from openTSNE.affinity import PerplexityBasedNN
 from openTSNE.nearest_neighbors import NNDescent
 from openTSNE.tsne import kl_divergence_bh, kl_divergence_fft
+from openTSNE.utils import is_package_installed
 
 np.random.seed(42)
 affinity.log.setLevel(logging.ERROR)
@@ -216,6 +217,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         check_call_contains_kwargs(gradient_descent.mock_calls[0], params)
 
     @check_params({"metric": set(NNDescent.VALID_METRICS) - {"mahalanobis"}})
+    @unittest.skipIf(not is_package_installed("pynndescent"), "`pynndescent`is not installed")
     @patch("pynndescent.NNDescent")
     def test_nndescent_distances(self, param_name, metric, nndescent: MagicMock):
         """Distance metrics should be properly passed down to NN descent"""
@@ -234,6 +236,7 @@ class TestTSNEParameterFlow(unittest.TestCase):
         self.assertEqual(nndescent.call_count, 1)
         check_call_contains_kwargs(nndescent.mock_calls[0], {"metric": metric})
 
+    @unittest.skipIf(not is_package_installed("pynndescent"), "`pynndescent`is not installed")
     @patch("pynndescent.NNDescent")
     def test_nndescent_mahalanobis_distance(self, nndescent: MagicMock):
         """Distance metrics and additional params should be correctly passed down to NN descent"""
@@ -576,12 +579,12 @@ class TestRandomState(unittest.TestCase):
         check_mock_called_with_kwargs(neighbors, {"random_state": random_state})
 
     @patch("openTSNE.initialization.pca", wraps=openTSNE.initialization.pca)
-    @patch("openTSNE.nearest_neighbors.NNDescent", wraps=openTSNE.nearest_neighbors.NNDescent)
+    @patch("openTSNE.nearest_neighbors.Annoy", wraps=openTSNE.nearest_neighbors.Annoy)
     def test_random_state_parameter_is_propagated_pca_init_approx(self, init, neighbors):
         random_state = 1
 
         tsne = openTSNE.TSNE(
-            neighbors="pynndescent",
+            neighbors="approx",
             initialization="pca",
             random_state=random_state,
         )

@@ -9,6 +9,7 @@ import scipy.sparse as sp
 from openTSNE import _tsne
 from openTSNE import nearest_neighbors
 from openTSNE import utils
+from openTSNE.utils import is_package_installed
 
 log = logging.getLogger(__name__)
 
@@ -273,7 +274,8 @@ class PerplexityBasedNN(Affinities):
 def build_knn_index(
     data, method, k, metric, metric_params=None, n_jobs=1, random_state=None, verbose=False
 ):
-    if not sp.issparse(data) and metric in [
+    preferred_approx_method = nearest_neighbors.Annoy
+    if is_package_installed("pynndescent") and sp.issparse(data) and metric not in [
         "cosine",
         "euclidean",
         "manhattan",
@@ -283,8 +285,6 @@ def build_knn_index(
         "l2",
         "taxicab",
     ]:
-        preferred_approx_method = nearest_neighbors.Annoy
-    else:
         preferred_approx_method = nearest_neighbors.NNDescent
 
     if data.shape[0] < 1000:

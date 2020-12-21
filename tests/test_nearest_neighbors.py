@@ -9,18 +9,8 @@ from sklearn import datasets
 from sklearn.utils import check_random_state
 
 from openTSNE import nearest_neighbors
+from openTSNE.utils import is_package_installed
 from .test_tsne import check_mock_called_with_kwargs
-
-
-def is_package_installed(libname):
-    """Check whether a python package is installed."""
-    import importlib
-
-    try:
-        importlib.import_module(libname)
-        return True
-    except ImportError:
-        return False
 
 
 class KNNIndexTestMixin:
