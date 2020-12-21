@@ -32,3 +32,14 @@ def deprecate_parameter(parameter):
             return f(*args, **kwargs)
         return func
     return wrapper
+
+
+def is_package_installed(libname):
+    """Check whether a python package is installed."""
+    import importlib
+
+    try:
+        importlib.import_module(libname)
+        return True
+    except ImportError:
+        return False

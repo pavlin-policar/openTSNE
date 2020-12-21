@@ -22,6 +22,9 @@ jobs:
       linux-python38:
         image.name: 'ubuntu-16.04'
         python.version: '3.8'
+      linux-python39:
+        image.name: 'ubuntu-16.04'
+        python.version: '3.9'
       osx-python36:
         image.name: 'macos-10.14'
         python.version: '3.6'
@@ -31,6 +34,9 @@ jobs:
       osx-python38:
         image.name: 'macos-10.14'
         python.version: '3.8'
+      osx-python39:
+        image.name: 'macos-10.14'
+        python.version: '3.9'
       windows-python36:
         image.name: 'vs2017-win2016'
         python.version: '3.6'
@@ -40,6 +46,9 @@ jobs:
       windows-python38:
         image.name: 'vs2017-win2016'
         python.version: '3.8'
+      windows-python39:
+        image.name: 'vs2017-win2016'
+        python.version: '3.9'
 
   steps:
   - task: UsePythonVersion@0
@@ -61,10 +70,12 @@ jobs:
   - script: pip install -vv .
     displayName: 'Install package'
 
-  - script: |
-      pip install pynndescent
-      pip install hnswlib
-    displayName: 'Install optional dependencies'
+  - script: pip install pynndescent
+    displayName: 'Install optional dependencies - pynndescent'
+    condition: ne(variables['python.version'], '3.9')
+
+  - script: pip install hnswlib
+    displayName: 'Install optional dependencies - hnswlib'
 
   # Since Python automatically adds `cwd` to `sys.path`, it's important we remove the local folder
   # containing our code from the working directory. Otherwise, the tests will use the local copy
