@@ -285,7 +285,7 @@ setup(
         "Issue Tracker": "https://github.com/pavlin-policar/openTSNE/issues",
     },
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Science/Research",
         "Intended Audience :: Developers",
         "Topic :: Software Development",
