@@ -4,16 +4,23 @@ from unittest.mock import patch, MagicMock
 import numpy as np
 import scipy.sparse as sp
 from scipy.spatial.distance import pdist, cdist, squareform
-import pynndescent
-import hnswlib
 from sklearn import datasets
 
-from numba import njit
-from numba.core.registry import CPUDispatcher
 from sklearn.utils import check_random_state
 
 from openTSNE import nearest_neighbors
 from .test_tsne import check_mock_called_with_kwargs
+
+
+def is_package_installed(libname):
+    """Check whether a python package is installed."""
+    import importlib
+
+    try:
+        importlib.import_module(libname)
+        return True
+    except ImportError:
+        return False
 
 
 class KNNIndexTestMixin:
@@ -74,10 +81,6 @@ class KNNIndexTestMixin:
 
 class TestAnnoy(KNNIndexTestMixin, unittest.TestCase):
     knn_index = nearest_neighbors.Annoy
-
-
-class TestHNSW(KNNIndexTestMixin, unittest.TestCase):
-    knn_index = nearest_neighbors.HNSW
 
 
 class TestBallTree(KNNIndexTestMixin, unittest.TestCase):
@@ -171,17 +174,36 @@ class TestBallTree(KNNIndexTestMixin, unittest.TestCase):
         )
 
 
+@unittest.skipIf(not is_package_installed("hnswlib"), "`hnswlib`is not installed")
+class TestHNSW(KNNIndexTestMixin, unittest.TestCase):
+    knn_index = nearest_neighbors.HNSW
+
+    @classmethod
+    def setUpClass(cls):
+        global hnswlib
+        import hnswlib
+
+
+@unittest.skipIf(not is_package_installed("pynndescent"), "`pynndescent`is not installed")
 class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
     knn_index = nearest_neighbors.NNDescent
 
-    @patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent)
-    def test_random_state_being_passed_through(self, nndescent):
-        random_state = 1
-        knn_index = nearest_neighbors.NNDescent("euclidean", random_state=random_state)
-        knn_index.build(self.x1, k=30)
+    @classmethod
+    def setUpClass(cls):
+        global pynndescent, njit, CPUDispatcher
 
-        nndescent.assert_called_once()
-        check_mock_called_with_kwargs(nndescent, {"random_state": random_state})
+        import pynndescent
+        from numba import njit
+        from numba.core.registry import CPUDispatcher
+
+    def test_random_state_being_passed_through(self):
+        random_state = 1
+        with patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent) as nndescent:
+            knn_index = nearest_neighbors.NNDescent("euclidean", random_state=random_state)
+            knn_index.build(self.x1, k=30)
+
+            nndescent.assert_called_once()
+            check_mock_called_with_kwargs(nndescent, {"random_state": random_state})
 
     def test_uncompiled_callable_is_compiled(self):
         knn_index = nearest_neighbors.NNDescent("manhattan")
@@ -245,47 +267,47 @@ class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
             distances, true_distances_, err_msg="Distances do not match"
         )
 
-    @patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent)
-    def test_building_with_lt15_builds_proper_graph(self, nndescent):
-        knn_index = nearest_neighbors.NNDescent("euclidean")
-        indices, distances = knn_index.build(self.x1, k=10)
+    def test_building_with_lt15_builds_proper_graph(self):
+        with patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent) as nndescent:
+            knn_index = nearest_neighbors.NNDescent("euclidean")
+            indices, distances = knn_index.build(self.x1, k=10)
 
-        self.assertEqual(indices.shape, (self.x1.shape[0], 10))
-        self.assertEqual(distances.shape, (self.x1.shape[0], 10))
-        self.assertFalse(np.all(indices[:, 0] == np.arange(self.x1.shape[0])))
+            self.assertEqual(indices.shape, (self.x1.shape[0], 10))
+            self.assertEqual(distances.shape, (self.x1.shape[0], 10))
+            self.assertFalse(np.all(indices[:, 0] == np.arange(self.x1.shape[0])))
 
         # Should be called with 11 because nearest neighbor in pynndescent is itself
         check_mock_called_with_kwargs(nndescent, dict(n_neighbors=11))
 
-    @patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent)
-    def test_building_with_gt15_calls_query(self, nndescent):
-        nndescent.query = MagicMock(wraps=nndescent.query)
-        knn_index = nearest_neighbors.NNDescent("euclidean")
-        indices, distances = knn_index.build(self.x1, k=30)
+    def test_building_with_gt15_calls_query(self):
+        with patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent) as nndescent:
+            nndescent.query = MagicMock(wraps=nndescent.query)
+            knn_index = nearest_neighbors.NNDescent("euclidean")
+            indices, distances = knn_index.build(self.x1, k=30)
 
-        self.assertEqual(indices.shape, (self.x1.shape[0], 30))
-        self.assertEqual(distances.shape, (self.x1.shape[0], 30))
-        self.assertFalse(np.all(indices[:, 0] == np.arange(self.x1.shape[0])))
+            self.assertEqual(indices.shape, (self.x1.shape[0], 30))
+            self.assertEqual(distances.shape, (self.x1.shape[0], 30))
+            self.assertFalse(np.all(indices[:, 0] == np.arange(self.x1.shape[0])))
 
-        # The index should be built with 15 neighbors
-        check_mock_called_with_kwargs(nndescent, dict(n_neighbors=15))
-        # And subsequently queried with the correct number of neighbors. Check
-        # for 31 neighbors because query will return the original point as well,
-        # which we don't consider.
-        check_mock_called_with_kwargs(nndescent.query, dict(k=31))
+            # The index should be built with 15 neighbors
+            check_mock_called_with_kwargs(nndescent, dict(n_neighbors=15))
+            # And subsequently queried with the correct number of neighbors. Check
+            # for 31 neighbors because query will return the original point as well,
+            # which we don't consider.
+            check_mock_called_with_kwargs(nndescent.query, dict(k=31))
 
-    @patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent)
-    def test_runs_with_correct_njobs_if_dense_input(self, nndescent):
-        knn_index = nearest_neighbors.NNDescent("euclidean", n_jobs=2)
-        knn_index.build(self.x1, k=5)
-        check_mock_called_with_kwargs(nndescent, dict(n_jobs=2))
+    def test_runs_with_correct_njobs_if_dense_input(self):
+        with patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent) as nndescent:
+            knn_index = nearest_neighbors.NNDescent("euclidean", n_jobs=2)
+            knn_index.build(self.x1, k=5)
+            check_mock_called_with_kwargs(nndescent, dict(n_jobs=2))
 
-    @patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent)
-    def test_runs_with_correct_njobs_if_sparse_input(self, nndescent):
-        x_sparse = sp.csr_matrix(self.x1)
-        knn_index = nearest_neighbors.NNDescent("euclidean", n_jobs=2)
-        knn_index.build(x_sparse, k=5)
-        check_mock_called_with_kwargs(nndescent, dict(n_jobs=2))
+    def test_runs_with_correct_njobs_if_sparse_input(self):
+        with patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent) as nndescent:
+            x_sparse = sp.csr_matrix(self.x1)
+            knn_index = nearest_neighbors.NNDescent("euclidean", n_jobs=2)
+            knn_index.build(x_sparse, k=5)
+            check_mock_called_with_kwargs(nndescent, dict(n_jobs=2))
 
     def test_random_cluster_when_invalid_indices(self):
         class MockIndex:
