@@ -1,7 +1,7 @@
 import inspect
 import logging
 import multiprocessing
-from collections import Iterable
+from collections.abc import Iterable
 from types import SimpleNamespace
 from time import time
 

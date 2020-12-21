@@ -11,7 +11,8 @@ from sklearn import datasets
 from sklearn.model_selection import train_test_split
 
 import openTSNE
-from openTSNE import affinity, initialization
+from openTSNE import affinity
+from openTSNE import initialization
 from openTSNE.affinity import PerplexityBasedNN
 from openTSNE.nearest_neighbors import NNDescent
 from openTSNE.tsne import kl_divergence_bh, kl_divergence_fft
