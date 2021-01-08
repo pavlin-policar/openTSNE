@@ -1395,10 +1395,6 @@ def kl_divergence_fft(
     n_jobs=1,
     **_,
 ):
-    # If the interpolation grid has not yet been evaluated, do it now
-    if reference_embedding is not None and reference_embedding.interp_coeffs is None:
-        reference_embedding.prepare_interpolation_grid()
-
     gradient = np.zeros_like(embedding, dtype=np.float64, order="C")
 
     # Compute negative gradient.
@@ -1613,6 +1609,10 @@ class gradient_descent:
                 "`%s` instead" % type(reference_embedding)
             )
 
+        # If the interpolation grid has not yet been evaluated, do it now
+        if reference_embedding is not None and reference_embedding.interp_coeffs is None:
+            reference_embedding.prepare_interpolation_grid()
+
         # If we're running transform and using the interpolation scheme, then we
         # should limit the range where new points can go to
         should_limit_range = False
@@ -1730,9 +1730,9 @@ class gradient_descent:
                 elif embedding.shape[1] == 2:
                     r = np.linalg.norm(embedding, axis=1)
                     phi = np.arctan2(embedding[:, 0], embedding[:, 1])
-                    mask = (lower_limit < embedding) & (embedding < upper_limit)
-                    mask = np.any(mask, axis=1)
-                    np.clip(r, lower_limit, upper_limit, out=r)
+                    r_limit = max(abs(lower_limit), abs(upper_limit))
+                    mask = r > r_limit
+                    np.clip(r, 0, r_limit, out=r)
                     embedding[:, 0] = r * np.cos(phi)
                     embedding[:, 1] = r * np.sin(phi)
                 # Zero out the momentum terms for the points that hit the boundary
