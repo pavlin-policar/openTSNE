@@ -115,6 +115,10 @@ class PerplexityBasedNN(Affinities):
         number generator is the RandomState instance used by `np.random`.
 
     verbose: bool
+    
+    k_neighbors: int or ``auto``
+        The number of neighbors to use in the kNN graph. If ``auto`` (default),
+        it is set to three times the perplexity.
 
     """
 
@@ -129,14 +133,27 @@ class PerplexityBasedNN(Affinities):
         n_jobs=1,
         random_state=None,
         verbose=False,
+        k_neighbors="auto",
     ):
         self.n_samples = data.shape[0]
+        
+        if k_neighbors=="auto":
+            self.k_neighbors = min(self.n_samples - 1, int(3 * perplexity))
+        else:
+            self.k_neighbors = k_neighbors
+
         self.perplexity = self.check_perplexity(perplexity)
         self.verbose = verbose
-
-        k_neighbors = min(self.n_samples - 1, int(3 * self.perplexity))
+        
+        if self.k_neighbors > int(3 * self.perplexity):
+            log.warning(
+                "The k_neighbors value is over 3 times larger than the perplexity value. "
+                "This may result in an unnecessary slowdown." 
+            )
+        
         self.knn_index, self.__neighbors, self.__distances = build_knn_index(
-            data, method, k_neighbors, metric, metric_params, n_jobs, random_state, verbose
+            data, method, self.k_neighbors, metric, metric_params, n_jobs, 
+            random_state, verbose
         )
 
         with utils.Timer("Calculating affinity matrix...", self.verbose):
@@ -172,8 +189,7 @@ class PerplexityBasedNN(Affinities):
         # Verify that the perplexity isn't too large
         new_perplexity = self.check_perplexity(new_perplexity)
         # Recompute the affinity matrix
-        k_neighbors = min(self.n_samples - 1, int(3 * new_perplexity))
-        if k_neighbors > self.__neighbors.shape[1]:
+        if new_perplexity > self.perplexity:
             raise RuntimeError(
                 "The desired perplexity `%.2f` is larger than the initial one "
                 "used. This would need to recompute the nearest neighbors, "
@@ -188,8 +204,8 @@ class PerplexityBasedNN(Affinities):
             "Perplexity changed. Recomputing affinity matrix...", self.verbose
         ):
             self.P = joint_probabilities_nn(
-                self.__neighbors[:, :k_neighbors],
-                self.__distances[:, :k_neighbors],
+                self.__neighbors,
+                self.__distances,
                 [self.perplexity],
                 symmetrize=True,
                 n_jobs=self.n_jobs,
@@ -237,9 +253,8 @@ class PerplexityBasedNN(Affinities):
         """
         perplexity = perplexity if perplexity is not None else self.perplexity
         perplexity = self.check_perplexity(perplexity)
-        k_neighbors = min(self.n_samples - 1, int(3 * perplexity))
 
-        neighbors, distances = self.knn_index.query(data, k_neighbors)
+        neighbors, distances = self.knn_index.query(data, self.k_neighbors)
 
         with utils.Timer("Calculating affinity matrix...", self.verbose):
             P = joint_probabilities_nn(
@@ -261,8 +276,8 @@ class PerplexityBasedNN(Affinities):
         if perplexity <= 0:
             raise ValueError("Perplexity must be >=0. %.2f given" % perplexity)
 
-        if self.n_samples - 1 < 3 * perplexity:
-            old_perplexity, perplexity = perplexity, (self.n_samples - 1) / 3
+        if self.k_neighbors < perplexity:
+            old_perplexity, perplexity = perplexity, self.k_neighbors / 3
             log.warning(
                 "Perplexity value %d is too high. Using perplexity %.2f instead"
                 % (old_perplexity, perplexity)
