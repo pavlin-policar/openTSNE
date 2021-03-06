@@ -275,7 +275,7 @@ def build_knn_index(
     data, method, k, metric, metric_params=None, n_jobs=1, random_state=None, verbose=False
 ):
     preferred_approx_method = nearest_neighbors.Annoy
-    if is_package_installed("pynndescent") and sp.issparse(data) and metric not in [
+    if is_package_installed("pynndescent") and (sp.issparse(data) or metric not in [
         "cosine",
         "euclidean",
         "manhattan",
@@ -284,7 +284,7 @@ def build_knn_index(
         "l1",
         "l2",
         "taxicab",
-    ]:
+    ]):
         preferred_approx_method = nearest_neighbors.NNDescent
 
     if data.shape[0] < 1000:
