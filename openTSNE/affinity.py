@@ -138,21 +138,21 @@ class PerplexityBasedNN(Affinities):
         self.n_samples = data.shape[0]
         
         if k_neighbors=="auto":
-            self.k_neighbors = min(self.n_samples - 1, int(3 * perplexity))
+            self._k_neighbors = min(self.n_samples - 1, int(3 * perplexity))
         else:
-            self.k_neighbors = k_neighbors
+            self._k_neighbors = k_neighbors
 
         self.perplexity = self.check_perplexity(perplexity)
         self.verbose = verbose
         
-        if self.k_neighbors > int(3 * self.perplexity):
+        if self._k_neighbors > int(3 * self.perplexity):
             log.warning(
                 "The k_neighbors value is over 3 times larger than the perplexity value. "
                 "This may result in an unnecessary slowdown." 
             )
         
         self.knn_index, self.__neighbors, self.__distances = build_knn_index(
-            data, method, self.k_neighbors, metric, metric_params, n_jobs, 
+            data, method, self._k_neighbors, metric, metric_params, n_jobs, 
             random_state, verbose
         )
 
@@ -170,12 +170,13 @@ class PerplexityBasedNN(Affinities):
     def set_perplexity(self, new_perplexity):
         """Change the perplexity of the affinity matrix.
 
-        Note that we only allow lowering the perplexity or restoring it to its
-        original value. This restriction exists because setting a higher
-        perplexity value requires recomputing all the nearest neighbors, which
-        can take a long time. To avoid potential confusion as to why execution
-        time is slow, this is not allowed. If you would like to increase the
-        perplexity above the initial value, simply create a new instance.
+        Note that we only allow setting the perplexity to a value not larger
+        than the number of neighbors used for the original perplexity. This
+        restriction exists because setting a higher perplexity value requires
+        recomputing all the nearest neighbors, which can take a long time.
+        To avoid potential confusion as to why execution time is slow, this
+        is not allowed. If you would like to increase the perplexity above 
+        that value, simply create a new instance.
 
         Parameters
         ----------
@@ -189,7 +190,7 @@ class PerplexityBasedNN(Affinities):
         # Verify that the perplexity isn't too large
         new_perplexity = self.check_perplexity(new_perplexity)
         # Recompute the affinity matrix
-        if new_perplexity > self.perplexity:
+        if new_perplexity > self.__neighbors.shape[1]:
             raise RuntimeError(
                 "The desired perplexity `%.2f` is larger than the initial one "
                 "used. This would need to recompute the nearest neighbors, "
@@ -253,8 +254,12 @@ class PerplexityBasedNN(Affinities):
         """
         perplexity = perplexity if perplexity is not None else self.perplexity
         perplexity = self.check_perplexity(perplexity)
+         
+        _k_neighbors = int(3*perplexity)
+        if _k_neighbors > self._k_neighbors:
+            _k_neighbors = self._k_neighbors
 
-        neighbors, distances = self.knn_index.query(data, self.k_neighbors)
+        neighbors, distances = self.knn_index.query(data, _k_neighbors)
 
         with utils.Timer("Calculating affinity matrix...", self.verbose):
             P = joint_probabilities_nn(
@@ -276,8 +281,8 @@ class PerplexityBasedNN(Affinities):
         if perplexity <= 0:
             raise ValueError("Perplexity must be >=0. %.2f given" % perplexity)
 
-        if self.k_neighbors < perplexity:
-            old_perplexity, perplexity = perplexity, self.k_neighbors / 3
+        if self._k_neighbors < perplexity:
+            old_perplexity, perplexity = perplexity, self._k_neighbors / 3
             log.warning(
                 "Perplexity value %d is too high. Using perplexity %.2f instead"
                 % (old_perplexity, perplexity)
@@ -290,7 +295,7 @@ def build_knn_index(
     data, method, k, metric, metric_params=None, n_jobs=1, random_state=None, verbose=False
 ):
     preferred_approx_method = nearest_neighbors.Annoy
-    if is_package_installed("pynndescent") and sp.issparse(data) and metric not in [
+    if is_package_installed("pynndescent") and (sp.issparse(data) or metric not in [
         "cosine",
         "euclidean",
         "manhattan",
@@ -299,7 +304,7 @@ def build_knn_index(
         "l1",
         "l2",
         "taxicab",
-    ]:
+    ]):
         preferred_approx_method = nearest_neighbors.NNDescent
 
     if data.shape[0] < 1000:
