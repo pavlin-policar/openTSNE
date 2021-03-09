@@ -265,7 +265,7 @@ class PerplexityBasedNN(Affinities):
         perplexity = perplexity if perplexity is not None else self.perplexity
         perplexity = self.check_perplexity(perplexity, self.n_samples)
          
-        k_neighbors = min(self.n_samples, int(3 * new_perplexity))
+        k_neighbors = min(self.n_samples, int(3 * perplexity))
 
         neighbors, distances = self.knn_index.query(data, k_neighbors)
 
