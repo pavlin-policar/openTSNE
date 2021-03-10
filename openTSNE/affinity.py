@@ -277,7 +277,7 @@ class PerplexityBasedNN(Affinities):
         perplexity = perplexity if perplexity is not None else self.perplexity
         perplexity = self.check_perplexity(perplexity, _k_neighbors)
 
-        neighbors, distances = self.knn_index.query(data, k_neighbors)
+        neighbors, distances = self.knn_index.query(data, _k_neighbors)
 
         with utils.Timer("Calculating affinity matrix...", self.verbose):
             P = joint_probabilities_nn(
