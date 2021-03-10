@@ -23,7 +23,7 @@ class TestPerplexityBased(unittest.TestCase):
         cls.x = np.random.normal(100, 50, (91, 4))
 
     def test_properly_reduces_large_perplexity(self):
-        aff = PerplexityBasedNN(self.x, perplexity=40)
+        aff = PerplexityBasedNN(self.x, perplexity=140)
         self.assertEqual(aff.perplexity, 30)
 
     def test_handles_reducing_perplexity_value(self):
@@ -51,11 +51,16 @@ class TestPerplexityBased(unittest.TestCase):
         self.assertTrue(reduced_P.nnz < original_P.nnz,
                         "Lower perplexities should consider less neighbors, "
                         "resulting in a sparser affinity matrix")
+                        
+        # Check that increasing the perplexity works (with a warning)
+        perplexity = 40
+        aff.set_perplexity(perplexity)
+        self.assertEqual(aff.perplexity, perplexity)
 
-        # Raising the perplexity above the initial value would need to recompute
-        # the nearest neighbors, so it should raise an error
+        # Raising the perplexity above the number of neighbors in the kNN graph
+        # would need to recompute the nearest neighbors, so it should raise an error
         with self.assertRaises(RuntimeError):
-            aff.set_perplexity(30)
+            aff.set_perplexity(70)
 
 
 class TestMultiscale(unittest.TestCase):
