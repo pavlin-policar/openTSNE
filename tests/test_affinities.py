@@ -51,6 +51,11 @@ class TestPerplexityBased(unittest.TestCase):
         self.assertTrue(reduced_P.nnz < original_P.nnz,
                         "Lower perplexities should consider less neighbors, "
                         "resulting in a sparser affinity matrix")
+                        
+        # Check that increasing the perplexity works (with a warning)
+        perplexity = 40
+        aff.set_perplexity(perplexity)
+        self.assertEqual(aff.perplexity, perplexity)
 
         # Raising the perplexity above the number of neighbors in the kNN graph
         # would need to recompute the nearest neighbors, so it should raise an error
