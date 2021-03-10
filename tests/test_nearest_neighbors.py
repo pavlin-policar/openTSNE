@@ -139,6 +139,10 @@ class TestBallTree(KNNIndexTestMixin, unittest.TestCase):
         )
 
 
+class TestSklearn(TestBallTree):
+    pass
+
+
 @unittest.skipIf(not is_package_installed("hnswlib"), "`hnswlib`is not installed")
 class TestHNSW(KNNIndexTestMixin, unittest.TestCase):
     knn_index = nearest_neighbors.HNSW

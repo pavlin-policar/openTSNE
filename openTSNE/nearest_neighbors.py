@@ -73,6 +73,128 @@ class KNNIndex:
         return metric
 
 
+class Sklearn(KNNIndex):
+    VALID_METRICS = [
+        "braycurtis",
+        "canberra",
+        "chebyshev",
+        "cityblock",
+        "dice",
+        "euclidean",
+        "hamming",
+        "haversine",
+        "infinity",
+        "jaccard",
+        "kulsinski",
+        "l1",
+        "l2",
+        "mahalanobis",
+        "manhattan",
+        "matching",
+        "minkowski",
+        "p",
+        "pyfunc",
+        "rogerstanimoto",
+        "russellrao",
+        "seuclidean",
+        "sokalmichener",
+        "sokalsneath",
+        "wminkowski",
+    ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__data = None
+
+    def build(self, data, k):
+        timer = utils.Timer(
+            f"Finding {k} nearest neighbors using exact search using "
+            f"{self.metric} distance...",
+            verbose=self.verbose,
+        )
+        timer.__enter__()
+
+        if self.metric == "cosine":
+            # The nearest neighbor ranking for cosine distance is the same as
+            # for euclidean distance on normalized data
+            effective_metric = "euclidean"
+            effective_data = data.copy()
+            effective_data = (
+                effective_data / np.linalg.norm(effective_data, axis=1)[:, None]
+            )
+            # In order to properly compute cosine distances when querying the
+            # index, we need to store the original data
+            self.__data = data
+        else:
+            effective_metric = self.metric
+            effective_data = data
+
+        self.index = neighbors.NearestNeighbors(
+            algorithm="auto",
+            metric=effective_metric,
+            metric_params=self.metric_params,
+            n_jobs=self.n_jobs,
+        )
+        self.index.fit(effective_data)
+
+        # Return the nearest neighbors in the training set
+        distances, indices = self.index.kneighbors(n_neighbors=k)
+
+        # If using cosine distance, the computed distances will be wrong and
+        # need to be recomputed
+        if self.metric == "cosine":
+            distances = np.vstack(
+                [
+                    cdist(np.atleast_2d(x), data[idx], metric="cosine")
+                    for x, idx in zip(data, indices)
+                ]
+            )
+
+        timer.__exit__()
+
+        return indices, distances
+
+    def query(self, query, k):
+        timer = utils.Timer(
+            f"Finding {k} nearest neighbors in existing embedding using exact search...",
+            self.verbose,
+        )
+        timer.__enter__()
+
+        # The nearest neighbor ranking for cosine distance is the same as for
+        # euclidean distance on normalized data
+        if self.metric == "cosine":
+            effective_data = query.copy()
+            effective_data = (
+                effective_data / np.linalg.norm(effective_data, axis=1)[:, None]
+            )
+        else:
+            effective_data = query
+
+        distances, indices = self.index.kneighbors(effective_data, n_neighbors=k)
+
+        # If using cosine distance, the computed distances will be wrong and
+        # need to be recomputed
+        if self.metric == "cosine":
+            if self.__data is None:
+                raise RuntimeError(
+                    "The original data was unavailable when querying cosine "
+                    "distance. Did you change the distance metric after "
+                    "building the index? Please rebuild the index using cosine "
+                    "similarity."
+                )
+            distances = np.vstack(
+                [
+                    cdist(np.atleast_2d(x), self.__data[idx], metric="cosine")
+                    for x, idx in zip(query, indices)
+                ]
+            )
+
+        timer.__exit__()
+
+        return indices, distances
+
+
 class BallTree(KNNIndex):
     VALID_METRICS = neighbors.BallTree.valid_metrics + ["cosine"]
 
