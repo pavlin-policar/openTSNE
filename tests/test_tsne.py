@@ -562,7 +562,7 @@ class TestRandomState(unittest.TestCase):
         )
 
     @patch("openTSNE.initialization.random", wraps=openTSNE.initialization.random)
-    @patch("openTSNE.nearest_neighbors.BallTree", wraps=openTSNE.nearest_neighbors.BallTree)
+    @patch("openTSNE.nearest_neighbors.Sklearn", wraps=openTSNE.nearest_neighbors.Sklearn)
     def test_random_state_parameter_is_propagated_random_init_exact(self, init, neighbors):
         random_state = 1
 
