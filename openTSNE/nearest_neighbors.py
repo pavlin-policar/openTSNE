@@ -202,6 +202,12 @@ class BallTree(KNNIndex):
         super().__init__(*args, **kwargs)
         self.__data = None
 
+        warnings.warn(
+            f"`nearest_neighbors.BallTree` has been superseeded by "
+            f"`nearest_neighbors.Sklearn` and will be removed from future versions",
+            category=FutureWarning,
+        )
+
     def build(self, data, k):
         timer = utils.Timer(
             f"Finding {k} nearest neighbors using exact search using "
