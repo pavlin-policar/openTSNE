@@ -222,7 +222,9 @@ class PerplexityBasedNN(Affinities):
                 n_jobs=self.n_jobs,
             )
 
-    def to_new(self, data, perplexity=None, return_distances=False):
+    def to_new(
+        self, data, perplexity=None, return_distances=False, k_neighbors="auto"
+    ):
         """Compute the affinities of new samples to the initial samples.
 
         This is necessary for embedding new data points into an existing
@@ -244,6 +246,10 @@ class PerplexityBasedNN(Affinities):
             If needed, the function can return the indices of the nearest
             neighbors and their corresponding distances.
 
+        k_neighbors: int or ``auto``
+            The number of neighbors to query kNN graph for. If ``auto``
+            (default), it is set to three times the perplexity.
+
         Returns
         -------
         P: array_like
@@ -262,10 +268,14 @@ class PerplexityBasedNN(Affinities):
             data point.
 
         """
+        
+        if k_neighbors=="auto":
+            _k_neighbors = min(self.n_samples, int(3 * perplexity))
+        else:
+            _k_neighbors = k_neighbors
+
         perplexity = perplexity if perplexity is not None else self.perplexity
-        perplexity = self.check_perplexity(perplexity, self.n_samples)
-         
-        k_neighbors = min(self.n_samples, int(3 * perplexity))
+        perplexity = self.check_perplexity(perplexity, _k_neighbors)
 
         neighbors, distances = self.knn_index.query(data, k_neighbors)
 
