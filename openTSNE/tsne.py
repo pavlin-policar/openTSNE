@@ -1725,7 +1725,7 @@ class gradient_descent:
             # Limit any new points within the circle defined by the interpolation grid
             if should_limit_range:
                 if embedding.shape[1] == 1:
-                    mask = (lower_limit < embedding) & (embedding < upper_limit)
+                    mask = (embedding < lower_limit) | (embedding > upper_limit)
                     np.clip(embedding, lower_limit, upper_limit, out=embedding)
                 elif embedding.shape[1] == 2:
                     r_limit = max(abs(lower_limit), abs(upper_limit))
