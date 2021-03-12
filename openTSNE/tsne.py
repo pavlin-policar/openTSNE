@@ -883,7 +883,7 @@ class TSNEEmbedding(np.ndarray):
             )
         elif initialization == "weighted":
             embedding = initialization_scheme.weighted_mean(
-                X, self, neighbors[:, :k], distances[:, :k]
+                X, embedding=self, P=P
             )
         elif initialization == "median":
             embedding = initialization_scheme.median(self, neighbors[:, :k])

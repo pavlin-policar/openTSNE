@@ -190,16 +190,21 @@ def random_circular_2d(X, embedding, random_state=None):
     return np.ascontiguousarray(embedding)
 
 
-def weighted_mean(X, embedding, neighbors, distances, verbose=False):
+def weighted_mean(X, embedding, P, verbose=False):
     """Initialize points onto an existing embedding by placing them in the
     weighted mean position of their nearest neighbors on the reference embedding.
 
     Parameters
     ----------
     X: np.ndarray
+
     embedding: TSNEEmbedding
-    neighbors: np.ndarray
-    distances: np.ndarray
+        The reference embedding.
+
+    P: np.ndarray
+        A matrix describing similaritieis (e.g. the affinity matrix) between
+        the new data points to the reference data points.
+
     verbose: bool
 
     Returns
@@ -209,12 +214,16 @@ def weighted_mean(X, embedding, neighbors, distances, verbose=False):
     """
     n_samples = X.shape[0]
     n_components = embedding.shape[1]
+    assert P.shape[0] == n_samples and P.shape[1] == embedding.shape[0]
 
     with utils.Timer("Calculating weighted-mean initialization...", verbose):
         partial_embedding = np.zeros((n_samples, n_components), order="C")
         for i in range(n_samples):
+            neighbors_i = P.indices[P.indptr[i]:P.indptr[i + 1]]
+            sim_i = P.data[P.indptr[i]:P.indptr[i + 1]]
+
             partial_embedding[i] = np.average(
-                embedding[neighbors[i]], axis=0, weights=distances[i]
+                embedding[neighbors_i[i]], axis=0, weights=sim_i[i]
             )
 
     return partial_embedding
