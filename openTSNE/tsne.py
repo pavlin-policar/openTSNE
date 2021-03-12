@@ -870,6 +870,12 @@ class TSNEEmbedding(np.ndarray):
             init_checks.num_dimensions(initialization.shape[1], self.shape[1])
 
             embedding = np.array(initialization)
+        # In a 2d scenario, random init will do circular random accross the span
+        # of the embedding
+        elif initialization == "random" and self.shape[1] == 2:
+            embedding = initialization_scheme.random_circular_2d(
+                X, self, self.random_state
+            )
         # Random initialization with isotropic normal distribution
         elif initialization == "random":
             embedding = initialization_scheme.random(

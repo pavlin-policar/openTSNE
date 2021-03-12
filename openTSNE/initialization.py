@@ -162,6 +162,34 @@ def spectral(A, n_components=2, tol=1e-4, max_iter=None, random_state=None, verb
     return embedding
 
 
+def random_circular_2d(X, embedding, random_state=None):
+    """Distribute points uniformly at random within a circle given a radius `r`.
+
+    Parameters
+    ----------
+    X: np.ndarray
+    embedding: TSNEEmbedding
+    random_state: Union[int, RandomState]
+    verbose: bool
+
+    Returns
+    -------
+    np.ndarray
+
+    """
+    random_state = check_random_state(random_state)
+
+    # Determine max radius
+    lower_limit = embedding.box_x_lower_bounds[0]
+    upper_limit = embedding.box_x_lower_bounds[-1]
+    radius = max(abs(lower_limit), abs(upper_limit))
+
+    r = random_state.uniform(0, radius ** 2, size=X.shape[0]) ** 0.5
+    phi = random_state.uniform(0, 2 * np.pi, size=X.shape[0])
+    embedding = np.stack((r * np.sin(phi), r * np.cos(phi))).T
+    return np.ascontiguousarray(embedding)
+
+
 def weighted_mean(X, embedding, neighbors, distances, verbose=False):
     """Initialize points onto an existing embedding by placing them in the
     weighted mean position of their nearest neighbors on the reference embedding.
