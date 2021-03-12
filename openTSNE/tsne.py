@@ -1728,13 +1728,9 @@ class gradient_descent:
                     mask = (lower_limit < embedding) & (embedding < upper_limit)
                     np.clip(embedding, lower_limit, upper_limit, out=embedding)
                 elif embedding.shape[1] == 2:
-                    r = np.linalg.norm(embedding, axis=1)
-                    phi = np.arctan2(embedding[:, 0], embedding[:, 1])
                     r_limit = max(abs(lower_limit), abs(upper_limit))
-                    mask = r > r_limit
-                    np.clip(r, 0, r_limit, out=r)
-                    embedding[:, 0] = r * np.cos(phi)
-                    embedding[:, 1] = r * np.sin(phi)
+                    embedding, mask = utils.clip_point_to_disc(embedding, r_limit, inplace=True)
+
                 # Zero out the momentum terms for the points that hit the boundary
                 self.gains[~mask] = 0
 
