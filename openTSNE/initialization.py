@@ -162,7 +162,7 @@ def spectral(A, n_components=2, tol=1e-4, max_iter=None, random_state=None, verb
     return embedding
 
 
-def random_circular_2d(X, embedding, random_state=None):
+def random_circular_2d(X, embedding, random_state=None, only_boundary=False):
     """Distribute points uniformly at random within a circle given a radius `r`.
 
     Parameters
@@ -170,7 +170,10 @@ def random_circular_2d(X, embedding, random_state=None):
     X: np.ndarray
     embedding: TSNEEmbedding
     random_state: Union[int, RandomState]
-    verbose: bool
+    only_boundary: bool
+        Whether the points should be distributed only on the circular bounday.
+        If this is set to `False`, the points will be distributed randomly
+        inside the circle.
 
     Returns
     -------
@@ -184,7 +187,10 @@ def random_circular_2d(X, embedding, random_state=None):
     upper_limit = embedding.box_x_lower_bounds[-1]
     radius = max(abs(lower_limit), abs(upper_limit))
 
-    r = random_state.uniform(0, radius ** 2, size=X.shape[0]) ** 0.5
+    if not only_boundary:
+        r = random_state.uniform(0, radius ** 2, size=X.shape[0]) ** 0.5
+    else:
+        r = radius
     phi = random_state.uniform(0, 2 * np.pi, size=X.shape[0])
     embedding = np.stack((r * np.sin(phi), r * np.cos(phi))).T
     return np.ascontiguousarray(embedding)
