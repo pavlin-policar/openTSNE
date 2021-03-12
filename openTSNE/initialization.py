@@ -250,6 +250,6 @@ def median(embedding, neighbors, verbose=False):
     np.ndarray
 
     """
-    with utils.Timer("Calculating meadian initialization...", verbose):
+    with utils.Timer("Calculating median initialization...", verbose):
         embedding = np.median(embedding[neighbors], axis=1)
     return np.ascontiguousarray(embedding)
