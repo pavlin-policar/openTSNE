@@ -1,6 +1,4 @@
 import logging
-import time
-import warnings
 from functools import partial
 
 import numpy as np
@@ -37,42 +35,6 @@ class Callback:
             interrupted.
 
         """
-
-
-class ErrorLogger(Callback):
-    """Basic error logger.
-
-    This logger prints out basic information about the optimization. These
-    include the iteration number, error and how much time has elapsed from the
-    previous callback invocation.
-
-    """
-
-    def __init__(self):
-        warnings.warn(
-            "`ErrorLogger` will be removed in upcoming version. Please use the "
-            "`verbose` flag instead.",
-            category=FutureWarning,
-        )
-        self.iter_count = 0
-        self.last_log_time = None
-
-    def optimization_about_to_start(self):
-        self.last_log_time = time.time()
-        self.iter_count = 0
-
-    def __call__(self, iteration, error, embedding):
-        now = time.time()
-        duration = now - self.last_log_time
-        self.last_log_time = now
-
-        n_iters = iteration - self.iter_count
-        self.iter_count = iteration
-
-        print(
-            "Iteration % 4d, KL divergence % 6.4f, %d iterations in %.4f sec"
-            % (iteration, error, n_iters, duration)
-        )
 
 
 class VerifyExaggerationError(Callback):
