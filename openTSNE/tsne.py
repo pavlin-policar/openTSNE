@@ -1402,7 +1402,7 @@ def kl_divergence_fft(
         if reference_embedding is not None:
             sum_Q = _tsne.estimate_negative_gradient_fft_1d_with_grid(
                 embedding.ravel(),
-                reference_embedding.ravel(),
+                gradient.ravel(),
                 reference_embedding.interp_coeffs,
                 reference_embedding.box_x_lower_bounds,
                 fft_params["n_interpolation_points"],
