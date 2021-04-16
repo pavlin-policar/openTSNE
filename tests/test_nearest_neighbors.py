@@ -25,23 +25,23 @@ class KNNIndexTestMixin:
     def test_returns_correct_number_neighbors_query_train(self):
         ks = [1, 5, 10, 30, 50]
         n_samples = self.x1.shape[0]
-        index: nearest_neighbors.KNNIndex = self.knn_index("euclidean")
 
         for k in ks:
-            indices, distances = index.build(self.x1, k=k)
+            index: nearest_neighbors.KNNIndex = self.knn_index(self.x1, k, "euclidean")
+            indices, distances = index.build()
             self.assertEqual(indices.shape, (n_samples, k))
             self.assertEqual(distances.shape, (n_samples, k))
 
     def test_returns_proper_distances_query_train(self):
-        index: nearest_neighbors.KNNIndex = self.knn_index("euclidean")
-        indices, distances = index.build(self.iris, k=30)
+        index: nearest_neighbors.KNNIndex = self.knn_index(self.iris, 30, "euclidean")
+        indices, distances = index.build()
         self.assertTrue(np.isfinite(distances).all())
 
     def test_returns_correct_number_neighbors_query(self):
         ks = [1, 5, 10, 30, 50]
         n_samples = self.x2.shape[0]
-        index: nearest_neighbors.KNNIndex = self.knn_index("euclidean")
-        index.build(self.x1, k=30)
+        index: nearest_neighbors.KNNIndex = self.knn_index(self.x1, 30, "euclidean")
+        index.build()
 
         for k in ks:
             indices, distances = index.query(self.x2, k)
@@ -49,21 +49,21 @@ class KNNIndexTestMixin:
             self.assertEqual(distances.shape, (n_samples, k))
 
     def test_query_train_same_result_with_fixed_random_state(self):
-        knn_index1 = self.knn_index("euclidean", random_state=1)
-        indices1, distances1 = knn_index1.build(self.x1, k=20)
+        knn_index1 = self.knn_index(self.x1, 20, "euclidean", random_state=1)
+        indices1, distances1 = knn_index1.build()
 
-        knn_index2 = self.knn_index("euclidean", random_state=1)
-        indices2, distances2 = knn_index2.build(self.x1, k=20)
+        knn_index2 = self.knn_index(self.x1, 20, "euclidean", random_state=1)
+        indices2, distances2 = knn_index2.build()
 
         np.testing.assert_equal(indices1, indices2)
         np.testing.assert_equal(distances1, distances2)
 
     def test_query_same_result_with_fixed_random_state(self):
-        knn_index1 = self.knn_index("euclidean", random_state=1)
-        indices1, distances1 = knn_index1.build(self.x1, k=30)
+        knn_index1 = self.knn_index(self.x1, 30, "euclidean", random_state=1)
+        indices1, distances1 = knn_index1.build()
 
-        knn_index2 = self.knn_index("euclidean", random_state=1)
-        indices2, distances2 = knn_index2.build(self.x1, k=30)
+        knn_index2 = self.knn_index(self.x1, 30, "euclidean", random_state=1)
+        indices2, distances2 = knn_index2.build()
 
         np.testing.assert_equal(indices1, indices2)
         np.testing.assert_equal(distances1, distances2)
@@ -79,8 +79,8 @@ class TestBallTree(KNNIndexTestMixin, unittest.TestCase):
     def test_cosine_distance(self):
         k = 15
         # Compute cosine distance nearest neighbors using ball tree
-        knn_index = nearest_neighbors.BallTree("cosine")
-        indices, distances = knn_index.build(self.x1, k=k)
+        knn_index = nearest_neighbors.BallTree(self.x1, k, "cosine")
+        indices, distances = knn_index.build()
 
         # Compute the exact nearest neighbors as a reference
         true_distances = squareform(pdist(self.x1, metric="cosine"))
@@ -97,8 +97,8 @@ class TestBallTree(KNNIndexTestMixin, unittest.TestCase):
     def test_cosine_distance_query(self):
         k = 15
         # Compute cosine distance nearest neighbors using ball tree
-        knn_index = nearest_neighbors.BallTree("cosine")
-        knn_index.build(self.x1, k=k)
+        knn_index = nearest_neighbors.BallTree(self.x1, k, "cosine")
+        knn_index.build()
 
         indices, distances = knn_index.query(self.x2, k=k)
 
@@ -117,8 +117,8 @@ class TestBallTree(KNNIndexTestMixin, unittest.TestCase):
     def test_uncompiled_callable_metric_same_result(self):
         k = 15
 
-        knn_index = self.knn_index("manhattan", random_state=1)
-        knn_index.build(self.x1, k=k)
+        knn_index = self.knn_index(self.x1, k, "manhattan", random_state=1)
+        knn_index.build()
         true_indices_, true_distances_ = knn_index.query(self.x2, k=k)
 
         def manhattan(x, y):
@@ -128,8 +128,8 @@ class TestBallTree(KNNIndexTestMixin, unittest.TestCase):
 
             return result
 
-        knn_index = self.knn_index(manhattan, random_state=1)
-        knn_index.build(self.x1, k=k)
+        knn_index = self.knn_index(self.x1, k, manhattan, random_state=1)
+        knn_index.build()
         indices, distances = knn_index.query(self.x2, k=k)
         np.testing.assert_array_equal(
             indices, true_indices_, err_msg="Nearest neighbors do not match"
@@ -168,14 +168,16 @@ class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
     def test_random_state_being_passed_through(self):
         random_state = 1
         with patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent) as nndescent:
-            knn_index = nearest_neighbors.NNDescent("euclidean", random_state=random_state)
-            knn_index.build(self.x1, k=30)
+            knn_index = nearest_neighbors.NNDescent(
+                self.x1, 30, "euclidean", random_state=random_state
+            )
+            knn_index.build()
 
             nndescent.assert_called_once()
             check_mock_called_with_kwargs(nndescent, {"random_state": random_state})
 
     def test_uncompiled_callable_is_compiled(self):
-        knn_index = nearest_neighbors.NNDescent("manhattan")
+        knn_index = nearest_neighbors.NNDescent(self.x1, 30, "manhattan")
 
         def manhattan(x, y):
             result = 0.0
@@ -190,8 +192,8 @@ class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
     def test_uncompiled_callable_metric_same_result(self):
         k = 15
 
-        knn_index = self.knn_index("manhattan", random_state=1)
-        knn_index.build(self.x1, k=k)
+        knn_index = self.knn_index(self.x1, k, "manhattan", random_state=1)
+        knn_index.build()
         true_indices_, true_distances_ = knn_index.query(self.x2, k=k)
 
         def manhattan(x, y):
@@ -201,8 +203,8 @@ class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
 
             return result
 
-        knn_index = self.knn_index(manhattan, random_state=1)
-        knn_index.build(self.x1, k=k)
+        knn_index = self.knn_index(self.x1, k, manhattan, random_state=1)
+        knn_index.build()
         indices, distances = knn_index.query(self.x2, k=k)
         np.testing.assert_array_equal(
             indices, true_indices_, err_msg="Nearest neighbors do not match"
@@ -214,8 +216,8 @@ class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
     def test_numba_compiled_callable_metric_same_result(self):
         k = 15
 
-        knn_index = self.knn_index("manhattan", random_state=1)
-        knn_index.build(self.x1, k=k)
+        knn_index = self.knn_index(self.x1, k, "manhattan", random_state=1)
+        knn_index.build()
         true_indices_, true_distances_ = knn_index.query(self.x2, k=k)
 
         @njit(fastmath=True)
@@ -226,8 +228,8 @@ class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
 
             return result
 
-        knn_index = self.knn_index(manhattan, random_state=1)
-        knn_index.build(self.x1, k=k)
+        knn_index = self.knn_index(self.x1, k, manhattan, random_state=1)
+        knn_index.build()
         indices, distances = knn_index.query(self.x2, k=k)
         np.testing.assert_array_equal(
             indices, true_indices_, err_msg="Nearest neighbors do not match"
@@ -238,8 +240,8 @@ class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
 
     def test_building_with_lt15_builds_proper_graph(self):
         with patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent) as nndescent:
-            knn_index = nearest_neighbors.NNDescent("euclidean")
-            indices, distances = knn_index.build(self.x1, k=10)
+            knn_index = nearest_neighbors.NNDescent(self.x1, 10, "euclidean")
+            indices, distances = knn_index.build()
 
             self.assertEqual(indices.shape, (self.x1.shape[0], 10))
             self.assertEqual(distances.shape, (self.x1.shape[0], 10))
@@ -251,8 +253,8 @@ class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
     def test_building_with_gt15_calls_query(self):
         with patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent) as nndescent:
             nndescent.query = MagicMock(wraps=nndescent.query)
-            knn_index = nearest_neighbors.NNDescent("euclidean")
-            indices, distances = knn_index.build(self.x1, k=30)
+            knn_index = nearest_neighbors.NNDescent(self.x1, 30, "euclidean")
+            indices, distances = knn_index.build()
 
             self.assertEqual(indices.shape, (self.x1.shape[0], 30))
             self.assertEqual(distances.shape, (self.x1.shape[0], 30))
@@ -267,15 +269,15 @@ class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
 
     def test_runs_with_correct_njobs_if_dense_input(self):
         with patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent) as nndescent:
-            knn_index = nearest_neighbors.NNDescent("euclidean", n_jobs=2)
-            knn_index.build(self.x1, k=5)
+            knn_index = nearest_neighbors.NNDescent(self.x1, 5, "euclidean", n_jobs=2)
+            knn_index.build()
             check_mock_called_with_kwargs(nndescent, dict(n_jobs=2))
 
     def test_runs_with_correct_njobs_if_sparse_input(self):
         with patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent) as nndescent:
             x_sparse = sp.csr_matrix(self.x1)
-            knn_index = nearest_neighbors.NNDescent("euclidean", n_jobs=2)
-            knn_index.build(x_sparse, k=5)
+            knn_index = nearest_neighbors.NNDescent(x_sparse, 5, "euclidean", n_jobs=2)
+            knn_index.build()
             check_mock_called_with_kwargs(nndescent, dict(n_jobs=2))
 
     def test_random_cluster_when_invalid_indices(self):
@@ -294,8 +296,8 @@ class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
                 self.neighbor_graph = indices, distances
 
         with patch("pynndescent.NNDescent", wraps=MockIndex):
-            knn_index = nearest_neighbors.NNDescent("euclidean", n_jobs=2)
-            indices, distances = knn_index.build(self.x1, k=5)
+            knn_index = nearest_neighbors.NNDescent(self.x1, 5, "euclidean", n_jobs=2)
+            indices, distances = knn_index.build()
 
             # Check that indices were replaced by something
             self.assertTrue(np.all(indices[:10] != -1))

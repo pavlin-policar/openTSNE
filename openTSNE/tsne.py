@@ -1318,8 +1318,17 @@ class TSNE(BaseEstimator):
         if X is None and initialization == "pca":
             log.warning(
                 "Attempting to use `pca` initalization, but no `X` matrix specified! "
-                "Using `spectral` initilization instead, which requires only "
-                "`affinities`."
+                "Using `spectral` initilization instead, which doesn't need access "
+                "to the data matrix"
+            )
+            initialization = "spectral"
+
+        # Same spiel for precomputed distance matrices
+        if self.metric == "precomputed" and initialization == "pca":
+            log.warning(
+                "Attempting to use `pca` initalization, but using precomputed "
+                "distance matrix! Using `spectral` initilization instead, which "
+                "doesn't need access to the data matrix."
             )
             initialization = "spectral"
 

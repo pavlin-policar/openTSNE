@@ -1,6 +1,8 @@
 import unittest
 from functools import partial
 
+from scipy.spatial.distance import pdist, squareform
+
 import openTSNE
 import openTSNE.affinity
 import openTSNE.initialization
@@ -67,6 +69,33 @@ class TestTSNECorrectness(unittest.TestCase):
 
         # Prepare a random initialization
         embedding = tsne.prepare_initial(x)
+
+        # KNN should do poorly on a random initialization
+        knn.fit(embedding, y)
+        predictions = knn.predict(embedding)
+        self.assertLess(accuracy_score(predictions, y), 0.5)
+
+        # Optimize the embedding for a small number of steps so tests run fast
+        embedding.optimize(250, inplace=True)
+
+        # Similar points should be grouped together, therefore KNN should do well
+        knn.fit(embedding, y)
+        predictions = knn.predict(embedding)
+        self.assertGreater(accuracy_score(predictions, y), 0.95)
+
+    def test_iris_with_precomputed_distance_matrices(self):
+        x, y = self.iris.data, self.iris.target
+
+        distances = squareform(pdist(x))
+
+        # Evaluate t-SNE optimization using a KNN classifier
+        knn = KNeighborsClassifier(n_neighbors=10)
+        tsne = TSNE(
+            perplexity=30, initialization="random", random_state=0, metric="precomputed"
+        )
+
+        # Prepare a random initialization
+        embedding = tsne.prepare_initial(distances)
 
         # KNN should do poorly on a random initialization
         knn.fit(embedding, y)
@@ -255,3 +284,17 @@ class TestTSNECorrectnessUsingNonStandardDof(TestTSNECorrectness):
         )
         cls.x_test = random_state.normal(0, 1, (25, 4))
         cls.iris = datasets.load_iris()
+
+
+class TestTSNECorrectnessUsingPrecomputedDistanceMatrix(unittest.TestCase):
+    def test_iris(self):
+        x = datasets.load_iris().data
+        x += np.random.normal(0, 1e-3, x.shape)  # iris contains duplicate rows
+
+        distances = squareform(pdist(x))
+        params = dict(initialization="random", random_state=0)
+        embedding1 = TSNE(metric="precomputed", **params).fit(distances)
+        embedding2 = TSNE(metric="euclidean", **params).fit(x)
+
+        np.testing.assert_almost_equal(embedding1, embedding2)
+

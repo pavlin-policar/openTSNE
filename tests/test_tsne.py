@@ -7,8 +7,11 @@ from typing import Callable, Any, Tuple, Optional
 from unittest.mock import patch, MagicMock
 
 import numpy as np
+from scipy.spatial.distance import pdist, squareform
 from sklearn import datasets
+from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
 
 import openTSNE
 from openTSNE import affinity
@@ -836,3 +839,42 @@ class TestTSNEEmebedding(unittest.TestCase):
         embedding: openTSNE.TSNEEmbedding = tsne.fit(np.random.randn(100, 4))
         loaded_obj: openTSNE.TSNEEmbedding = pickle.loads(pickle.dumps(embedding))
         loaded_obj.transform(np.random.randn(100, 4))
+
+
+class TestPrecomputedDistanceMatrices(unittest.TestCase):
+    def test_precomputed_dist_matrix_via_affinities_uses_spectral_init(self):
+        x = np.random.normal(0, 1, (200, 5))
+        d = squareform(pdist(x))
+
+        aff = affinity.PerplexityBasedNN(d, metric="precomputed")
+        desired_init = initialization.spectral(aff.P)
+        embedding = TSNE(early_exaggeration_iter=0, n_iter=0).fit(affinities=aff)
+        np.testing.assert_array_equal(embedding, desired_init)
+
+    def test_precomputed_dist_matrix_via_tsne_interface_uses_spectral_init(self):
+        x = np.random.normal(0, 1, (200, 5))
+        d = squareform(pdist(x))
+
+        aff = affinity.PerplexityBasedNN(d, metric="precomputed")
+        desired_init = initialization.spectral(aff.P)
+        embedding = TSNE(metric="precomputed", early_exaggeration_iter=0, n_iter=0) \
+            .fit(d)
+        np.testing.assert_array_equal(embedding, desired_init)
+
+    def test_precomputed_dist_matrix_doesnt_override_valid_inits(self):
+        iris = datasets.load_iris()
+        x, y = iris.data, iris.target
+        d = squareform(pdist(x))
+
+        embedding = TSNE(
+            initialization="random",
+            metric="precomputed",
+            early_exaggeration_iter=0,
+            n_iter=0
+        ).fit(d)
+
+        knn = KNeighborsClassifier(n_neighbors=10)
+        knn.fit(embedding, y)
+        predictions = knn.predict(embedding)
+        self.assertLess(accuracy_score(predictions, y), 0.55)
+

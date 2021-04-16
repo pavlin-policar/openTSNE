@@ -3,10 +3,11 @@ import unittest
 from functools import partial
 
 import numpy as np
+from scipy.spatial.distance import squareform, pdist
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
 
-from openTSNE import affinity
+from openTSNE import affinity, nearest_neighbors
 
 affinity.log.setLevel(logging.ERROR)
 
@@ -179,5 +180,40 @@ class TestAffinityMatrixCorrectness(unittest.TestCase):
                 np.asarray(np.sum(P, axis=1)).ravel(),
                 np.ones(len(x_test)),
                 err_msg=method_name,
+            )
+
+    def test_handles_precomputed_distance_matrices(self):
+        x = np.random.normal(0, 1, (200, 5))
+        d = squareform(pdist(x))
+
+        for method_name, cls in self.affinity_classes:
+            aff = cls(d, metric="precomputed")
+            self.assertIsInstance(
+                aff.knn_index, nearest_neighbors.PrecomputedDistanceMatrix, msg=method_name
+            )
+
+    def test_affinity_matrix_matches_precomputed_distance_affinity_matrix_random(self):
+        x = np.random.normal(0, 1, (200, 5))
+        d = squareform(pdist(x))
+
+        for method_name, cls in self.affinity_classes:
+            aff1 = cls(d, metric="precomputed")
+            aff2 = cls(x, metric="euclidean")
+
+            np.testing.assert_almost_equal(
+                aff1.P.toarray(), aff2.P.toarray(), err_msg=method_name
+            )
+
+    def test_affinity_matrix_matches_precomputed_distance_affinity_matrix_iris(self):
+        x = datasets.load_iris().data
+        x += np.random.normal(0, 1e-3, x.shape)  # iris contains duplicate rows
+        d = squareform(pdist(x))
+
+        for method_name, cls in self.affinity_classes:
+            aff1 = cls(d, metric="precomputed")
+            aff2 = cls(x, metric="euclidean")
+
+            np.testing.assert_almost_equal(
+                aff1.P.toarray(), aff2.P.toarray(), err_msg=method_name
             )
 
