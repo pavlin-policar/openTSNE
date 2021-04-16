@@ -7,8 +7,11 @@ from typing import Callable, Any, Tuple, Optional
 from unittest.mock import patch, MagicMock
 
 import numpy as np
+from scipy.spatial.distance import pdist, squareform
 from sklearn import datasets
+from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
 
 import openTSNE
 from openTSNE import affinity
@@ -387,25 +390,52 @@ class TestTSNECallbackParams(unittest.TestCase):
         self.assertEqual(callback.call_count, 1)
 
 
-class TestAffinityAsParameter(unittest.TestCase):
-    def test_fails_if_incorrect_class(self):
-        aff = "definitely not an instance of Affinity"
+class TestAlternativeFitUsageWithAffinityAndInitialization(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.x = np.random.normal(100, 50, (25, 4))
+        cls.init = np.random.normal(0, 1e-4, (25, 2))
+
+    def test_fails_if_no_parameters_specified(self):
+        tsne = TSNE()
         with self.assertRaises(ValueError):
-            TSNE(affinities=aff)
+            tsne.fit()
 
-    def test_affinities_passed_to_embedding(self):
-        x = np.random.normal(100, 50, (25, 4))
-        aff = affinity.PerplexityBasedNN(x, 5, method="exact")
-        tsne = TSNE(affinities=aff)
-        embedding = tsne.prepare_initial(x)
+    def test_precomputed_affinity_is_passed_to_embedding_object(self):
+        aff = affinity.PerplexityBasedNN(self.x, 5, method="exact")
+        embedding = TSNE(
+            early_exaggeration_iter=0, n_iter=0, initialization=self.init
+        ).fit(affinities=aff)
         self.assertIs(embedding.affinities, aff)
 
-    def test_optimize_runs_properly(self):
-        x = np.random.normal(100, 50, (25, 4))
-        aff = affinity.PerplexityBasedNN(x, 5, method="exact")
-        tsne = TSNE(affinities=aff)
-        embedding = tsne.fit(x)
-        self.assertIs(embedding.affinities, aff)
+    def test_fails_if_affinities_parameter_is_not_correct_class(self):
+        aff = "definitely not an affinity object"
+        with self.assertRaises(ValueError):
+            TSNE(initialization=self.init).fit(affinities=aff)
+
+    def test_precomputed_initialization_is_passed_to_embedding_object(self):
+        embedding = TSNE(early_exaggeration_iter=0, n_iter=0) \
+            .fit(self.x, initialization=self.init)
+        np.testing.assert_array_equal(embedding, self.init)
+
+    def test_string_initialization(self):
+        # This should not crash
+        TSNE(early_exaggeration_iter=0, n_iter=0).fit(self.x, initialization="pca")
+
+    def test_parameter_init_takes_precendence_over_constructor_init(self):
+        constructor_init = np.random.normal(1, 1e-4, self.init.shape)
+        embedding = TSNE(
+            early_exaggeration_iter=0, n_iter=0, initialization=constructor_init
+        ).fit(self.x, initialization=self.init)
+        np.testing.assert_array_equal(embedding, self.init)
+
+    def test_pca_init_with_only_affinities_passed(self):
+        aff = affinity.PerplexityBasedNN(self.x, 5, method="exact")
+        desired_init = initialization.spectral(aff.P)
+        embedding = TSNE(
+            early_exaggeration_iter=0, n_iter=0, initialization="pca"
+        ).fit(affinities=aff)
+        np.testing.assert_array_equal(embedding, desired_init)
 
 
 class TSNEInitialization(unittest.TestCase):
@@ -809,3 +839,42 @@ class TestTSNEEmebedding(unittest.TestCase):
         embedding: openTSNE.TSNEEmbedding = tsne.fit(np.random.randn(100, 4))
         loaded_obj: openTSNE.TSNEEmbedding = pickle.loads(pickle.dumps(embedding))
         loaded_obj.transform(np.random.randn(100, 4))
+
+
+class TestPrecomputedDistanceMatrices(unittest.TestCase):
+    def test_precomputed_dist_matrix_via_affinities_uses_spectral_init(self):
+        x = np.random.normal(0, 1, (200, 5))
+        d = squareform(pdist(x))
+
+        aff = affinity.PerplexityBasedNN(d, metric="precomputed")
+        desired_init = initialization.spectral(aff.P)
+        embedding = TSNE(early_exaggeration_iter=0, n_iter=0).fit(affinities=aff)
+        np.testing.assert_array_equal(embedding, desired_init)
+
+    def test_precomputed_dist_matrix_via_tsne_interface_uses_spectral_init(self):
+        x = np.random.normal(0, 1, (200, 5))
+        d = squareform(pdist(x))
+
+        aff = affinity.PerplexityBasedNN(d, metric="precomputed")
+        desired_init = initialization.spectral(aff.P)
+        embedding = TSNE(metric="precomputed", early_exaggeration_iter=0, n_iter=0) \
+            .fit(d)
+        np.testing.assert_array_equal(embedding, desired_init)
+
+    def test_precomputed_dist_matrix_doesnt_override_valid_inits(self):
+        iris = datasets.load_iris()
+        x, y = iris.data, iris.target
+        d = squareform(pdist(x))
+
+        embedding = TSNE(
+            initialization="random",
+            metric="precomputed",
+            early_exaggeration_iter=0,
+            n_iter=0
+        ).fit(d)
+
+        knn = KNeighborsClassifier(n_neighbors=10)
+        knn.fit(embedding, y)
+        predictions = knn.predict(embedding)
+        self.assertLess(accuracy_score(predictions, y), 0.55)
+

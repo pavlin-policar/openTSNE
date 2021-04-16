@@ -137,7 +137,7 @@ class PerplexityBasedNN(Affinities):
     ):
         self.n_samples = data.shape[0]
         
-        if k_neighbors=="auto":
+        if k_neighbors == "auto":
             _k_neighbors = min(self.n_samples - 1, int(3 * perplexity))
         else:
             _k_neighbors = k_neighbors
@@ -313,6 +313,13 @@ class PerplexityBasedNN(Affinities):
 def build_knn_index(
     data, method, k, metric, metric_params=None, n_jobs=1, random_state=None, verbose=False
 ):
+    # If we're dealing with a precomputed distance matrix, our job is very easy
+    # so we can skip all the remaining checks
+    if metric == "precomputed":
+        knn_index = nearest_neighbors.PrecomputedDistanceMatrix(data, k=k)
+        neighbors, distances = knn_index.build()
+        return knn_index, neighbors, distances
+
     preferred_approx_method = nearest_neighbors.Annoy
     if is_package_installed("pynndescent") and (sp.issparse(data) or metric not in [
         "cosine",
@@ -349,6 +356,8 @@ def build_knn_index(
         )
     else:
         knn_index = methods[method](
+            data=data,
+            k=k,
             metric=metric,
             metric_params=metric_params,
             n_jobs=n_jobs,
@@ -356,7 +365,7 @@ def build_knn_index(
             verbose=verbose,
         )
 
-    neighbors, distances = knn_index.build(data, k=k)
+    neighbors, distances = knn_index.build()
 
     return knn_index, neighbors, distances
 
@@ -523,11 +532,9 @@ class FixedSigmaNN(Affinities):
                 "`k` (%d) cannot be larger than N-1 (%d)." % (k, self.n_samples)
             )
 
-        knn_index, neighbors, distances = build_knn_index(
+        self.knn_index, neighbors, distances = build_knn_index(
             data, method, k, metric, metric_params, n_jobs, random_state, self.verbose
         )
-
-        self.knn_index = knn_index
 
         with utils.Timer("Calculating affinity matrix...", self.verbose):
             # Compute asymmetric pairwise input similarities

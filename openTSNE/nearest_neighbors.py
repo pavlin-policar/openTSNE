@@ -12,27 +12,23 @@ class KNNIndex:
     VALID_METRICS = []
 
     def __init__(
-        self, metric, metric_params=None, n_jobs=1, random_state=None, verbose=False
+        self, data, k, metric, metric_params=None, n_jobs=1, random_state=None, verbose=False
     ):
-        self.index = None
+        self.data = data
+        self.k = k
         self.metric = self.check_metric(metric)
         self.metric_params = metric_params
         self.n_jobs = n_jobs
         self.random_state = random_state
         self.verbose = verbose
 
-    def build(self, data, k):
+        self.index = None
+
+    def build(self):
         """Build the nearest neighbor index on the training data.
 
         Builds an index on the training data and computes the nearest neighbors
         on the training data.
-
-        Parameters
-        ----------
-        data: array_like
-            Training data.
-        k: int
-            The number of nearest neighbors to compute on the training data.
 
         Returns
         -------
@@ -106,7 +102,9 @@ class Sklearn(KNNIndex):
         super().__init__(*args, **kwargs)
         self.__data = None
 
-    def build(self, data, k):
+    def build(self):
+        data, k = self.data, self.k
+
         timer = utils.Timer(
             f"Finding {k} nearest neighbors using exact search using "
             f"{self.metric} distance...",
@@ -208,7 +206,9 @@ class BallTree(KNNIndex):
             category=FutureWarning,
         )
 
-    def build(self, data, k):
+    def build(self):
+        data, k = self.data, self.k
+
         timer = utils.Timer(
             f"Finding {k} nearest neighbors using exact search using "
             f"{self.metric} distance...",
@@ -309,7 +309,9 @@ class Annoy(KNNIndex):
         "taxicab",
     ]
 
-    def build(self, data, k):
+    def build(self):
+        data, k = self.data, self.k
+
         timer = utils.Timer(
             f"Finding {k} nearest neighbors using Annoy approximate search using "
             f"{self.metric} distance...",
@@ -486,7 +488,9 @@ class NNDescent(KNNIndex):
 
         return super().check_metric(metric)
 
-    def build(self, data, k):
+    def build(self):
+        data, k = self.data, self.k
+
         timer = utils.Timer(
             f"Finding {k} nearest neighbors using NN descent approximate search using "
             f"{self.metric} distance...",
@@ -593,7 +597,9 @@ class HNSW(KNNIndex):
             )
         super().__init__(*args, **kwargs)
 
-    def build(self, data, k: int):
+    def build(self):
+        data, k = self.data, self.k
+
         timer = utils.Timer(
             f"Finding {k} nearest neighbors using HNSWlib approximate search using "
             f"{self.metric} distance...",
@@ -655,3 +661,16 @@ class HNSW(KNNIndex):
 
         # return indices and distances
         return indices, distances
+
+
+class PrecomputedDistanceMatrix(KNNIndex):
+    def __init__(self, distance_matrix, k=None):
+        nn = neighbors.NearestNeighbors(metric="precomputed")
+        nn.fit(distance_matrix)
+        self.distances, self.indices = nn.kneighbors(n_neighbors=k)
+
+    def build(self):
+        return self.indices, self.distances
+
+    def query(self, *args, **kwargs):
+        raise RuntimeError("Precomputed distance matrices cannot be queried")
