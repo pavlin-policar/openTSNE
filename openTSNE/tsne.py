@@ -1838,4 +1838,3 @@ class gradient_descent:
         )
 
         return error, embedding
-

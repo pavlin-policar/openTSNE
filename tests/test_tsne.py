@@ -877,4 +877,3 @@ class TestPrecomputedDistanceMatrices(unittest.TestCase):
         knn.fit(embedding, y)
         predictions = knn.predict(embedding)
         self.assertLess(accuracy_score(predictions, y), 0.55)
-

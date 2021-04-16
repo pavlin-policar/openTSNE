@@ -17,6 +17,14 @@ PerplexityBasedNN = partial(affinity.PerplexityBasedNN, method="exact")
 FixedSigmaNN = partial(affinity.FixedSigmaNN, method="exact")
 Uniform = partial(affinity.Uniform, method="exact")
 
+AFFINITY_CLASSES = [
+    ("PerplexityBasedNN", PerplexityBasedNN),
+    ("FixedSigmaNN", partial(FixedSigmaNN, sigma=1)),
+    ("MultiscaleMixture", partial(MultiscaleMixture, perplexities=[10, 20])),
+    ("Multiscale", partial(Multiscale, perplexities=[10, 20])),
+    ("Uniform", partial(Uniform, k_neighbors=5)),
+]
+
 
 class TestPerplexityBased(unittest.TestCase):
     @classmethod
@@ -153,27 +161,19 @@ class TestUniform(unittest.TestCase):
 
 
 class TestAffinityMatrixCorrectness(unittest.TestCase):
-    affinity_classes = [
-        ("PerplexityBasedNN", PerplexityBasedNN),
-        ("FixedSigmaNN", partial(FixedSigmaNN, sigma=1)),
-        ("MultiscaleMixture", partial(MultiscaleMixture, perplexities=[10, 20])),
-        ("Multiscale", partial(Multiscale, perplexities=[10, 20])),
-        ("Uniform", partial(Uniform, k_neighbors=5)),
-    ]
-
     @classmethod
     def setUpClass(cls):
         cls.iris = datasets.load_iris().data
 
     def test_that_regular_matrix_sums_to_one(self):
-        for method_name, cls in self.affinity_classes:
+        for method_name, cls in AFFINITY_CLASSES:
             aff: affinity.Affinities = cls(self.iris)
             self.assertAlmostEqual(np.sum(aff.P), 1, msg=method_name)
 
     def test_that_to_new_transform_matrix_treats_each_datapoint_separately(self):
         x_train, x_test = train_test_split(self.iris, test_size=0.33, random_state=42)
 
-        for method_name, cls in self.affinity_classes:
+        for method_name, cls in AFFINITY_CLASSES:
             aff: affinity.Affinities = cls(x_train)
             P = aff.to_new(x_test)
             np.testing.assert_allclose(
@@ -186,7 +186,7 @@ class TestAffinityMatrixCorrectness(unittest.TestCase):
         x = np.random.normal(0, 1, (200, 5))
         d = squareform(pdist(x))
 
-        for method_name, cls in self.affinity_classes:
+        for method_name, cls in AFFINITY_CLASSES:
             aff = cls(d, metric="precomputed")
             self.assertIsInstance(
                 aff.knn_index, nearest_neighbors.PrecomputedDistanceMatrix, msg=method_name
@@ -196,7 +196,7 @@ class TestAffinityMatrixCorrectness(unittest.TestCase):
         x = np.random.normal(0, 1, (200, 5))
         d = squareform(pdist(x))
 
-        for method_name, cls in self.affinity_classes:
+        for method_name, cls in AFFINITY_CLASSES:
             aff1 = cls(d, metric="precomputed")
             aff2 = cls(x, metric="euclidean")
 
@@ -205,11 +205,10 @@ class TestAffinityMatrixCorrectness(unittest.TestCase):
             )
 
     def test_affinity_matrix_matches_precomputed_distance_affinity_matrix_iris(self):
-        x = datasets.load_iris().data
-        x += np.random.normal(0, 1e-3, x.shape)  # iris contains duplicate rows
+        x = self.iris + np.random.normal(0, 1e-3, self.iris.shape)  # iris contains duplicate rows
         d = squareform(pdist(x))
 
-        for method_name, cls in self.affinity_classes:
+        for method_name, cls in AFFINITY_CLASSES:
             aff1 = cls(d, metric="precomputed")
             aff2 = cls(x, metric="euclidean")
 
@@ -217,3 +216,33 @@ class TestAffinityMatrixCorrectness(unittest.TestCase):
                 aff1.P.toarray(), aff2.P.toarray(), err_msg=method_name
             )
 
+
+class TestAffinityAcceptsKnnIndexAsParameter(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.iris = datasets.load_iris().data
+        cls.iris += np.random.normal(0, 1e-3, cls.iris.shape)
+
+    def test_fails_if_neither_data_nor_index_specified(self):
+        for method_name, cls in AFFINITY_CLASSES:
+            with self.assertRaises(ValueError, msg=method_name):
+                cls(data=None, knn_index=None)
+
+    def test_fails_if_both_data_and_index_specified(self):
+        knn_index = nearest_neighbors.Sklearn(self.iris, k=30)
+        for method_name, cls in AFFINITY_CLASSES:
+            with self.assertRaises(ValueError, msg=method_name):
+                cls(data=self.iris, knn_index=knn_index)
+
+    def test_accepts_knn_index(self):
+        knn_index = nearest_neighbors.Sklearn(self.iris, k=30)
+        for method_name, cls in AFFINITY_CLASSES:
+            aff = cls(knn_index=knn_index)
+            self.assertIs(aff.knn_index, knn_index, msg=method_name)
+            self.assertEqual(aff.n_samples, self.iris.shape[0])
+
+    def test_to_new(self):
+        knn_index = nearest_neighbors.Sklearn(self.iris, k=30)
+        for method_name, cls in AFFINITY_CLASSES:
+            aff = cls(knn_index=knn_index)
+            aff.to_new(self.iris)

@@ -12,9 +12,17 @@ class KNNIndex:
     VALID_METRICS = []
 
     def __init__(
-        self, data, k, metric, metric_params=None, n_jobs=1, random_state=None, verbose=False
+        self,
+        data,
+        k,
+        metric="euclidean",
+        metric_params=None,
+        n_jobs=1,
+        random_state=None,
+        verbose=False,
     ):
         self.data = data
+        self.n_samples = data.shape[0]
         self.k = k
         self.metric = self.check_metric(metric)
         self.metric_params = metric_params
@@ -664,10 +672,47 @@ class HNSW(KNNIndex):
 
 
 class PrecomputedDistanceMatrix(KNNIndex):
-    def __init__(self, distance_matrix, k=None):
+    """Use a precomputed distance matrix to construct the KNNG.
+
+    Parameters
+    ----------
+    distance_matrix: np.ndarray
+        A square, symmetric, and contain only poistive values.
+
+    """
+
+    def __init__(self, distance_matrix, k):
         nn = neighbors.NearestNeighbors(metric="precomputed")
         nn.fit(distance_matrix)
         self.distances, self.indices = nn.kneighbors(n_neighbors=k)
+        self.n_samples = distance_matrix.shape[0]
+        self.k = k
+
+    def build(self):
+        return self.indices, self.distances
+
+    def query(self, *args, **kwargs):
+        raise RuntimeError("Precomputed distance matrices cannot be queried")
+
+
+class PrecomputedNeighbors(KNNIndex):
+    """Use a precomputed distance matrix to construct the KNNG.
+
+    Parameters
+    ----------
+    neighbors: np.ndarray
+        A N x K matrix containing the indices of point i's k nearest neighbors.
+
+    distances: np.ndarray
+        A N x K matrix containing the distances to from data point i to its k
+        nearest neighbors.
+
+    """
+
+    def __init__(self, neighbors, distances):
+        self.distances, self.indices = distances, neighbors
+        self.n_samples = neighbors.shape[0]
+        self.k = neighbors.shape[1]
 
     def build(self):
         return self.indices, self.distances
