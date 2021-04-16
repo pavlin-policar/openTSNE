@@ -376,9 +376,10 @@ cpdef double estimate_negative_gradient_fft_1d(
     # FFTW works faster on numbers that can be written as  2^a 3^b 5^c 7^d
     # 11^e 13^f, where e+f is either 0 or 1, and the other exponents are arbitrary
     cdef list recommended_boxes = [
-        25, 36, 50, 55, 60, 65, 70, 75, 80, 85, 90, 96, 100, 110, 120, 130, 140, 150, 175, 200
+        25, 36, 50, 60, 70, 75, 80, 90, 96, 100, 120, 140, 150, 175, 200,
+        250, 300, 350, 400, 450, 500, 1000, 5000, 10000 
     ]
-    if n_boxes < recommended_boxes[19]:
+    if n_boxes < recommended_boxes[23]:
         i = 0
         while n_boxes > recommended_boxes[i]:
             i += 1
@@ -756,9 +757,10 @@ cpdef double estimate_negative_gradient_fft_2d(
     # FFTW works faster on numbers that can be written as  2^a 3^b 5^c 7^d
     # 11^e 13^f, where e+f is either 0 or 1, and the other exponents are arbitrary
     cdef list recommended_boxes = [
-        25, 36, 50, 55, 60, 65, 70, 75, 80, 85, 90, 96, 100, 110, 120, 130, 140, 150, 175, 200
+        25, 36, 50, 60, 70, 75, 80, 90, 96, 100, 120, 140, 150, 175, 200,
+        250, 300, 350, 400, 450, 500, 1000, 5000, 10000 
     ]
-    if n_boxes_1d < recommended_boxes[19]:
+    if n_boxes_1d < recommended_boxes[23]:
         i = 0
         while n_boxes_1d > recommended_boxes[i]:
             i += 1
