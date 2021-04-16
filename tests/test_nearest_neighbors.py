@@ -1,4 +1,7 @@
+import pickle
+import tempfile
 import unittest
+from os import path
 from unittest.mock import patch, MagicMock
 
 import numpy as np
@@ -71,6 +74,35 @@ class KNNIndexTestMixin:
 
 class TestAnnoy(KNNIndexTestMixin, unittest.TestCase):
     knn_index = nearest_neighbors.Annoy
+
+    def test_pickle_without_built_index(self):
+        knn_index = nearest_neighbors.Annoy(self.iris, k=30)
+        self.assertIsNone(knn_index.index)
+
+        with tempfile.TemporaryDirectory() as dirname:
+            with open(path.join(dirname, "index.pkl"), "wb") as f:
+                pickle.dump(knn_index, f)
+
+            with open(path.join(dirname, "index.pkl"), "rb") as f:
+                loaded_obj = pickle.load(f)
+
+        self.assertIsNone(loaded_obj.index)
+
+    def test_pickle_with_built_index(self):
+        knn_index = nearest_neighbors.Annoy(self.iris, k=30)
+        knn_index.build()
+        with tempfile.TemporaryDirectory() as dirname:
+            with open(path.join(dirname, "index.pkl"), "wb") as f:
+                pickle.dump(knn_index, f)
+
+            with open(path.join(dirname, "index.pkl"), "rb") as f:
+                loaded_obj = pickle.load(f)
+
+        load_idx, load_dist = loaded_obj.query(self.iris, 15)
+        orig_idx, orig_dist = knn_index.query(self.iris, 15)
+
+        np.testing.assert_array_equal(load_idx, orig_idx)
+        np.testing.assert_array_almost_equal(load_dist, orig_dist)
 
 
 class TestBallTree(KNNIndexTestMixin, unittest.TestCase):
