@@ -1315,7 +1315,7 @@ class TSNE(BaseEstimator):
 
         # If only the affinites have been specified, and the initialization depends
         # on `X`, switch to spectral initalization
-        if X is None and initialization == "pca":
+        if X is None and isinstance(initialization, str) and initialization == "pca":
             log.warning(
                 "Attempting to use `pca` initalization, but no `X` matrix specified! "
                 "Using `spectral` initilization instead, which doesn't need access "
