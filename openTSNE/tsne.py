@@ -1058,11 +1058,6 @@ class TSNE(BaseEstimator):
         scikit-learn convention, ``-1`` meaning all processors, ``-2`` meaning
         all but one, etc.
 
-    affinities: openTSNE.affinity.Affinities
-        A precomputed affinity object. If specified, other affinity-related
-        parameters are ignored e.g. `perplexity` and anything nearest-neighbor
-        search related.
-
     neighbors: str
         Specifies the nearest neighbor method to use. Can be ``exact``, ``annoy``,
         ``pynndescent``, ``approx``, or ``auto`` (default). ``approx`` uses Annoy
@@ -1117,7 +1112,6 @@ class TSNE(BaseEstimator):
         max_grad_norm=None,
         max_step_norm=5,
         n_jobs=1,
-        affinities=None,
         neighbors="auto",
         negative_gradient_method="fft",
         callbacks=None,
@@ -1151,12 +1145,6 @@ class TSNE(BaseEstimator):
         self.max_step_norm = max_step_norm
         self.n_jobs = n_jobs
 
-        if affinities is not None and not isinstance(affinities, Affinities):
-            raise ValueError(
-                "`affinities` must be an instance of `openTSNE.affinity.Affinities`"
-            )
-        self.affinities = affinities
-
         self.neighbors = neighbors
         self.negative_gradient_method = negative_gradient_method
 
@@ -1178,16 +1166,39 @@ class TSNE(BaseEstimator):
         )
         return self.neighbors
 
-    def fit(self, X):
+    def fit(self, X=None, affinities=None, initialization=None):
         """Fit a t-SNE embedding for a given data set.
 
         Runs the standard t-SNE optimization, consisting of the early
         exaggeration phase and a normal optimization phase.
 
+        This function call be called in two ways.
+        1.  We can call it in the standard way using a ``np.array``. This will
+            compute the affinity matrix and initialization, and run the optimization
+            as usual.
+        2.  We can also pass in a precomputed ``affinity`` object, which will
+            override the affinity-related paramters specified in the constructor.
+            This is useful when you wish to use custom affinity objects.
+        Please note that some initialization schemes require ``X`` to be specified,
+        e.g. PCA. If the initilization is not able to be computed, we default to
+        using spectral initilization calculated from the affinity matrix.
+
         Parameters
         ----------
-        X: np.ndarray
+        X: Optional[np.ndarray}
             The data matrix to be embedded.
+
+        affinities: Optional[openTSNE.affinity.Affinities]
+            A precomputed affinity object. If specified, other affinity-related
+            parameters are ignored e.g. `perplexity` and anything nearest-neighbor
+            search related.
+
+        initialization: Optional[np.ndarray]
+            The initial point positions to be used in the embedding space. Can be
+            a precomputed numpy array, ``pca``, ``spectral`` or ``random``. Please
+            note that when passing in a precomputed positions, it is highly
+            recommended that the point positions have small variance
+            (std(Y) < 0.0001), otherwise you may get poor embeddings.
 
         Returns
         -------
@@ -1198,7 +1209,7 @@ class TSNE(BaseEstimator):
         if self.verbose:
             print("-" * 80, repr(self), "-" * 80, sep="\n")
 
-        embedding = self.prepare_initial(X)
+        embedding = self.prepare_initial(X, affinities, initialization)
 
         try:
             # Early exaggeration with lower momentum to allow points to find more
@@ -1227,13 +1238,35 @@ class TSNE(BaseEstimator):
 
         return embedding
 
-    def prepare_initial(self, X):
+    def prepare_initial(self, X=None, affinities=None, initialization=None):
         """Prepare the initial embedding which can be optimized as needed.
+
+        This function call be called in two ways.
+        1.  We can call it in the standard way using a ``np.array``. This will
+            compute the affinity matrix and initialization as usual.
+        2.  We can also pass in a precomputed ``affinity`` object, which will
+            override the affinity-related paramters specified in the constructor.
+            This is useful when you wish to use custom affinity objects.
+        Please note that some initialization schemes require ``X`` to be specified,
+        e.g. PCA. If the initilization is not able to be computed, we default to
+        using spectral initilization calculated from the affinity matrix.
 
         Parameters
         ----------
-        X: np.ndarray
+        X: Optional[np.ndarray}
             The data matrix to be embedded.
+
+        affinities: Optional[openTSNE.affinity.Affinities]
+            A precomputed affinity object. If specified, other affinity-related
+            parameters are ignored e.g. `perplexity` and anything nearest-neighbor
+            search related.
+
+        initialization: Optional[np.ndarray]
+            The initial point positions to be used in the embedding space. Can be
+            a precomputed numpy array, ``pca``, ``spectral`` or ``random``. Please
+            note that when passing in a precomputed positions, it is highly
+            recommended that the point positions have small variance
+            (std(Y) < 0.0001), otherwise you may get poor embeddings.
 
         Returns
         -------
@@ -1243,7 +1276,15 @@ class TSNE(BaseEstimator):
 
         """
 
-        if self.affinities is None:
+        # Either `X` or `affinities` must be specified
+        if X is None and affinities is None and initialization is None:
+            raise ValueError(
+                "At least one of the parameters `X` or `affinities` must be specified!"
+            )
+
+        # If precomputed affinites are given, use those, otherwise proceed with
+        # standard perpelxity-based affinites
+        if affinities is None:
             affinities = PerplexityBasedNN(
                 X,
                 self.perplexity,
@@ -1255,18 +1296,45 @@ class TSNE(BaseEstimator):
                 verbose=self.verbose,
             )
         else:
+            if not isinstance(affinities, Affinities):
+                raise ValueError(
+                    "`affinities` must be an instance of `openTSNE.affinity.Affinities`"
+                )
             log.info(
-                "Precomputed affinities provided. Ignoring perplexity-related "
+                "Precomputed affinities provided. Ignoring perplexity-related parameters."
+            )
+
+        # If a precomputed initialization was specified, use that, otherwise
+        # use the parameters specified in the constructor
+        if initialization is None:
+            initialization = self.initialization
+            log.info(
+                "Precomputed initialization provided. Ignoring initalization-related "
                 "parameters."
             )
-            affinities = self.affinities
+
+        # If only the affinites have been specified, and the initialization depends
+        # on `X`, switch to spectral initalization
+        if X is None and initialization == "pca":
+            log.warning(
+                "Attempting to use `pca` initalization, but no `X` matrix specified! "
+                "Using `spectral` initilization instead, which requires only "
+                "`affinities`."
+            )
+            initialization = "spectral"
+
+        # Determine the number of samples in the input data set
+        if X is not None:
+            n_samples = X.shape[0]
+        else:
+            n_samples = affinities.P.shape[0]
 
         # If initial positions are given in an array, use a copy of that
-        if isinstance(self.initialization, np.ndarray):
-            init_checks.num_samples(self.initialization.shape[0], X.shape[0])
-            init_checks.num_dimensions(self.initialization.shape[1], self.n_components)
+        if isinstance(initialization, np.ndarray):
+            init_checks.num_samples(initialization.shape[0], n_samples)
+            init_checks.num_dimensions(initialization.shape[1], self.n_components)
 
-            embedding = np.array(self.initialization)
+            embedding = np.array(initialization)
 
             stddev = np.std(embedding, axis=0)
             if any(stddev > 1e-2):
@@ -1275,21 +1343,21 @@ class TSNE(BaseEstimator):
                     "embeddings with high variance may have display poor convergence."
                 )
 
-        elif self.initialization == "pca":
+        elif initialization == "pca":
             embedding = initialization_scheme.pca(
                 X,
                 self.n_components,
                 random_state=self.random_state,
                 verbose=self.verbose,
             )
-        elif self.initialization == "random":
+        elif initialization == "random":
             embedding = initialization_scheme.random(
                 X,
                 self.n_components,
                 random_state=self.random_state,
                 verbose=self.verbose,
             )
-        elif self.initialization == "spectral":
+        elif initialization == "spectral":
             embedding = initialization_scheme.spectral(
                 affinities.P,
                 self.n_components,
@@ -1298,7 +1366,7 @@ class TSNE(BaseEstimator):
             )
         else:
             raise ValueError(
-                f"Unrecognized initialization scheme `{self.initialization}`."
+                f"Unrecognized initialization scheme `{initialization}`."
             )
 
         gradient_descent_params = {
