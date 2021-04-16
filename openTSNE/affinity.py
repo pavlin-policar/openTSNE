@@ -470,7 +470,7 @@ class FixedSigmaNN(Affinities):
 
     method: str
         Specifies the nearest neighbor method to use. Can be ``exact``, ``annoy``,
-        ``pynndescent``, ``approx``, or ``auto`` (default). ``approx`` uses Annoy
+        ``pynndescent``, ``hnsw``, ``approx``, or ``auto`` (default). ``approx`` uses Annoy
         if the input data matrix is not a sparse object and if Annoy supports
         the given metric. Otherwise it uses Pynndescent. ``auto`` uses exact
         nearest neighbors for N<1000 and the same heuristic as ``approx`` for N>=1000.
