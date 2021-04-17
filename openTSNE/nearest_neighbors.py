@@ -1,3 +1,5 @@
+import logging
+import os
 import warnings
 
 import numpy as np
@@ -6,6 +8,8 @@ from sklearn import neighbors
 from sklearn.utils import check_random_state
 
 from openTSNE import utils
+
+log = logging.getLogger(__name__)
 
 
 class KNNIndex:
@@ -306,6 +310,31 @@ class BallTree(KNNIndex):
 
 
 class Annoy(KNNIndex):
+    """Annoy KNN Index.
+
+    Notes
+    -----
+    Pickling:
+        Annoy doesn't support pickling. As a workaround, we override the pickling
+        process and save the annoy index file separately. Upon unpickling, this
+        file will attempt to be reloaded.
+
+        However, since we can't access the actual pickle file location from
+        __getstate__, the annoy index is saved into the current working directory.
+        And, it will also be loaded from cwd. This means that if we pickle an
+        object into a specific directory, our files could end up in different
+        places. And when sharing a pickle, they may need to be put into different
+        directories.
+
+        Alternatively, the use can set the ``.pickle_fname`` attribute to specify
+        a file name and location for the save annoy index e.g.
+        ``./pickle/my-index.ann``. This should make it at least somewhat easier
+        to specify the pickle names.
+
+        This is extremely messy, but it is better than not supporting pickling at
+        all. If anyone has a better solution, I would welcome any and all help.
+
+    """
     VALID_METRICS = [
         "cosine",
         "euclidean",
@@ -316,6 +345,10 @@ class Annoy(KNNIndex):
         "l2",
         "taxicab",
     ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.pickle_fname = None
 
     def build(self):
         data, k = self.data, self.k
@@ -408,6 +441,55 @@ class Annoy(KNNIndex):
         timer.__exit__()
 
         return indices, distances
+
+    def __getstate__(self):
+        should_reset_fname = self.pickle_fname is None
+        if self.index is not None and self.pickle_fname is None:
+            import datetime
+
+            ts = int(datetime.datetime.now().timestamp())
+            self.pickle_fname = f"annoy_index-{ts}.ann"
+
+        d = dict(self.__dict__)
+        del d["index"]
+
+        if self.index is not None:
+            log.info(
+                f"Pickling `openTSNE.nearest_neighbors.Annoy`... Saving Annoy index "
+                f"file to {self.pickle_fname}. "
+            )
+            self.index.save(self.pickle_fname)
+
+        if should_reset_fname:
+            self.pickle_fname = None
+
+        return d
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+
+        # Load the annoy index if saved
+        if state["pickle_fname"] and os.path.exists(state["pickle_fname"]):
+            annoy_metric = self.metric
+            annoy_aliases = {
+                "cosine": "angular",
+                "l1": "manhattan",
+                "l2": "euclidean",
+                "taxicab": "manhattan",
+            }
+            if annoy_metric in annoy_aliases:
+                annoy_metric = annoy_aliases[annoy_metric]
+
+            from openTSNE.dependencies.annoy import AnnoyIndex
+
+            log.info(
+                f"Unpickling `openTSNE.nearest_neighbors.Annoy`... Attempting "
+                f"to reload annoy index from {self.pickle_fname}."
+            )
+            self.index = AnnoyIndex(self.data.shape[1], annoy_metric)
+            self.index.load(self.pickle_fname)
+        else:
+            self.index = None
 
 
 class NNDescent(KNNIndex):
