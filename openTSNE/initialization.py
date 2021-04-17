@@ -28,13 +28,13 @@ def rescale(x, inplace=False):
     return x
 
 
-def random(X, n_components=2, random_state=None, verbose=False):
+def random(n_samples, n_components=2, random_state=None, verbose=False):
     """Initialize an embedding using samples from an isotropic Gaussian.
 
     Parameters
     ----------
-    X: np.ndarray
-        The data matrix.
+    n_samples: Union[int, np.ndarray]
+        The number of samples. Also accepts a data matrix.
 
     n_components: int
         The dimension of the embedding space.
@@ -53,7 +53,9 @@ def random(X, n_components=2, random_state=None, verbose=False):
 
     """
     random_state = check_random_state(random_state)
-    embedding = random_state.normal(0, 1e-4, (X.shape[0], n_components))
+    if isinstance(n_samples, np.ndarray):
+        n_samples = n_samples.shape[0]
+    embedding = random_state.normal(0, 1e-4, (n_samples, n_components))
     return np.ascontiguousarray(embedding)
 
 

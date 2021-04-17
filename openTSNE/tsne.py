@@ -1361,7 +1361,7 @@ class TSNE(BaseEstimator):
             )
         elif initialization == "random":
             embedding = initialization_scheme.random(
-                X,
+                n_samples,
                 self.n_components,
                 random_state=self.random_state,
                 verbose=self.verbose,
