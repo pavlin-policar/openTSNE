@@ -1324,7 +1324,7 @@ class TSNE(BaseEstimator):
             initialization = "spectral"
 
         # Same spiel for precomputed distance matrices
-        if self.metric == "precomputed" and initialization == "pca":
+        if self.metric == "precomputed" and isinstance(initialization, str) and initialization == "pca":
             log.warning(
                 "Attempting to use `pca` initalization, but using precomputed "
                 "distance matrix! Using `spectral` initilization instead, which "
