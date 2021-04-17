@@ -1,4 +1,5 @@
 import pickle
+import platform
 import tempfile
 import unittest
 from os import path
@@ -75,10 +76,31 @@ class KNNIndexTestMixin:
 class TestAnnoy(KNNIndexTestMixin, unittest.TestCase):
     knn_index = nearest_neighbors.Annoy
 
+    @unittest.skipIf(platform.system() == "Windows", "Files locked on Windows")
     def test_pickle_without_built_index(self):
         knn_index = nearest_neighbors.Annoy(self.iris, k=30)
         self.assertIsNone(knn_index.index)
 
+        # Generate unique fname so tests don't use same file on CI
+        randint = np.random.randint(1)
+        fname = f"tmp-{randint}.ann"
+
+        with tempfile.TemporaryDirectory() as dirname:
+            knn_index.pickle_fname = path.join(dirname, fname)
+            with open(path.join(dirname, "index.pkl"), "wb") as f:
+                pickle.dump(knn_index, f)
+
+            with open(path.join(dirname, "index.pkl"), "rb") as f:
+                loaded_obj = pickle.load(f)
+
+        self.assertIsNotNone(knn_index.pickle_fname)
+        self.assertIsNotNone(loaded_obj.pickle_fname)
+        self.assertIsNone(loaded_obj.index)
+
+    @unittest.skipIf(platform.system() == "Windows", "Files locked on Windows")
+    def test_pickle_without_built_index_cleans_up_fname(self):
+        knn_index = nearest_neighbors.Annoy(self.iris, k=30)
+        # We don't set `pickle_fname` here
         with tempfile.TemporaryDirectory() as dirname:
             with open(path.join(dirname, "index.pkl"), "wb") as f:
                 pickle.dump(knn_index, f)
@@ -86,12 +108,21 @@ class TestAnnoy(KNNIndexTestMixin, unittest.TestCase):
             with open(path.join(dirname, "index.pkl"), "rb") as f:
                 loaded_obj = pickle.load(f)
 
-        self.assertIsNone(loaded_obj.index)
+        self.assertIsNone(knn_index.pickle_fname)
+        self.assertIsNone(loaded_obj.pickle_fname)
 
+    @unittest.skipIf(platform.system() == "Windows", "Files locked on Windows")
     def test_pickle_with_built_index(self):
         knn_index = nearest_neighbors.Annoy(self.iris, k=30)
         knn_index.build()
+        self.assertIsNotNone(knn_index.index)
+
+        # Generate unique fname so tests don't use same file on CI
+        randint = np.random.randint(1)
+        fname = f"tmp-{randint}.ann"
+
         with tempfile.TemporaryDirectory() as dirname:
+            knn_index.pickle_fname = path.join(dirname, fname)
             with open(path.join(dirname, "index.pkl"), "wb") as f:
                 pickle.dump(knn_index, f)
 
