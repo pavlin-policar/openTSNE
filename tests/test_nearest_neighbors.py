@@ -136,13 +136,13 @@ class TestAnnoy(KNNIndexTestMixin, unittest.TestCase):
         np.testing.assert_array_almost_equal(load_dist, orig_dist)
 
 
-class TestBallTree(KNNIndexTestMixin, unittest.TestCase):
-    knn_index = nearest_neighbors.BallTree
+class TestSklearn(KNNIndexTestMixin, unittest.TestCase):
+    knn_index = nearest_neighbors.Sklearn
 
     def test_cosine_distance(self):
         k = 15
         # Compute cosine distance nearest neighbors using ball tree
-        knn_index = nearest_neighbors.BallTree(self.x1, k, "cosine")
+        knn_index = self.knn_index(self.x1, k, "cosine")
         indices, distances = knn_index.build()
 
         # Compute the exact nearest neighbors as a reference
@@ -160,7 +160,7 @@ class TestBallTree(KNNIndexTestMixin, unittest.TestCase):
     def test_cosine_distance_query(self):
         k = 15
         # Compute cosine distance nearest neighbors using ball tree
-        knn_index = nearest_neighbors.BallTree(self.x1, k, "cosine")
+        knn_index = self.knn_index(self.x1, k, "cosine")
         knn_index.build()
 
         indices, distances = knn_index.query(self.x2, k=k)
@@ -200,10 +200,6 @@ class TestBallTree(KNNIndexTestMixin, unittest.TestCase):
         np.testing.assert_allclose(
             distances, true_distances_, err_msg="Distances do not match"
         )
-
-
-class TestSklearn(TestBallTree):
-    pass
 
 
 @unittest.skipIf(not is_package_installed("hnswlib"), "`hnswlib`is not installed")
