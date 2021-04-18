@@ -37,12 +37,23 @@ def _check_callbacks(callbacks):
 def _handle_nice_params(embedding: np.ndarray, optim_params: dict) -> None:
     """Convert the user friendly params into something the optimizer can
     understand."""
+    n_samples = embedding.shape[0]
     # Handle callbacks
     optim_params["callbacks"] = _check_callbacks(optim_params.get("callbacks"))
     optim_params["use_callbacks"] = optim_params["callbacks"] is not None
 
     # Handle negative gradient method
     negative_gradient_method = optim_params.pop("negative_gradient_method")
+    # Handle `auto` negative gradient method
+    if isinstance(negative_gradient_method, str) and negative_gradient_method == "auto":
+        if n_samples < 10_000:
+            negative_gradient_method = "bh"
+        else:
+            negative_gradient_method = "fft"
+        log.info(
+            f"Automatically determined negative gradient method `{negative_gradient_method}`"
+        )
+
     if callable(negative_gradient_method):
         negative_gradient_method = negative_gradient_method
     elif negative_gradient_method in {"bh", "BH", "barnes-hut"}:
@@ -78,7 +89,7 @@ def _handle_nice_params(embedding: np.ndarray, optim_params: dict) -> None:
 
     # Determine learning rate if requested
     if optim_params.get("learning_rate", "auto") == "auto":
-        optim_params["learning_rate"] = max(200, embedding.shape[0] / 12)
+        optim_params["learning_rate"] = max(200, n_samples / 12)
 
 
 def __check_init_num_samples(num_samples, required_num_samples):
@@ -169,7 +180,8 @@ class PartialTSNEEmbedding(np.ndarray):
         using one of the following aliases: ``bh``, ``BH`` or ``barnes-hut``.
         For larger data sets, the FFT accelerated interpolation method is more
         appropriate and can be set using one of the following aliases: ``fft``,
-        ``FFT`` or ``ìnterpolation``.
+        ``FFT`` or ``ìnterpolation``. Alternatively, you can use ``auto`` to
+        approximately select the faster method.
 
     theta: float
         This is the trade-off parameter between speed and accuracy of the tree
@@ -290,6 +302,8 @@ class PartialTSNEEmbedding(np.ndarray):
             ``barnes-hut``. For larger data sets, the FFT accelerated
             interpolation method is more appropriate and can be set using one of
             the following aliases: ``fft``, ``FFT`` or ``ìnterpolation``.
+            Alternatively, you can use ``auto`` to approximately select the
+            faster method.
 
         theta: float
             This is the trade-off parameter between speed and accuracy of the
@@ -431,7 +445,8 @@ class TSNEEmbedding(np.ndarray):
         using one of the following aliases: ``bh``, ``BH`` or ``barnes-hut``.
         For larger data sets, the FFT accelerated interpolation method is more
         appropriate and can be set using one of the following aliases: ``fft``,
-        ``FFT`` or ``ìnterpolation``.
+        ``FFT`` or ``ìnterpolation``.A lternatively, you can use ``auto`` to
+        approximately select the faster method.
 
     theta: float
         This is the trade-off parameter between speed and accuracy of the tree
@@ -490,7 +505,7 @@ class TSNEEmbedding(np.ndarray):
         n_interpolation_points=3,
         min_num_intervals=50,
         ints_in_interval=1,
-        negative_gradient_method="fft",
+        negative_gradient_method="auto",
         random_state=None,
         optimizer=None,
         **gradient_descent_params,
@@ -571,6 +586,8 @@ class TSNEEmbedding(np.ndarray):
             ``barnes-hut``. For larger data sets, the FFT accelerated
             interpolation method is more appropriate and can be set using one of
             the following aliases: ``fft``, ``FFT`` or ``ìnterpolation``.
+            Alternatively, you can use ``auto`` to approximately select the
+            faster method.
 
         theta: float
             This is the trade-off parameter between speed and accuracy of the
@@ -1000,7 +1017,8 @@ class TSNE(BaseEstimator):
         This is the trade-off parameter between speed and accuracy of the tree
         approximation method. Typical values range from 0.2 to 0.8. The value 0
         indicates that no approximation is to be made and produces exact results
-        also producing longer runtime.
+        also producing longer runtime. Alternatively, you can use ``auto`` to
+        approximately select the faster method.
 
     n_interpolation_points: int
         Only used when ``negative_gradient_method="fft"`` or its other aliases.
@@ -1071,7 +1089,8 @@ class TSNE(BaseEstimator):
         using one of the following aliases: ``bh``, ``BH`` or ``barnes-hut``.
         For larger data sets, the FFT accelerated interpolation method is more
         appropriate and can be set using one of the following aliases: ``fft``,
-        ``FFT`` or ``ìnterpolation``.
+        ``FFT`` or ``ìnterpolation``. Alternatively, you can use ``auto`` to
+        approximately select the faster method.
 
     callbacks: Union[Callable, List[Callable]]
         Callbacks, which will be run every ``callbacks_every_iters`` iterations.
@@ -1113,7 +1132,7 @@ class TSNE(BaseEstimator):
         max_step_norm=5,
         n_jobs=1,
         neighbors="auto",
-        negative_gradient_method="fft",
+        negative_gradient_method="auto",
         callbacks=None,
         callbacks_every_iters=50,
         random_state=None,
