@@ -1154,18 +1154,6 @@ class TSNE(BaseEstimator):
         self.random_state = random_state
         self.verbose = verbose
 
-    @property
-    def neighbors_method(self):
-        import warnings
-
-        warnings.warn(
-            f"The `neighbors_method` attribute has been deprecated and will be "
-            f"removed in future versions. Please use the new `neighbors` "
-            f"attribute",
-            category=FutureWarning,
-        )
-        return self.neighbors
-
     def fit(self, X=None, affinities=None, initialization=None):
         """Fit a t-SNE embedding for a given data set.
 
