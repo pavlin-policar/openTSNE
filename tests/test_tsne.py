@@ -877,3 +877,23 @@ class TestPrecomputedDistanceMatrices(unittest.TestCase):
         knn.fit(embedding, y)
         predictions = knn.predict(embedding)
         self.assertLess(accuracy_score(predictions, y), 0.55)
+
+
+class TestMisc(unittest.TestCase):
+    def test_very_large_affinity_matrices(self):
+        x = np.random.normal(0, 1, (50, 10))
+        aff = PerplexityBasedNN(x, perplexity=30)
+
+        # Super large affinity matrices have so many indices, it needs to be
+        # stored as long
+        aff.P.indptr = aff.P.indptr.astype(np.int64)
+        aff.P.indices = aff.P.indices.astype(np.int64)
+
+        TSNE().fit(x, affinities=aff)
+
+        # The old version should still work
+        aff.P.indptr = aff.P.indptr.astype(np.int32)
+        aff.P.indices = aff.P.indices.astype(np.int32)
+
+        TSNE().fit(x, affinities=aff)
+

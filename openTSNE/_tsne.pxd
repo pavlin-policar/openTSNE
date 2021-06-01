@@ -5,7 +5,14 @@
 # cython: initializedcheck=False
 # cython: warn.undeclared=True
 # cython: language_level=3
+cimport numpy as np
+
 from .quad_tree cimport QuadTree
+
+
+ctypedef fused sparse_index_type:
+    np.int32_t
+    np.int64_t
 
 
 cpdef double[:, ::1] compute_gaussian_perplexity(
@@ -17,8 +24,8 @@ cpdef double[:, ::1] compute_gaussian_perplexity(
 )
 
 cpdef tuple estimate_positive_gradient_nn(
-    int[:] indices,
-    int[:] indptr,
+    sparse_index_type[:] indices,
+    sparse_index_type[:] indptr,
     double[:] P_data,
     double[:, ::1] embedding,
     double[:, ::1] reference_embedding,

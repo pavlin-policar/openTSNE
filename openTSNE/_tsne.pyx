@@ -101,8 +101,8 @@ cpdef double[:, ::1] compute_gaussian_perplexity(
 
 
 cpdef tuple estimate_positive_gradient_nn(
-    int[:] indices,
-    int[:] indptr,
+    sparse_index_type[:] indices,
+    sparse_index_type[:] indptr,
     double[:] P_data,
     double[:, ::1] embedding,
     double[:, ::1] reference_embedding,
