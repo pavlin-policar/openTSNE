@@ -1,7 +1,7 @@
 openTSNE
 ========
 
-|Build Status| |ReadTheDocs Badge| |Codacy Badge| |License Badge|
+|Build Status| |ReadTheDocs Badge| |License Badge|
 
 openTSNE is a modular Python implementation of t-Distributed Stochasitc Neighbor Embedding (t-SNE) [1]_, a popular dimensionality-reduction algorithm for visualizing high-dimensional data sets. openTSNE incorporates the latest improvements to the t-SNE algorithm, including the ability to add new data points to existing embeddings [2]_, massive speed improvements [3]_ [4]_, enabling t-SNE to scale to millions of data points and various tricks to improve global alignment of the resulting visualizations [5]_.
 
@@ -135,7 +135,5 @@ References
 .. |ReadTheDocs Badge| image:: https://readthedocs.org/projects/opentsne/badge/?version=latest
    :target: https://opentsne.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
-.. |Codacy Badge| image:: https://api.codacy.com/project/badge/Grade/ef67c21a74924b548acae5a514bc443d
-   :target: https://app.codacy.com/app/pavlin-policar/openTSNE?utm_source=github.com&utm_medium=referral&utm_content=pavlin-policar/openTSNE&utm_campaign=Badge_Grade_Dashboard
 .. |License Badge| image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
    :target: https://opensource.org/licenses/BSD-3-Clause
