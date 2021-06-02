@@ -121,7 +121,7 @@ class PerplexityBasedNN(Affinities):
         number generator is the RandomState instance used by `np.random`.
 
     verbose: bool
-    
+
     k_neighbors: int or ``auto``
         The number of neighbors to use in the kNN graph. If ``auto`` (default),
         it is set to three times the perplexity.
@@ -206,7 +206,7 @@ class PerplexityBasedNN(Affinities):
         restriction exists because setting a higher perplexity value requires
         recomputing all the nearest neighbors, which can take a long time.
         To avoid potential confusion as to why execution time is slow, this
-        is not allowed. If you would like to increase the perplexity above 
+        is not allowed. If you would like to increase the perplexity above
         that value, simply create a new instance.
 
         Parameters
@@ -220,7 +220,7 @@ class PerplexityBasedNN(Affinities):
             return
         # Verify that the perplexity isn't negative
         new_perplexity = self.check_perplexity(new_perplexity, np.inf)
-        # Verify that the perplexity isn't too large for the kNN graph        
+        # Verify that the perplexity isn't too large for the kNN graph
         if new_perplexity > self.__neighbors.shape[1]:
             raise RuntimeError(
                 "The desired perplexity `%.2f` is larger than the kNN graph "
@@ -229,7 +229,7 @@ class PerplexityBasedNN(Affinities):
                 "with the increased perplexity."
                 % (new_perplexity, self.__class__.__name__)
             )
-        # Warn if the perplexity is larger than the heuristic        
+        # Warn if the perplexity is larger than the heuristic
         if 3 * new_perplexity > self.__neighbors.shape[1]:
             log.warning(
                 "The new perplexity is quite close to the computed number of "
@@ -299,7 +299,7 @@ class PerplexityBasedNN(Affinities):
             data point.
 
         """
-        
+
         perplexity = perplexity if perplexity is not None else self.perplexity
 
         if k_neighbors == "auto":
