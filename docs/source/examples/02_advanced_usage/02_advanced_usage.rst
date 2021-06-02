@@ -1,4 +1,3 @@
-
 Advanced usage
 ==============
 
@@ -14,9 +13,8 @@ embeddings and preserve more global structure.
 .. code:: ipython3
 
     from openTSNE import TSNEEmbedding
-    from openTSNE.affinity import PerplexityBasedNN
+    from openTSNE import affinity
     from openTSNE import initialization
-    from openTSNE.callbacks import ErrorLogger
     
     from examples import utils
     
@@ -84,19 +82,24 @@ examples.
 .. code:: ipython3
 
     %%time
-    affinities_train = PerplexityBasedNN(
+    affinities_train = affinity.PerplexityBasedNN(
         x_train,
         perplexity=30,
         metric="euclidean",
         n_jobs=8,
         random_state=42,
+        verbose=True,
     )
 
 
 .. parsed-literal::
 
-    CPU times: user 1min 39s, sys: 2.15 s, total: 1min 41s
-    Wall time: 19.6 s
+    ===> Finding 90 nearest neighbors using Annoy approximate search using euclidean distance...
+       --> Time elapsed: 3.78 seconds
+    ===> Calculating affinity matrix...
+       --> Time elapsed: 0.43 seconds
+    CPU times: user 19.3 s, sys: 794 ms, total: 20.1 s
+    Wall time: 4.22 s
 
 
 **2. Generate initial coordinates for our embedding**
@@ -108,8 +111,8 @@ examples.
 
 .. parsed-literal::
 
-    CPU times: user 3.01 s, sys: 49.6 ms, total: 3.06 s
-    Wall time: 77.3 ms
+    CPU times: user 448 ms, sys: 88.3 ms, total: 536 ms
+    Wall time: 86.9 ms
 
 
 **3. Construct the ``TSNEEmbedding`` object**
@@ -121,7 +124,7 @@ examples.
         affinities_train,
         negative_gradient_method="fft",
         n_jobs=8,
-        callbacks=ErrorLogger(),
+        verbose=True,
     )
 
 **4. Optimize embedding**
@@ -135,13 +138,15 @@ examples.
 
 .. parsed-literal::
 
-    Iteration   50, KL divergence  5.7889, 50 iterations in 1.1595 sec
-    Iteration  100, KL divergence  5.2496, 50 iterations in 1.1852 sec
-    Iteration  150, KL divergence  5.1563, 50 iterations in 1.1364 sec
-    Iteration  200, KL divergence  5.1203, 50 iterations in 1.1426 sec
-    Iteration  250, KL divergence  5.1018, 50 iterations in 1.1117 sec
-    CPU times: user 2min 52s, sys: 3.41 s, total: 2min 55s
-    Wall time: 5.79 s
+    ===> Running optimization with exaggeration=12.00, lr=2501.75 for 250 iterations...
+    Iteration   50, KL divergence 5.8046, 50 iterations in 1.8747 sec
+    Iteration  100, KL divergence 5.2268, 50 iterations in 2.0279 sec
+    Iteration  150, KL divergence 5.1357, 50 iterations in 1.9912 sec
+    Iteration  200, KL divergence 5.0977, 50 iterations in 1.9626 sec
+    Iteration  250, KL divergence 5.0772, 50 iterations in 1.9759 sec
+       --> Time elapsed: 9.83 seconds
+    CPU times: user 1min 11s, sys: 2.04 s, total: 1min 13s
+    Wall time: 9.89 s
 
 
 .. code:: ipython3
@@ -157,28 +162,25 @@ examples.
 
 .. code:: ipython3
 
-    %time embedding_train_2 = embedding_train_1.optimize(n_iter=750, momentum=0.8)
+    %time embedding_train_2 = embedding_train_1.optimize(n_iter=500, momentum=0.8)
 
 
 .. parsed-literal::
 
-    Iteration   50, KL divergence  3.7958, 50 iterations in 1.3252 sec
-    Iteration  100, KL divergence  3.4076, 50 iterations in 1.2355 sec
-    Iteration  150, KL divergence  3.1945, 50 iterations in 1.4455 sec
-    Iteration  200, KL divergence  3.0541, 50 iterations in 1.4912 sec
-    Iteration  250, KL divergence  2.9521, 50 iterations in 1.9103 sec
-    Iteration  300, KL divergence  2.8745, 50 iterations in 2.1101 sec
-    Iteration  350, KL divergence  2.8131, 50 iterations in 2.6402 sec
-    Iteration  400, KL divergence  2.7642, 50 iterations in 3.6373 sec
-    Iteration  450, KL divergence  2.7241, 50 iterations in 3.8347 sec
-    Iteration  500, KL divergence  2.6918, 50 iterations in 4.7176 sec
-    Iteration  550, KL divergence  2.6655, 50 iterations in 6.8521 sec
-    Iteration  600, KL divergence  2.6441, 50 iterations in 5.5079 sec
-    Iteration  650, KL divergence  2.6264, 50 iterations in 6.5560 sec
-    Iteration  700, KL divergence  2.6121, 50 iterations in 7.5798 sec
-    Iteration  750, KL divergence  2.6002, 50 iterations in 9.0642 sec
-    CPU times: user 27min 24s, sys: 32.9 s, total: 27min 57s
-    Wall time: 1min
+    ===> Running optimization with exaggeration=1.00, lr=2501.75 for 500 iterations...
+    Iteration   50, KL divergence 3.5741, 50 iterations in 1.9240 sec
+    Iteration  100, KL divergence 3.1653, 50 iterations in 1.9942 sec
+    Iteration  150, KL divergence 2.9612, 50 iterations in 2.3730 sec
+    Iteration  200, KL divergence 2.8342, 50 iterations in 3.4895 sec
+    Iteration  250, KL divergence 2.7496, 50 iterations in 4.7873 sec
+    Iteration  300, KL divergence 2.6901, 50 iterations in 5.2739 sec
+    Iteration  350, KL divergence 2.6471, 50 iterations in 6.9968 sec
+    Iteration  400, KL divergence 2.6138, 50 iterations in 7.8137 sec
+    Iteration  450, KL divergence 2.5893, 50 iterations in 9.5210 sec
+    Iteration  500, KL divergence 2.5699, 50 iterations in 10.6958 sec
+       --> Time elapsed: 54.87 seconds
+    CPU times: user 6min 2s, sys: 20.3 s, total: 6min 23s
+    Wall time: 55.1 s
 
 
 .. code:: ipython3
@@ -206,8 +208,12 @@ Transform
 
 .. parsed-literal::
 
-    CPU times: user 3.55 s, sys: 150 ms, total: 3.7 s
-    Wall time: 1.22 s
+    ===> Finding 15 nearest neighbors in existing embedding using Annoy approximate search...
+       --> Time elapsed: 1.11 seconds
+    ===> Calculating affinity matrix...
+       --> Time elapsed: 0.03 seconds
+    CPU times: user 3 s, sys: 192 ms, total: 3.19 s
+    Wall time: 1.15 s
 
 
 .. code:: ipython3
@@ -221,21 +227,20 @@ Transform
 
 .. code:: ipython3
 
-    %%time
-    embedding_test_1 = embedding_test.optimize(
-        n_iter=100,
-        learning_rate=1,
-        exaggeration=2,
-        momentum=0,
-    )
+    %time embedding_test_1 = embedding_test.optimize(n_iter=250, learning_rate=0.1, momentum=0.8)
 
 
 .. parsed-literal::
 
-    Iteration   50, KL divergence  212577.9338, 50 iterations in 8.4328 sec
-    Iteration  100, KL divergence  212507.1902, 50 iterations in 6.1227 sec
-    CPU times: user 3min 14s, sys: 3.71 s, total: 3min 18s
-    Wall time: 14.7 s
+    ===> Running optimization with exaggeration=1.00, lr=0.10 for 250 iterations...
+    Iteration   50, KL divergence 226760.6820, 50 iterations in 0.3498 sec
+    Iteration  100, KL divergence 221529.7066, 50 iterations in 0.4099 sec
+    Iteration  150, KL divergence 215464.6854, 50 iterations in 0.4285 sec
+    Iteration  200, KL divergence 211201.7247, 50 iterations in 0.4060 sec
+    Iteration  250, KL divergence 209022.1241, 50 iterations in 0.4211 sec
+       --> Time elapsed: 2.02 seconds
+    CPU times: user 10.7 s, sys: 889 ms, total: 11.6 s
+    Wall time: 2.74 s
 
 
 .. code:: ipython3
@@ -262,4 +267,5 @@ larger opacity.
 
 
 .. image:: output_28_0.png
+
 

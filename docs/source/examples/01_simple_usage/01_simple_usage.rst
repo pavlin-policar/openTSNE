@@ -1,4 +1,3 @@
-
 Simple usage
 ============
 
@@ -8,7 +7,6 @@ is sufficient for almost all use-cases.
 .. code:: ipython3
 
     from openTSNE import TSNE
-    from openTSNE.callbacks import ErrorLogger
     
     from examples import utils
     
@@ -74,9 +72,9 @@ We’ll first create an embedding on the training data.
     tsne = TSNE(
         perplexity=30,
         metric="euclidean",
-        callbacks=ErrorLogger(),
         n_jobs=8,
         random_state=42,
+        verbose=True,
     )
 
 .. code:: ipython3
@@ -86,28 +84,36 @@ We’ll first create an embedding on the training data.
 
 .. parsed-literal::
 
-    Iteration   50, KL divergence  5.7889, 50 iterations in 1.2277 sec
-    Iteration  100, KL divergence  5.2496, 50 iterations in 1.1978 sec
-    Iteration  150, KL divergence  5.1563, 50 iterations in 1.1671 sec
-    Iteration  200, KL divergence  5.1203, 50 iterations in 1.3511 sec
-    Iteration  250, KL divergence  5.1018, 50 iterations in 1.4377 sec
-    Iteration   50, KL divergence  3.7958, 50 iterations in 1.5298 sec
-    Iteration  100, KL divergence  3.4076, 50 iterations in 1.3780 sec
-    Iteration  150, KL divergence  3.1945, 50 iterations in 1.3263 sec
-    Iteration  200, KL divergence  3.0541, 50 iterations in 1.5235 sec
-    Iteration  250, KL divergence  2.9521, 50 iterations in 2.1700 sec
-    Iteration  300, KL divergence  2.8745, 50 iterations in 2.4172 sec
-    Iteration  350, KL divergence  2.8131, 50 iterations in 3.0004 sec
-    Iteration  400, KL divergence  2.7642, 50 iterations in 3.9832 sec
-    Iteration  450, KL divergence  2.7241, 50 iterations in 4.3934 sec
-    Iteration  500, KL divergence  2.6918, 50 iterations in 5.2797 sec
-    Iteration  550, KL divergence  2.6655, 50 iterations in 7.8413 sec
-    Iteration  600, KL divergence  2.6441, 50 iterations in 5.8196 sec
-    Iteration  650, KL divergence  2.6264, 50 iterations in 6.7464 sec
-    Iteration  700, KL divergence  2.6121, 50 iterations in 9.0360 sec
-    Iteration  750, KL divergence  2.6002, 50 iterations in 10.0276 sec
-    CPU times: user 34min 49s, sys: 41.8 s, total: 35min 31s
-    Wall time: 1min 32s
+    --------------------------------------------------------------------------------
+    TSNE(n_jobs=8, random_state=42, verbose=True)
+    --------------------------------------------------------------------------------
+    ===> Finding 90 nearest neighbors using Annoy approximate search using euclidean distance...
+       --> Time elapsed: 3.89 seconds
+    ===> Calculating affinity matrix...
+       --> Time elapsed: 0.44 seconds
+    ===> Calculating PCA-based initialization...
+       --> Time elapsed: 0.10 seconds
+    ===> Running optimization with exaggeration=12.00, lr=2501.75 for 250 iterations...
+    Iteration   50, KL divergence 5.8046, 50 iterations in 1.7123 sec
+    Iteration  100, KL divergence 5.2268, 50 iterations in 1.8265 sec
+    Iteration  150, KL divergence 5.1357, 50 iterations in 2.0626 sec
+    Iteration  200, KL divergence 5.0977, 50 iterations in 2.0250 sec
+    Iteration  250, KL divergence 5.0772, 50 iterations in 1.9598 sec
+       --> Time elapsed: 9.59 seconds
+    ===> Running optimization with exaggeration=1.00, lr=2501.75 for 500 iterations...
+    Iteration   50, KL divergence 3.5741, 50 iterations in 1.9948 sec
+    Iteration  100, KL divergence 3.1653, 50 iterations in 1.8672 sec
+    Iteration  150, KL divergence 2.9612, 50 iterations in 2.2518 sec
+    Iteration  200, KL divergence 2.8342, 50 iterations in 3.2478 sec
+    Iteration  250, KL divergence 2.7496, 50 iterations in 4.2982 sec
+    Iteration  300, KL divergence 2.6901, 50 iterations in 5.4970 sec
+    Iteration  350, KL divergence 2.6471, 50 iterations in 7.1508 sec
+    Iteration  400, KL divergence 2.6138, 50 iterations in 8.1424 sec
+    Iteration  450, KL divergence 2.5893, 50 iterations in 9.8184 sec
+    Iteration  500, KL divergence 2.5699, 50 iterations in 10.3756 sec
+       --> Time elapsed: 54.65 seconds
+    CPU times: user 7min 53s, sys: 20.6 s, total: 8min 14s
+    Wall time: 1min 8s
 
 
 .. code:: ipython3
@@ -132,10 +138,21 @@ into an existing embedding.
 
 .. parsed-literal::
 
-    Iteration   50, KL divergence  214515.0279, 50 iterations in 11.2446 sec
-    Iteration   50, KL divergence  204042.5486, 50 iterations in 11.1324 sec
-    CPU times: user 4min 13s, sys: 4.9 s, total: 4min 17s
-    Wall time: 24.2 s
+    ===> Finding 15 nearest neighbors in existing embedding using Annoy approximate search...
+       --> Time elapsed: 1.12 seconds
+    ===> Calculating affinity matrix...
+       --> Time elapsed: 0.03 seconds
+    ===> Running optimization with exaggeration=4.00, lr=0.10 for 0 iterations...
+       --> Time elapsed: 0.00 seconds
+    ===> Running optimization with exaggeration=1.50, lr=0.10 for 250 iterations...
+    Iteration   50, KL divergence 214688.6176, 50 iterations in 0.3767 sec
+    Iteration  100, KL divergence 213210.5159, 50 iterations in 0.3881 sec
+    Iteration  150, KL divergence 212270.1679, 50 iterations in 0.3898 sec
+    Iteration  200, KL divergence 211592.6686, 50 iterations in 0.3881 sec
+    Iteration  250, KL divergence 211074.3288, 50 iterations in 0.3814 sec
+       --> Time elapsed: 1.92 seconds
+    CPU times: user 19.2 s, sys: 650 ms, total: 19.8 s
+    Wall time: 3.89 s
 
 
 .. code:: ipython3
@@ -162,4 +179,5 @@ larger opacity.
 
 
 .. image:: output_16_0.png
+
 

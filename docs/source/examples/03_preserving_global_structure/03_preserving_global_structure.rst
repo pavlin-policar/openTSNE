@@ -1,16 +1,14 @@
-
 Preserving global structure
 ===========================
 
 .. code:: ipython3
 
-    from openTSNE import TSNE, TSNEEmbedding, affinity, initialization
-    from openTSNE import initialization
-    from openTSNE.callbacks import ErrorLogger
-    
-    from examples import utils
+    import gzip
+    import pickle
     
     import numpy as np
+    import openTSNE
+    from examples import utils
     
     import matplotlib.pyplot as plt
 
@@ -19,14 +17,19 @@ Load data
 
 .. code:: ipython3
 
-    import gzip
-    import pickle
-    
+    %%time
     with gzip.open("data/macosko_2015.pkl.gz", "rb") as f:
         data = pickle.load(f)
     
     x = data["pca_50"]
     y = data["CellType1"].astype(str)
+
+
+.. parsed-literal::
+
+    CPU times: user 220 ms, sys: 12 ms, total: 232 ms
+    Wall time: 230 ms
+
 
 .. code:: ipython3
 
@@ -61,23 +64,20 @@ This will serve as a baseline comparison.
 
 .. code:: ipython3
 
-    tsne = TSNE(
+    %%time
+    embedding_standard = openTSNE.TSNE(
         perplexity=30,
         initialization="random",
         metric="euclidean",
         n_jobs=8,
         random_state=3,
-    )
-
-.. code:: ipython3
-
-    %time embedding_standard = tsne.fit(x)
+    ).fit(x)
 
 
 .. parsed-literal::
 
-    CPU times: user 45min 48s, sys: 54.1 s, total: 46min 42s
-    Wall time: 1min 37s
+    CPU times: user 6min 4s, sys: 15.7 s, total: 6min 20s
+    Wall time: 53.4 s
 
 
 .. code:: ipython3
@@ -86,7 +86,7 @@ This will serve as a baseline comparison.
 
 
 
-.. image:: output_11_0.png
+.. image:: output_10_0.png
 
 
 Using PCA initialization
@@ -102,23 +102,20 @@ can be omitted.
 
 .. code:: ipython3
 
-    tsne = TSNE(
+    %%time
+    embedding_pca = openTSNE.TSNE(
         perplexity=30,
         initialization="pca",
         metric="euclidean",
         n_jobs=8,
         random_state=3,
-    )
-
-.. code:: ipython3
-
-    %time embedding_pca = tsne.fit(x)
+    ).fit(x)
 
 
 .. parsed-literal::
 
-    CPU times: user 42min 9s, sys: 49.8 s, total: 42min 59s
-    Wall time: 1min 28s
+    CPU times: user 6min 7s, sys: 15.1 s, total: 6min 22s
+    Wall time: 53.5 s
 
 
 .. code:: ipython3
@@ -127,7 +124,7 @@ can be omitted.
 
 
 
-.. image:: output_15_0.png
+.. image:: output_13_0.png
 
 
 Using cosine distance
@@ -142,23 +139,20 @@ parameter.
 
 .. code:: ipython3
 
-    tsne = TSNE(
+    %%time
+    embedding_cosine = openTSNE.TSNE(
         perplexity=30,
         initialization="random",
         metric="cosine",
         n_jobs=8,
         random_state=3,
-    )
-
-.. code:: ipython3
-
-    %time embedding_cosine = tsne.fit(x)
+    ).fit(x)
 
 
 .. parsed-literal::
 
-    CPU times: user 46min 27s, sys: 55.8 s, total: 47min 23s
-    Wall time: 1min 37s
+    CPU times: user 6min 16s, sys: 14.5 s, total: 6min 31s
+    Wall time: 54 s
 
 
 .. code:: ipython3
@@ -167,7 +161,7 @@ parameter.
 
 
 
-.. image:: output_19_0.png
+.. image:: output_16_0.png
 
 
 Using PCA initialization and cosine distance
@@ -177,23 +171,20 @@ Lastly, let’s see how our embedding looks with both the changes.
 
 .. code:: ipython3
 
-    tsne = TSNE(
+    %%time
+    embedding_pca_cosine = openTSNE.TSNE(
         perplexity=30,
         initialization="pca",
         metric="cosine",
         n_jobs=8,
         random_state=3,
-    )
-
-.. code:: ipython3
-
-    %time embedding_pca_cosine = tsne.fit(x)
+    ).fit(x)
 
 
 .. parsed-literal::
 
-    CPU times: user 44min 15s, sys: 52.6 s, total: 45min 7s
-    Wall time: 1min 32s
+    CPU times: user 6min 2s, sys: 13.6 s, total: 6min 16s
+    Wall time: 51.6 s
 
 
 .. code:: ipython3
@@ -202,7 +193,7 @@ Lastly, let’s see how our embedding looks with both the changes.
 
 
 
-.. image:: output_23_0.png
+.. image:: output_19_0.png
 
 
 Summary
@@ -210,7 +201,7 @@ Summary
 
 .. code:: ipython3
 
-    _, ax = plt.subplots(nrows=2, ncols=2, figsize=(12, 12))
+    fig, ax = plt.subplots(nrows=2, ncols=2, figsize=(12, 12))
     plot(embedding_standard, title="Standard t-SNE", ax=ax[0, 0], draw_legend=False)
     plot(embedding_pca, title="PCA initialization", ax=ax[0, 1], draw_legend=False)
     plot(embedding_cosine, title="Cosine distance", ax=ax[1, 0], draw_legend=False)
@@ -219,7 +210,7 @@ Summary
 
 
 
-.. image:: output_25_0.png
+.. image:: output_21_0.png
 
 
 We can see that we’ve made a lot of progress already. We would like
@@ -250,7 +241,7 @@ Perplexity: 30
 
 
 
-.. image:: output_29_0.png
+.. image:: output_25_0.png
 
 
 Perplexity: 500
@@ -258,23 +249,20 @@ Perplexity: 500
 
 .. code:: ipython3
 
-    tsne = TSNE(
+    %%time
+    embedding_pca_cosine_500 = openTSNE.TSNE(
         perplexity=500,
         initialization="pca",
         metric="cosine",
         n_jobs=8,
         random_state=3,
-    )
-
-.. code:: ipython3
-
-    %time embedding_pca_cosine_500 = tsne.fit(x)
+    ).fit(x)
 
 
 .. parsed-literal::
 
-    CPU times: user 2h 27min 38s, sys: 2min 32s, total: 2h 30min 10s
-    Wall time: 7min 15s
+    CPU times: user 28min 32s, sys: 12.9 s, total: 28min 45s
+    Wall time: 3min 41s
 
 
 .. code:: ipython3
@@ -283,7 +271,7 @@ Perplexity: 500
 
 
 
-.. image:: output_33_0.png
+.. image:: output_28_0.png
 
 
 Using different affinity models
@@ -312,119 +300,47 @@ perplexity to something smaller to emphasize the local structure.
 .. code:: ipython3
 
     %%time
-    affinities_annealing = affinity.PerplexityBasedNN(
-        x,
-        perplexity=500,
-        metric="cosine",
-        n_jobs=8,
-        random_state=3,
-    )
+    embedding_annealing = openTSNE.TSNE(
+        perplexity=500, metric="cosine", initialization="pca", n_jobs=8, random_state=3
+    ).fit(x)
 
 
 .. parsed-literal::
 
-    CPU times: user 19min 3s, sys: 16.1 s, total: 19min 19s
-    Wall time: 3min 51s
+    CPU times: user 28min 39s, sys: 13.6 s, total: 28min 53s
+    Wall time: 3min 43s
 
 
 .. code:: ipython3
 
-    %time init = initialization.pca(x, random_state=42)
+    %time embedding_annealing.affinities.set_perplexity(50)
 
 
 .. parsed-literal::
 
-    CPU times: user 3.77 s, sys: 232 ms, total: 4 s
-    Wall time: 100 ms
+    CPU times: user 10.3 s, sys: 644 ms, total: 10.9 s
+    Wall time: 2.01 s
 
 
 .. code:: ipython3
 
-    embedding = TSNEEmbedding(
-        init,
-        affinities_annealing,
-        negative_gradient_method="fft",
-        n_jobs=8,
-    )
-
-1. Perform normal t-SNE optimization with large perplexity
-
-.. code:: ipython3
-
-    %time embedding1 = embedding.optimize(n_iter=250, exaggeration=12, momentum=0.5)
+    %time embedding_annealing = embedding_annealing.optimize(250, momentum=0.8)
 
 
 .. parsed-literal::
 
-    CPU times: user 30min 56s, sys: 35 s, total: 31min 31s
-    Wall time: 48.2 s
+    CPU times: user 2min 6s, sys: 4.6 s, total: 2min 11s
+    Wall time: 16.4 s
 
 
 .. code:: ipython3
 
-    plot(embedding1)
+    plot(embedding_annealing)
 
 
 
-.. image:: output_41_0.png
+.. image:: output_34_0.png
 
-
-.. code:: ipython3
-
-    %time embedding2 = embedding1.optimize(n_iter=750, exaggeration=1, momentum=0.8)
-
-
-.. parsed-literal::
-
-    CPU times: user 1h 36min 47s, sys: 1min 41s, total: 1h 38min 29s
-    Wall time: 2min 33s
-
-
-.. code:: ipython3
-
-    plot(embedding2)
-
-
-
-.. image:: output_43_0.png
-
-
-2. Lower perplexity and optimize
-
-.. code:: ipython3
-
-    %time affinities_annealing.set_perplexity(50)
-
-
-.. parsed-literal::
-
-    CPU times: user 19.3 s, sys: 1.26 s, total: 20.6 s
-    Wall time: 1.54 s
-
-
-.. code:: ipython3
-
-    %time embedding3 = embedding2.optimize(n_iter=500, momentum=0.8)
-
-
-.. parsed-literal::
-
-    CPU times: user 31min 55s, sys: 39 s, total: 32min 34s
-    Wall time: 49.7 s
-
-
-.. code:: ipython3
-
-    plot(embedding3)
-
-
-
-.. image:: output_47_0.png
-
-
-.. code:: ipython3
-
-    embedding_annealing = embedding3.view(np.ndarray)
 
 Multiscale
 ~~~~~~~~~~
@@ -439,7 +355,7 @@ much of the global structure.
 .. code:: ipython3
 
     %%time
-    affinities_multiscale_mixture = affinity.Multiscale(
+    affinities_multiscale_mixture = openTSNE.affinity.Multiscale(
         x,
         perplexities=[50, 500],
         metric="cosine",
@@ -450,82 +366,45 @@ much of the global structure.
 
 .. parsed-literal::
 
-    CPU times: user 21min 11s, sys: 38.3 s, total: 21min 50s
-    Wall time: 4min 13s
+    CPU times: user 8min 28s, sys: 6.88 s, total: 8min 34s
+    Wall time: 1min 19s
 
 
 .. code:: ipython3
 
-    %time init = initialization.pca(x, random_state=42)
+    %time init = openTSNE.initialization.pca(x, random_state=42)
 
 
 .. parsed-literal::
 
-    CPU times: user 9.72 s, sys: 455 ms, total: 10.2 s
-    Wall time: 255 ms
+    CPU times: user 1.98 s, sys: 140 ms, total: 2.12 s
+    Wall time: 115 ms
 
-
-.. code:: ipython3
-
-    embedding = TSNEEmbedding(
-        init,
-        affinities_multiscale_mixture,
-        negative_gradient_method="fft",
-        n_jobs=8,
-    )
 
 Now, we just optimize just like we would standard t-SNE.
 
 .. code:: ipython3
 
-    %time embedding1 = embedding.optimize(n_iter=250, exaggeration=12, momentum=0.5)
-
-
-.. parsed-literal::
-
-    CPU times: user 31min 24s, sys: 32.7 s, total: 31min 56s
-    Wall time: 48.6 s
-
+    embedding_multiscale = openTSNE.TSNE(n_jobs=8).fit(
+        affinities=affinities_multiscale_mixture,
+        initialization=init,
+    )
 
 .. code:: ipython3
 
-    plot(embedding1)
+    plot(embedding_multiscale)
 
 
 
-.. image:: output_55_0.png
+.. image:: output_40_0.png
 
-
-.. code:: ipython3
-
-    %time embedding2 = embedding1.optimize(n_iter=750, exaggeration=1, momentum=0.8)
-
-
-.. parsed-literal::
-
-    CPU times: user 1h 36min 12s, sys: 1min 38s, total: 1h 37min 51s
-    Wall time: 2min 38s
-
-
-.. code:: ipython3
-
-    plot(embedding2)
-
-
-
-.. image:: output_57_0.png
-
-
-.. code:: ipython3
-
-    embedding_multiscale = embedding2.view(np.ndarray)
 
 Summary
 ~~~~~~~
 
 .. code:: ipython3
 
-    _, ax = plt.subplots(nrows=2, ncols=2, figsize=(12, 12))
+    fig, ax = plt.subplots(nrows=2, ncols=2, figsize=(12, 12))
     plot(embedding_pca_cosine, title="Perplexity 30", ax=ax[0, 0], draw_legend=False)
     plot(embedding_pca_cosine_500, title="Perplexity 500", ax=ax[0, 1], draw_legend=False)
     plot(embedding_annealing, title="Perplexity annealing: 50, 500", ax=ax[1, 0], draw_legend=False)
@@ -534,7 +413,7 @@ Summary
 
 
 
-.. image:: output_60_0.png
+.. image:: output_42_0.png
 
 
 Comparison to UMAP
@@ -544,13 +423,6 @@ Comparison to UMAP
 
     from umap import UMAP
     from itertools import product
-
-
-.. parsed-literal::
-
-    /home/ppolicar/local/miniconda3/envs/tsne/lib/python3.7/site-packages/scikit_learn-0.21.0-py3.7-linux-x86_64.egg/sklearn/externals/joblib/__init__.py:15: DeprecationWarning: sklearn.externals.joblib is deprecated in 0.21 and will be removed in 0.23. Please import this functionality directly from joblib, which can be installed with: pip install joblib. If this warning is raised when loading pickled models, you may need to re-serialize those models with scikit-learn 0.21+.
-      warnings.warn(msg, category=DeprecationWarning)
-
 
 .. code:: ipython3
 
@@ -565,13 +437,72 @@ Comparison to UMAP
 
 .. parsed-literal::
 
-    CPU times: user 1h 11min 8s, sys: 4min 30s, total: 1h 15min 38s
-    Wall time: 12min 25s
+    /home/ppolicar/local/miniconda3/envs/tsne/lib/python3.7/site-packages/umap/nndescent.py:92: NumbaPerformanceWarning: 
+    The keyword argument 'parallel=True' was specified but no transformation for parallel execution was possible.
+    
+    To find out why, try turning on parallel diagnostics, see http://numba.pydata.org/numba-doc/latest/user/parallel.html#diagnostics for help.
+    
+    File "../../../local/miniconda3/envs/tsne/lib/python3.7/site-packages/umap/utils.py", line 409:
+    @numba.njit(parallel=True)
+    def build_candidates(current_graph, n_vertices, n_neighbors, max_candidates, rng_state):
+    ^
+    
+      current_graph, n_vertices, n_neighbors, max_candidates, rng_state
+    /home/ppolicar/local/miniconda3/envs/tsne/lib/python3.7/site-packages/numba/typed_passes.py:293: NumbaPerformanceWarning: 
+    The keyword argument 'parallel=True' was specified but no transformation for parallel execution was possible.
+    
+    To find out why, try turning on parallel diagnostics, see http://numba.pydata.org/numba-doc/latest/user/parallel.html#diagnostics for help.
+    
+    File "../../../local/miniconda3/envs/tsne/lib/python3.7/site-packages/umap/nndescent.py", line 47:
+        @numba.njit(parallel=True)
+        def nn_descent(
+        ^
+    
+      state.func_ir.loc))
+    /home/ppolicar/local/miniconda3/envs/tsne/lib/python3.7/site-packages/numba/typed_passes.py:293: NumbaPerformanceWarning: 
+    The keyword argument 'parallel=True' was specified but no transformation for parallel execution was possible.
+    
+    To find out why, try turning on parallel diagnostics, see http://numba.pydata.org/numba-doc/latest/user/parallel.html#diagnostics for help.
+    
+    File "../../../local/miniconda3/envs/tsne/lib/python3.7/site-packages/umap/nndescent.py", line 47:
+        @numba.njit(parallel=True)
+        def nn_descent(
+        ^
+    
+      state.func_ir.loc))
+    /home/ppolicar/local/miniconda3/envs/tsne/lib/python3.7/site-packages/numba/typed_passes.py:293: NumbaPerformanceWarning: 
+    The keyword argument 'parallel=True' was specified but no transformation for parallel execution was possible.
+    
+    To find out why, try turning on parallel diagnostics, see http://numba.pydata.org/numba-doc/latest/user/parallel.html#diagnostics for help.
+    
+    File "../../../local/miniconda3/envs/tsne/lib/python3.7/site-packages/umap/nndescent.py", line 47:
+        @numba.njit(parallel=True)
+        def nn_descent(
+        ^
+    
+      state.func_ir.loc))
+    /home/ppolicar/local/miniconda3/envs/tsne/lib/python3.7/site-packages/numba/typed_passes.py:293: NumbaPerformanceWarning: 
+    The keyword argument 'parallel=True' was specified but no transformation for parallel execution was possible.
+    
+    To find out why, try turning on parallel diagnostics, see http://numba.pydata.org/numba-doc/latest/user/parallel.html#diagnostics for help.
+    
+    File "../../../local/miniconda3/envs/tsne/lib/python3.7/site-packages/umap/nndescent.py", line 47:
+        @numba.njit(parallel=True)
+        def nn_descent(
+        ^
+    
+      state.func_ir.loc))
+
+
+.. parsed-literal::
+
+    CPU times: user 22min 41s, sys: 49.1 s, total: 23min 30s
+    Wall time: 11min 37s
 
 
 .. code:: ipython3
 
-    _, ax = plt.subplots(nrows=2, ncols=2, figsize=(12, 12))
+    fig, ax = plt.subplots(nrows=2, ncols=2, figsize=(12, 12))
     plot(embeddings[0][2], title=f"k={embeddings[0][0]}, min_dist={embeddings[0][1]}", ax=ax[0, 0], draw_legend=False)
     plot(embeddings[1][2], title=f"k={embeddings[1][0]}, min_dist={embeddings[1][1]}", ax=ax[0, 1], draw_legend=False)
     plot(embeddings[2][2], title=f"k={embeddings[2][0]}, min_dist={embeddings[2][1]}", ax=ax[1, 0], draw_legend=False)
@@ -580,5 +511,6 @@ Comparison to UMAP
 
 
 
-.. image:: output_64_0.png
+.. image:: output_46_0.png
+
 
