@@ -1180,12 +1180,14 @@ class TSNE(BaseEstimator):
         exaggeration phase and a normal optimization phase.
 
         This function call be called in two ways.
+
         1.  We can call it in the standard way using a ``np.array``. This will
             compute the affinity matrix and initialization, and run the optimization
             as usual.
         2.  We can also pass in a precomputed ``affinity`` object, which will
             override the affinity-related paramters specified in the constructor.
             This is useful when you wish to use custom affinity objects.
+
         Please note that some initialization schemes require ``X`` to be specified,
         e.g. PCA. If the initilization is not able to be computed, we default to
         using spectral initilization calculated from the affinity matrix.
@@ -1249,11 +1251,13 @@ class TSNE(BaseEstimator):
         """Prepare the initial embedding which can be optimized as needed.
 
         This function call be called in two ways.
+
         1.  We can call it in the standard way using a ``np.array``. This will
             compute the affinity matrix and initialization as usual.
         2.  We can also pass in a precomputed ``affinity`` object, which will
             override the affinity-related paramters specified in the constructor.
             This is useful when you wish to use custom affinity objects.
+
         Please note that some initialization schemes require ``X`` to be specified,
         e.g. PCA. If the initilization is not able to be computed, we default to
         using spectral initilization calculated from the affinity matrix.
