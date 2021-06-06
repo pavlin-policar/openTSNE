@@ -722,7 +722,6 @@ class MultiscaleMixture(Affinities):
         the given metric. Otherwise it uses Pynndescent. ``auto`` uses exact
         nearest neighbors for N<1000 and the same heuristic as ``approx`` for N>=1000.
 
-
     metric: Union[str, Callable]
         The metric to be used to compute affinities between points in the
         original space.
@@ -1005,7 +1004,6 @@ class Multiscale(MultiscaleMixture):
         if the input data matrix is not a sparse object and if Annoy supports
         the given metric. Otherwise it uses Pynndescent. ``auto`` uses exact
         nearest neighbors for N<1000 and the same heuristic as ``approx`` for N>=1000.
-
 
     metric: Union[str, Callable]
         The metric to be used to compute affinities between points in the
