@@ -231,6 +231,7 @@ class Annoy(KNNIndex):
         all. If anyone has a better solution, I would welcome any and all help.
 
     """
+
     VALID_METRICS = [
         "cosine",
         "euclidean",
@@ -390,7 +391,6 @@ class Annoy(KNNIndex):
 
 class NNDescent(KNNIndex):
     VALID_METRICS = [
-        # general minkowski distances
         "euclidean",
         "l2",
         "sqeuclidean",
@@ -402,24 +402,29 @@ class NNDescent(KNNIndex):
         "linfty",
         "linf",
         "minkowski",
-        # Standardised/weighted distances
         "seuclidean",
         "standardised_euclidean",
         "wminkowski",
         "weighted_minkowski",
         "mahalanobis",
-        # Other distances
         "canberra",
         "cosine",
         "dot",
         "correlation",
-        "hellinger",
         "haversine",
         "braycurtis",
         "spearmanr",
+        "tsss",
+        "true_angular",
+        "hellinger",
         "kantorovich",
         "wasserstein",
-        # Binary distances
+        "sinkhorn",
+        "jensen-shannon",
+        "jensen_shannon",
+        "symmetric-kl",
+        "symmetric_kl",
+        "symmetric_kullback_liebler",
         "hamming",
         "jaccard",
         "dice",
