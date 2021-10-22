@@ -108,7 +108,7 @@ jobs:
     cancelTimeoutInMinutes: 10
     displayName: 'Build wheels :: linux -'
     pool:
-      vmImage: 'Ubuntu-16.04'
+      vmImage: 'ubuntu-latest'
 
     strategy:
       matrix:
@@ -183,7 +183,7 @@ jobs:
     cancelTimeoutInMinutes: 10
     displayName: 'Package source distribution'
     pool:
-      vmImage: 'Ubuntu-16.04'
+      vmImage: 'ubuntu-latest'
 
     steps:
       - task: UsePythonVersion@0

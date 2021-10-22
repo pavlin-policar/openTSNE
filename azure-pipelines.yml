@@ -14,16 +14,16 @@ jobs:
   strategy:
     matrix:
       linux-python36:
-        image.name: 'ubuntu-16.04'
+        image.name: 'ubuntu-latest'
         python.version: '3.6'
       linux-python37:
-        image.name: 'ubuntu-16.04'
+        image.name: 'ubuntu-latest'
         python.version: '3.7'
       linux-python38:
-        image.name: 'ubuntu-16.04'
+        image.name: 'ubuntu-latest'
         python.version: '3.8'
       linux-python39:
-        image.name: 'ubuntu-16.04'
+        image.name: 'ubuntu-latest'
         python.version: '3.9'
       osx-python36:
         image.name: 'macos-10.14'
