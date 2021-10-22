@@ -274,7 +274,12 @@ class Annoy(KNNIndex):
         self.index = AnnoyIndex(data.shape[1], annoy_metric)
 
         if self.random_state:
-            self.index.set_seed(self.random_state)
+            if isinstance(self.random_state, np.random.RandomState):
+                # We can extract the original random seed using this hacky trick
+                seed = self.random_state.get_state()[1][0]
+            else:
+                seed = self.random_state
+            self.index.set_seed(seed)
 
         for i in range(N):
             self.index.add_item(i, data[i])
@@ -608,6 +613,14 @@ class HNSW(KNNIndex):
             "l2": "l2",
         }[self.metric]
 
+        if isinstance(self.random_state, np.random.RandomState):
+            # We can extract the original random seed using this hacky trick
+            seed = self.random_state.get_state()[1][0]
+        else:
+            seed = self.random_state
+        if seed is None:  # hnswlib can't be called with seed=None
+            seed = 100
+
         self.index = Index(space=hnsw_space, dim=data.shape[1])
 
         # Initialize HNSW Index
@@ -615,7 +628,7 @@ class HNSW(KNNIndex):
             max_elements=data.shape[0],
             ef_construction=200,
             M=16,
-            random_seed=self.random_state or 100,
+            random_seed=seed,
         )
 
         # Build index tree from data

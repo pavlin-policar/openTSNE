@@ -72,6 +72,18 @@ class KNNIndexTestMixin:
         np.testing.assert_equal(indices1, indices2)
         np.testing.assert_equal(distances1, distances2)
 
+    def test_query_same_result_with_fixed_random_state_instance(self):
+        random_state = np.random.RandomState(42)
+
+        knn_index1 = self.knn_index(self.x1, 30, "euclidean", random_state=random_state)
+        indices1, distances1 = knn_index1.build()
+
+        knn_index2 = self.knn_index(self.x1, 30, "euclidean", random_state=random_state)
+        indices2, distances2 = knn_index2.build()
+
+        np.testing.assert_equal(indices1, indices2)
+        np.testing.assert_equal(distances1, distances2)
+
 
 class TestAnnoy(KNNIndexTestMixin, unittest.TestCase):
     knn_index = nearest_neighbors.Annoy
