@@ -71,6 +71,23 @@ class TestPerplexityBased(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             aff.set_perplexity(70)
 
+    def test_set_perplexity_respects_symmetrization(self):
+        # Apply symmetrization
+        symmetrize = True
+        aff = PerplexityBasedNN(self.x, perplexity=30, symmetrize=symmetrize)
+        self.assertAlmostEqual(np.sum(aff.P - aff.P.T), 0, delta=1e-16)
+
+        aff.set_perplexity(20)
+        self.assertAlmostEqual(np.sum(aff.P - aff.P.T), 0, delta=1e-16)
+
+        # Skip symmetrization
+        symmetrize = False
+        aff = PerplexityBasedNN(self.x, perplexity=30, symmetrize=symmetrize)
+        self.assertAlmostEqual(np.sum(aff.P - aff.P.T), 0, delta=1e-16)
+
+        aff.set_perplexity(20)
+        self.assertAlmostEqual(np.sum(aff.P - aff.P.T), 0, delta=1e-16)
+
 
 class TestMultiscale(unittest.TestCase):
     @classmethod
@@ -136,6 +153,23 @@ class TestMultiscale(unittest.TestCase):
         # the nearest neighbors, so it should raise an error
         with self.assertRaises(RuntimeError):
             ms.set_perplexities([20, 30])
+
+    def test_set_perplexities_respects_symmetrization(self):
+        # Apply symmetrization
+        symmetrize = True
+        aff = Multiscale(self.x, perplexities=[10, 20], symmetrize=symmetrize)
+        self.assertAlmostEqual(np.sum(aff.P - aff.P.T), 0, delta=1e-16)
+
+        aff.set_perplexities([5, 10])
+        self.assertAlmostEqual(np.sum(aff.P - aff.P.T), 0, delta=1e-16)
+
+        # Skip symmetrization
+        symmetrize = False
+        aff = Multiscale(self.x, perplexities=[10, 20], symmetrize=symmetrize)
+        self.assertAlmostEqual(np.sum(aff.P - aff.P.T), 0, delta=1e-16)
+
+        aff.set_perplexities([5, 10])
+        self.assertAlmostEqual(np.sum(aff.P - aff.P.T), 0, delta=1e-16)
 
 
 class TestUniform(unittest.TestCase):

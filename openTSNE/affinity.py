@@ -195,6 +195,7 @@ class PerplexityBasedNN(Affinities):
                 n_jobs=n_jobs,
             )
 
+        self.symmetrize = symmetrize
         self.n_jobs = n_jobs
         self.verbose = verbose
 
@@ -249,7 +250,7 @@ class PerplexityBasedNN(Affinities):
                 self.__neighbors[:, :k_neighbors],
                 self.__distances[:, :k_neighbors],
                 [self.perplexity],
-                symmetrize=True,
+                symmetrize=self.symmetrize,
                 n_jobs=self.n_jobs,
             )
 
@@ -811,6 +812,7 @@ class MultiscaleMixture(Affinities):
             )
 
         self.perplexities = perplexities
+        self.symmetrize = symmetrize
         self.n_jobs = n_jobs
         self.verbose = verbose
 
@@ -875,7 +877,7 @@ class MultiscaleMixture(Affinities):
                 self.__neighbors[:, :k_neighbors],
                 self.__distances[:, :k_neighbors],
                 self.perplexities,
-                symmetrize=True,
+                symmetrize=self.symmetrize,
                 n_jobs=self.n_jobs,
             )
 
