@@ -108,14 +108,14 @@ class TestUsageWithCustomAffinityAndCustomNeighbors(TestUsage):
             embedding = TSNE().fit(affinities=aff)
             self.eval_embedding(embedding, aff.__class__.__name__)
             new_embedding = embedding.prepare_partial(self.x)
-            new_embedding.optimize(10, learning_rate=0.1, inplace=True)
+            new_embedding.optimize(50, learning_rate=1, inplace=True)
             self.eval_embedding(new_embedding, f"transform::{aff.__class__.__name__}")
 
             # With initilization
             embedding = TSNE().fit(affinities=aff, initialization=init)
             self.eval_embedding(embedding, aff.__class__.__name__)
             new_embedding = embedding.prepare_partial(self.x)
-            new_embedding.optimize(10, learning_rate=0.1, inplace=True)
+            new_embedding.optimize(50, learning_rate=1, inplace=True)
             self.eval_embedding(new_embedding, f"transform::{aff.__class__.__name__}")
 
     def test_affinity_with_precomputed_distances(self):
