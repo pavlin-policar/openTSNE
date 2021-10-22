@@ -74,10 +74,10 @@ class KNNIndexTestMixin:
 
     def test_query_same_result_with_fixed_random_state_instance(self):
         random_state = np.random.RandomState(42)
-
         knn_index1 = self.knn_index(self.x1, 30, "euclidean", random_state=random_state)
         indices1, distances1 = knn_index1.build()
 
+        random_state = np.random.RandomState(42)
         knn_index2 = self.knn_index(self.x1, 30, "euclidean", random_state=random_state)
         indices2, distances2 = knn_index2.build()
 
