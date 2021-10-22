@@ -332,14 +332,6 @@ class PartialTSNEEmbedding(np.ndarray):
             flag indicates whether we should propagate that exception or to
             simply stop optimization and return the resulting embedding.
 
-        random_state: Union[int, RandomState]
-            The random state parameter follows the convention used in
-            scikit-learn. If the value is an int, random_state is the seed used
-            by the random number generator. If the value is a RandomState
-            instance, then it will be used as the random number generator. If
-            the value is None, the random number generator is the RandomState
-            instance used by `np.random`.
-
         n_jobs: int
             The number of threads to use while running t-SNE. This follows the
             scikit-learn convention, ``-1`` meaning all processors, ``-2``
@@ -628,14 +620,6 @@ class TSNEEmbedding(np.ndarray):
             Maximum update norm. If the norm exceeds this value, it will be
             clipped. This prevents points from "shooting off" from
             the embedding.
-
-        random_state: Union[int, RandomState]
-            The random state parameter follows the convention used in
-            scikit-learn. If the value is an int, random_state is the seed used
-            by the random number generator. If the value is a RandomState
-            instance, then it will be used as the random number generator. If
-            the value is None, the random number generator is the RandomState
-            instance used by `np.random`.
 
         n_jobs: int
             The number of threads to use while running t-SNE. This follows the
