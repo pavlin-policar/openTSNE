@@ -245,7 +245,6 @@ class Annoy(KNNIndex):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.pickle_fname = None
 
     def build(self):
         data, k = self.data, self.k
@@ -340,34 +339,38 @@ class Annoy(KNNIndex):
         return indices, distances
 
     def __getstate__(self):
-        should_reset_fname = self.pickle_fname is None
-        if self.index is not None and self.pickle_fname is None:
-            import datetime
-
-            ts = int(datetime.datetime.now().timestamp())
-            self.pickle_fname = f"annoy_index-{ts}.ann"
+        import tempfile
+        import base64
+        from os import path
 
         d = dict(self.__dict__)
-        del d["index"]
-
+        # If the index is not None, we want to save the encoded index
         if self.index is not None:
-            log.info(
-                f"Pickling `openTSNE.nearest_neighbors.Annoy`... Saving Annoy index "
-                f"file to {self.pickle_fname}. "
-            )
-            self.index.save(self.pickle_fname)
+            with tempfile.TemporaryDirectory() as dirname:
+                self.index.save(path.join(dirname, "tmp.ann"))
 
-        if should_reset_fname:
-            self.pickle_fname = None
+                with open(path.join(dirname, "tmp.ann"), "rb") as f:
+                    b64_index = base64.b64encode(f.read())
+
+            d["b64_index"] = b64_index
+            del d["index"]
 
         return d
 
     def __setstate__(self, state):
-        self.__dict__.update(state)
+        import tempfile
+        import base64
+        from os import path
 
-        # Load the annoy index if saved
-        if state["pickle_fname"] and os.path.exists(state["pickle_fname"]):
-            annoy_metric = self.metric
+        from openTSNE.dependencies.annoy import AnnoyIndex
+
+        # If a base64 index is given, we have to load the index
+        if "b64_index" in state:
+            assert "index" not in state
+            b64_index = state["b64_index"]
+            del state["b64_index"]
+
+            annoy_metric = state["metric"]
             annoy_aliases = {
                 "cosine": "angular",
                 "l1": "manhattan",
@@ -377,16 +380,13 @@ class Annoy(KNNIndex):
             if annoy_metric in annoy_aliases:
                 annoy_metric = annoy_aliases[annoy_metric]
 
-            from openTSNE.dependencies.annoy import AnnoyIndex
+            self.index = AnnoyIndex(state["data"].shape[1], annoy_metric)
+            with tempfile.TemporaryDirectory() as dirname:
+                with open(path.join(dirname, "tmp.ann"), "wb") as f:
+                    f.write(base64.b64decode(b64_index))
+                self.index.load(path.join(dirname, "tmp.ann"))
 
-            log.info(
-                f"Unpickling `openTSNE.nearest_neighbors.Annoy`... Attempting "
-                f"to reload annoy index from {self.pickle_fname}."
-            )
-            self.index = AnnoyIndex(self.data.shape[1], annoy_metric)
-            self.index.load(self.pickle_fname)
-        else:
-            self.index = None
+        self.__dict__.update(state)
 
 
 class NNDescent(KNNIndex):
@@ -655,6 +655,57 @@ class HNSW(KNNIndex):
 
         # return indices and distances
         return indices, distances
+
+    def __getstate__(self):
+        import tempfile
+        import base64
+        from os import path
+
+        d = dict(self.__dict__)
+        # If the index is not None, we want to save the encoded index
+        if self.index is not None:
+            with tempfile.TemporaryDirectory() as dirname:
+                self.index.save_index(path.join(dirname, "tmp.bin"))
+
+                with open(path.join(dirname, "tmp.bin"), "rb") as f:
+                    b64_index = base64.b64encode(f.read())
+
+            d["b64_index"] = b64_index
+            del d["index"]
+
+        return d
+
+    def __setstate__(self, state):
+        import tempfile
+        import base64
+        from os import path
+
+        from hnswlib import Index
+
+        # If a base64 index is given, we have to load the index
+        if "b64_index" in state:
+            assert "index" not in state
+            b64_index = state["b64_index"]
+            del state["b64_index"]
+
+            hnsw_metric = state["metric"]
+            hnsw_aliases = {
+                "cosine": "cosine",
+                "dot": "ip",
+                "euclidean": "l2",
+                "ip": "ip",
+                "l2": "l2",
+            }
+            if hnsw_metric in hnsw_aliases:
+                hnsw_metric = hnsw_aliases[hnsw_metric]
+
+            self.index = Index(space=hnsw_metric, dim=state["data"].data.shape[1])
+            with tempfile.TemporaryDirectory() as dirname:
+                with open(path.join(dirname, "tmp.bin"), "wb") as f:
+                    f.write(base64.b64decode(b64_index))
+                self.index.load_index(path.join(dirname, "tmp.bin"))
+
+        self.__dict__.update(state)
 
 
 class PrecomputedDistanceMatrix(KNNIndex):
