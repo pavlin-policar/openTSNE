@@ -117,7 +117,7 @@ References
 .. [1] Van Der Maaten, Laurens, and Hinton, Geoffrey. `“Visualizing data using
     t-SNE.” <http://www.jmlr.org/papers/volume9/vandermaaten08a/vandermaaten08a.pdf>`__
     Journal of Machine Learning Research 9.Nov (2008): 2579-2605.
-.. [2] Poličar, Pavlin G., Martin Stražar, and Blaž Zupan. `“Embedding to Reference t-SNE Space Addresses Batch Effects in Single-Cell Classification.” <https://www.biorxiv.org/content/10.1101/671404v1.abstract>`__ BioRxiv (2019): 671404.
+.. [2] Poličar, Pavlin G., Martin Stražar, and Blaž Zupan. `“Embedding to Reference t-SNE Space Addresses Batch Effects in Single-Cell Classification.” <https://link.springer.com/article/10.1007/s10994-021-06043-1>`__ Machine Learning (2021): 1-20.
 .. [3] Van Der Maaten, Laurens. `“Accelerating t-SNE using tree-based algorithms.”
     <http://www.jmlr.org/papers/volume15/vandermaaten14a/vandermaaten14a.pdf>`__
     Journal of Machine Learning Research 15.1 (2014): 3221-3245.
