@@ -13,9 +13,6 @@ jobs:
 
   strategy:
     matrix:
-      linux-python36:
-        image.name: 'ubuntu-latest'
-        python.version: '3.6'
       linux-python37:
         image.name: 'ubuntu-latest'
         python.version: '3.7'
@@ -25,9 +22,6 @@ jobs:
       linux-python39:
         image.name: 'ubuntu-latest'
         python.version: '3.9'
-      osx-python36:
-        image.name: 'macos-10.14'
-        python.version: '3.6'
       osx-python37:
         image.name: 'macos-10.14'
         python.version: '3.7'
@@ -37,9 +31,6 @@ jobs:
       osx-python39:
         image.name: 'macos-10.14'
         python.version: '3.9'
-      windows-python36:
-        image.name: 'vs2017-win2016'
-        python.version: '3.6'
       windows-python37:
         image.name: 'vs2017-win2016'
         python.version: '3.7'
