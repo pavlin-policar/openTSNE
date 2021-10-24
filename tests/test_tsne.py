@@ -703,33 +703,39 @@ class TestGradientDescentOptimizer(unittest.TestCase):
     def test_optimizer_being_passed_to_subsequent_embeddings(self):
         embedding = self.tsne.prepare_initial(self.x)
 
-        self.assertIsNone(embedding.optimizer.gains,
-                          "Optimizer should be initialized with no gains")
+        self.assertIsNone(
+            embedding.optimizer.gains, "Optimizer should be initialized with no gains"
+        )
 
         # Check the switch from no gains to some gains
         embedding1 = embedding.optimize(10)
         self.assertIsNone(
             embedding.optimizer.gains,
             "Gains changed on initial optimizer even though we did not do "
-            "inplace optimization.")
+            "inplace optimization.",
+        )
         self.assertIsNotNone(
-            embedding1.optimizer.gains,
-            "Gains were not properly set in new embedding.")
+            embedding1.optimizer.gains, "Gains were not properly set in new embedding."
+        )
         self.assertIsNot(
-            embedding.optimizer, embedding1.optimizer,
+            embedding.optimizer,
+            embedding1.optimizer,
             "The embedding and new embedding optimizer are the same instance "
-            "even we did not do inplace optimization.")
+            "even we did not do inplace optimization.",
+        )
 
         # Check switch from existing gains to new gains
         embedding2 = embedding1.optimize(10)
         self.assertIsNot(
-            embedding1.optimizer, embedding2.optimizer,
+            embedding1.optimizer,
+            embedding2.optimizer,
             "The embedding and new embedding optimizer are the same instance "
-            "even we did not do inplace optimization.")
+            "even we did not do inplace optimization.",
+        )
         self.assertFalse(
             np.allclose(embedding1.optimizer.gains, embedding2.optimizer.gains),
             "The gains in the new embedding did not change at all from the old "
-            "embedding."
+            "embedding.",
         )
 
     def test_optimizer_being_passed_to_partial_embeddings(self):
@@ -739,32 +745,39 @@ class TestGradientDescentOptimizer(unittest.TestCase):
         # Partial embeddings get their own optimizer instance
         partial = embedding.prepare_partial(self.x_test)
         self.assertIsNot(
-            embedding.optimizer, partial.optimizer,
-            "Embedding and partial embedding optimizers are the same instance.")
+            embedding.optimizer,
+            partial.optimizer,
+            "Embedding and partial embedding optimizers are the same instance.",
+        )
         self.assertIsNone(
             partial.optimizer.gains,
-            "Partial embedding was not initialized with no gains")
+            "Partial embedding was not initialized with no gains",
+        )
 
         # Check the switch from no gains to some gains
         partial1 = partial.optimize(10)
         self.assertIsNone(
             partial.optimizer.gains,
             "Gains on initial optimizer changed even though we did not do "
-            "inplace optimization.")
+            "inplace optimization.",
+        )
         self.assertIsNotNone(
             partial1.optimizer.gains,
-            "Gains were not properly set in new partial embedding.")
+            "Gains were not properly set in new partial embedding.",
+        )
 
         # Check switch from existing gains to new gains
         partial2 = partial1.optimize(10)
         self.assertIsNot(
-            partial1.optimizer, partial2.optimizer,
+            partial1.optimizer,
+            partial2.optimizer,
             "The embedding and new embedding optimizer are the same instance "
-            "even we did not do inplace optimization.")
+            "even we did not do inplace optimization.",
+        )
         self.assertFalse(
             np.allclose(partial1.optimizer.gains, partial2.optimizer.gains),
             "The gains in the new embedding did not change at all from the old "
-            "embedding."
+            "embedding.",
         )
 
     def test_embedding_optimizer_inplace(self):
