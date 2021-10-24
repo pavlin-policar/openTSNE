@@ -808,6 +808,37 @@ class TestGradientDescentOptimizer(unittest.TestCase):
         loaded_obj = pickle.loads(pickle.dumps(obj))
         np.testing.assert_array_equal(loaded_obj.gains, np.ones(5))
 
+    def test_gains_is_always_numpy_array(self):
+        embedding = self.tsne.prepare_initial(self.x)
+        self.assertIsInstance(embedding.optimizer.gains, (type(None), np.ndarray))
+        self.assertNotIsInstance(embedding.optimizer.gains, openTSNE.TSNEEmbedding)
+
+        embedding = embedding.optimize(10)
+        self.assertIsInstance(embedding.optimizer.gains, (type(None), np.ndarray))
+        self.assertNotIsInstance(embedding.optimizer.gains, openTSNE.TSNEEmbedding)
+
+        embedding.optimize(10, inplace=True)
+        self.assertIsInstance(embedding.optimizer.gains, (type(None), np.ndarray))
+        self.assertNotIsInstance(embedding.optimizer.gains, openTSNE.TSNEEmbedding)
+
+    def test_pickling_via_embedding(self):
+        embedding = self.tsne.prepare_initial(self.x)
+        # Before optimization
+        loaded_embedding = pickle.loads(pickle.dumps(embedding))
+        np.testing.assert_equal(
+            embedding.optimizer.gains,
+            loaded_embedding.optimizer.gains,
+            "Failed loading without any optimization",
+        )
+
+        # After optimization
+        loaded_embedding = pickle.loads(pickle.dumps(embedding))
+        np.testing.assert_equal(
+            embedding.optimizer.gains,
+            loaded_embedding.optimizer.gains,
+            "Failed loading after optimization (differing gains)",
+        )
+
 
 class TestAffinityIntegration(unittest.TestCase):
     @classmethod

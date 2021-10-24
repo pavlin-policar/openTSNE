@@ -932,6 +932,7 @@ class TSNEEmbedding(np.ndarray):
     def __reduce__(self):
         state = super().__reduce__()
         new_state = state[2] + (
+            self.optimizer,
             self.affinities,
             self.gradient_descent_params,
             self.random_state,
@@ -950,7 +951,13 @@ class TSNEEmbedding(np.ndarray):
         self.random_state = state[-5]
         self.gradient_descent_params = state[-6]
         self.affinities = state[-7]
-        super().__setstate__(state[0:-7])
+
+        if len(state) == 12:  # backwards compat (when I forgot optimizer)
+            self.optimizer = gradient_descent()
+            super().__setstate__(state[:-7])
+        else:
+            self.optimizer = state[-8]
+            super().__setstate__(state[:-8])
 
 
 class TSNE(BaseEstimator):
@@ -1696,7 +1703,7 @@ class gradient_descent:
 
         update = np.zeros_like(embedding)
         if self.gains is None:
-            self.gains = np.ones_like(embedding)
+            self.gains = np.ones_like(embedding).view(np.ndarray)
 
         bh_params = {"theta": theta}
         fft_params = {
