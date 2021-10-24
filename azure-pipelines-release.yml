@@ -81,7 +81,7 @@ jobs:
 
       - script: pip install pynndescent
         displayName: 'Install optional dependencies - pynndescent'
-        condition: ne(variables['python.version'], '3.9')
+        condition: ne(variables['python.version'], '3.6')  # llvm-lite doesn't support py36 from v0.37 onwards
 
       - script: pip install hnswlib
         displayName: 'Install optional dependencies - hnswlib'
@@ -150,7 +150,7 @@ jobs:
 
       - script: $(python)/pip install pynndescent
         displayName: 'Install optional dependencies - pynndescent'
-        condition: ne(variables['python.version'], '3.9')
+        condition: false  # llvm-lite doesn't support py36 from v0.37 onwards, and the llvmlite version wasn't built for manylinux2010
 
       - script: $(python)/pip install hnswlib
         displayName: 'Install optional dependencies - hnswlib'
