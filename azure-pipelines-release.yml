@@ -19,16 +19,16 @@ jobs:
     strategy:
       matrix:
         osx - python36:
-          image.name: 'macos-10.14'
+          image.name: 'macOS-10.15'
           python.version: '3.6'
         osx - python37:
-          image.name: 'macos-10.14'
+          image.name: 'macOS-10.15'
           python.version: '3.7'
         osx - python38:
-          image.name: 'macos-10.14'
+          image.name: 'macOS-10.15'
           python.version: '3.8'
         osx - python39:
-          image.name: 'macos-10.14'
+          image.name: 'macOS-10.15'
           python.version: '3.9'
 
         windows - python36:
