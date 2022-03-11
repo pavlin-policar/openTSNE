@@ -5,13 +5,18 @@ import sys
 import tempfile
 import warnings
 from distutils import ccompiler
-from distutils.command.build_ext import build_ext
 from distutils.errors import CompileError, LinkError
 from distutils.sysconfig import customize_compiler
 from os.path import join
 
 import setuptools
 from setuptools import setup, Extension
+
+try:
+    from Cython.Distutils.build_ext import new_build_ext as build_ext
+    have_cython = True
+except ImportError:
+    have_cython = False
 
 
 class ConvertNotebooksToDocs(distutils.cmd.Command):
@@ -121,15 +126,8 @@ def has_c_library(library, extension=".c"):
 
 class CythonBuildExt(build_ext):
     def build_extensions(self):
-        # Automatically append the file extension based on language.
-        # ``cythonize`` does this for us automatically, so it's not necessary if
-        # that was run
-        for extension in extensions:
-            for idx, source in enumerate(extension.sources):
-                base, ext = os.path.splitext(source)
-                if ext == ".pyx":
-                    base += ".cpp" if extension.language == "c++" else ".c"
-                    extension.sources[idx] = base
+        if not have_cython:
+            raise RuntimeError("Missing build dependency: Cython")
 
         extra_compile_args = []
         extra_link_args = []
@@ -253,12 +251,6 @@ else:
     )
     extensions.append(extension_)
 
-try:
-    from Cython.Build import cythonize
-    extensions = cythonize(extensions)
-except ImportError:
-    pass
-
 
 def readme():
     with open("README.rst", encoding="utf-8") as f:
@@ -307,6 +299,9 @@ setup(
         "numpy>=1.16.6",
         "scikit-learn>=0.20",
         "scipy",
+    ],
+    setup_requires=[
+        "cython",
     ],
     extras_require={
         "hnsw": "hnswlib~=0.4.0",
