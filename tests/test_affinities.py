@@ -188,9 +188,9 @@ class TestMultiscale(unittest.TestCase):
 
     def test_single_perplexity_produces_same_result_as_perplexity_based_nn(self):
         for perplexity in [5, 30, 50, 100]:
-            ms1 = MultiscaleMixture(self.x, perplexities=[perplexity], method="exact")
-            ms2 = Multiscale(self.x, perplexities=[perplexity], method="exact")
-            perp = PerplexityBasedNN(self.x, perplexity=perplexity, method="exact")
+            ms1 = MultiscaleMixture(self.x, perplexities=[perplexity])
+            ms2 = Multiscale(self.x, perplexities=[perplexity])
+            perp = PerplexityBasedNN(self.x, perplexity=perplexity)
 
             # 1e-14 instead of 1e-16: It looks like a machine precision issue
             # There are no noticeable differences between the matrices
@@ -203,9 +203,9 @@ class TestMultiscale(unittest.TestCase):
 
     def test_single_perplexity_produces_same_result_as_perplexity_based_nn_to_new(self):
         for perplexity in [5, 30, 50, 100]:
-            ms1 = MultiscaleMixture(self.x, perplexities=[perplexity], method="exact")
-            ms2 = Multiscale(self.x, perplexities=[perplexity], method="exact")
-            perp = PerplexityBasedNN(self.x, perplexity=perplexity, method="exact")
+            ms1 = MultiscaleMixture(self.x, perplexities=[perplexity])
+            ms2 = Multiscale(self.x, perplexities=[perplexity])
+            perp = PerplexityBasedNN(self.x, perplexity=perplexity)
 
             ms1_new = ms1.to_new(self.x2)
             ms2_new = ms2.to_new(self.x2)
@@ -219,6 +219,18 @@ class TestMultiscale(unittest.TestCase):
             self.assertAlmostEqual(
                 np.sum(ms2_new - perp_new), 0, delta=1e-14, msg=f"perplexity={perplexity}"
             )
+
+    def test_accepts_single_perplexity_value(self):
+        perplexity = 30
+
+        ms = MultiscaleMixture(self.x, perplexities=perplexity)
+        self.assertEqual(ms.perplexities, 30)
+        self.assertEqual(ms.effective_perplexities_, [30])
+
+        ms = MultiscaleMixture(self.x, perplexities=perplexity)
+        self.assertEqual(ms.perplexities, 30)
+        self.assertEqual(ms.effective_perplexities_, [30])
+
 
 
 class TestUniform(unittest.TestCase):

@@ -1,4 +1,5 @@
 import logging
+import numbers
 import operator
 from functools import reduce
 
@@ -960,6 +961,9 @@ class MultiscaleMixture(Affinities):
         value doesn't already exist in the list.
 
         """
+        if isinstance(perplexities, numbers.Number):
+            perplexities = [perplexities]
+
         usable_perplexities = []
         for perplexity in sorted(perplexities):
             if perplexity <= 0:
