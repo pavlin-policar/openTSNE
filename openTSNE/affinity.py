@@ -803,6 +803,8 @@ class MultiscaleMixture(Affinities):
 
         else:
             self.knn_index = knn_index
+            n_samples = self.knn_index.n_samples
+            effective_perplexities = self.check_perplexities(perplexities, n_samples)
             log.info("KNN index provided. Ignoring KNN-related parameters.")
 
         self.__neighbors, self.__distances = self.knn_index.build()
