@@ -792,8 +792,8 @@ class MultiscaleMixture(Affinities):
             # We will compute the nearest neighbors to the max value of perplexity,
             # smaller values can just use indexing to truncate unneeded neighbors
             n_samples = data.shape[0]
-            perplexities = self.check_perplexities(perplexities, n_samples)
-            max_perplexity = np.max(perplexities)
+            effective_perplexities = self.check_perplexities(perplexities, n_samples)
+            max_perplexity = np.max(effective_perplexities)
             k_neighbors = min(n_samples - 1, int(3 * max_perplexity))
 
             self.knn_index = get_knn_index(
@@ -810,12 +810,13 @@ class MultiscaleMixture(Affinities):
             self.P = self._calculate_P(
                 self.__neighbors,
                 self.__distances,
-                perplexities,
+                effective_perplexities,
                 symmetrize=symmetrize,
                 n_jobs=n_jobs,
             )
 
         self.perplexities = perplexities
+        self.effective_perplexities_ = effective_perplexities
         self.symmetrize = symmetrize
         self.n_jobs = n_jobs
         self.verbose = verbose
@@ -860,8 +861,8 @@ class MultiscaleMixture(Affinities):
         if np.array_equal(self.perplexities, new_perplexities):
             return
 
-        new_perplexities = self.check_perplexities(new_perplexities, self.n_samples)
-        max_perplexity = np.max(new_perplexities)
+        effective_perplexities = self.check_perplexities(new_perplexities, self.n_samples)
+        max_perplexity = np.max(effective_perplexities)
         k_neighbors = min(self.n_samples - 1, int(3 * max_perplexity))
 
         if k_neighbors > self.__neighbors.shape[1]:
@@ -874,13 +875,14 @@ class MultiscaleMixture(Affinities):
             )
 
         self.perplexities = new_perplexities
+        self.effective_perplexities_ = effective_perplexities
         with utils.Timer(
             "Perplexity changed. Recomputing affinity matrix...", self.verbose
         ):
             self.P = self._calculate_P(
                 self.__neighbors[:, :k_neighbors],
                 self.__distances[:, :k_neighbors],
-                self.perplexities,
+                self.effective_perplexities_,
                 symmetrize=self.symmetrize,
                 n_jobs=self.n_jobs,
             )
@@ -927,9 +929,9 @@ class MultiscaleMixture(Affinities):
 
         """
         perplexities = perplexities if perplexities is not None else self.perplexities
-        perplexities = self.check_perplexities(perplexities, self.n_samples)
+        effective_perplexities = self.check_perplexities(perplexities, self.n_samples)
 
-        max_perplexity = np.max(perplexities)
+        max_perplexity = np.max(effective_perplexities)
         k_neighbors = min(self.n_samples - 1, int(3 * max_perplexity))
 
         neighbors, distances = self.knn_index.query(data, k_neighbors)
@@ -938,7 +940,7 @@ class MultiscaleMixture(Affinities):
             P = self._calculate_P(
                 neighbors,
                 distances,
-                perplexities,
+                effective_perplexities,
                 symmetrize=False,
                 normalization="point-wise",
                 n_reference_samples=self.n_samples,

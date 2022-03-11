@@ -109,26 +109,30 @@ class TestMultiscale(unittest.TestCase):
         # above that should be ignored or corrected
 
         ms = Multiscale(self.x, perplexities=[20])
+        np.testing.assert_array_equal(ms.perplexities, [20])
         np.testing.assert_array_equal(
-            ms.perplexities, [20],
+            ms.effective_perplexities_, [20],
             "Incorrectly changed perplexity that was within a valid range",
         )
 
         ms = Multiscale(self.x, perplexities=[20, 40])
+        np.testing.assert_array_equal(ms.perplexities, [20, 40])
         np.testing.assert_array_equal(
-            ms.perplexities, [20, 30],
+            ms.effective_perplexities_, [20, 30],
             "Did not lower large perplexity."
         )
 
         ms = Multiscale(self.x, perplexities=[20, 40, 60])
+        np.testing.assert_array_equal(ms.perplexities, [20, 40, 60])
         np.testing.assert_array_equal(
-            ms.perplexities, [20, 30],
+            ms.effective_perplexities_, [20, 30],
             "Did not drop large perplexities when more than one was too large."
         )
 
         ms = Multiscale(self.x, perplexities=[20, 30, 40, 60])
+        np.testing.assert_array_equal(ms.perplexities, [20, 30, 40, 60])
         np.testing.assert_array_equal(
-            ms.perplexities, [20, 30],
+            ms.effective_perplexities_, [20, 30],
             "Did not drop duplicate corrected perplexity."
         )
 
@@ -138,6 +142,7 @@ class TestMultiscale(unittest.TestCase):
 
         ms = Multiscale(self.x, perplexities=perplexities)
         np.testing.assert_equal(ms.perplexities, perplexities)
+        np.testing.assert_equal(ms.effective_perplexities_, perplexities)
 
         # Check that the initial `P` matrix is allright
         n_samples = self.x.shape[0]
@@ -151,6 +156,7 @@ class TestMultiscale(unittest.TestCase):
         k_neighbors = new_perplexities[-1] * 3
         ms.set_perplexities(new_perplexities)
         np.testing.assert_equal(ms.perplexities, new_perplexities)
+        np.testing.assert_equal(ms.effective_perplexities_, new_perplexities)
 
         reduced_P = ms.P.copy()
         self.assertTrue(reduced_P.nnz >= n_samples * k_neighbors)
