@@ -93,6 +93,7 @@ class TestMultiscale(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.x = np.random.normal(100, 50, (91, 4))
+        cls.x2 = np.random.normal(100, 50, (30, 4))
 
     def test_handles_too_large_perplexities(self):
         # x has 91 samples, this means that the max perplexity that we allow is
@@ -170,6 +171,40 @@ class TestMultiscale(unittest.TestCase):
 
         aff.set_perplexities([5, 10])
         self.assertAlmostEqual(np.sum(aff.P - aff.P.T), 0, delta=1e-16)
+
+    def test_single_perplexity_produces_same_result_as_perplexity_based_nn(self):
+        for perplexity in [5, 30, 50, 100]:
+            ms1 = MultiscaleMixture(self.x, perplexities=[perplexity], method="exact")
+            ms2 = Multiscale(self.x, perplexities=[perplexity], method="exact")
+            perp = PerplexityBasedNN(self.x, perplexity=perplexity, method="exact")
+
+            # 1e-14 instead of 1e-16: It looks like a machine precision issue
+            # There are no noticeable differences between the matrices
+            self.assertAlmostEqual(
+                np.sum(ms1.P - perp.P), 0, delta=1e-14, msg=f"perplexity={perplexity}"
+            )
+            self.assertAlmostEqual(
+                np.sum(ms2.P - perp.P), 0, delta=1e-14, msg=f"perplexity={perplexity}"
+            )
+
+    def test_single_perplexity_produces_same_result_as_perplexity_based_nn_to_new(self):
+        for perplexity in [5, 30, 50, 100]:
+            ms1 = MultiscaleMixture(self.x, perplexities=[perplexity], method="exact")
+            ms2 = Multiscale(self.x, perplexities=[perplexity], method="exact")
+            perp = PerplexityBasedNN(self.x, perplexity=perplexity, method="exact")
+
+            ms1_new = ms1.to_new(self.x2)
+            ms2_new = ms2.to_new(self.x2)
+            perp_new = perp.to_new(self.x2)
+
+            # 1e-14 instead of 1e-16: It looks like a machine precision issue
+            # There are no noticeable differences between the matrices
+            self.assertAlmostEqual(
+                np.sum(ms1_new - perp_new), 0, delta=1e-14, msg=f"perplexity={perplexity}"
+            )
+            self.assertAlmostEqual(
+                np.sum(ms2_new - perp_new), 0, delta=1e-14, msg=f"perplexity={perplexity}"
+            )
 
 
 class TestUniform(unittest.TestCase):
