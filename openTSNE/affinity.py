@@ -167,8 +167,8 @@ class PerplexityBasedNN(Affinities):
             else:
                 _k_neighbors = k_neighbors
 
-            self.perplexity = self.check_perplexity(perplexity, _k_neighbors)
-            if _k_neighbors > int(3 * self.perplexity):
+            effective_perplexity = self.check_perplexity(perplexity, _k_neighbors)
+            if _k_neighbors > int(3 * effective_perplexity):
                 log.warning(
                     "The k_neighbors value is over 3 times larger than the perplexity value. "
                     "This may result in an unnecessary slowdown."
@@ -181,7 +181,7 @@ class PerplexityBasedNN(Affinities):
 
         else:
             self.knn_index = knn_index
-            self.perplexity = self.check_perplexity(perplexity, self.knn_index.k)
+            effective_perplexity = self.check_perplexity(perplexity, self.knn_index.k)
             log.info("KNN index provided. Ignoring KNN-related parameters.")
 
         self.__neighbors, self.__distances = self.knn_index.build()
@@ -190,11 +190,13 @@ class PerplexityBasedNN(Affinities):
             self.P = joint_probabilities_nn(
                 self.__neighbors,
                 self.__distances,
-                [self.perplexity],
+                [effective_perplexity],
                 symmetrize=symmetrize,
                 n_jobs=n_jobs,
             )
 
+        self.perplexity = perplexity
+        self.effective_perplexity_ = effective_perplexity
         self.symmetrize = symmetrize
         self.n_jobs = n_jobs
         self.verbose = verbose
@@ -220,27 +222,28 @@ class PerplexityBasedNN(Affinities):
         if new_perplexity == self.perplexity:
             return
         # Verify that the perplexity isn't negative
-        new_perplexity = self.check_perplexity(new_perplexity, np.inf)
+        effective_perplexity = self.check_perplexity(new_perplexity, np.inf)
         # Verify that the perplexity isn't too large for the kNN graph
-        if new_perplexity > self.__neighbors.shape[1]:
+        if effective_perplexity > self.__neighbors.shape[1]:
             raise RuntimeError(
                 "The desired perplexity `%.2f` is larger than the kNN graph "
                 "allows. This would need to recompute the nearest neighbors, "
                 "which is not efficient. Please create a new `%s` instance "
                 "with the increased perplexity."
-                % (new_perplexity, self.__class__.__name__)
+                % (effective_perplexity, self.__class__.__name__)
             )
         # Warn if the perplexity is larger than the heuristic
-        if 3 * new_perplexity > self.__neighbors.shape[1]:
+        if 3 * effective_perplexity > self.__neighbors.shape[1]:
             log.warning(
                 "The new perplexity is quite close to the computed number of "
                 "nearest neighbors. The results may be unexpected. Consider "
                 "creating a new `%s` instance with the increased perplexity."
-                % (self.__class__.__name__)
+                % self.__class__.__name__
             )
 
         # Recompute the affinity matrix
         self.perplexity = new_perplexity
+        self.effective_perplexity_ = effective_perplexity
         k_neighbors = int(3 * new_perplexity)
 
         with utils.Timer(
@@ -249,7 +252,7 @@ class PerplexityBasedNN(Affinities):
             self.P = joint_probabilities_nn(
                 self.__neighbors[:, :k_neighbors],
                 self.__distances[:, :k_neighbors],
-                [self.perplexity],
+                [self.effective_perplexity_],
                 symmetrize=self.symmetrize,
                 n_jobs=self.n_jobs,
             )
@@ -308,7 +311,7 @@ class PerplexityBasedNN(Affinities):
         else:
             _k_neighbors = k_neighbors
 
-        perplexity = self.check_perplexity(perplexity, _k_neighbors)
+        effective_perplexity = self.check_perplexity(perplexity, _k_neighbors)
 
         neighbors, distances = self.knn_index.query(data, _k_neighbors)
 
@@ -316,7 +319,7 @@ class PerplexityBasedNN(Affinities):
             P = joint_probabilities_nn(
                 neighbors,
                 distances,
-                [perplexity],
+                [effective_perplexity],
                 symmetrize=False,
                 normalization="point-wise",
                 n_reference_samples=self.n_samples,
@@ -328,7 +331,8 @@ class PerplexityBasedNN(Affinities):
 
         return P
 
-    def check_perplexity(self, perplexity, k_neighbors):
+    @staticmethod
+    def check_perplexity(perplexity, k_neighbors):
         if perplexity <= 0:
             raise ValueError("Perplexity must be >=0. %.2f given" % perplexity)
 

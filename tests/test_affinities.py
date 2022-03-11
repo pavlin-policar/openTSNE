@@ -31,16 +31,18 @@ class TestPerplexityBased(unittest.TestCase):
     def setUpClass(cls):
         cls.x = np.random.normal(100, 50, (91, 4))
 
-    def test_properly_reduces_large_perplexity(self):
+    def test_doesnt_change_perplexity_parameter_value(self):
         aff = PerplexityBasedNN(self.x, perplexity=140)
-        self.assertEqual(aff.perplexity, 30)
+        self.assertEqual(aff.perplexity, 140)
+        self.assertEqual(aff.effective_perplexity_, 30)
 
     def test_handles_reducing_perplexity_value(self):
-        perplexity = 20
+        perplexity = 20  # initial perplexity values
         k_neighbors = perplexity * 3
         aff = PerplexityBasedNN(self.x, perplexity=perplexity)
 
         self.assertEqual(aff.perplexity, perplexity)
+        self.assertEqual(aff.effective_perplexity_, perplexity)
 
         # Check that the initial `P` matrix is allright
         n_samples = self.x.shape[0]
@@ -50,11 +52,13 @@ class TestPerplexityBased(unittest.TestCase):
         self.assertTrue(original_P.nnz >= n_samples * k_neighbors)
 
         # Check that lowering the perplexity properly changes affinity matrix
-        perplexity = 10
+        perplexity = 10  # lower the perplexity value
         k_neighbors = perplexity * 3
 
         aff.set_perplexity(perplexity)
         self.assertEqual(aff.perplexity, perplexity)
+        self.assertEqual(aff.effective_perplexity_, perplexity)
+
         reduced_P = aff.P.copy()
         self.assertTrue(reduced_P.nnz >= n_samples * k_neighbors)
         self.assertTrue(reduced_P.nnz < original_P.nnz,
@@ -62,14 +66,18 @@ class TestPerplexityBased(unittest.TestCase):
                         "resulting in a sparser affinity matrix")
                         
         # Check that increasing the perplexity works (with a warning)
+        # Larger then the original perplexity, but still less than the number of
+        # nearest neighbors
         perplexity = 40
-        aff.set_perplexity(perplexity)
-        self.assertEqual(aff.perplexity, perplexity)
+        with self.assertLogs(affinity.log, level="WARNING"):
+            aff.set_perplexity(perplexity)
+            self.assertEqual(aff.perplexity, perplexity)
+            self.assertEqual(aff.effective_perplexity_, perplexity)
 
         # Raising the perplexity above the number of neighbors in the kNN graph
         # would need to recompute the nearest neighbors, so it should raise an error
         with self.assertRaises(RuntimeError):
-            aff.set_perplexity(70)
+            aff.set_perplexity(70)  # more than the number of nearest neighbors
 
     def test_set_perplexity_respects_symmetrization(self):
         # Apply symmetrization
