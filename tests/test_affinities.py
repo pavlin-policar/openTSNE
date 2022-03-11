@@ -232,7 +232,6 @@ class TestMultiscale(unittest.TestCase):
         self.assertEqual(ms.effective_perplexities_, [30])
 
 
-
 class TestUniform(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

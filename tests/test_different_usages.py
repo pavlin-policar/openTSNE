@@ -46,6 +46,12 @@ class TestUsageSimple(TestUsage):
         new_embedding = embedding.transform(self.x)
         self.eval_embedding(new_embedding, "transform")
 
+    def test_simple_multiscale(self):
+        embedding = TSNE(perplexity=[10, 30]).fit(self.x)
+        self.eval_embedding(embedding)
+        new_embedding = embedding.transform(self.x, perplexity=[5, 10])
+        self.eval_embedding(new_embedding, "transform")
+
     def test_with_precomputed_distances(self):
         d = squareform(pdist(self.x))
         embedding = TSNE(metric="precomputed").fit(d)
@@ -58,6 +64,16 @@ class TestUsageLowestLevel(TestUsage):
     def test_1(self):
         init = initialization.pca(self.x)
         aff = affinity.PerplexityBasedNN(self.x, perplexity=30)
+        embedding = openTSNE.TSNEEmbedding(init, aff)
+        embedding.optimize(25, exaggeration=12, momentum=0.5, inplace=True)
+        embedding.optimize(50, exaggeration=1, momentum=0.8, inplace=True)
+        self.eval_embedding(embedding)
+        new_embedding = embedding.transform(self.x)
+        self.eval_embedding(new_embedding, f"transform")
+
+    def test_2(self):
+        init = initialization.pca(self.x)
+        aff = affinity.MultiscaleMixture(self.x, perplexities=[5, 30])
         embedding = openTSNE.TSNEEmbedding(init, aff)
         embedding.optimize(25, exaggeration=12, momentum=0.5, inplace=True)
         embedding.optimize(50, exaggeration=1, momentum=0.8, inplace=True)

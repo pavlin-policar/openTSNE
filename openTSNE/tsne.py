@@ -10,7 +10,7 @@ from sklearn.base import BaseEstimator
 
 from openTSNE import _tsne
 from openTSNE import initialization as initialization_scheme
-from openTSNE.affinity import Affinities, PerplexityBasedNN
+from openTSNE.affinity import Affinities, MultiscaleMixture
 from openTSNE.quad_tree import QuadTree
 from openTSNE import utils
 
@@ -781,24 +781,26 @@ class TSNEEmbedding(np.ndarray):
 
         """
 
-        # We check if the affinity `to_new` methods takes the `perplexity`
-        # parameter and raise an informative error if not. This happes when the
-        # user uses a non-standard affinity class e.g. multiscale, then attempts
-        # to add points via `transform`. These classes take `perplexities` and
-        # fail
+        # Since the standard usage of t-SNE uses perplexities, check if the
+        # currently used affinity class supports either the `perplexity` or
+        # `perplexities` parameters.
         affinity_signature = inspect.signature(self.affinities.to_new)
-        if "perplexity" not in affinity_signature.parameters:
+        if "perplexity" in affinity_signature.parameters:
+            affinity_params = {"perplexity": perplexity}
+        elif "perplexities" in affinity_signature.parameters:
+            affinity_params = {"perplexities": perplexity}
+        else:
             raise TypeError(
-                "`transform` currently does not support non `%s` type affinity "
-                "classes. Please use `prepare_partial` and `optimize` to add "
-                "points to the embedding." % PerplexityBasedNN.__name__
+                f"`transform` currently does not support "
+                f"{self.affinities.__class__.__name__} affinities. Please use "
+                f"`prepare_partial` and `optimize` to add points to the embedding."
             )
 
         # Center the current embedding
         self -= (np.max(self, axis=0) + np.min(self, axis=0)) / 2
 
         embedding = self.prepare_partial(
-            X, perplexity=perplexity, initialization=initialization, k=k
+            X, initialization=initialization, k=k, **affinity_params
         )
 
         try:
@@ -861,6 +863,20 @@ class TSNEEmbedding(np.ndarray):
             optimization.
 
         """
+
+        # To maintain perfect backwards compatibility and to handle the very
+        # specific case when the user wants to pass in `perplexity` to the
+        # multiscale affinity object (multiscale accepts `perplexities`), rename
+        # this parameter so everything works
+        affinity_signature = inspect.signature(self.affinities.to_new)
+        if (
+            "perplexities" in affinity_signature.parameters and
+            "perplexities" in affinity_signature.parameters and
+            "perplexity" in affinity_params and
+            "perplexities" not in affinity_params
+        ):
+            affinity_params["perplexities"] = affinity_params.pop("perplexity")
+
         P, neighbors, distances = self.affinities.to_new(
             X, return_distances=True, **affinity_params
         )
@@ -1287,7 +1303,7 @@ class TSNE(BaseEstimator):
         # If precomputed affinites are given, use those, otherwise proceed with
         # standard perpelxity-based affinites
         if affinities is None:
-            affinities = PerplexityBasedNN(
+            affinities = MultiscaleMixture(
                 X,
                 self.perplexity,
                 method=self.neighbors,

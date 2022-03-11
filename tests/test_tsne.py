@@ -857,11 +857,20 @@ class TestAffinityIntegration(unittest.TestCase):
         # This should not raise an error
         embedding.transform(self.x_test)
 
+    def test_transform_with_multiscale_affinity(self):
+        init = openTSNE.initialization.random(self.x)
+        aff = openTSNE.affinity.Multiscale(self.x, [2, 5], method="exact")
+        embedding = openTSNE.TSNEEmbedding(init, aff, negative_gradient_method="bh")
+        embedding.optimize(100, inplace=True)
+
+        # This should not raise an error
+        embedding.transform(self.x_test)
+
     def test_transform_with_nonstandard_affinity(self):
         """Should raise an informative error when a non-standard affinity is used
         with `transform`."""
         init = openTSNE.initialization.random(self.x)
-        aff = openTSNE.affinity.Multiscale(self.x, [2, 5], method="exact")
+        aff = openTSNE.affinity.Uniform(self.x, 5, method="exact")
         embedding = openTSNE.TSNEEmbedding(init, aff, negative_gradient_method="bh")
         embedding.optimize(100, inplace=True)
 
