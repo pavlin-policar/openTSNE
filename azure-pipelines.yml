@@ -22,6 +22,9 @@ jobs:
       linux-python39:
         image.name: 'ubuntu-latest'
         python.version: '3.9'
+      linux-python310:
+        image.name: 'ubuntu-latest'
+        python.version: '3.10'
       osx-python37:
         image.name: 'macOS-10.15'
         python.version: '3.7'
@@ -31,6 +34,9 @@ jobs:
       osx-python39:
         image.name: 'macOS-10.15'
         python.version: '3.9'
+      osx-python310:
+        image.name: 'macOS-10.15'
+        python.version: '3.10'
       windows-python37:
         image.name: 'vs2017-win2016'
         python.version: '3.7'
@@ -40,6 +46,9 @@ jobs:
       windows-python39:
         image.name: 'vs2017-win2016'
         python.version: '3.9'
+      windows-python310:
+        image.name: 'vs2017-win2016'
+        python.version: '3.10'
 
   steps:
   - task: UsePythonVersion@0

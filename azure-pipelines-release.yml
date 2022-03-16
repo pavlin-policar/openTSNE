@@ -30,6 +30,9 @@ jobs:
         osx - python39:
           image.name: 'macOS-10.15'
           python.version: '3.9'
+        osx - python310:
+          image.name: 'macOS-10.15'
+          python.version: '3.10'
 
         windows - python36:
           image.name: 'vs2017-win2016'
@@ -43,6 +46,9 @@ jobs:
         windows - python39:
           image.name: 'vs2017-win2016'
           python.version: '3.9'
+        windows - python310:
+          image.name: 'vs2017-win2016'
+          python.version: '3.10'
 
     steps:
       - task: UsePythonVersion@0
