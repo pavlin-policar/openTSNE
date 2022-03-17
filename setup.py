@@ -141,7 +141,12 @@ class CythonBuildExt(build_ext):
 
         if compiler == "unix" and platform.system() == "Darwin":
             # For some reason fast math causes segfaults on linux but works on mac
-            extra_compile_args += ["-ffast-math", "-fno-associative-math"]
+            # https://stackoverflow.com/questions/22931147/stdisinf-does-not-work-with-ffast-math-how-to-check-for-infinity
+            extra_compile_args += [
+                "-ffast-math",
+                "-fno-finite-math-only",  # we use infinity
+                "-fno-associative-math",
+            ]
 
         # Annoy specific flags
         annoy_ext = None
