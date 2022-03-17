@@ -140,7 +140,6 @@ class CythonBuildExt(build_ext):
             extra_compile_args += ["/Ox", "/fp:fast"]
 
         if compiler == "unix":
-            # For some reason fast math causes segfaults on linux but works on mac
             # https://stackoverflow.com/questions/22931147/stdisinf-does-not-work-with-ffast-math-how-to-check-for-infinity
             extra_compile_args += [
                 "-ffast-math",
