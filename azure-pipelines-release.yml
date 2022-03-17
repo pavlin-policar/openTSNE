@@ -18,9 +18,6 @@ jobs:
 
     strategy:
       matrix:
-        osx - python36:
-          image.name: 'macOS-10.15'
-          python.version: '3.6'
         osx - python37:
           image.name: 'macOS-10.15'
           python.version: '3.7'
@@ -34,9 +31,6 @@ jobs:
           image.name: 'macOS-10.15'
           python.version: '3.10'
 
-        windows - python36:
-          image.name: 'windows-2019'
-          python.version: '3.6'
         windows - python37:
           image.name: 'windows-2019'
           python.version: '3.7'
@@ -118,9 +112,6 @@ jobs:
 
     strategy:
       matrix:
-        python36:
-          python: '/opt/python/cp36-cp36m/bin'
-          python.version: '3.6'
         python37:
           python: '/opt/python/cp37-cp37m/bin'
           python.version: '3.7'
