@@ -36,7 +36,7 @@ class TestUsage(unittest.TestCase):
         knn = KNeighborsClassifier(n_neighbors=10)
         knn.fit(embedding, self.y)
         predictions = knn.predict(embedding)
-        self.assertGreater(accuracy_score(predictions, self.y), 0.95, msg=method_name)
+        self.assertGreater(accuracy_score(predictions, self.y), 0.94, msg=method_name)
 
 
 class TestUsageSimple(TestUsage):
@@ -89,9 +89,9 @@ class TestUsageWithCustomAffinity(TestUsage):
         for aff in [
             affinity.PerplexityBasedNN(self.x, perplexity=30),
             affinity.Uniform(self.x, k_neighbors=30),
-            affinity.FixedSigmaNN(self.x, sigma=1),
-            affinity.Multiscale(self.x, perplexities=[10, 20]),
-            affinity.MultiscaleMixture(self.x, perplexities=[10, 20]),
+            affinity.FixedSigmaNN(self.x, sigma=1, k=30),
+            affinity.Multiscale(self.x, perplexities=[10, 30]),
+            affinity.MultiscaleMixture(self.x, perplexities=[10, 30]),
         ]:
             # Without initilization
             embedding = TSNE().fit(affinities=aff)
