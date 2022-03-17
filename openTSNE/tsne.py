@@ -1705,7 +1705,11 @@ class gradient_descent:
             )
 
         # If the interpolation grid has not yet been evaluated, do it now
-        if reference_embedding is not None and reference_embedding.interp_coeffs is None:
+        if (
+            reference_embedding is not None and
+            reference_embedding.interp_coeffs is None and
+            objective_function is kl_divergence_fft
+        ):
             reference_embedding.prepare_interpolation_grid()
 
         # If we're running transform and using the interpolation scheme, then we
