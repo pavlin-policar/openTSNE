@@ -728,8 +728,26 @@ class PrecomputedDistanceMatrix(KNNIndex):
     def build(self):
         return self.indices, self.distances
 
-    def query(self, *args, **kwargs):
-        raise RuntimeError("Precomputed distance matrices cannot be queried")
+    def query(self, query, k):
+        """Use a precomputed distance matrix to determine the KNNG for the
+        transformed samples.
+
+        Parameters
+        ----------
+        query: array_like
+            An M x N distance matrix where M is the number of query points and
+            N is the number of samples in the existing embedding.
+        k: int
+
+        Returns
+        -------
+        indices: np.ndarray
+        distances: np.ndarray
+
+        """
+        indices = np.argsort(query, axis=1)[:, :k]
+        distances = np.take_along_axis(query, indices, axis=1)
+        return indices, distances
 
 
 class PrecomputedNeighbors(KNNIndex):

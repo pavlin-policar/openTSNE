@@ -2,7 +2,7 @@ import unittest
 from functools import partial
 
 import numpy as np
-from scipy.spatial.distance import pdist, squareform
+from scipy.spatial.distance import pdist, squareform, cdist
 from sklearn import datasets
 from sklearn.metrics import accuracy_score
 from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
@@ -32,32 +32,34 @@ class TestUsage(unittest.TestCase):
         cls.x = cls.iris.data + np.random.normal(0, 1e-3, cls.iris.data.shape)
         cls.y = cls.iris.target
 
-    def eval_embedding(self, embedding, method_name=None):
+    def eval_embedding(self, embedding, y, method_name=None):
         knn = KNeighborsClassifier(n_neighbors=10)
-        knn.fit(embedding, self.y)
+        knn.fit(embedding, y)
         predictions = knn.predict(embedding)
-        self.assertGreater(accuracy_score(predictions, self.y), 0.94, msg=method_name)
+        self.assertGreater(accuracy_score(predictions, y), 0.94, msg=method_name)
 
 
 class TestUsageSimple(TestUsage):
     def test_simple(self):
         embedding = TSNE().fit(self.x)
-        self.eval_embedding(embedding)
+        self.eval_embedding(embedding, self.y)
         new_embedding = embedding.transform(self.x)
-        self.eval_embedding(new_embedding, "transform")
+        self.eval_embedding(new_embedding, self.y, "transform")
 
     def test_simple_multiscale(self):
         embedding = TSNE(perplexity=[10, 30]).fit(self.x)
-        self.eval_embedding(embedding)
+        self.eval_embedding(embedding, self.y)
         new_embedding = embedding.transform(self.x, perplexity=[5, 10])
-        self.eval_embedding(new_embedding, "transform")
+        self.eval_embedding(new_embedding, self.y, "transform")
 
     def test_with_precomputed_distances(self):
         d = squareform(pdist(self.x))
         embedding = TSNE(metric="precomputed").fit(d)
-        self.eval_embedding(embedding)
+        self.eval_embedding(embedding, self.y)
 
-        # No transform, precomputed distances can't be queried
+        d_new = cdist(self.x[:20], self.x)
+        new_embedding = embedding.transform(d_new)
+        self.eval_embedding(new_embedding, self.y[:20], "transform")
 
 
 class TestUsageLowestLevel(TestUsage):
@@ -67,9 +69,9 @@ class TestUsageLowestLevel(TestUsage):
         embedding = openTSNE.TSNEEmbedding(init, aff)
         embedding.optimize(25, exaggeration=12, momentum=0.5, inplace=True)
         embedding.optimize(50, exaggeration=1, momentum=0.8, inplace=True)
-        self.eval_embedding(embedding)
+        self.eval_embedding(embedding, self.y)
         new_embedding = embedding.transform(self.x)
-        self.eval_embedding(new_embedding, f"transform")
+        self.eval_embedding(new_embedding, self.y, "transform")
 
     def test_2(self):
         init = initialization.pca(self.x)
@@ -77,9 +79,9 @@ class TestUsageLowestLevel(TestUsage):
         embedding = openTSNE.TSNEEmbedding(init, aff)
         embedding.optimize(25, exaggeration=12, momentum=0.5, inplace=True)
         embedding.optimize(50, exaggeration=1, momentum=0.8, inplace=True)
-        self.eval_embedding(embedding)
+        self.eval_embedding(embedding, self.y)
         new_embedding = embedding.transform(self.x)
-        self.eval_embedding(new_embedding, f"transform")
+        self.eval_embedding(new_embedding, self.y, "transform")
 
 
 class TestUsageWithCustomAffinity(TestUsage):
@@ -95,17 +97,17 @@ class TestUsageWithCustomAffinity(TestUsage):
         ]:
             # Without initilization
             embedding = TSNE().fit(affinities=aff)
-            self.eval_embedding(embedding, aff.__class__.__name__)
+            self.eval_embedding(embedding, self.y, aff.__class__.__name__)
             new_embedding = embedding.prepare_partial(self.x)
             new_embedding.optimize(10, learning_rate=0.1, inplace=True)
-            self.eval_embedding(new_embedding, f"transform::{aff.__class__.__name__}")
+            self.eval_embedding(new_embedding, self.y, f"transform::{aff.__class__.__name__}")
 
             # With initilization
             embedding = TSNE().fit(affinities=aff, initialization=init)
-            self.eval_embedding(embedding, aff.__class__.__name__)
+            self.eval_embedding(embedding, self.y, aff.__class__.__name__)
             new_embedding = embedding.prepare_partial(self.x)
             new_embedding.optimize(10, learning_rate=0.1, inplace=True)
-            self.eval_embedding(new_embedding, f"transform::{aff.__class__.__name__}")
+            self.eval_embedding(new_embedding, self.y, f"transform::{aff.__class__.__name__}")
 
 
 class TestUsageWithCustomAffinityAndCustomNeighbors(TestUsage):
@@ -122,17 +124,17 @@ class TestUsageWithCustomAffinityAndCustomNeighbors(TestUsage):
         ]:
             # Without initilization
             embedding = TSNE().fit(affinities=aff)
-            self.eval_embedding(embedding, aff.__class__.__name__)
+            self.eval_embedding(embedding, self.y, aff.__class__.__name__)
             new_embedding = embedding.prepare_partial(self.x)
             new_embedding.optimize(50, learning_rate=1, inplace=True)
-            self.eval_embedding(new_embedding, f"transform::{aff.__class__.__name__}")
+            self.eval_embedding(new_embedding, self.y, f"transform::{aff.__class__.__name__}")
 
             # With initilization
             embedding = TSNE().fit(affinities=aff, initialization=init)
-            self.eval_embedding(embedding, aff.__class__.__name__)
+            self.eval_embedding(embedding, self.y, aff.__class__.__name__)
             new_embedding = embedding.prepare_partial(self.x)
             new_embedding.optimize(50, learning_rate=1, inplace=True)
-            self.eval_embedding(new_embedding, f"transform::{aff.__class__.__name__}")
+            self.eval_embedding(new_embedding, self.y, f"transform::{aff.__class__.__name__}")
 
     def test_affinity_with_precomputed_distances(self):
         d = squareform(pdist(self.x))
@@ -148,11 +150,11 @@ class TestUsageWithCustomAffinityAndCustomNeighbors(TestUsage):
         ]:
             # Without initilization
             embedding = TSNE().fit(affinities=aff)
-            self.eval_embedding(embedding, aff.__class__.__name__)
+            self.eval_embedding(embedding, self.y, aff.__class__.__name__)
 
-            # With initilization
+            # With initialization
             embedding = TSNE().fit(affinities=aff, initialization=init)
-            self.eval_embedding(embedding, aff.__class__.__name__)
+            self.eval_embedding(embedding, self.y, aff.__class__.__name__)
 
     def test_affinity_with_precomputed_neighbors(self):
         nn = NearestNeighbors(n_neighbors=30)
@@ -171,8 +173,8 @@ class TestUsageWithCustomAffinityAndCustomNeighbors(TestUsage):
         ]:
             # Without initilization
             embedding = TSNE().fit(affinities=aff)
-            self.eval_embedding(embedding, aff.__class__.__name__)
+            self.eval_embedding(embedding, self.y, aff.__class__.__name__)
 
             # With initilization
             embedding = TSNE().fit(affinities=aff, initialization=init)
-            self.eval_embedding(embedding, aff.__class__.__name__)
+            self.eval_embedding(embedding, self.y, aff.__class__.__name__)
