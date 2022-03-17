@@ -950,3 +950,14 @@ class TestMisc(unittest.TestCase):
 
         TSNE().fit(x, affinities=aff)
 
+    def test_interpolation_grid_not_called_using_bh(self):
+        x1 = np.random.normal(0, 1, (50, 10))
+        x2 = np.random.normal(0, 1, (20, 10))
+
+        with patch("openTSNE.TSNEEmbedding.prepare_interpolation_grid") as prep_grid:
+            tsne = openTSNE.TSNE(negative_gradient_method="bh")
+            embedding = tsne.fit(x1)
+            # Calling transform shouldn't call `prepare_interpolation_grid`
+            embedding.transform(x2)
+
+            prep_grid.assert_not_called()
