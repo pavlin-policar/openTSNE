@@ -36,7 +36,7 @@ class TestUsage(unittest.TestCase):
         knn = KNeighborsClassifier(n_neighbors=10)
         knn.fit(embedding, self.y)
         predictions = knn.predict(embedding)
-        self.assertGreater(accuracy_score(predictions, self.y), 0.95, msg=method_name)
+        self.assertGreater(accuracy_score(predictions, self.y), 0.94, msg=method_name)
 
 
 class TestUsageSimple(TestUsage):
@@ -44,6 +44,12 @@ class TestUsageSimple(TestUsage):
         embedding = TSNE().fit(self.x)
         self.eval_embedding(embedding)
         new_embedding = embedding.transform(self.x)
+        self.eval_embedding(new_embedding, "transform")
+
+    def test_simple_multiscale(self):
+        embedding = TSNE(perplexity=[10, 30]).fit(self.x)
+        self.eval_embedding(embedding)
+        new_embedding = embedding.transform(self.x, perplexity=[5, 10])
         self.eval_embedding(new_embedding, "transform")
 
     def test_with_precomputed_distances(self):
@@ -65,6 +71,16 @@ class TestUsageLowestLevel(TestUsage):
         new_embedding = embedding.transform(self.x)
         self.eval_embedding(new_embedding, f"transform")
 
+    def test_2(self):
+        init = initialization.pca(self.x)
+        aff = affinity.MultiscaleMixture(self.x, perplexities=[5, 30])
+        embedding = openTSNE.TSNEEmbedding(init, aff)
+        embedding.optimize(25, exaggeration=12, momentum=0.5, inplace=True)
+        embedding.optimize(50, exaggeration=1, momentum=0.8, inplace=True)
+        self.eval_embedding(embedding)
+        new_embedding = embedding.transform(self.x)
+        self.eval_embedding(new_embedding, f"transform")
+
 
 class TestUsageWithCustomAffinity(TestUsage):
     def test_affinity(self):
@@ -73,9 +89,9 @@ class TestUsageWithCustomAffinity(TestUsage):
         for aff in [
             affinity.PerplexityBasedNN(self.x, perplexity=30),
             affinity.Uniform(self.x, k_neighbors=30),
-            affinity.FixedSigmaNN(self.x, sigma=1),
-            affinity.Multiscale(self.x, perplexities=[10, 20]),
-            affinity.MultiscaleMixture(self.x, perplexities=[10, 20]),
+            affinity.FixedSigmaNN(self.x, sigma=1, k=30),
+            affinity.Multiscale(self.x, perplexities=[10, 30]),
+            affinity.MultiscaleMixture(self.x, perplexities=[10, 30]),
         ]:
             # Without initilization
             embedding = TSNE().fit(affinities=aff)

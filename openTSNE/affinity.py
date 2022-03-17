@@ -1,4 +1,5 @@
 import logging
+import numbers
 import operator
 from functools import reduce
 
@@ -167,8 +168,8 @@ class PerplexityBasedNN(Affinities):
             else:
                 _k_neighbors = k_neighbors
 
-            self.perplexity = self.check_perplexity(perplexity, _k_neighbors)
-            if _k_neighbors > int(3 * self.perplexity):
+            effective_perplexity = self.check_perplexity(perplexity, _k_neighbors)
+            if _k_neighbors > int(3 * effective_perplexity):
                 log.warning(
                     "The k_neighbors value is over 3 times larger than the perplexity value. "
                     "This may result in an unnecessary slowdown."
@@ -181,7 +182,7 @@ class PerplexityBasedNN(Affinities):
 
         else:
             self.knn_index = knn_index
-            self.perplexity = self.check_perplexity(perplexity, self.knn_index.k)
+            effective_perplexity = self.check_perplexity(perplexity, self.knn_index.k)
             log.info("KNN index provided. Ignoring KNN-related parameters.")
 
         self.__neighbors, self.__distances = self.knn_index.build()
@@ -190,11 +191,13 @@ class PerplexityBasedNN(Affinities):
             self.P = joint_probabilities_nn(
                 self.__neighbors,
                 self.__distances,
-                [self.perplexity],
+                [effective_perplexity],
                 symmetrize=symmetrize,
                 n_jobs=n_jobs,
             )
 
+        self.perplexity = perplexity
+        self.effective_perplexity_ = effective_perplexity
         self.symmetrize = symmetrize
         self.n_jobs = n_jobs
         self.verbose = verbose
@@ -220,27 +223,28 @@ class PerplexityBasedNN(Affinities):
         if new_perplexity == self.perplexity:
             return
         # Verify that the perplexity isn't negative
-        new_perplexity = self.check_perplexity(new_perplexity, np.inf)
+        effective_perplexity = self.check_perplexity(new_perplexity, np.inf)
         # Verify that the perplexity isn't too large for the kNN graph
-        if new_perplexity > self.__neighbors.shape[1]:
+        if effective_perplexity > self.__neighbors.shape[1]:
             raise RuntimeError(
                 "The desired perplexity `%.2f` is larger than the kNN graph "
                 "allows. This would need to recompute the nearest neighbors, "
                 "which is not efficient. Please create a new `%s` instance "
                 "with the increased perplexity."
-                % (new_perplexity, self.__class__.__name__)
+                % (effective_perplexity, self.__class__.__name__)
             )
         # Warn if the perplexity is larger than the heuristic
-        if 3 * new_perplexity > self.__neighbors.shape[1]:
+        if 3 * effective_perplexity > self.__neighbors.shape[1]:
             log.warning(
                 "The new perplexity is quite close to the computed number of "
                 "nearest neighbors. The results may be unexpected. Consider "
                 "creating a new `%s` instance with the increased perplexity."
-                % (self.__class__.__name__)
+                % self.__class__.__name__
             )
 
         # Recompute the affinity matrix
         self.perplexity = new_perplexity
+        self.effective_perplexity_ = effective_perplexity
         k_neighbors = int(3 * new_perplexity)
 
         with utils.Timer(
@@ -249,7 +253,7 @@ class PerplexityBasedNN(Affinities):
             self.P = joint_probabilities_nn(
                 self.__neighbors[:, :k_neighbors],
                 self.__distances[:, :k_neighbors],
-                [self.perplexity],
+                [self.effective_perplexity_],
                 symmetrize=self.symmetrize,
                 n_jobs=self.n_jobs,
             )
@@ -308,7 +312,7 @@ class PerplexityBasedNN(Affinities):
         else:
             _k_neighbors = k_neighbors
 
-        perplexity = self.check_perplexity(perplexity, _k_neighbors)
+        effective_perplexity = self.check_perplexity(perplexity, _k_neighbors)
 
         neighbors, distances = self.knn_index.query(data, _k_neighbors)
 
@@ -316,7 +320,7 @@ class PerplexityBasedNN(Affinities):
             P = joint_probabilities_nn(
                 neighbors,
                 distances,
-                [perplexity],
+                [effective_perplexity],
                 symmetrize=False,
                 normalization="point-wise",
                 n_reference_samples=self.n_samples,
@@ -328,7 +332,8 @@ class PerplexityBasedNN(Affinities):
 
         return P
 
-    def check_perplexity(self, perplexity, k_neighbors):
+    @staticmethod
+    def check_perplexity(perplexity, k_neighbors):
         if perplexity <= 0:
             raise ValueError("Perplexity must be >=0. %.2f given" % perplexity)
 
@@ -788,8 +793,8 @@ class MultiscaleMixture(Affinities):
             # We will compute the nearest neighbors to the max value of perplexity,
             # smaller values can just use indexing to truncate unneeded neighbors
             n_samples = data.shape[0]
-            perplexities = self.check_perplexities(perplexities, n_samples)
-            max_perplexity = np.max(perplexities)
+            effective_perplexities = self.check_perplexities(perplexities, n_samples)
+            max_perplexity = np.max(effective_perplexities)
             k_neighbors = min(n_samples - 1, int(3 * max_perplexity))
 
             self.knn_index = get_knn_index(
@@ -798,6 +803,8 @@ class MultiscaleMixture(Affinities):
 
         else:
             self.knn_index = knn_index
+            n_samples = self.knn_index.n_samples
+            effective_perplexities = self.check_perplexities(perplexities, n_samples)
             log.info("KNN index provided. Ignoring KNN-related parameters.")
 
         self.__neighbors, self.__distances = self.knn_index.build()
@@ -806,12 +813,13 @@ class MultiscaleMixture(Affinities):
             self.P = self._calculate_P(
                 self.__neighbors,
                 self.__distances,
-                perplexities,
+                effective_perplexities,
                 symmetrize=symmetrize,
                 n_jobs=n_jobs,
             )
 
         self.perplexities = perplexities
+        self.effective_perplexities_ = effective_perplexities
         self.symmetrize = symmetrize
         self.n_jobs = n_jobs
         self.verbose = verbose
@@ -856,8 +864,8 @@ class MultiscaleMixture(Affinities):
         if np.array_equal(self.perplexities, new_perplexities):
             return
 
-        new_perplexities = self.check_perplexities(new_perplexities, self.n_samples)
-        max_perplexity = np.max(new_perplexities)
+        effective_perplexities = self.check_perplexities(new_perplexities, self.n_samples)
+        max_perplexity = np.max(effective_perplexities)
         k_neighbors = min(self.n_samples - 1, int(3 * max_perplexity))
 
         if k_neighbors > self.__neighbors.shape[1]:
@@ -870,13 +878,14 @@ class MultiscaleMixture(Affinities):
             )
 
         self.perplexities = new_perplexities
+        self.effective_perplexities_ = effective_perplexities
         with utils.Timer(
             "Perplexity changed. Recomputing affinity matrix...", self.verbose
         ):
             self.P = self._calculate_P(
                 self.__neighbors[:, :k_neighbors],
                 self.__distances[:, :k_neighbors],
-                self.perplexities,
+                self.effective_perplexities_,
                 symmetrize=self.symmetrize,
                 n_jobs=self.n_jobs,
             )
@@ -923,9 +932,9 @@ class MultiscaleMixture(Affinities):
 
         """
         perplexities = perplexities if perplexities is not None else self.perplexities
-        perplexities = self.check_perplexities(perplexities, self.n_samples)
+        effective_perplexities = self.check_perplexities(perplexities, self.n_samples)
 
-        max_perplexity = np.max(perplexities)
+        max_perplexity = np.max(effective_perplexities)
         k_neighbors = min(self.n_samples - 1, int(3 * max_perplexity))
 
         neighbors, distances = self.knn_index.query(data, k_neighbors)
@@ -934,7 +943,7 @@ class MultiscaleMixture(Affinities):
             P = self._calculate_P(
                 neighbors,
                 distances,
-                perplexities,
+                effective_perplexities,
                 symmetrize=False,
                 normalization="point-wise",
                 n_reference_samples=self.n_samples,
@@ -954,6 +963,9 @@ class MultiscaleMixture(Affinities):
         value doesn't already exist in the list.
 
         """
+        if isinstance(perplexities, numbers.Number):
+            perplexities = [perplexities]
+
         usable_perplexities = []
         for perplexity in sorted(perplexities):
             if perplexity <= 0:

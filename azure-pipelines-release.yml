@@ -19,30 +19,36 @@ jobs:
     strategy:
       matrix:
         osx - python36:
-          image.name: 'macos-10.14'
+          image.name: 'macOS-10.15'
           python.version: '3.6'
         osx - python37:
-          image.name: 'macos-10.14'
+          image.name: 'macOS-10.15'
           python.version: '3.7'
         osx - python38:
-          image.name: 'macos-10.14'
+          image.name: 'macOS-10.15'
           python.version: '3.8'
         osx - python39:
-          image.name: 'macos-10.14'
+          image.name: 'macOS-10.15'
           python.version: '3.9'
+        osx - python310:
+          image.name: 'macOS-10.15'
+          python.version: '3.10'
 
         windows - python36:
-          image.name: 'vs2017-win2016'
+          image.name: 'windows-2019'
           python.version: '3.6'
         windows - python37:
-          image.name: 'vs2017-win2016'
+          image.name: 'windows-2019'
           python.version: '3.7'
         windows - python38:
-          image.name: 'vs2017-win2016'
+          image.name: 'windows-2019'
           python.version: '3.8'
         windows - python39:
-          image.name: 'vs2017-win2016'
+          image.name: 'windows-2019'
           python.version: '3.9'
+        windows - python310:
+          image.name: 'windows-2019'
+          python.version: '3.10'
 
     steps:
       - task: UsePythonVersion@0
