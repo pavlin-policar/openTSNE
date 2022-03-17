@@ -50,13 +50,12 @@ If you wish to install openTSNE from source, please run
 
 ::
 
-   python setup.py install
+   pip install .
 
 
 in the root directory to install the appropriate dependencies and compile the necessary binary files.
 
-Please note that openTSNE requires a C/C++ compiler to be available on the system. Additionally,
-``numpy`` must be pre-installed in the active environment.
+Please note that openTSNE requires a C/C++ compiler to be available on the system.
 
 In order for openTSNE to utilize multiple threads, the C/C++ compiler
 must support ``OpenMP``. In practice, almost all compilers
