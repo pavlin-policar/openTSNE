@@ -38,16 +38,16 @@ jobs:
         image.name: 'macOS-10.15'
         python.version: '3.10'
       windows-python37:
-        image.name: 'vs2017-win2016'
+        image.name: 'windows-2019'
         python.version: '3.7'
       windows-python38:
-        image.name: 'vs2017-win2016'
+        image.name: 'windows-2019'
         python.version: '3.8'
       windows-python39:
-        image.name: 'vs2017-win2016'
+        image.name: 'windows-2019'
         python.version: '3.9'
       windows-python310:
-        image.name: 'vs2017-win2016'
+        image.name: 'windows-2019'
         python.version: '3.10'
 
   steps:
