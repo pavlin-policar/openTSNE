@@ -54,17 +54,10 @@ jobs:
       - script: env
         displayName: 'List enviromental variables'
 
-      - script: |
-          python -m pip install --upgrade pip
-          python -m pip install setuptools wheel pytest
-          python -m pip install cython
-          python -m pip install numpy==1.16.6
-        displayName: 'Install job dependencies'
+      - script: python -m pip install build
+        displayName: Installing build tools
 
-      - script: python -m pip freeze
-        displayName: 'List dependency versions'
-
-      - script: python setup.py bdist_wheel
+      - script: python -m build -w .
         displayName: 'Build wheel'
 
       # Since Python automatically adds `cwd` to `sys.path`, it's important we remove the local folder
@@ -76,15 +69,18 @@ jobs:
       - bash: ls -lRh dist
         displayName: 'List built files'
 
-      - bash: python -m pip install -vv --force-reinstall --find-links dist openTSNE
+      - bash: python -m pip install --force-reinstall --find-links dist openTSNE
         displayName: 'Install wheel'
 
       - script: pip install pynndescent
         displayName: 'Install optional dependencies - pynndescent'
-        condition: ne(variables['python.version'], '3.6')  # llvm-lite doesn't support py36 from v0.37 onwards
+        condition: ne(variables['python.version'], '3.10')
 
       - script: pip install hnswlib
         displayName: 'Install optional dependencies - hnswlib'
+
+      - bash: pip install pytest
+        displayName: 'Install pytest'
 
       - script: pytest -v
         timeoutInMinutes: 15
@@ -121,23 +117,31 @@ jobs:
         python39:
           python: '/opt/python/cp39-cp39/bin'
           python.version: '3.9'
+        python310:
+          python: '/opt/python/cp310-cp310/bin'
+          python.version: '3.10'
 
     container:
-      image: quay.io/pypa/manylinux2010_x86_64:latest
-      options: -e PLAT=manylinux2010_x86_64
+      image: quay.io/pypa/manylinux2014_x86_64:latest
+      options: -e PLAT=manylinux2014_x86_64
 
     steps:
       - bash: ls -R /opt/python
         displayName: 'List available Python binaries'
 
-      - bash: $(python)/pip install --user pytest
-        displayName: 'Install job dependencies'
+      - script: $(python)/pip install --user build
+        displayName: 'Installing build tools'
 
-      # Build and install the wheel
-      - bash: .ci/build_wheels.sh
+      - script: $(python)/python -m build -w -o wheelhouse/ .
         displayName: 'Build wheels'
-        env:
-          PYBIN: $(python)
+
+      # Bundle external shared libraries into the wheels
+      - script: |
+          for whl in wheelhouse/openTSNE*.whl; do
+              auditwheel show "$whl"
+              auditwheel repair "$whl" --plat $PLAT -w wheelhouse/
+          done
+        displayName: 'Repair wheels'
 
       # Since Python automatically adds `cwd` to `sys.path`, it's important we remove the local folder
       # containing our code from the working directory. Otherwise, the tests will use the local copy
@@ -145,12 +149,18 @@ jobs:
       - bash: mv openTSNE src
         displayName: 'Remove source files from path'
 
+      - script: $(python)/pip install --force-reinstall --find-links wheelhouse openTSNE
+        displayName: 'Install openTSNE wheel'
+
       - script: $(python)/pip install pynndescent
         displayName: 'Install optional dependencies - pynndescent'
-        condition: false  # llvm-lite doesn't support py36 from v0.37 onwards, and the llvmlite version wasn't built for manylinux2010
+        condition: ne(variables['python.version'], '3.10')
 
       - script: $(python)/pip install hnswlib
         displayName: 'Install optional dependencies - hnswlib'
+
+      - bash: $(python)/pip install --user pytest
+        displayName: 'Install pytest'
 
       - script: $(python)/python -m pytest -v
         timeoutInMinutes: 15
@@ -184,21 +194,14 @@ jobs:
 
     steps:
       - task: UsePythonVersion@0
-        displayName: 'Use Python 3.7'
+        displayName: 'Use Python 3.8'
         inputs:
-          versionSpec: '3.7'
+          versionSpec: '3.8'
 
-      - script: |
-          python -m pip install --upgrade pip
-          python -m pip install setuptools wheel pytest
-          python -m pip install cython
-          python -m pip install numpy==1.16.6
-        displayName: 'Install job dependencies'
+      - script: python -m pip install build
+        displayName: Installing build tools
 
-      - script: python -m pip freeze
-        displayName: 'List dependency versions'
-
-      - script: python setup.py sdist
+      - script: python -m build -s .
         displayName: 'Build sdist'
 
       # Since Python automatically adds `cwd` to `sys.path`, it's important we remove the local folder
@@ -213,10 +216,15 @@ jobs:
       - bash: python -m pip install --force-reinstall --find-links dist openTSNE
         displayName: 'Install package'
 
-      - script: |
-          python -m pip install pynndescent
-          python -m pip install hnswlib
-        displayName: 'Install optional dependencies'
+      - script: pip install pynndescent
+        displayName: 'Install optional dependencies - pynndescent'
+        condition: ne(variables['python.version'], '3.10')
+
+      - script: pip install hnswlib
+        displayName: 'Install optional dependencies - hnswlib'
+
+      - bash: pip install pytest
+        displayName: 'Install pytest'
 
       - script: pytest -v
         timeoutInMinutes: 15
