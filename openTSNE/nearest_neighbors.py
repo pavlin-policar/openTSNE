@@ -206,32 +206,6 @@ class Sklearn(KNNIndex):
 
 
 class Annoy(KNNIndex):
-    """Annoy KNN Index.
-
-    Notes
-    -----
-    Pickling:
-        Annoy doesn't support pickling. As a workaround, we override the pickling
-        process and save the annoy index file separately. Upon unpickling, this
-        file will attempt to be reloaded.
-
-        However, since we can't access the actual pickle file location from
-        __getstate__, the annoy index is saved into the current working directory.
-        And, it will also be loaded from cwd. This means that if we pickle an
-        object into a specific directory, our files could end up in different
-        places. And when sharing a pickle, they may need to be put into different
-        directories.
-
-        Alternatively, the use can set the ``.pickle_fname`` attribute to specify
-        a file name and location for the save annoy index e.g.
-        ``./pickle/my-index.ann``. This should make it at least somewhat easier
-        to specify the pickle names.
-
-        This is extremely messy, but it is better than not supporting pickling at
-        all. If anyone has a better solution, I would welcome any and all help.
-
-    """
-
     VALID_METRICS = [
         "cosine",
         "euclidean",
