@@ -1264,3 +1264,22 @@ class Uniform(Affinities):
             return P, neighbors, distances
 
         return P
+
+
+class PrecomputedAffinities(Affinities):
+    """Use a precomputed affinity matrix.
+
+    Parameters
+    ----------
+    affinities: scipy.sparse.csr_matrix, np.ndarray
+        A N x N matrix containing the affinities.
+
+    """
+
+    def __init__(self, affinities):
+        if not isinstance(affinities, sp.csr_matrix):
+            affinities = sp.csr_matrix(affinities)
+        self.P = affinities
+
+    def to_new(self, data, return_distances=False):
+        raise RuntimeError("Precomputed affinity matrices cannot be queried.")
