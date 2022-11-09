@@ -1007,7 +1007,7 @@ class TSNE(BaseEstimator):
         The exaggeration factor to use during the *early exaggeration* phase.
         Typical values range from 4 to 32. When ``early_exaggeration="auto"``
         early exaggeration factor defaults to 12, unless desired subsequent
-        exaggeration is higher, i.e.: ``early_exaggeration = min(12,
+        exaggeration is higher, i.e.: ``early_exaggeration = max(12,
         exaggeration)``.
 
     n_iter: int
@@ -1152,7 +1152,10 @@ class TSNE(BaseEstimator):
         self.perplexity = perplexity
         self.learning_rate = learning_rate
         if early_exaggeration == "auto":
-            self.early_exaggeration = min(12, exaggeration)
+            if exaggeration is None:
+                self.early_exaggeration = 12
+            else:
+                self.early_exaggeration = max(12, exaggeration)
         else:
             self.early_exaggeration = early_exaggeration
         self.early_exaggeration_iter = early_exaggeration_iter
