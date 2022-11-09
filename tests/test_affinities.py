@@ -340,3 +340,22 @@ class TestAffinityAcceptsKnnIndexAsParameter(unittest.TestCase):
         for method_name, cls in AFFINITY_CLASSES:
             aff = cls(knn_index=knn_index)
             aff.to_new(self.iris)
+
+class TestPrecomputedAffinity(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.iris = datasets.load_iris().data
+    
+    def test_precomputed_affinity_matches(self):
+        aff1 = PerplexityBasedNN(self.iris)
+        aff2 = affinity.PrecomputedAffinity(aff1.P)
+        np.testing.assert_almost_equal(
+            aff1.P.toarray(), aff2.P.toarray(), err_msg=method_name
+        )
+
+    def test_precomputed_affinity_normalization(self):
+        aff1 = PerplexityBasedNN(self.iris)
+        aff2 = affinity.PrecomputedAffinity(aff1.P * 2)
+        np.testing.assert_almost_equal(
+            aff1.P.toarray(), aff2.P.toarray(), err_msg=method_name
+        )

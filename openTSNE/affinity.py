@@ -1273,12 +1273,16 @@ class PrecomputedAffinities(Affinities):
     ----------
     affinities: scipy.sparse.csr_matrix, np.ndarray
         A N x N matrix containing the affinities.
+    normalize: bool
+        Normalize the affinity matrix to sum to 1. Default is True.
 
     """
 
-    def __init__(self, affinities):
+    def __init__(self, affinities, normalize=True):
         if not isinstance(affinities, sp.csr_matrix):
             affinities = sp.csr_matrix(affinities)
+        if normalize:
+            affinities /= np.sum(affinities)
         self.P = affinities
 
     def to_new(self, data, return_distances=False):
