@@ -995,17 +995,20 @@ class TSNE(BaseEstimator):
 
     learning_rate: Union[str, float]
         The learning rate for t-SNE optimization. When ``learning_rate="auto"``
-        the appropriate learning rate is selected according to max(200, N / 12),
-        as determined in Belkina et al. "Automated optimized parameters for
-        T-distributed stochastic neighbor embedding improve visualization and
-        analysis of large datasets", 2019.
+        the appropriate learning rate is selected according to ``max(200,
+        N/early_exaggeration),`` as determined in Belkina et al. "Automated 
+        optimized parameters for T-distributed stochastic neighbor embedding 
+        improve visualization and analysis of large datasets", 2019.
 
     early_exaggeration_iter: int
         The number of iterations to run in the *early exaggeration* phase.
 
-    early_exaggeration: float
+    early_exaggeration: Union[str, float]
         The exaggeration factor to use during the *early exaggeration* phase.
-        Typical values range from 12 to 32.
+        Typical values range from 4 to 32. When ``early_exaggeration="auto"``
+        early exaggeration factor defaults to 12, unless desired subsequent
+        exaggeration is higher, i.e.: ``early_exaggeration = min(12,
+        exaggeration)``.
 
     n_iter: int
         The number of iterations to run in the normal optimization regime.
@@ -1122,7 +1125,7 @@ class TSNE(BaseEstimator):
         perplexity=30,
         learning_rate="auto",
         early_exaggeration_iter=250,
-        early_exaggeration=12,
+        early_exaggeration="auto",
         n_iter=500,
         exaggeration=None,
         dof=1,
@@ -1148,7 +1151,10 @@ class TSNE(BaseEstimator):
         self.n_components = n_components
         self.perplexity = perplexity
         self.learning_rate = learning_rate
-        self.early_exaggeration = early_exaggeration
+        if early_exaggeration == "auto":
+            self.early_exaggeration = min(12, exaggeration)
+        else:
+            self.early_exaggeration = early_exaggeration
         self.early_exaggeration_iter = early_exaggeration_iter
         self.n_iter = n_iter
         self.exaggeration = exaggeration
@@ -1201,7 +1207,7 @@ class TSNE(BaseEstimator):
 
         Parameters
         ----------
-        X: Optional[np.ndarray}
+        X: Optional[np.ndarray]
             The data matrix to be embedded.
 
         affinities: Optional[openTSNE.affinity.Affinities]
@@ -1271,7 +1277,7 @@ class TSNE(BaseEstimator):
 
         Parameters
         ----------
-        X: Optional[np.ndarray}
+        X: Optional[np.ndarray]
             The data matrix to be embedded.
 
         affinities: Optional[openTSNE.affinity.Affinities]
@@ -1395,11 +1401,17 @@ class TSNE(BaseEstimator):
             raise ValueError(
                 f"Unrecognized initialization scheme `{initialization}`."
             )
+            
+        # Set the auto learning rate depending on the value of early exaggeration
+        if self.learning_rate == "auto":
+            learning_rate_now = max(200, n_samples / self.early_exaggeration)
+        else:
+            learning_rate_now = self.learning_rate 
 
         gradient_descent_params = {
             "dof": self.dof,
             "negative_gradient_method": self.negative_gradient_method,
-            "learning_rate": self.learning_rate,
+            "learning_rate": learning_rate_now,
             # By default, use the momentum used in unexaggerated phase
             "momentum": self.final_momentum,
             # Barnes-Hut params
