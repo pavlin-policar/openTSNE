@@ -345,17 +345,21 @@ class TestPrecomputedAffinity(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.iris = datasets.load_iris().data
-    
+
     def test_precomputed_affinity_matches(self):
         aff1 = PerplexityBasedNN(self.iris)
         aff2 = affinity.PrecomputedAffinity(aff1.P)
-        np.testing.assert_almost_equal(
-            aff1.P.toarray(), aff2.P.toarray(), err_msg=method_name
+        np.testing.assert_allclose(
+            aff1.P.toarray(),
+            aff2.P.toarray(),
+            err_msg="Precomputed affinities are not passed in correctly.",
         )
 
     def test_precomputed_affinity_normalization(self):
         aff1 = PerplexityBasedNN(self.iris)
         aff2 = affinity.PrecomputedAffinity(aff1.P * 2)
-        np.testing.assert_almost_equal(
-            aff1.P.toarray(), aff2.P.toarray(), err_msg=method_name
+        np.testing.assert_allclose(
+            aff1.P.toarray(),
+            aff2.P.toarray(),
+            err_msg="Precomputed affinities are not normalized to sum to 1.",
         )
