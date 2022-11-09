@@ -109,6 +109,15 @@ class TestUsageWithCustomAffinity(TestUsage):
             new_embedding.optimize(10, learning_rate=0.1, inplace=True)
             self.eval_embedding(new_embedding, self.y, f"transform::{aff.__class__.__name__}")
 
+    def test_precomputed_affinity(self):
+        # Setup precomputed affinity
+        aff = affinity.Uniform(self.x).P
+        aff *= 10  # rescale
+        precomputed_affinity = affinity.PrecomputedAffinities(aff, normalize=True)
+
+        embedding = TSNE().fit(affinities=precomputed_affinity, initialization="spectral")
+        self.eval_embedding(embedding, self.y, aff.__class__.__name__)
+
 
 class TestUsageWithCustomAffinityAndCustomNeighbors(TestUsage):
     def test_affinity_with_queryable_knn_index(self):
