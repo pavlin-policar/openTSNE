@@ -8,7 +8,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
 
 import openTSNE
-from openTSNE import affinity, initialization, nearest_neighbors
+from openTSNE import affinity, initialization, nearest_neighbors, TSNEEmbedding
 
 Multiscale = partial(affinity.Multiscale, method="exact")
 MultiscaleMixture = partial(affinity.MultiscaleMixture, method="exact")
