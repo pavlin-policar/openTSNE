@@ -187,12 +187,12 @@ class TestUsageExplicitOptimizeCalls(TestUsage):
         A = affinity.PerplexityBasedNN(self.x)
         I = initialization.pca(self.x)
         embedding2 = TSNEEmbedding(I, A)
-        embedding2.optimize(n_iter=250, exaggeration=12)
-        embedding2.optimize(n_iter=500, exaggeration=1)
+        embedding2 = embedding2.optimize(n_iter=250, exaggeration=12)
+        embedding2 = embedding2.optimize(n_iter=500, exaggeration=1)
         
         self.assert_array_equal(
             embedding1,
             embedding2,
             "Calling optimize twice with default parameters produced a different " \
-            "result compared to the default optimization"
+            "result compared to the default fit() call"
         )

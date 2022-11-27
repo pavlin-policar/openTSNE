@@ -284,7 +284,7 @@ class PartialTSNEEmbedding(np.ndarray):
             The number of optimization iterations.
 
         learning_rate: Union[str, float]
-            The learning rate for t-SNE optimization. When 
+            The learning rate for t-SNE optimization. When
             ``learning_rate="auto"`` the appropriate learning rate is selected
             according to N / exaggeration as determined in Belkina et al.
             (2019), Nature Communications. Note that this will result in a
@@ -560,7 +560,7 @@ class TSNEEmbedding(np.ndarray):
             The number of optimization iterations.
 
         learning_rate: Union[str, float]
-            The learning rate for t-SNE optimization. When 
+            The learning rate for t-SNE optimization. When
             ``learning_rate="auto"`` the appropriate learning rate is selected
             according to N / exaggeration as determined in Belkina et al.
             (2019), Nature Communications. Note that this will result in a
@@ -1624,7 +1624,7 @@ class gradient_descent:
             embedding.
 
         learning_rate: Union[str, float]
-            The learning rate for t-SNE optimization. When 
+            The learning rate for t-SNE optimization. When
             ``learning_rate="auto"`` the appropriate learning rate is selected
             according to N / exaggeration as determined in Belkina et al.
             (2019), Nature Communications. Note that this will result in a
