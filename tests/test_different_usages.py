@@ -178,3 +178,21 @@ class TestUsageWithCustomAffinityAndCustomNeighbors(TestUsage):
             # With initilization
             embedding = TSNE().fit(affinities=aff, initialization=init)
             self.eval_embedding(embedding, self.y, aff.__class__.__name__)
+
+
+class TestUsageExplicitOptimizeCalls(TestUsage):
+    def test_explicit_optimize_calls(self):
+        embedding1 = TSNE().fit(self.x)
+        
+        A = affinity.PerplexityBasedNN(self.x)
+        I = initialization.pca(self.x)
+        embedding2 = TSNEEmbedding(I, A)
+        embedding2.optimize(n_iter=250, exaggeration=12)
+        embedding2.optimize(n_iter=500, exaggeration=1)
+        
+        self.assert_array_equal(
+            embedding1,
+            embedding2,
+            "Calling optimize twice with default parameters produced a different " \
+            "result compared to the default optimization"
+        )
