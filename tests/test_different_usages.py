@@ -190,7 +190,7 @@ class TestUsageExplicitOptimizeCalls(TestUsage):
         embedding2 = embedding2.optimize(n_iter=250, exaggeration=12)
         embedding2 = embedding2.optimize(n_iter=500, exaggeration=1)
         
-        self.assert_array_equal(
+        np.testing.assert_array_equal(
             embedding1,
             embedding2,
             "Calling optimize twice with default parameters produced a different " \
