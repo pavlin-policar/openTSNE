@@ -67,7 +67,7 @@ class TestUsageLowestLevel(TestUsage):
         init = initialization.pca(self.x)
         aff = affinity.PerplexityBasedNN(self.x, perplexity=30)
         embedding = openTSNE.TSNEEmbedding(init, aff)
-        embedding.optimize(25, exaggeration=12, momentum=0.5, inplace=True)
+        embedding.optimize(25, exaggeration=12, momentum=0.8, inplace=True)
         embedding.optimize(50, exaggeration=1, momentum=0.8, inplace=True)
         self.eval_embedding(embedding, self.y)
         new_embedding = embedding.transform(self.x)
@@ -77,7 +77,7 @@ class TestUsageLowestLevel(TestUsage):
         init = initialization.pca(self.x)
         aff = affinity.MultiscaleMixture(self.x, perplexities=[5, 30])
         embedding = openTSNE.TSNEEmbedding(init, aff)
-        embedding.optimize(25, exaggeration=12, momentum=0.5, inplace=True)
+        embedding.optimize(25, exaggeration=12, momentum=0.8, inplace=True)
         embedding.optimize(50, exaggeration=1, momentum=0.8, inplace=True)
         self.eval_embedding(embedding, self.y)
         new_embedding = embedding.transform(self.x)
@@ -187,8 +187,8 @@ class TestUsageExplicitOptimizeCalls(TestUsage):
         A = affinity.PerplexityBasedNN(self.x)
         I = initialization.pca(self.x)
         embedding2 = TSNEEmbedding(I, A)
-        embedding2 = embedding2.optimize(n_iter=250, exaggeration=12)
-        embedding2 = embedding2.optimize(n_iter=500, exaggeration=1)
+        embedding2 = embedding2.optimize(n_iter=25, exaggeration=12)
+        embedding2 = embedding2.optimize(n_iter=50)
         
         np.testing.assert_array_equal(
             embedding1,
