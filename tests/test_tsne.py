@@ -958,13 +958,13 @@ class TestPrecomputedDistanceMatrices(unittest.TestCase):
             initialization="random",
             metric="precomputed",
             early_exaggeration_iter=0,
-            n_iter=0
+            n_iter=0,
         ).fit(d)
 
         knn = KNeighborsClassifier(n_neighbors=10)
         knn.fit(embedding, y)
         predictions = knn.predict(embedding)
-        self.assertLess(accuracy_score(predictions, y), 0.55)
+        self.assertLess(accuracy_score(predictions, y), 0.6)
 
 
 class TestMisc(unittest.TestCase):
