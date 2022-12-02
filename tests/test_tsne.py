@@ -18,7 +18,9 @@ from openTSNE import affinity
 from openTSNE import initialization
 from openTSNE.affinity import PerplexityBasedNN
 from openTSNE.nearest_neighbors import NNDescent
-from openTSNE.tsne import kl_divergence_bh, kl_divergence_fft
+from openTSNE.tsne import (
+    kl_divergence_bh, kl_divergence_fft, TSNEEmbedding, PartialTSNEEmbedding
+)
 from openTSNE.utils import is_package_installed
 
 np.random.seed(42)
@@ -274,8 +276,9 @@ class TestTSNEInplaceOptimization(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.tsne = TSNE()
-        cls.x = np.random.randn(100, 4)
-        cls.x_test = np.random.randn(25, 4)
+        cls.x = datasets.load_iris()["data"]
+        cls.x_test = cls.x[::3]
+        cls.x_test += np.random.normal(0, 1, size=cls.x_test.shape)
 
     def test_embedding_inplace_optimization(self):
         embedding1 = self.tsne.prepare_initial(self.x)
@@ -320,6 +323,38 @@ class TestTSNEInplaceOptimization(unittest.TestCase):
         self.assertFalse(partial_embedding1.base is partial_embedding2.base)
         self.assertFalse(partial_embedding2.base is partial_embedding3.base)
         self.assertFalse(partial_embedding1.base is partial_embedding3.base)
+
+    def test_inplace_embedding_optimization_doesnt_change_init(self):
+        init = initialization.pca(self.x)
+        init_copy = init.copy()
+
+        aff = affinity.PerplexityBasedNN(self.x)
+        embedding = TSNEEmbedding(init, aff)
+        embedding.optimize(10, inplace=True)
+
+        np.testing.assert_array_equal(init, init_copy)
+
+    def test_inplace_partial_embedding_optimization_doesnt_change_init(self):
+        embedding = TSNE(early_exaggeration_iter=10, n_iter=10).fit(self.x)
+
+        init = initialization.random(self.x_test)
+        init_copy = init.copy()
+
+        P = embedding.affinities.to_new(self.x_test)
+
+        partial_embedding = PartialTSNEEmbedding(init, embedding, P)
+        partial_embedding.optimize(10, inplace=True)
+
+        np.testing.assert_array_equal(init, init_copy)
+
+    def test_inplace_partial_embedding_optimization_doesnt_change_embedding(self):
+        embedding = TSNE(early_exaggeration_iter=10, n_iter=10).fit(self.x)
+        embedding_copy = np.array(embedding)
+
+        partial_embedding = embedding.prepare_partial(self.x_test)
+        partial_embedding.optimize(10, inplace=True)
+
+        np.testing.assert_array_equal(np.array(embedding), embedding_copy)
 
 
 class TestTSNECallbackParams(unittest.TestCase):
@@ -923,13 +958,13 @@ class TestPrecomputedDistanceMatrices(unittest.TestCase):
             initialization="random",
             metric="precomputed",
             early_exaggeration_iter=0,
-            n_iter=0
+            n_iter=0,
         ).fit(d)
 
         knn = KNeighborsClassifier(n_neighbors=10)
         knn.fit(embedding, y)
         predictions = knn.predict(embedding)
-        self.assertLess(accuracy_score(predictions, y), 0.55)
+        self.assertLess(accuracy_score(predictions, y), 0.6)
 
 
 class TestMisc(unittest.TestCase):

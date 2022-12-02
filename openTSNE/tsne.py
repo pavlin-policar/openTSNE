@@ -35,7 +35,7 @@ def _check_callbacks(callbacks):
 
 
 def _handle_nice_params(embedding: np.ndarray, optim_params: dict) -> None:
-    """Convert the user friendly params into something the optimizer can
+    """Convert the user-friendly params into something the optimizer can
     understand."""
     n_samples = embedding.shape[0]
     # Handle callbacks
@@ -43,8 +43,7 @@ def _handle_nice_params(embedding: np.ndarray, optim_params: dict) -> None:
     optim_params["use_callbacks"] = optim_params["callbacks"] is not None
 
     # Handle negative gradient method
-    negative_gradient_method = optim_params.pop("negative_gradient_method")
-    # Handle `auto` negative gradient method
+    negative_gradient_method = optim_params.pop("negative_gradient_method", "auto")
     if isinstance(negative_gradient_method, str) and negative_gradient_method == "auto":
         if n_samples < 10_000:
             negative_gradient_method = "bh"
@@ -248,9 +247,7 @@ class PartialTSNEEmbedding(np.ndarray):
     ):
         init_checks.num_samples(embedding.shape[0], P.shape[0])
 
-        obj = np.asarray(embedding, dtype=np.float64, order="C").view(
-            PartialTSNEEmbedding
-        )
+        obj = np.array(embedding, dtype=np.float64, order="C").view(PartialTSNEEmbedding)
 
         obj.reference_embedding = reference_embedding
         obj.P = P
@@ -512,7 +509,7 @@ class TSNEEmbedding(np.ndarray):
     ):
         init_checks.num_samples(embedding.shape[0], affinities.P.shape[0])
 
-        obj = np.asarray(embedding, dtype=np.float64, order="C").view(TSNEEmbedding)
+        obj = np.array(embedding, dtype=np.float64, order="C").view(TSNEEmbedding)
 
         obj.affinities = affinities  # type: Affinities
         obj.gradient_descent_params = gradient_descent_params  # type: dict
