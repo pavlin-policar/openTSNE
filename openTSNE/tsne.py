@@ -88,8 +88,13 @@ def _handle_nice_params(embedding: np.ndarray, optim_params: dict) -> None:
     optim_params["n_jobs"] = n_jobs
 
     # Determine learning rate if requested
-    if optim_params.get("learning_rate", "auto") == "auto":
-        optim_params["learning_rate"] = max(200, n_samples / 12)
+    learning_rate = optim_params.get("learning_rate", "auto")
+    if learning_rate == "auto":
+        exaggeration = optim_params.get("exaggeration", None)
+        if exaggeration is None:
+            exaggeration = 1
+        learning_rate = n_samples / exaggeration
+    optim_params["learning_rate"] = learning_rate
 
 
 def __check_init_num_samples(num_samples, required_num_samples):
@@ -160,11 +165,12 @@ class PartialTSNEEmbedding(np.ndarray):
 
     learning_rate: Union[str, float]
         The learning rate for t-SNE optimization. When ``learning_rate="auto"``
-        the appropriate learning rate is selected according to max(200, N / 12)
+        the appropriate learning rate is selected according to N / exaggeration
         as determined in Belkina et al. (2019), Nature Communications. Note that
-        this should *not* be used when adding samples into existing embeddings,
-        where the learning rate often needs to be much lower to obtain
-        convergence.
+        this will result in a different learning rate during the early
+        exaggeration phase and afterwards. This should *not* be used when 
+        adding samples into existing embeddings, where the learning rate often
+        needs to be much lower to obtain convergence.
 
     exaggeration: float
         The exaggeration factor is used to increase the attractive forces of
@@ -280,12 +286,12 @@ class PartialTSNEEmbedding(np.ndarray):
         learning_rate: Union[str, float]
             The learning rate for t-SNE optimization. When
             ``learning_rate="auto"`` the appropriate learning rate is selected
-            according to max(200, N / 12), as determined in Belkina et al.
-            "Automated optimized parameters for t-distributed stochastic
-            neighbor embedding improve visualization and analysis of large
-            datasets", 2019. Note that this should *not* be used when adding
-            samples into existing embeddings, where the learning rate often
-            needs to be much lower to obtain convergence.
+            according to N / exaggeration as determined in Belkina et al.
+            (2019), Nature Communications. Note that this will result in a
+            different learning rate during the early exaggeration phase and
+            afterwards. This should *not* be used when adding samples into
+            existing embeddings, where the learning rate often needs to be much
+            lower to obtain convergence.
 
         exaggeration: float
             The exaggeration factor is used to increase the attractive forces of
@@ -414,10 +420,12 @@ class TSNEEmbedding(np.ndarray):
 
     learning_rate: Union[str, float]
         The learning rate for t-SNE optimization. When ``learning_rate="auto"``
-        the appropriate learning rate is selected according to max(200, N / 12),
-        as determined in Belkina et al. "Automated optimized parameters for
-        T-distributed stochastic neighbor embedding improve visualization and
-        analysis of large datasets", 2019.
+        the appropriate learning rate is selected according to N / exaggeration
+        as determined in Belkina et al. (2019), Nature Communications. Note that
+        this will result in a different learning rate during the early
+        exaggeration phase and afterwards. This should *not* be used when 
+        adding samples into existing embeddings, where the learning rate often
+        needs to be much lower to obtain convergence.
 
     exaggeration: float
         The exaggeration factor is used to increase the attractive forces of
@@ -554,10 +562,12 @@ class TSNEEmbedding(np.ndarray):
         learning_rate: Union[str, float]
             The learning rate for t-SNE optimization. When
             ``learning_rate="auto"`` the appropriate learning rate is selected
-            according to max(200, N / 12), as determined in Belkina et al.
-            "Automated optimized parameters for t-distributed stochastic
-            neighbor embedding improve visualization and analysis of large
-            datasets", 2019.
+            according to N / exaggeration as determined in Belkina et al.
+            (2019), Nature Communications. Note that this will result in a
+            different learning rate during the early exaggeration phase and
+            afterwards. This should *not* be used when adding samples into
+            existing embeddings, where the learning rate often needs to be much
+            lower to obtain convergence.
 
         exaggeration: float
             The exaggeration factor is used to increase the attractive forces of
@@ -693,7 +703,7 @@ class TSNEEmbedding(np.ndarray):
         early_exaggeration_iter=0,
         exaggeration=1.5,
         n_iter=250,
-        initial_momentum=0.5,
+        initial_momentum=0.8,
         final_momentum=0.8,
         max_grad_norm=0.25,
         max_step_norm=None,
@@ -731,21 +741,21 @@ class TSNEEmbedding(np.ndarray):
             initial point positions.
 
         learning_rate: Union[str, float]
-            The learning rate for t-SNE optimization. When
+            The learning rate for t-SNE optimization. When 
             ``learning_rate="auto"`` the appropriate learning rate is selected
-            according to max(200, N / 12), as determined in Belkina et al.
-            "Automated optimized parameters for t-distributed stochastic
-            neighbor embedding improve visualization and analysis of large
-            datasets", 2019. Note that this should *not* be used when adding
-            samples into existing embeddings, where the learning rate often
-            needs to be much lower to obtain convergence.
+            according to N / exaggeration as determined in Belkina et al.
+            (2019), Nature Communications. Note that this will result in a
+            different learning rate during the early exaggeration phase and
+            afterwards. This should *not* be used when adding samples into
+            existing embeddings, where the learning rate often needs to be much
+            lower to obtain convergence.
 
         early_exaggeration_iter: int
             The number of iterations to run in the *early exaggeration* phase.
 
         early_exaggeration: float
             The exaggeration factor to use during the *early exaggeration* phase.
-            Typical values range from 12 to 32.
+            Typical values range from 4 to 32.
 
         n_iter: int
             The number of iterations to run in the normal optimization regime.
@@ -995,17 +1005,22 @@ class TSNE(BaseEstimator):
 
     learning_rate: Union[str, float]
         The learning rate for t-SNE optimization. When ``learning_rate="auto"``
-        the appropriate learning rate is selected according to max(200, N / 12),
-        as determined in Belkina et al. "Automated optimized parameters for
-        T-distributed stochastic neighbor embedding improve visualization and
-        analysis of large datasets", 2019.
+        the appropriate learning rate is selected according to N / exaggeration
+        as determined in Belkina et al. (2019), Nature Communications. Note that
+        this will result in a different learning rate during the early
+        exaggeration phase and afterwards. This should *not* be used when 
+        adding samples into existing embeddings, where the learning rate often
+        needs to be much lower to obtain convergence.
 
     early_exaggeration_iter: int
         The number of iterations to run in the *early exaggeration* phase.
 
-    early_exaggeration: float
+    early_exaggeration: Union[str, float]
         The exaggeration factor to use during the *early exaggeration* phase.
-        Typical values range from 12 to 32.
+        Typical values range from 4 to 32. When ``early_exaggeration="auto"``
+        early exaggeration factor defaults to 12, unless desired subsequent
+        exaggeration is higher, i.e.: ``early_exaggeration = max(12,
+        exaggeration)``.
 
     n_iter: int
         The number of iterations to run in the normal optimization regime.
@@ -1122,7 +1137,7 @@ class TSNE(BaseEstimator):
         perplexity=30,
         learning_rate="auto",
         early_exaggeration_iter=250,
-        early_exaggeration=12,
+        early_exaggeration="auto",
         n_iter=500,
         exaggeration=None,
         dof=1,
@@ -1133,7 +1148,7 @@ class TSNE(BaseEstimator):
         initialization="pca",
         metric="euclidean",
         metric_params=None,
-        initial_momentum=0.5,
+        initial_momentum=0.8,
         final_momentum=0.8,
         max_grad_norm=None,
         max_step_norm=5,
@@ -1148,7 +1163,13 @@ class TSNE(BaseEstimator):
         self.n_components = n_components
         self.perplexity = perplexity
         self.learning_rate = learning_rate
-        self.early_exaggeration = early_exaggeration
+        if early_exaggeration == "auto":
+            if exaggeration is None:
+                self.early_exaggeration = 12
+            else:
+                self.early_exaggeration = max(12, exaggeration)
+        else:
+            self.early_exaggeration = early_exaggeration
         self.early_exaggeration_iter = early_exaggeration_iter
         self.n_iter = n_iter
         self.exaggeration = exaggeration
@@ -1201,7 +1222,7 @@ class TSNE(BaseEstimator):
 
         Parameters
         ----------
-        X: Optional[np.ndarray}
+        X: Optional[np.ndarray]
             The data matrix to be embedded.
 
         affinities: Optional[openTSNE.affinity.Affinities]
@@ -1271,7 +1292,7 @@ class TSNE(BaseEstimator):
 
         Parameters
         ----------
-        X: Optional[np.ndarray}
+        X: Optional[np.ndarray]
             The data matrix to be embedded.
 
         affinities: Optional[openTSNE.affinity.Affinities]
@@ -1567,8 +1588,8 @@ class gradient_descent:
         P,
         n_iter,
         objective_function,
-        learning_rate=200,
-        momentum=0.5,
+        learning_rate="auto",
+        momentum=0.8,
         exaggeration=None,
         dof=1,
         min_gain=0.01,
@@ -1605,10 +1626,12 @@ class gradient_descent:
         learning_rate: Union[str, float]
             The learning rate for t-SNE optimization. When
             ``learning_rate="auto"`` the appropriate learning rate is selected
-            according to max(200, N / 12), as determined in Belkina et al.
-            "Automated optimized parameters for t-distributed stochastic
-            neighbor embedding improve visualization and analysis of large
-            datasets", 2019.
+            according to N / exaggeration as determined in Belkina et al.
+            (2019), Nature Communications. Note that this will result in a
+            different learning rate during the early exaggeration phase and
+            afterwards. This should *not* be used when adding samples into
+            existing embeddings, where the learning rate often needs to be much
+            lower to obtain convergence.
 
         momentum: float
             Momentum accounts for gradient directions from previous iterations,

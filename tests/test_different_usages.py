@@ -8,7 +8,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
 
 import openTSNE
-from openTSNE import affinity, initialization, nearest_neighbors
+from openTSNE import affinity, initialization, nearest_neighbors, TSNEEmbedding
 
 Multiscale = partial(affinity.Multiscale, method="exact")
 MultiscaleMixture = partial(affinity.MultiscaleMixture, method="exact")
@@ -67,7 +67,7 @@ class TestUsageLowestLevel(TestUsage):
         init = initialization.pca(self.x)
         aff = affinity.PerplexityBasedNN(self.x, perplexity=30)
         embedding = openTSNE.TSNEEmbedding(init, aff)
-        embedding.optimize(25, exaggeration=12, momentum=0.5, inplace=True)
+        embedding.optimize(25, exaggeration=12, momentum=0.8, inplace=True)
         embedding.optimize(50, exaggeration=1, momentum=0.8, inplace=True)
         self.eval_embedding(embedding, self.y)
         new_embedding = embedding.transform(self.x)
@@ -77,7 +77,7 @@ class TestUsageLowestLevel(TestUsage):
         init = initialization.pca(self.x)
         aff = affinity.MultiscaleMixture(self.x, perplexities=[5, 30])
         embedding = openTSNE.TSNEEmbedding(init, aff)
-        embedding.optimize(25, exaggeration=12, momentum=0.5, inplace=True)
+        embedding.optimize(25, exaggeration=12, momentum=0.8, inplace=True)
         embedding.optimize(50, exaggeration=1, momentum=0.8, inplace=True)
         self.eval_embedding(embedding, self.y)
         new_embedding = embedding.transform(self.x)
@@ -187,3 +187,21 @@ class TestUsageWithCustomAffinityAndCustomNeighbors(TestUsage):
             # With initilization
             embedding = TSNE().fit(affinities=aff, initialization=init)
             self.eval_embedding(embedding, self.y, aff.__class__.__name__)
+
+
+class TestUsageExplicitOptimizeCalls(TestUsage):
+    def test_explicit_optimize_calls(self):
+        embedding1 = TSNE().fit(self.x)
+        
+        A = affinity.PerplexityBasedNN(self.x)
+        I = initialization.pca(self.x)
+        embedding2 = TSNEEmbedding(I, A)
+        embedding2 = embedding2.optimize(n_iter=25, exaggeration=12)
+        embedding2 = embedding2.optimize(n_iter=50)
+        
+        np.testing.assert_array_equal(
+            embedding1,
+            embedding2,
+            "Calling optimize twice with default parameters produced a different " \
+            "result compared to the default fit() call"
+        )
