@@ -101,7 +101,7 @@ def pca(X, n_components=2, svd_solver="auto", random_state=None, verbose=False):
         n_components=n_components, svd_solver=svd_solver, random_state=random_state
     )
     embedding = pca_.fit_transform(X)
-    rescale(embedding, inplace=True)
+    rescale(embedding, inplace=True, random_state=random_state)
 
     timer.__exit__()
 
@@ -167,7 +167,7 @@ def spectral(A, n_components=2, tol=1e-4, max_iter=None, random_state=None, verb
     # Drop the leading eigenvector
     embedding = eigvecs[:, 1:]
 
-    rescale(embedding, inplace=True)
+    rescale(embedding, inplace=True, random_state=random_state)
 
     timer.__exit__()
 
