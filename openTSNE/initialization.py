@@ -6,13 +6,15 @@ from sklearn.utils import check_random_state
 from openTSNE import utils
 
 
-def rescale(x, inplace=False):
+def rescale(x, inplace=False, target_std=1e-4, add_noise=True, random_state=None):
     """Rescale an embedding so optimization will not have convergence issues.
 
     Parameters
     ----------
     x: np.ndarray
     inplace: bool
+    target_std: float
+    addNoise: bool
 
     Returns
     -------
@@ -23,7 +25,13 @@ def rescale(x, inplace=False):
     if not inplace:
         x = np.array(x, copy=True)
 
-    x /= np.std(x[:, 0]) * 10000
+    x /= np.std(x[:, 0]) / target_std
+    
+    # Add noise with standard deviation 100 times smaller
+    # to avoid numerical problems when the points overlap exactly
+    if add_noise:
+        random_state = check_random_state(random_state)
+        x += random_state.normal(0, target_std / 100, *x.shape)
 
     return x
 
@@ -143,7 +151,9 @@ def spectral(A, n_components=2, tol=1e-4, max_iter=None, random_state=None, verb
 
     # Find leading eigenvectors
     k = n_components + 1
-    v0 = np.ones(A.shape[0]) / np.sqrt(A.shape[0])
+    # v0 initializatoin is taken from sklearn.utils._arpack._init_arpack_v0()
+    random_state = check_random_state(random_state)
+    v0 = random_state.uniform(-1, 1, A.shape[0])
     eigvals, eigvecs = sp.linalg.eigsh(
         A, M=D, k=k, tol=tol, maxiter=max_iter, which="LM", v0=v0
     )
