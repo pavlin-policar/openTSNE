@@ -31,7 +31,7 @@ def rescale(x, inplace=False, target_std=1e-4, add_noise=True, random_state=None
     # to avoid numerical problems when the points overlap exactly
     if add_noise:
         random_state = check_random_state(random_state)
-        x += random_state.normal(0, target_std / 100, *x.shape)
+        x += random_state.normal(0, target_std / 100, x.shape)
 
     return x
 
