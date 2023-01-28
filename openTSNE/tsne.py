@@ -1745,7 +1745,7 @@ class gradient_descent:
                 upper_limit = reference_embedding.box_x_lower_bounds[-1]
 
         if self.update is None:
-            self.update = np.zeros_like(embedding)
+            self.update = np.zeros_like(embedding).view(np.ndarray)
         if self.gains is None:
             self.gains = np.ones_like(embedding).view(np.ndarray)
 
