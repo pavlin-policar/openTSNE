@@ -12,6 +12,7 @@ from sklearn import datasets
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.manifold import SpectralEmbedding
 
 TSNE = partial(openTSNE.TSNE, neighbors="exact", negative_gradient_method="bh")
 
@@ -298,3 +299,22 @@ class TestTSNECorrectnessUsingPrecomputedDistanceMatrix(unittest.TestCase):
 
         np.testing.assert_almost_equal(embedding1, embedding2)
 
+
+class TestSpectralInitializationCorrectness(unittest.TestCase):
+    def test_spectral_agreement_with_sklearn(self):
+        # Generate some random data and stretch it, to give it some structure
+        np.random.seed(42)
+        x = np.random.randn(100, 20)
+        x[:,0] *= 5
+
+        # Perform spectral embedding via sklearn and via openTSNE
+        P = openTSNE.affinity.PerplexityBasedNN(X).P
+        embedding1 = openTSNE.initialization.spectral(P, tol=0, add_jitter=False)
+        embedding2 = SpectralEmbedding(affinity='precomputed').fit_transform(P)
+
+        np.testing.assert_almost_equal(
+            np.abs(np.corrcoef(embedding1[:,0], embedding2[:,0])[0,1]), 1
+        )
+        np.testing.assert_almost_equal(
+            np.abs(np.corrcoef(embedding1[:,1], embedding2[:,1])[0,1]), 1
+        )

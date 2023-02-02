@@ -51,7 +51,9 @@ def jitter(x, inplace=False, scale=0.01, random_state=None):
 
     target_std = np.std(x[:, 0]) * scale
     random_state = check_random_state(random_state)
-    return x + random_state.normal(0, target_std, x.shape)
+    x += random_state.normal(0, target_std, x.shape)
+
+    return x
 
 
 def random(n_samples, n_components=2, random_state=None, verbose=False):
