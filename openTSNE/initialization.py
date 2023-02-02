@@ -6,13 +6,14 @@ from sklearn.utils import check_random_state
 from openTSNE import utils
 
 
-def rescale(x, inplace=False):
+def rescale(x, inplace=False, target_std=1e-4):
     """Rescale an embedding so optimization will not have convergence issues.
 
     Parameters
     ----------
     x: np.ndarray
     inplace: bool
+    target_std: float
 
     Returns
     -------
@@ -23,7 +24,34 @@ def rescale(x, inplace=False):
     if not inplace:
         x = np.array(x, copy=True)
 
-    x /= np.std(x[:, 0]) * 10000
+    x /= np.std(x[:, 0]) / target_std
+
+    return x
+
+
+def jitter(x, inplace=False, scale=0.01, random_state=None):
+    """Add jitter with small standard deviation to avoid numerical problems
+    when the points overlap exactly.
+
+    Parameters
+    ----------
+    x: np.ndarray
+    inplace: bool
+    scale: float
+    random_state: int or np.random.RandomState
+
+    Returns
+    -------
+    np.ndarray
+        A jittered version of ``x``.
+
+    """
+    if not inplace:
+        x = np.array(x, copy=True)
+
+    target_std = np.std(x[:, 0]) * scale
+    random_state = check_random_state(random_state)
+    x += random_state.normal(0, target_std, x.shape)
 
     return x
 
@@ -59,7 +87,14 @@ def random(n_samples, n_components=2, random_state=None, verbose=False):
     return np.ascontiguousarray(embedding)
 
 
-def pca(X, n_components=2, svd_solver="auto", random_state=None, verbose=False):
+def pca(
+    X,
+    n_components=2, 
+    svd_solver="auto", 
+    random_state=None, 
+    verbose=False, 
+    add_jitter=True,
+):
     """Initialize an embedding using the top principal components.
 
     Parameters
@@ -80,6 +115,11 @@ def pca(X, n_components=2, svd_solver="auto", random_state=None, verbose=False):
         number generator is the RandomState instance used by `np.random`.
 
     verbose: bool
+    
+    add_jitter: bool
+        If True, jitter with small standard deviation is added to the
+        initialization to prevent points overlapping exactly, which may lead to
+        numerical issues during optimization. 
 
     Returns
     -------
@@ -93,14 +133,25 @@ def pca(X, n_components=2, svd_solver="auto", random_state=None, verbose=False):
         n_components=n_components, svd_solver=svd_solver, random_state=random_state
     )
     embedding = pca_.fit_transform(X)
+
     rescale(embedding, inplace=True)
+    if add_jitter:
+        jitter(embedding, inplace=True, random_state=random_state)
 
     timer.__exit__()
 
     return np.ascontiguousarray(embedding)
 
 
-def spectral(A, n_components=2, tol=1e-4, max_iter=None, random_state=None, verbose=False):
+def spectral(
+    A,
+    n_components=2,
+    tol=1e-4,
+    max_iter=None,
+    random_state=None,
+    verbose=False,
+    add_jitter=True,
+):
     """Initialize an embedding using the spectral embedding of the KNN graph.
 
     Specifically, we initialize data points by computing the diffusion map on
@@ -122,7 +173,15 @@ def spectral(A, n_components=2, tol=1e-4, max_iter=None, random_state=None, verb
         See scipy.sparse.linalg.eigsh documentation.
 
     random_state: Any
-        Unused, but kept for consistency between initialization schemes.
+        If the value is an int, random_state is the seed used by the random
+        number generator. If the value is a RandomState instance, then it will
+        be used as the random number generator. If the value is None, the random
+        number generator is the RandomState instance used by `np.random`.
+
+    add_jitter: bool
+        If True, jitter with small standard deviation is added to the
+        initialization to prevent points overlapping exactly, which may lead to
+        numerical issues during optimization.
 
     verbose: bool
 
@@ -143,7 +202,9 @@ def spectral(A, n_components=2, tol=1e-4, max_iter=None, random_state=None, verb
 
     # Find leading eigenvectors
     k = n_components + 1
-    v0 = np.ones(A.shape[0]) / np.sqrt(A.shape[0])
+    # v0 initializatoin is taken from sklearn.utils._arpack._init_arpack_v0()
+    random_state = check_random_state(random_state)
+    v0 = random_state.uniform(-1, 1, A.shape[0])
     eigvals, eigvecs = sp.linalg.eigsh(
         A, M=D, k=k, tol=tol, maxiter=max_iter, which="LM", v0=v0
     )
@@ -158,6 +219,8 @@ def spectral(A, n_components=2, tol=1e-4, max_iter=None, random_state=None, verb
     embedding = eigvecs[:, 1:]
 
     rescale(embedding, inplace=True)
+    if add_jitter:
+        jitter(embedding, inplace=True, random_state=random_state)
 
     timer.__exit__()
 

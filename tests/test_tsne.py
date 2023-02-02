@@ -466,9 +466,9 @@ class TestAlternativeFitUsageWithAffinityAndInitialization(unittest.TestCase):
 
     def test_pca_init_with_only_affinities_passed(self):
         aff = affinity.PerplexityBasedNN(self.x, 5, method="exact")
-        desired_init = initialization.spectral(aff.P)
+        desired_init = initialization.spectral(aff.P, random_state=42)
         embedding = TSNE(
-            early_exaggeration_iter=0, n_iter=0, initialization="pca"
+            early_exaggeration_iter=0, n_iter=0, initialization="pca", random_state=42
         ).fit(affinities=aff)
         np.testing.assert_array_equal(embedding, desired_init)
 
@@ -935,8 +935,12 @@ class TestPrecomputedDistanceMatrices(unittest.TestCase):
         d = squareform(pdist(x))
 
         aff = affinity.PerplexityBasedNN(d, metric="precomputed")
-        desired_init = initialization.spectral(aff.P)
-        embedding = TSNE(early_exaggeration_iter=0, n_iter=0).fit(affinities=aff)
+        desired_init = initialization.spectral(aff.P, random_state=42)
+        embedding = TSNE(
+            early_exaggeration_iter=0, 
+            n_iter=0, 
+            random_state=42,
+        ).fit(affinities=aff)
         np.testing.assert_array_equal(embedding, desired_init)
 
     def test_precomputed_dist_matrix_via_tsne_interface_uses_spectral_init(self):
@@ -944,9 +948,13 @@ class TestPrecomputedDistanceMatrices(unittest.TestCase):
         d = squareform(pdist(x))
 
         aff = affinity.PerplexityBasedNN(d, metric="precomputed")
-        desired_init = initialization.spectral(aff.P)
-        embedding = TSNE(metric="precomputed", early_exaggeration_iter=0, n_iter=0) \
-            .fit(d)
+        desired_init = initialization.spectral(aff.P, random_state=42)
+        embedding = TSNE(
+            metric="precomputed", 
+            early_exaggeration_iter=0, 
+            n_iter=0,
+            random_state=42,
+         ).fit(d)
         np.testing.assert_array_equal(embedding, desired_init)
 
     def test_precomputed_dist_matrix_doesnt_override_valid_inits(self):
