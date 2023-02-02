@@ -308,7 +308,7 @@ class TestSpectralInitializationCorrectness(unittest.TestCase):
         x[:,0] *= 5
 
         # Perform spectral embedding via sklearn and via openTSNE
-        P = openTSNE.affinity.PerplexityBasedNN(X).P
+        P = openTSNE.affinity.PerplexityBasedNN(x).P
         embedding1 = openTSNE.initialization.spectral(P, tol=0, add_jitter=False)
         embedding2 = SpectralEmbedding(affinity='precomputed').fit_transform(P)
 
