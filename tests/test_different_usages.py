@@ -191,10 +191,10 @@ class TestUsageWithCustomAffinityAndCustomNeighbors(TestUsage):
 
 class TestUsageExplicitOptimizeCalls(TestUsage):
     def test_explicit_optimize_calls(self):
-        embedding1 = TSNE().fit(self.x)
+        embedding1 = TSNE(random_state=42).fit(self.x)
         
         A = affinity.PerplexityBasedNN(self.x)
-        I = initialization.pca(self.x)
+        I = initialization.pca(self.x, random_state=42)
         embedding2 = TSNEEmbedding(I, A)
         embedding2 = embedding2.optimize(n_iter=25, exaggeration=12)
         embedding2 = embedding2.optimize(n_iter=50)
