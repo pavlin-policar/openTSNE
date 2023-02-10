@@ -196,7 +196,7 @@ class TestUsageExplicitOptimizeCalls(TestUsage):
         A = affinity.PerplexityBasedNN(self.x)
         I = initialization.pca(self.x, random_state=42)
         embedding2 = TSNEEmbedding(I, A)
-        embedding2 = embedding2.optimize(n_iter=25, exaggeration=12)
+        embedding2 = embedding2.optimize(n_iter=25, exaggeration=4)
         embedding2 = embedding2.optimize(n_iter=50)
         
         np.testing.assert_array_equal(
