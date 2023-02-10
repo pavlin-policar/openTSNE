@@ -330,6 +330,6 @@ class TestEarlyExaggerationCollapse(unittest.TestCase):
                 x = np.random.randn(n, p)
                 
                 # Only running early exaggeration, with default parameters
-                embedding = openTSNE(n_iter=0, random_state=42).fit(x)
+                embedding = openTSNE.TSNE(n_iter=0, random_state=42).fit(x)
                 self.assertGreater(np.max(np.abs(embedding)), 1e-10)
 
