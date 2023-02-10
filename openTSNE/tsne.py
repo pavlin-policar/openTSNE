@@ -1015,9 +1015,10 @@ class TSNE(BaseEstimator):
     early_exaggeration: Union[str, float]
         The exaggeration factor to use during the *early exaggeration* phase.
         Typical values range from 4 to 32. When ``early_exaggeration="auto"``
-        early exaggeration factor defaults to 12, unless desired subsequent
-        exaggeration is higher, i.e.: ``early_exaggeration = max(12,
-        exaggeration)``.
+        early exaggeration factor defaults to 4 (for sample sizes below 10,000)
+        or to 12 (for sample sizes >= 10,000), unless desired subsequent
+        exaggeration is higher (in that case early exaggeration is set to equal
+        the `exaggeration` value).
 
     n_iter: int
         The number of iterations to run in the normal optimization regime.
@@ -1109,7 +1110,8 @@ class TSNE(BaseEstimator):
         For larger data sets, the FFT accelerated interpolation method is more
         appropriate and can be set using one of the following aliases: ``fft``,
         ``FFT`` or ``ìnterpolation``. Alternatively, you can use ``auto`` to
-        approximately select the faster method.
+        approximately select the faster method (this will use Barnes-Hut if
+        the sample size is below 10,000).
 
     callbacks: Union[Callable, List[Callable]]
         Callbacks, which will be run every ``callbacks_every_iters`` iterations.
@@ -1162,7 +1164,8 @@ class TSNE(BaseEstimator):
         self.learning_rate = learning_rate
         if early_exaggeration == "auto":
             if exaggeration is None:
-                self.early_exaggeration = 12
+                # Needs to be determined in fit() depending on the sample size
+                self.early_exaggeration = "auto"
             else:
                 self.early_exaggeration = max(12, exaggeration)
         else:
@@ -1246,18 +1249,27 @@ class TSNE(BaseEstimator):
         embedding = self.prepare_initial(X, affinities, initialization)
 
         try:
-            # Early exaggeration with lower momentum to allow points to find more
+            # Early exaggeration with initial_momentum to allow points to more
             # easily move around and find their neighbors
+            n_samples = embedding.shape[0]
+            if self.early_exaggeration == "auto":
+                if n_samples >= 10000:
+                    early_exaggeration = 12
+                else:
+                    early_exaggeration = 4
+            else:
+                early_exaggeration = self.early_exaggeration
+
             embedding.optimize(
                 n_iter=self.early_exaggeration_iter,
-                exaggeration=self.early_exaggeration,
+                exaggeration=early_exaggeration,
                 momentum=self.initial_momentum,
                 inplace=True,
                 propagate_exception=True,
             )
 
-            # Restore actual affinity probabilities and increase momentum to get
-            # final, optimized embedding
+            # Set exaggeration to the final desired value and set final_momentum
+            # to get final, optimized embedding
             embedding.optimize(
                 n_iter=self.n_iter,
                 exaggeration=self.exaggeration,
