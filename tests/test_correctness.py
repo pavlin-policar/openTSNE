@@ -318,3 +318,18 @@ class TestSpectralInitializationCorrectness(unittest.TestCase):
         np.testing.assert_almost_equal(
             np.abs(np.corrcoef(embedding1[:,1], embedding2[:,1])[0,1]), 1
         )
+
+class TestEarlyExaggerationCollapse(unittest.TestCase):
+    def test_early_exaggeration_does_not_collapse(self):
+        ns = [100, 150, 200]
+        ps = [5, 10, 20]
+        
+        np.random.seed(42)
+        for n in ns:
+            for p in ps:
+                x = np.random.randn(n, p)
+                
+                # Only running early exaggeration, with default parameters
+                embedding = openTSNE(n_iter=0, random_state=42).fit(x)
+                self.assertGreater(np.max(np.abs(embedding)), 1e-10)
+
