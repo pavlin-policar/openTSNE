@@ -866,6 +866,8 @@ class TestGradientDescentOptimizer(unittest.TestCase):
             "Failed loading without any optimization",
         )
 
+        embedding = embedding.optimize(10)
+
         # After optimization
         loaded_embedding = pickle.loads(pickle.dumps(embedding))
         np.testing.assert_equal(
