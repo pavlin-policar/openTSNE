@@ -205,3 +205,19 @@ class TestUsageExplicitOptimizeCalls(TestUsage):
             "Calling optimize twice with default parameters produced a different " \
             "result compared to the default fit() call"
         )
+
+    def test_multiple_optimize_calls(self):
+        A = affinity.PerplexityBasedNN(self.x)
+        I = initialization.pca(self.x)
+        embedding1 = TSNEEmbedding(I, A)
+        embedding1.optimize(n_iter=50, inplace=True)
+        embedding2 = TSNEEmbedding(I, A)
+        for i in range(50):
+            embedding2.optimize(n_iter=1, inplace=True)
+        
+        np.testing.assert_array_equal(
+            embedding1,
+            embedding2,
+            "Calling optimize 50 times with n_iter=1 produced a different " \
+            "result compared to calling it once with n_iter=50"
+        )

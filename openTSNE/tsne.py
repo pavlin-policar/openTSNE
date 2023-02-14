@@ -1572,11 +1572,14 @@ def kl_divergence_fft(
 class gradient_descent:
     def __init__(self):
         self.gains = None
+        self.update = None
 
     def copy(self):
         optimizer = self.__class__()
         if self.gains is not None:
             optimizer.gains = np.copy(self.gains)
+        if self.update is not None:
+            optimizer.update = np.copy(self.update)
         return optimizer
 
     def __call__(
@@ -1741,7 +1744,8 @@ class gradient_descent:
                 lower_limit = reference_embedding.box_x_lower_bounds[0]
                 upper_limit = reference_embedding.box_x_lower_bounds[-1]
 
-        update = np.zeros_like(embedding)
+        if self.update is None:
+            self.update = np.zeros_like(embedding).view(np.ndarray)
         if self.gains is None:
             self.gains = np.ones_like(embedding).view(np.ndarray)
 
@@ -1819,22 +1823,23 @@ class gradient_descent:
                     raise OptimizationInterrupt(error=error, final_embedding=embedding)
 
             # Update the embedding using the gradient
-            grad_direction_flipped = np.sign(update) != np.sign(gradient)
+            grad_direction_flipped = np.sign(self.update) != np.sign(gradient)
             grad_direction_same = np.invert(grad_direction_flipped)
             self.gains[grad_direction_flipped] += 0.2
             self.gains[grad_direction_same] = (
                 self.gains[grad_direction_same] * 0.8 + min_gain
             )
-            update = momentum * update - learning_rate * self.gains * gradient
+            gradient = gradient.view(np.ndarray)
+            self.update = momentum * self.update - learning_rate * self.gains * gradient
 
             # Clip the update sizes
             if max_step_norm is not None:
-                update_norms = np.linalg.norm(update, axis=1, keepdims=True)
+                update_norms = np.linalg.norm(self.update, axis=1, keepdims=True)
                 mask = update_norms.squeeze() > max_step_norm
-                update[mask] /= update_norms[mask]
-                update[mask] *= max_step_norm
+                self.update[mask] /= update_norms[mask]
+                self.update[mask] *= max_step_norm
 
-            embedding += update
+            embedding += self.update
 
             # Zero-mean the embedding only if we're not adding new data points,
             # otherwise this will reset point positions
