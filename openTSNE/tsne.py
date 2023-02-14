@@ -1829,6 +1829,7 @@ class gradient_descent:
             self.gains[grad_direction_same] = (
                 self.gains[grad_direction_same] * 0.8 + min_gain
             )
+            gradient = gradient.view(np.ndarray)
             self.update = momentum * self.update - learning_rate * self.gains * gradient
 
             # Clip the update sizes
