@@ -318,3 +318,18 @@ class TestSpectralInitializationCorrectness(unittest.TestCase):
         np.testing.assert_almost_equal(
             np.abs(np.corrcoef(embedding1[:,1], embedding2[:,1])[0,1]), 1
         )
+
+
+class TestEarlyExaggerationCollapse(unittest.TestCase):
+    """In some cases, the BH implementation was producing a collapsed embedding
+    for all data points. For more information, see #233, #234."""
+    def test_early_exaggeration_does_not_collapse(self):
+        n_samples = [100, 150, 200]
+        n_dims = [5, 10, 20]
+
+        np.random.seed(42)
+        for n in n_samples:
+            for d in n_dims:
+                x = np.random.randn(n, d)
+                embedding = openTSNE.TSNE(random_state=42).fit(x)
+                self.assertGreater(np.max(np.abs(embedding)), 1e-8)
