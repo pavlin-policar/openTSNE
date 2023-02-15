@@ -124,7 +124,7 @@ cdef void split_node(Node * node):
     PyMem_Free(new_center)
 
 
-cdef inline bint is_duplicate(Node * node, double * point, double duplicate_eps=1e-6) nogil:
+cdef inline bint is_duplicate(Node * node, double * point, double duplicate_eps=EPSILON) nogil:
     cdef Py_ssize_t d
     for d in range(node.n_dims):
         if fabs(node.center_of_mass[d] - point[d]) >= duplicate_eps:
