@@ -21,28 +21,44 @@ jobs:
         osx - python37:
           image.name: 'macos-12'
           python.version: '3.7'
+          ciwb.build: cp37-macosx_x86_64
+          ciwb.archs: x86_64
         osx - python38:
           image.name: 'macos-12'
           python.version: '3.8'
+          ciwb.build: cp38-macosx_x86_64
+          ciwb.archs: x86_64
         osx - python39:
           image.name: 'macos-12'
           python.version: '3.9'
+          ciwb.build: cp39-macosx_universal2
+          ciwb.archs: universal2
         osx - python310:
           image.name: 'macos-12'
           python.version: '3.10'
+          ciwb.build: cp310-macosx_universal2
+          ciwb.archs: universal2
 
         windows - python37:
           image.name: 'windows-2019'
           python.version: '3.7'
+          ciwb.build: cp37-win_amd64
+          ciwb.archs: AMD64
         windows - python38:
           image.name: 'windows-2019'
           python.version: '3.8'
+          ciwb.build: cp38-win_amd64
+          ciwb.archs: AMD64
         windows - python39:
           image.name: 'windows-2019'
           python.version: '3.9'
+          ciwb.build: cp39-win_amd64
+          ciwb.archs: AMD64
         windows - python310:
           image.name: 'windows-2019'
           python.version: '3.10'
+          ciwb.build: cp310-win_amd64
+          ciwb.archs: AMD64
 
     steps:
       - task: UsePythonVersion@0
@@ -54,11 +70,14 @@ jobs:
       - script: env
         displayName: 'List enviromental variables'
 
-      - script: python -m pip install build
+      - script: python -m pip install cibuildwheel
         displayName: Installing build tools
 
-      - script: python -m build -w .
+      - script: python -m cibuildwheel --output-dir dist/
         displayName: 'Build wheel'
+        env:
+          CIBW_BUILD: $(ciwb.build)
+          CIBW_ARCHS: $(ciwb.archs)
 
       # Since Python automatically adds `cwd` to `sys.path`, it's important we remove the local folder
       # containing our code from the working directory. Otherwise, the tests will use the local copy
