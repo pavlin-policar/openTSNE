@@ -5,8 +5,6 @@
 # cython: language_level=3
 import numpy as np
 
-cdef double EPSILON = np.finfo(np.float64).eps
-
 ctypedef struct Node:
     Py_ssize_t n_dims
     double *center
@@ -19,7 +17,7 @@ ctypedef struct Node:
     Py_ssize_t num_points
 
 
-cdef bint is_duplicate(Node * node, double * point, double duplicate_eps=*) nogil
+cdef bint is_close(Node * node, double * point, double eps) nogil
 
 
 cdef class QuadTree:

@@ -71,14 +71,15 @@ cdef Py_ssize_t get_child_idx_for(Node * node, double * point) nogil:
 cdef inline void update_center_of_mass(Node * node, double * point) nogil:
     cdef Py_ssize_t d
     for d in range(node.n_dims):
-        node.center_of_mass[d] = (node.center_of_mass[d] * node.num_points + point[d]) \
-            / (node.num_points + 1)
+        node.center_of_mass[d] = (node.center_of_mass[d] * node.num_points + point[d]) / (node.num_points + 1)
     node.num_points += 1
 
 
 cdef void add_point_to(Node * node, double * point):
-    # If the node is a leaf node and empty, we"re done
-    if node.is_leaf and node.num_points == 0 or is_duplicate(node, point):
+    # If the node is a leaf node and empty, we're done. We'll also limit the
+    # branching of each node to prevent memory explosions. 1e-6 here is
+    # effectively the minimum size that a node can take
+    if node.is_leaf and node.num_points == 0 or is_close(node, point, 1e-6):
         update_center_of_mass(node, point)
         return
 
@@ -124,10 +125,10 @@ cdef void split_node(Node * node):
     PyMem_Free(new_center)
 
 
-cdef inline bint is_duplicate(Node * node, double * point, double duplicate_eps=1e-16) nogil:
+cdef inline bint is_close(Node * node, double * point, double eps) nogil:
     cdef Py_ssize_t d
     for d in range(node.n_dims):
-        if fabs(node.center_of_mass[d] - point[d]) >= duplicate_eps:
+        if fabs(node.center_of_mass[d] - point[d]) >= eps:
             return False
     return True
 

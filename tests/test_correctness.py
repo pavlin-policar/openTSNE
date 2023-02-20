@@ -333,3 +333,26 @@ class TestEarlyExaggerationCollapse(unittest.TestCase):
                 x = np.random.randn(n, d)
                 embedding = openTSNE.TSNE(random_state=42).fit(x)
                 self.assertGreater(np.max(np.abs(embedding)), 1e-8)
+
+
+class TestDataMatricesWithDuplicatedRows(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        from sklearn.preprocessing import KBinsDiscretizer
+
+        # Load up contrived example where we have a large number of duplicated
+        # rows. This is similar to the Titanic data set, which is problematic.
+        np.random.seed(0)
+        iris = datasets.load_iris()
+        x, y = iris.data, iris.target
+
+        discretizer = KBinsDiscretizer(n_bins=2, strategy="uniform")
+        x = discretizer.fit_transform(x).toarray()
+
+        idx = np.random.choice(x.shape[0], size=1000, replace=True)
+        cls.x, cls.y = x[idx], y[idx]
+
+    def test_works_without_error(self):
+        openTSNE.TSNE(
+            early_exaggeration=100, negative_gradient_method="bh", random_state=0
+        ).fit(self.x)

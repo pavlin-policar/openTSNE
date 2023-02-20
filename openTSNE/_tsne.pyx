@@ -10,7 +10,7 @@ from cython.parallel import prange, parallel
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
 from libc.stdlib cimport malloc, free
 
-from .quad_tree cimport QuadTree, Node, is_duplicate
+from .quad_tree cimport QuadTree, Node, is_close
 from ._matrix_mul.matrix_mul cimport matrix_multiply_fft_1d, matrix_multiply_fft_2d
 
 
@@ -178,7 +178,7 @@ cpdef double estimate_negative_gradient_bh(
     Py_ssize_t num_threads=1,
     bint pairwise_normalization=True,
 ):
-    """Estimate the negative tSNE gradient using the Barnes Hut approximation.
+    """Estimate the negative t-SNE gradient using the Barnes-Hut approximation.
     
     Notes
     -----
@@ -197,7 +197,7 @@ cpdef double estimate_negative_gradient_bh(
         num_threads = 1
 
     # In order to run gradient estimation in parallel, we need to pass each
-    # worker it's own memory slot to write sum_Qs
+    # worker its own memory slot to write sum_Qs
     for i in prange(num_points, nogil=True, num_threads=num_threads, schedule="guided"):
         _estimate_negative_gradient_single(
             &tree.root, &embedding[i, 0], &gradient[i, 0], &sum_Qi[i], theta, dof
@@ -225,8 +225,8 @@ cdef void _estimate_negative_gradient_single(
     double theta,
     double dof,
 ) nogil:
-    # Make sure that we spend no time on empty nodes or self-interactions
-    if node.num_points == 0 or node.is_leaf and is_duplicate(node, point):
+    # Make sure that we spend no time on empty nodes or simple self-interactions
+    if node.num_points == 0 or node.is_leaf and is_close(node, point, EPSILON):
         return
 
     cdef:
@@ -234,7 +234,7 @@ cdef void _estimate_negative_gradient_single(
         double q_ij, tmp
         Py_ssize_t d
 
-    # Compute the squared euclidean disstance in the embedding space from the
+    # Compute the squared euclidean distance in the embedding space from the
     # new point to the center of mass
     for d in range(node.n_dims):
         tmp = node.center_of_mass[d] - point[d]
