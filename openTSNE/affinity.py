@@ -1111,9 +1111,12 @@ class Uniform(Affinities):
     metric_params: dict
         Additional keyword arguments for the metric function.
 
-    symmetrize: bool
+    symmetrize: Union[str, bool]
         Symmetrize affinity matrix. Standard t-SNE symmetrizes the interactions
-        but when embedding new data, symmetrization is not performed.
+        but when embedding new data, symmetrization is not performed. Default value is True
+        and is equivalent to ``average``: symmetrization via (A + A.T)/2. Alternatively,
+        ``or`` yields a binary affinity matrix with all non-zero elements being the same:
+        (A + A.T) > 0.
 
     n_jobs: int
         The number of threads to use while running t-SNE. This follows the
@@ -1188,7 +1191,9 @@ class Uniform(Affinities):
         )
 
         # Symmetrize the probability matrix
-        if symmetrize:
+        if symmetrize == "or":
+            P = (P + P.T > 0).astype(float)
+        elif symmetrize == "average" or symmetrize == True:
             P = (P + P.T) / 2
 
         # Convert weights to probabilities
