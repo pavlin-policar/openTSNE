@@ -1113,10 +1113,12 @@ class Uniform(Affinities):
 
     symmetrize: Union[str, bool]
         Symmetrize affinity matrix. Standard t-SNE symmetrizes the interactions
-        but when embedding new data, symmetrization is not performed. Default value is True
-        and is equivalent to ``average``: symmetrization via (A + A.T)/2. Alternatively,
-        ``or`` yields a binary affinity matrix with all non-zero elements being the same:
-        (A + A.T) > 0.
+        but when embedding new data, symmetrization is not performed. Default value is
+        ``max`` and yields a binary affinity matrix with all non-zero elements
+        (corresponding to edges of the kNN graph) being the same. Another
+        possibility is ``mean``, which performs symmetrization via (A + A.T)/2, resulting
+        in the affinity matrix with two possible non-zero values. ``True`` is equivalent
+        to ``max``. ``False`` performs no symmetrization.
 
     n_jobs: int
         The number of threads to use while running t-SNE. This follows the
@@ -1145,7 +1147,7 @@ class Uniform(Affinities):
         method="auto",
         metric="euclidean",
         metric_params=None,
-        symmetrize=True,
+        symmetrize="max",
         n_jobs=1,
         random_state=None,
         verbose=False,
@@ -1191,9 +1193,9 @@ class Uniform(Affinities):
         )
 
         # Symmetrize the probability matrix
-        if symmetrize == "or":
+        if symmetrize == "max" or symmetrize == True:
             P = (P + P.T > 0).astype(float)
-        elif symmetrize == "average" or symmetrize == True:
+        elif symmetrize == "mean":
             P = (P + P.T) / 2
 
         # Convert weights to probabilities
