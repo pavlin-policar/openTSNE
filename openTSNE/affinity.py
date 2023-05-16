@@ -1197,6 +1197,12 @@ class Uniform(Affinities):
             P = (P + P.T > 0).astype(float)
         elif symmetrize == "mean":
             P = (P + P.T) / 2
+        elif symmetrize == False:
+            pass
+        else:
+            raise ValueError(
+                f"Symmetrization method ({symmetrize}) is not recognized."
+            )
 
         # Convert weights to probabilities
         P /= np.sum(P)
