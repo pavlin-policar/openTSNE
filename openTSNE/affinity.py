@@ -1122,7 +1122,7 @@ class Uniform(Affinities):
         symmetrization via (A + A.T)/2, resulting in the affinity matrix with two possible
         non-zero values. ``none`` results in non-symmetric affinity matrix. Default value
         is ``True`` which is equivalent to ``mean``, but the default will change to
-        ``max`` in future versions.
+        ``max`` in future versions. ``False`` is equivalent to ``none``.
 
     n_jobs: int
         The number of threads to use while running t-SNE. This follows the
@@ -1201,7 +1201,7 @@ class Uniform(Affinities):
             P = (P + P.T > 0).astype(float)
         elif symmetrize == "mean":
             P = (P + P.T) / 2
-        elif symmetrize == "none":
+        elif symmetrize == "none" or symmetrize == False:
             pass
         elif symmetrize == True:
             # Backward compatibility
