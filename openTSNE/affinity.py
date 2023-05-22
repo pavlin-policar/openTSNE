@@ -11,6 +11,8 @@ from openTSNE import nearest_neighbors
 from openTSNE import utils
 from openTSNE.utils import is_package_installed
 
+import warnings
+
 log = logging.getLogger(__name__)
 
 
@@ -1111,9 +1113,16 @@ class Uniform(Affinities):
     metric_params: dict
         Additional keyword arguments for the metric function.
 
-    symmetrize: bool
+    symmetrize: Union[str, bool]
         Symmetrize affinity matrix. Standard t-SNE symmetrizes the interactions
-        but when embedding new data, symmetrization is not performed.
+        but when embedding new data, symmetrization is not performed. Available options
+        are ``max``, ``mean``, and ``none``.
+        ``max`` yields a binary affinity matrix with all non-zero elements
+        (corresponding to edges of the kNN graph) being the same. ``mean`` performs
+        symmetrization via (A + A.T)/2, resulting in the affinity matrix with two possible
+        non-zero values. ``none`` results in non-symmetric affinity matrix. Default value
+        is ``True`` which is equivalent to ``mean``, but the default will change to
+        ``max`` in future versions. ``False`` is equivalent to ``none``.
 
     n_jobs: int
         The number of threads to use while running t-SNE. This follows the
@@ -1188,8 +1197,24 @@ class Uniform(Affinities):
         )
 
         # Symmetrize the probability matrix
-        if symmetrize:
+        if symmetrize == "max":
+            P = (P + P.T > 0).astype(float)
+        elif symmetrize == "mean":
             P = (P + P.T) / 2
+        elif symmetrize == "none" or symmetrize == False:
+            pass
+        elif symmetrize == True:
+            # Backward compatibility
+            P = (P + P.T) / 2
+            warnings.warn(
+                f"Using `mean` symmetrization, but the default behaviour is going to "
+                f"change to `max` in future versions.",
+                category=FutureWarning,
+            )
+        else:
+            raise ValueError(
+                f"Symmetrization method ({symmetrize}) is not recognized."
+            )
 
         # Convert weights to probabilities
         P /= np.sum(P)
