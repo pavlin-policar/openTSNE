@@ -81,7 +81,7 @@ class Affinities:
 
 
 class PerplexityBasedNN(Affinities):
-    """Compute affinities using nearest neighbors.
+    """Compute standard, Gaussian affinities using nearest neighbors.
 
     Please see the :ref:`parameter-guide` for more information.
 
@@ -96,10 +96,11 @@ class PerplexityBasedNN(Affinities):
 
     method: str
         Specifies the nearest neighbor method to use. Can be ``exact``, ``annoy``,
-        ``pynndescent``, ``hnsw``, ``approx``, or ``auto`` (default). ``approx`` uses Annoy
-        if the input data matrix is not a sparse object and if Annoy supports
-        the given metric. Otherwise it uses Pynndescent. ``auto`` uses exact
-        nearest neighbors for N<1000 and the same heuristic as ``approx`` for N>=1000.
+        ``pynndescent``, ``hnsw``, ``approx``, or ``auto`` (default). ``approx``
+        uses Annoy if the input data matrix is not a sparse object and if Annoy
+        supports the given metric. Otherwise, it uses Pynndescent. ``auto`` uses
+        exact nearest neighbors for N<1000 and the same heuristic as ``approx``
+        for N>=1000.
 
     metric: Union[str, Callable]
         The metric to be used to compute affinities between points in the
@@ -109,8 +110,9 @@ class PerplexityBasedNN(Affinities):
         Additional keyword arguments for the metric function.
 
     symmetrize: bool
-        Symmetrize affinity matrix. Standard t-SNE symmetrizes the interactions
-        but when embedding new data, symmetrization is not performed.
+        Symmetrize the affinity matrix. During standard t-SNE optimization, the
+        affinities are symmetrized. However, when embedding new data points into
+        existing embeddings, symmetrization is not performed.
 
     n_jobs: int
         The number of threads to use while running t-SNE. This follows the
@@ -352,7 +354,7 @@ class PerplexityBasedNN(Affinities):
 def get_knn_index(
     data, method, k, metric, metric_params=None, n_jobs=1, random_state=None, verbose=False
 ):
-    # If we're dealing with a precomputed distance matrix, our job is very easy
+    # If we're dealing with a precomputed distance matrix, our job is very easy,
     # so we can skip all the remaining checks
     if metric == "precomputed":
         return nearest_neighbors.PrecomputedDistanceMatrix(data, k=k)
@@ -422,7 +424,7 @@ def joint_probabilities_nn(
     ----------
     neighbors: np.ndarray
         A `n_samples * k_neighbors` matrix containing the indices to each
-        points" nearest neighbors in descending order.
+        points' nearest neighbors in descending order.
     distances: np.ndarray
         A `n_samples * k_neighbors` matrix containing the distances to the
         neighbors at indices defined in the neighbors parameter.
@@ -493,7 +495,7 @@ def joint_probabilities_nn(
 
 
 class FixedSigmaNN(Affinities):
-    """Compute affinities using using nearest neighbors and a fixed bandwidth
+    """Compute affinities using nearest neighbors and a fixed bandwidth
     for the Gaussians in the ambient space.
 
     Using a fixed Gaussian bandwidth can enable us to find smaller clusters of
@@ -514,11 +516,11 @@ class FixedSigmaNN(Affinities):
 
     method: str
         Specifies the nearest neighbor method to use. Can be ``exact``, ``annoy``,
-        ``pynndescent``, ``hnsw``, ``approx``, or ``auto`` (default). ``approx`` uses Annoy
-        if the input data matrix is not a sparse object and if Annoy supports
-        the given metric. Otherwise it uses Pynndescent. ``auto`` uses exact
-        nearest neighbors for N<1000 and the same heuristic as ``approx`` for N>=1000.
-
+        ``pynndescent``, ``hnsw``, ``approx``, or ``auto`` (default). ``approx``
+        uses Annoy if the input data matrix is not a sparse object and if Annoy
+        supports the given metric. Otherwise, it uses Pynndescent. ``auto`` uses
+        exact nearest neighbors for N<1000 and the same heuristic as ``approx``
+        for N>=1000.
 
     metric: Union[str, Callable]
         The metric to be used to compute affinities between points in the
@@ -528,8 +530,9 @@ class FixedSigmaNN(Affinities):
         Additional keyword arguments for the metric function.
 
     symmetrize: bool
-        Symmetrize affinity matrix. Standard t-SNE symmetrizes the interactions
-        but when embedding new data, symmetrization is not performed.
+        Symmetrize the affinity matrix. During standard t-SNE optimization, the
+        affinities are symmetrized. However, when embedding new data points into
+        existing embeddings, symmetrization is not performed.
 
     n_jobs: int
         The number of threads to use while running t-SNE. This follows the
@@ -725,10 +728,11 @@ class MultiscaleMixture(Affinities):
 
     method: str
         Specifies the nearest neighbor method to use. Can be ``exact``, ``annoy``,
-        ``pynndescent``, ``hnsw``, ``approx``, or ``auto`` (default). ``approx`` uses Annoy
-        if the input data matrix is not a sparse object and if Annoy supports
-        the given metric. Otherwise it uses Pynndescent. ``auto`` uses exact
-        nearest neighbors for N<1000 and the same heuristic as ``approx`` for N>=1000.
+        ``pynndescent``, ``hnsw``, ``approx``, or ``auto`` (default). ``approx``
+        uses Annoy if the input data matrix is not a sparse object and if Annoy
+        supports the given metric. Otherwise, it uses Pynndescent. ``auto`` uses
+        exact nearest neighbors for N<1000 and the same heuristic as ``approx``
+        for N>=1000.
 
     metric: Union[str, Callable]
         The metric to be used to compute affinities between points in the
@@ -738,8 +742,9 @@ class MultiscaleMixture(Affinities):
         Additional keyword arguments for the metric function.
 
     symmetrize: bool
-        Symmetrize affinity matrix. Standard t-SNE symmetrizes the interactions
-        but when embedding new data, symmetrization is not performed.
+        Symmetrize the affinity matrix. During standard t-SNE optimization, the
+        affinities are symmetrized. However, when embedding new data points into
+        existing embeddings, symmetrization is not performed.
 
     n_jobs: int
         The number of threads to use while running t-SNE. This follows the
@@ -1016,10 +1021,11 @@ class Multiscale(MultiscaleMixture):
 
     method: str
         Specifies the nearest neighbor method to use. Can be ``exact``, ``annoy``,
-        ``pynndescent``, ``hnsw``, ``approx``, or ``auto`` (default). ``approx`` uses Annoy
-        if the input data matrix is not a sparse object and if Annoy supports
-        the given metric. Otherwise it uses Pynndescent. ``auto`` uses exact
-        nearest neighbors for N<1000 and the same heuristic as ``approx`` for N>=1000.
+        ``pynndescent``, ``hnsw``, ``approx``, or ``auto`` (default). ``approx``
+        uses Annoy if the input data matrix is not a sparse object and if Annoy
+        supports the given metric. Otherwise, it uses Pynndescent. ``auto`` uses
+        exact nearest neighbors for N<1000 and the same heuristic as ``approx``
+        for N>=1000.
 
     metric: Union[str, Callable]
         The metric to be used to compute affinities between points in the
@@ -1029,8 +1035,9 @@ class Multiscale(MultiscaleMixture):
         Additional keyword arguments for the metric function.
 
     symmetrize: bool
-        Symmetrize affinity matrix. Standard t-SNE symmetrizes the interactions
-        but when embedding new data, symmetrization is not performed.
+        Symmetrize the affinity matrix. During standard t-SNE optimization, the
+        affinities are symmetrized. However, when embedding new data points into
+        existing embeddings, symmetrization is not performed.
 
     n_jobs: int
         The number of threads to use while running t-SNE. This follows the
@@ -1088,7 +1095,7 @@ class Multiscale(MultiscaleMixture):
 
 
 class Uniform(Affinities):
-    """Compute affinities using using nearest neighbors and uniform kernel in
+    """Compute affinities using nearest neighbors and uniform kernel in
     the ambient space.
 
     Parameters
@@ -1100,11 +1107,11 @@ class Uniform(Affinities):
 
     method: str
         Specifies the nearest neighbor method to use. Can be ``exact``, ``annoy``,
-        ``pynndescent``, ``hnsw``, ``approx``, or ``auto`` (default). ``approx`` uses Annoy
-        if the input data matrix is not a sparse object and if Annoy supports
-        the given metric. Otherwise it uses Pynndescent. ``auto`` uses exact
-        nearest neighbors for N<1000 and the same heuristic as ``approx`` for N>=1000.
-
+        ``pynndescent``, ``hnsw``, ``approx``, or ``auto`` (default). ``approx``
+        uses Annoy if the input data matrix is not a sparse object and if Annoy
+        supports the given metric. Otherwise, it uses Pynndescent. ``auto`` uses
+        exact nearest neighbors for N<1000 and the same heuristic as ``approx``
+        for N>=1000.
 
     metric: Union[str, Callable]
         The metric to be used to compute affinities between points in the
@@ -1114,15 +1121,18 @@ class Uniform(Affinities):
         Additional keyword arguments for the metric function.
 
     symmetrize: Union[str, bool]
-        Symmetrize affinity matrix. Standard t-SNE symmetrizes the interactions
-        but when embedding new data, symmetrization is not performed. Available options
-        are ``max``, ``mean``, and ``none``.
-        ``max`` yields a binary affinity matrix with all non-zero elements
-        (corresponding to edges of the kNN graph) being the same. ``mean`` performs
-        symmetrization via (A + A.T)/2, resulting in the affinity matrix with two possible
-        non-zero values. ``none`` results in non-symmetric affinity matrix. Default value
-        is ``True`` which is equivalent to ``mean``, but the default will change to
-        ``max`` in future versions. ``False`` is equivalent to ``none``.
+        Symmetrize the affinity matrix. During standard t-SNE optimization, the
+        affinities are symmetrized. However, when embedding new data points into
+        existing embeddings, symmetrization is not performed.
+        The uniform affinity supports ``max`` and ``mean`` symmetrization, as
+        well as no symmetrization via ``none``.
+        The ``max`` symmetrization yields a binary affinity matrix with all
+        non-zero elements (corresponding to edges of the kNN graph) being the
+        same. The ``mean`` symmetrization performs symmetrization via
+        (A + A.T) / 2, resulting in the affinity matrix with two possible
+        non-zero values. Applying no symmetrization results in a non-symmetric
+        affinity matrix. We default to ``mean`` symmetrization, but the default
+        will change to ``max`` in future versions.
 
     n_jobs: int
         The number of threads to use while running t-SNE. This follows the
@@ -1297,7 +1307,7 @@ class PrecomputedAffinities(Affinities):
     Parameters
     ----------
     affinities: scipy.sparse.csr_matrix, np.ndarray
-        A N x N matrix containing the affinities.
+        An N x N matrix containing the affinities.
     normalize: bool
         Normalize the affinity matrix to sum to 1. Default is True.
 
