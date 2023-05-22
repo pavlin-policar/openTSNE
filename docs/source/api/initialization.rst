@@ -2,4 +2,4 @@ Initialization
 ==============
 
 .. automodule:: openTSNE.initialization
-    :members: pca, random
+    :members: pca, spectral, random, rescale, jitter
