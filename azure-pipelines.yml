@@ -84,7 +84,6 @@ jobs:
 
   - script: pip install pynndescent
     displayName: 'Install optional dependencies - pynndescent'
-    condition: ne(variables['python.version'], '3.10')
 
   - script: pip install hnswlib
     env:
