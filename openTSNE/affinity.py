@@ -1201,9 +1201,9 @@ class Uniform(Affinities):
             P = (P + P.T > 0).astype(float)
         elif symmetrize == "mean":
             P = (P + P.T) / 2
-        elif symmetrize == "none" or symmetrize == False:
+        elif symmetrize == "none" or symmetrize is False:
             pass
-        elif symmetrize == True:
+        elif symmetrize is True:
             # Backward compatibility
             P = (P + P.T) / 2
             warnings.warn(
@@ -1213,7 +1213,7 @@ class Uniform(Affinities):
             )
         else:
             raise ValueError(
-                f"Symmetrization method ({symmetrize}) is not recognized."
+                f"Symmetrization method `{symmetrize}` is not recognized."
             )
 
         # Convert weights to probabilities
