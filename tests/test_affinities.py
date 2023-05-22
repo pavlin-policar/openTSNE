@@ -259,12 +259,12 @@ class TestUniform(unittest.TestCase):
         values = aff.P.data
         self.assertEqual(len(np.unique(values)), 2)
 
-    def test_symmetrize_max_has_one_distinct_values(self):
+    def test_symmetrize_max_has_one_distinct_value(self):
         aff = Uniform(self.x, k_neighbors=10, symmetrize="max")
         values = aff.P.data
         self.assertEqual(len(np.unique(values)), 1)
 
-    def test_symmetrize_with_inavlid_parameter(self):
+    def test_symmetrize_with_invalid_parameter(self):
         with self.assertRaises(ValueError):
             Uniform(self.x, k_neighbors=10, symmetrize="invalid")
 
