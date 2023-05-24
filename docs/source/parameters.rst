@@ -37,12 +37,10 @@ Optimization parameters
 t-SNE uses a variation of gradient descent optimization procedure that incorporates momentum to speed up convergence of the embedding [3]_.
 
 learning_rate: float
-    The learning rate controls the step size of the gradient updates. This typically ranges from 100 to 1000, but usually the default (200) works well enough.
-
-    When dealing with large data sets e.g 500k samples or more, it may be necessary to increase the learning rate or to increase the number of iterations [1]_.
+    The learning rate controls the step size of the gradient updates. This parameter can be manually set, however, we recommend using the default value of "auto", which sets the learning rate by dividing the number of samples by the exaggearation factor.
 
 momentum: float
-    Gradient descent with momentum keeps a sum exponentially decaying weights from previous iterations, speeding up convergence. In early stages of the optimization, this is typically set to a lower value (0.5 in most implementations) since points generally move around quite a bit in this phase and increased after the initial early exaggeration phase (typically to 0.8) to speed up convergence.
+    To increase convergence speed and reduce the number of iterations required, we can augment gradient descent with a momentum term. Momentum stores an exponentially decaying sum of gradient updates from previous iterations. By default, this is typically set to 0.8.
 
 max_grad_norm: float
     By default, openTSNE does not apply gradient clipping. However, when embedding new data into an existing embedding, care must be taken that the data points do not "shoot off". Gradient clipping alevaites this issue.
