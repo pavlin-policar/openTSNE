@@ -20,13 +20,13 @@ sys.path.insert(0, os.path.abspath('openTSNE'))
 # -- Project information -----------------------------------------------------
 
 project = 'openTSNE'
-copyright = u'2020, Pavlin Poličar'
+copyright = u'2023, Pavlin Poličar'
 author = u'Pavlin Poličar'
 
 # The short X.Y version
 version = ''
 # The full version, including alpha/beta/rc tags
-release = '0.3.13'
+release = '1.0.0'
 
 
 # -- General configuration ---------------------------------------------------
