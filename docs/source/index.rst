@@ -30,9 +30,14 @@ openTSNE is a modular Python implementation of t-Distributed Stochasitc Neighbor
 References
 ----------
 
-.. [1] Van Der Maaten, Laurens, and Hinton, Geoffrey. `“Visualizing data using t-SNE” <http://www.jmlr.org/papers/volume9/vandermaaten08a/vandermaaten08a.pdf>`__, Journal of Machine Learning Research (2008).
-.. [2] Poličar, Pavlin G., Martin Stražar, and Blaž Zupan. `“Embedding to Reference t-SNE Space Addresses Batch Effects in Single-Cell Classification” <https://www.biorxiv.org/content/10.1101/671404v1.abstract>`__, BioRxiv (2019).
-.. [3] Van Der Maaten, Laurens. `“Accelerating t-SNE using tree-based algorithms” <http://www.jmlr.org/papers/volume15/vandermaaten14a/vandermaaten14a.pdf>`__, Journal of Machine Learning Research (2014).
+.. [1] Van der Maaten, Laurens, and Hinton, Geoffrey. `“Visualizing data using t-SNE” <http://www.jmlr.org/papers/volume9/vandermaaten08a/vandermaaten08a.pdf>`__, Journal of Machine Learning Research (2008).
+
+.. [2] Poličar, Pavlin G., Martin Stražar, and Blaž Zupan. `“Embedding to Reference t-SNE Space Addresses Batch Effects in Single-Cell Classification” <https://link.springer.com/article/10.1007/s10994-021-06043-1>`__, Machine Learning (2021).
+
+.. [3] Van der Maaten, Laurens. `“Accelerating t-SNE using tree-based algorithms” <http://www.jmlr.org/papers/volume15/vandermaaten14a/vandermaaten14a.pdf>`__, Journal of Machine Learning Research (2014).
+
 .. [4] Linderman, George C., et al. `"Fast interpolation-based t-SNE for improved visualization of single-cell RNA-seq data" <https://www.nature.com/articles/s41592-018-0308-4>`__, Nature Methods (2019).
+
 .. [5] Kobak, Dmitry, and Berens, Philipp. `“The art of using t-SNE for single-cell transcriptomics” <https://www.nature.com/articles/s41467-019-13056-x>`__, Nature Communications (2019).
+
 .. [6] Macosko, Evan Z., et al. \ `“Highly parallel genome-wide expression profiling of individual cells using nanoliter droplets” <https://www.sciencedirect.com/science/article/pii/S0092867415005498>`__, Cell (2015).

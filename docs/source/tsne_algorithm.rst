@@ -204,8 +204,8 @@ UMAP, a recent and popular embedding technique for visualizing high dimensional 
 References
 ----------
 
-.. [1] Maaten, Laurens van der, and Geoffrey Hinton. "Visualizing data using t-SNE." Journal of machine learning research 9.Nov (2008): 2579-2605.
+.. [1] Van der Maaten, Laurens, and Hinton, Geoffrey. `“Visualizing data using t-SNE” <http://www.jmlr.org/papers/volume9/vandermaaten08a/vandermaaten08a.pdf>`__, Journal of Machine Learning Research (2008).
 
-.. [2] Van Der Maaten, Laurens. "Accelerating t-SNE using tree-based algorithms." The Journal of Machine Learning Research 15.1 (2014): 3221-3245.
+.. [2] Van der Maaten, Laurens. `“Accelerating t-SNE using tree-based algorithms” <http://www.jmlr.org/papers/volume15/vandermaaten14a/vandermaaten14a.pdf>`__, Journal of Machine Learning Research (2014).
 
-.. [3] Linderman, George C., et al. "Efficient Algorithms for t-distributed Stochastic Neighborhood Embedding." arXiv preprint arXiv:1712.09005 (2017).
+.. [3] Linderman, George C., et al. `"Fast interpolation-based t-SNE for improved visualization of single-cell RNA-seq data" <https://www.nature.com/articles/s41592-018-0308-4>`__, Nature Methods (2019).

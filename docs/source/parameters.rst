@@ -74,8 +74,8 @@ ints_in_interval: float
 
 References
 ----------
-.. [1] Kobak, Dmitry, and Philipp Berens. "The art of using t-SNE for single-cell transcriptomics." bioRxiv (2018): 453449.
+.. [1] Kobak, Dmitry, and Berens, Philipp. `“The art of using t-SNE for single-cell transcriptomics” <https://www.nature.com/articles/s41467-019-13056-x>`__, Nature Communications (2019).
 
-.. [2] Linderman, George C., and Stefan Steinerberger. "Clustering with t-SNE, provably." arXiv preprint arXiv:1706.02582 (2017).
+.. [2] Linderman, George C., and Stefan Steinerberger. `“Clustering with t-SNE, provably.” <https://epubs.siam.org/doi/abs/10.1137/18M1216134>`__, SIAM Journal on Mathematics of Data Science (2019).
 
-.. [3] Jacobs, Robert A. "Increased rates of convergence through learning rate adaptation." Neural networks 1.4 (1988): 295-307.
+.. [3] Jacobs, Robert A. `"Increased rates of convergence through learning rate adaptation." <https://www.sciencedirect.com/science/article/abs/pii/0893608088900032>`__, Neural Networks (1988).

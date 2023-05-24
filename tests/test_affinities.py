@@ -22,7 +22,8 @@ AFFINITY_CLASSES = [
     ("FixedSigmaNN", partial(FixedSigmaNN, sigma=1)),
     ("MultiscaleMixture", partial(MultiscaleMixture, perplexities=[10, 20])),
     ("Multiscale", partial(Multiscale, perplexities=[10, 20])),
-    ("Uniform", partial(Uniform, k_neighbors=5)),
+    ("UniformMean", partial(Uniform, k_neighbors=5, symmetrize="mean")),
+    ("UniformMax", partial(Uniform, k_neighbors=5, symmetrize="max")),
 ]
 
 
@@ -66,7 +67,7 @@ class TestPerplexityBased(unittest.TestCase):
                         "resulting in a sparser affinity matrix")
                         
         # Check that increasing the perplexity works (with a warning)
-        # Larger then the original perplexity, but still less than the number of
+        # Larger than the original perplexity, but still less than the number of
         # nearest neighbors
         perplexity = 40
         with self.assertLogs(affinity.log, level="WARNING"):
@@ -253,6 +254,20 @@ class TestUniform(unittest.TestCase):
         new_p = new_p.toarray()
         np.testing.assert_allclose(new_p.sum(axis=1), np.ones(self.y.shape[0]))
 
+    def test_symmetrize_mean_has_two_distinct_values(self):
+        aff = Uniform(self.x, k_neighbors=10, symmetrize="mean")
+        values = aff.P.data
+        self.assertEqual(len(np.unique(values)), 2)
+
+    def test_symmetrize_max_has_one_distinct_value(self):
+        aff = Uniform(self.x, k_neighbors=10, symmetrize="max")
+        values = aff.P.data
+        self.assertEqual(len(np.unique(values)), 1)
+
+    def test_symmetrize_with_invalid_parameter(self):
+        with self.assertRaises(ValueError):
+            Uniform(self.x, k_neighbors=10, symmetrize="invalid")
+
 
 class TestAffinityMatrixCorrectness(unittest.TestCase):
     @classmethod
@@ -340,6 +355,7 @@ class TestAffinityAcceptsKnnIndexAsParameter(unittest.TestCase):
         for method_name, cls in AFFINITY_CLASSES:
             aff = cls(knn_index=knn_index)
             aff.to_new(self.iris)
+
 
 class TestPrecomputedAffinity(unittest.TestCase):
     @classmethod
