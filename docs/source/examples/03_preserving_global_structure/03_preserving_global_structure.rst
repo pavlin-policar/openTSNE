@@ -15,6 +15,9 @@ Preserving global structure
 Load data
 ---------
 
+The preprocessed data set can be downloaded from
+http://file.biolab.si/opentsne/benchmark/macosko_2015.pkl.gz.
+
 .. code:: ipython3
 
     %%time
@@ -27,8 +30,8 @@ Load data
 
 .. parsed-literal::
 
-    CPU times: user 220 ms, sys: 12 ms, total: 232 ms
-    Wall time: 230 ms
+    CPU times: user 159 ms, sys: 43.7 ms, total: 203 ms
+    Wall time: 203 ms
 
 
 .. code:: ipython3
@@ -76,8 +79,8 @@ This will serve as a baseline comparison.
 
 .. parsed-literal::
 
-    CPU times: user 6min 4s, sys: 15.7 s, total: 6min 20s
-    Wall time: 53.4 s
+    CPU times: user 3min 44s, sys: 2.81 s, total: 3min 47s
+    Wall time: 2min 7s
 
 
 .. code:: ipython3
@@ -114,8 +117,8 @@ can be omitted.
 
 .. parsed-literal::
 
-    CPU times: user 6min 7s, sys: 15.1 s, total: 6min 22s
-    Wall time: 53.5 s
+    CPU times: user 3min 37s, sys: 3.52 s, total: 3min 40s
+    Wall time: 2min 1s
 
 
 .. code:: ipython3
@@ -151,8 +154,8 @@ parameter.
 
 .. parsed-literal::
 
-    CPU times: user 6min 16s, sys: 14.5 s, total: 6min 31s
-    Wall time: 54 s
+    CPU times: user 3min 34s, sys: 2.54 s, total: 3min 37s
+    Wall time: 1min 51s
 
 
 .. code:: ipython3
@@ -183,8 +186,8 @@ Lastly, let’s see how our embedding looks with both the changes.
 
 .. parsed-literal::
 
-    CPU times: user 6min 2s, sys: 13.6 s, total: 6min 16s
-    Wall time: 51.6 s
+    CPU times: user 3min 42s, sys: 3.38 s, total: 3min 45s
+    Wall time: 2min
 
 
 .. code:: ipython3
@@ -261,8 +264,8 @@ Perplexity: 500
 
 .. parsed-literal::
 
-    CPU times: user 28min 32s, sys: 12.9 s, total: 28min 45s
-    Wall time: 3min 41s
+    CPU times: user 23min 9s, sys: 7.15 s, total: 23min 17s
+    Wall time: 4min 58s
 
 
 .. code:: ipython3
@@ -307,30 +310,30 @@ perplexity to something smaller to emphasize the local structure.
 
 .. parsed-literal::
 
-    CPU times: user 28min 39s, sys: 13.6 s, total: 28min 53s
-    Wall time: 3min 43s
+    CPU times: user 23min 28s, sys: 6.7 s, total: 23min 35s
+    Wall time: 5min 1s
 
 
 .. code:: ipython3
 
-    %time embedding_annealing.affinities.set_perplexity(50)
+    %time embedding_annealing.affinities.set_perplexities([50])
 
 
 .. parsed-literal::
 
-    CPU times: user 10.3 s, sys: 644 ms, total: 10.9 s
-    Wall time: 2.01 s
+    CPU times: user 3.35 s, sys: 233 ms, total: 3.59 s
+    Wall time: 1.33 s
 
 
 .. code:: ipython3
 
-    %time embedding_annealing = embedding_annealing.optimize(250, momentum=0.8)
+    %time embedding_annealing = embedding_annealing.optimize(250)
 
 
 .. parsed-literal::
 
-    CPU times: user 2min 6s, sys: 4.6 s, total: 2min 11s
-    Wall time: 16.4 s
+    CPU times: user 1min 26s, sys: 218 ms, total: 1min 26s
+    Wall time: 46.5 s
 
 
 .. code:: ipython3
@@ -366,8 +369,8 @@ much of the global structure.
 
 .. parsed-literal::
 
-    CPU times: user 8min 28s, sys: 6.88 s, total: 8min 34s
-    Wall time: 1min 19s
+    CPU times: user 6min 15s, sys: 8.2 s, total: 6min 23s
+    Wall time: 1min 23s
 
 
 .. code:: ipython3
@@ -377,8 +380,8 @@ much of the global structure.
 
 .. parsed-literal::
 
-    CPU times: user 1.98 s, sys: 140 ms, total: 2.12 s
-    Wall time: 115 ms
+    CPU times: user 1.12 s, sys: 872 ms, total: 1.99 s
+    Wall time: 349 ms
 
 
 Now, we just optimize just like we would standard t-SNE.
@@ -424,89 +427,37 @@ Comparison to UMAP
     from umap import UMAP
     from itertools import product
 
+
+.. parsed-literal::
+
+    /home/ppolicar/local/miniconda3/envs/tsne-paper/lib/python3.9/site-packages/tqdm/auto.py:22: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
+      from .autonotebook import tqdm as notebook_tqdm
+
+
 .. code:: ipython3
 
     %%time
     embeddings = []
     
-    for n_neighbors, min_dist in product([15, 200], [0.1, 0.5]):
-        umap = UMAP(n_neighbors=n_neighbors, min_dist=min_dist, metric="cosine", random_state=3)
+    for n_neighbors, init in product([15, 200], ["random", "spectral"]):
+        umap = UMAP(n_neighbors=n_neighbors, init=init, metric="cosine", random_state=3)
         embedding_umap = umap.fit_transform(x)
-        embeddings.append((n_neighbors, min_dist, embedding_umap))
+        embeddings.append((n_neighbors, init, embedding_umap))
 
 
 .. parsed-literal::
 
-    /home/ppolicar/local/miniconda3/envs/tsne/lib/python3.7/site-packages/umap/nndescent.py:92: NumbaPerformanceWarning: 
-    The keyword argument 'parallel=True' was specified but no transformation for parallel execution was possible.
-    
-    To find out why, try turning on parallel diagnostics, see http://numba.pydata.org/numba-doc/latest/user/parallel.html#diagnostics for help.
-    
-    File "../../../local/miniconda3/envs/tsne/lib/python3.7/site-packages/umap/utils.py", line 409:
-    @numba.njit(parallel=True)
-    def build_candidates(current_graph, n_vertices, n_neighbors, max_candidates, rng_state):
-    ^
-    
-      current_graph, n_vertices, n_neighbors, max_candidates, rng_state
-    /home/ppolicar/local/miniconda3/envs/tsne/lib/python3.7/site-packages/numba/typed_passes.py:293: NumbaPerformanceWarning: 
-    The keyword argument 'parallel=True' was specified but no transformation for parallel execution was possible.
-    
-    To find out why, try turning on parallel diagnostics, see http://numba.pydata.org/numba-doc/latest/user/parallel.html#diagnostics for help.
-    
-    File "../../../local/miniconda3/envs/tsne/lib/python3.7/site-packages/umap/nndescent.py", line 47:
-        @numba.njit(parallel=True)
-        def nn_descent(
-        ^
-    
-      state.func_ir.loc))
-    /home/ppolicar/local/miniconda3/envs/tsne/lib/python3.7/site-packages/numba/typed_passes.py:293: NumbaPerformanceWarning: 
-    The keyword argument 'parallel=True' was specified but no transformation for parallel execution was possible.
-    
-    To find out why, try turning on parallel diagnostics, see http://numba.pydata.org/numba-doc/latest/user/parallel.html#diagnostics for help.
-    
-    File "../../../local/miniconda3/envs/tsne/lib/python3.7/site-packages/umap/nndescent.py", line 47:
-        @numba.njit(parallel=True)
-        def nn_descent(
-        ^
-    
-      state.func_ir.loc))
-    /home/ppolicar/local/miniconda3/envs/tsne/lib/python3.7/site-packages/numba/typed_passes.py:293: NumbaPerformanceWarning: 
-    The keyword argument 'parallel=True' was specified but no transformation for parallel execution was possible.
-    
-    To find out why, try turning on parallel diagnostics, see http://numba.pydata.org/numba-doc/latest/user/parallel.html#diagnostics for help.
-    
-    File "../../../local/miniconda3/envs/tsne/lib/python3.7/site-packages/umap/nndescent.py", line 47:
-        @numba.njit(parallel=True)
-        def nn_descent(
-        ^
-    
-      state.func_ir.loc))
-    /home/ppolicar/local/miniconda3/envs/tsne/lib/python3.7/site-packages/numba/typed_passes.py:293: NumbaPerformanceWarning: 
-    The keyword argument 'parallel=True' was specified but no transformation for parallel execution was possible.
-    
-    To find out why, try turning on parallel diagnostics, see http://numba.pydata.org/numba-doc/latest/user/parallel.html#diagnostics for help.
-    
-    File "../../../local/miniconda3/envs/tsne/lib/python3.7/site-packages/umap/nndescent.py", line 47:
-        @numba.njit(parallel=True)
-        def nn_descent(
-        ^
-    
-      state.func_ir.loc))
-
-
-.. parsed-literal::
-
-    CPU times: user 22min 41s, sys: 49.1 s, total: 23min 30s
-    Wall time: 11min 37s
+    CPU times: user 12min 5s, sys: 53.6 s, total: 12min 58s
+    Wall time: 6min 34s
 
 
 .. code:: ipython3
 
     fig, ax = plt.subplots(nrows=2, ncols=2, figsize=(12, 12))
-    plot(embeddings[0][2], title=f"k={embeddings[0][0]}, min_dist={embeddings[0][1]}", ax=ax[0, 0], draw_legend=False)
-    plot(embeddings[1][2], title=f"k={embeddings[1][0]}, min_dist={embeddings[1][1]}", ax=ax[0, 1], draw_legend=False)
-    plot(embeddings[2][2], title=f"k={embeddings[2][0]}, min_dist={embeddings[2][1]}", ax=ax[1, 0], draw_legend=False)
-    plot(embeddings[3][2], title=f"k={embeddings[3][0]}, min_dist={embeddings[3][1]}", ax=ax[1, 1], draw_legend=False)
+    plot(embeddings[0][2], title=f"k={embeddings[0][0]}, init={embeddings[0][1]}", ax=ax[0, 0], draw_legend=False)
+    plot(embeddings[1][2], title=f"k={embeddings[1][0]}, init={embeddings[1][1]}", ax=ax[0, 1], draw_legend=False)
+    plot(embeddings[2][2], title=f"k={embeddings[2][0]}, init={embeddings[2][1]}", ax=ax[1, 0], draw_legend=False)
+    plot(embeddings[3][2], title=f"k={embeddings[3][0]}, init={embeddings[3][1]}", ax=ax[1, 1], draw_legend=False)
     plt.tight_layout()
 
 

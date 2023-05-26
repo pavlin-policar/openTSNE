@@ -20,7 +20,9 @@ Load data
 
 In most of the notebooks, we will be using the Macosko 2015 mouse retina
 data set. This is a fairly well-known and well explored data set in the
-single-cell literature making it suitable as an example.
+single-cell literature making it suitable as an example. The
+preprocessed data set can be downloaded from
+http://file.biolab.si/opentsne/benchmark/macosko_2015.pkl.gz.
 
 .. code:: ipython3
 
@@ -85,35 +87,35 @@ We’ll first create an embedding on the training data.
 .. parsed-literal::
 
     --------------------------------------------------------------------------------
-    TSNE(n_jobs=8, random_state=42, verbose=True)
+    TSNE(early_exaggeration=12, n_jobs=8, random_state=42, verbose=True)
     --------------------------------------------------------------------------------
     ===> Finding 90 nearest neighbors using Annoy approximate search using euclidean distance...
-       --> Time elapsed: 3.89 seconds
+       --> Time elapsed: 8.82 seconds
     ===> Calculating affinity matrix...
-       --> Time elapsed: 0.44 seconds
+       --> Time elapsed: 0.70 seconds
     ===> Calculating PCA-based initialization...
-       --> Time elapsed: 0.10 seconds
+       --> Time elapsed: 0.21 seconds
     ===> Running optimization with exaggeration=12.00, lr=2501.75 for 250 iterations...
-    Iteration   50, KL divergence 5.8046, 50 iterations in 1.7123 sec
-    Iteration  100, KL divergence 5.2268, 50 iterations in 1.8265 sec
-    Iteration  150, KL divergence 5.1357, 50 iterations in 2.0626 sec
-    Iteration  200, KL divergence 5.0977, 50 iterations in 2.0250 sec
-    Iteration  250, KL divergence 5.0772, 50 iterations in 1.9598 sec
-       --> Time elapsed: 9.59 seconds
-    ===> Running optimization with exaggeration=1.00, lr=2501.75 for 500 iterations...
-    Iteration   50, KL divergence 3.5741, 50 iterations in 1.9948 sec
-    Iteration  100, KL divergence 3.1653, 50 iterations in 1.8672 sec
-    Iteration  150, KL divergence 2.9612, 50 iterations in 2.2518 sec
-    Iteration  200, KL divergence 2.8342, 50 iterations in 3.2478 sec
-    Iteration  250, KL divergence 2.7496, 50 iterations in 4.2982 sec
-    Iteration  300, KL divergence 2.6901, 50 iterations in 5.4970 sec
-    Iteration  350, KL divergence 2.6471, 50 iterations in 7.1508 sec
-    Iteration  400, KL divergence 2.6138, 50 iterations in 8.1424 sec
-    Iteration  450, KL divergence 2.5893, 50 iterations in 9.8184 sec
-    Iteration  500, KL divergence 2.5699, 50 iterations in 10.3756 sec
-       --> Time elapsed: 54.65 seconds
-    CPU times: user 7min 53s, sys: 20.6 s, total: 8min 14s
-    Wall time: 1min 8s
+    Iteration   50, KL divergence 5.1633, 50 iterations in 2.5187 sec
+    Iteration  100, KL divergence 5.0975, 50 iterations in 2.5269 sec
+    Iteration  150, KL divergence 5.0648, 50 iterations in 2.5661 sec
+    Iteration  200, KL divergence 5.0510, 50 iterations in 2.3758 sec
+    Iteration  250, KL divergence 5.0430, 50 iterations in 2.4623 sec
+       --> Time elapsed: 12.45 seconds
+    ===> Running optimization with exaggeration=1.00, lr=30021.00 for 500 iterations...
+    Iteration   50, KL divergence 3.0008, 50 iterations in 2.6407 sec
+    Iteration  100, KL divergence 2.7927, 50 iterations in 3.9767 sec
+    Iteration  150, KL divergence 2.6962, 50 iterations in 5.1542 sec
+    Iteration  200, KL divergence 2.6384, 50 iterations in 6.5875 sec
+    Iteration  250, KL divergence 2.5970, 50 iterations in 8.1932 sec
+    Iteration  300, KL divergence 2.5673, 50 iterations in 9.5913 sec
+    Iteration  350, KL divergence 2.5431, 50 iterations in 11.2144 sec
+    Iteration  400, KL divergence 2.5244, 50 iterations in 11.6824 sec
+    Iteration  450, KL divergence 2.5088, 50 iterations in 12.7052 sec
+    Iteration  500, KL divergence 2.4950, 50 iterations in 14.4997 sec
+       --> Time elapsed: 86.25 seconds
+    CPU times: user 3min 13s, sys: 2.91 s, total: 3min 15s
+    Wall time: 1min 53s
 
 
 .. code:: ipython3
@@ -139,20 +141,20 @@ into an existing embedding.
 .. parsed-literal::
 
     ===> Finding 15 nearest neighbors in existing embedding using Annoy approximate search...
-       --> Time elapsed: 1.12 seconds
+       --> Time elapsed: 3.54 seconds
     ===> Calculating affinity matrix...
-       --> Time elapsed: 0.03 seconds
+       --> Time elapsed: 0.04 seconds
     ===> Running optimization with exaggeration=4.00, lr=0.10 for 0 iterations...
        --> Time elapsed: 0.00 seconds
     ===> Running optimization with exaggeration=1.50, lr=0.10 for 250 iterations...
-    Iteration   50, KL divergence 214688.6176, 50 iterations in 0.3767 sec
-    Iteration  100, KL divergence 213210.5159, 50 iterations in 0.3881 sec
-    Iteration  150, KL divergence 212270.1679, 50 iterations in 0.3898 sec
-    Iteration  200, KL divergence 211592.6686, 50 iterations in 0.3881 sec
-    Iteration  250, KL divergence 211074.3288, 50 iterations in 0.3814 sec
-       --> Time elapsed: 1.92 seconds
-    CPU times: user 19.2 s, sys: 650 ms, total: 19.8 s
-    Wall time: 3.89 s
+    Iteration   50, KL divergence 213718.9013, 50 iterations in 0.4314 sec
+    Iteration  100, KL divergence 212177.4468, 50 iterations in 0.4447 sec
+    Iteration  150, KL divergence 211186.1793, 50 iterations in 0.4477 sec
+    Iteration  200, KL divergence 210471.7728, 50 iterations in 0.4193 sec
+    Iteration  250, KL divergence 209921.5693, 50 iterations in 0.4285 sec
+       --> Time elapsed: 2.17 seconds
+    CPU times: user 10.4 s, sys: 864 ms, total: 11.2 s
+    Wall time: 6.72 s
 
 
 .. code:: ipython3

@@ -27,6 +27,9 @@ preserving local strucutre.
 Load data
 ---------
 
+The preprocessed data set can be downloaded from
+http://file.biolab.si/opentsne/benchmark/10x_mouse_zheng.pkl.gz.
+
 .. code:: ipython3
 
     %%time
@@ -39,8 +42,8 @@ Load data
 
 .. parsed-literal::
 
-    CPU times: user 4.73 s, sys: 980 ms, total: 5.71 s
-    Wall time: 5.71 s
+    CPU times: user 5.88 s, sys: 2.54 s, total: 8.42 s
+    Wall time: 8.42 s
 
 
 .. code:: ipython3
@@ -111,8 +114,8 @@ several places throughout the notebook, and can take a long time to run.
 
 .. parsed-literal::
 
-    CPU times: user 46min 53s, sys: 1min 39s, total: 48min 33s
-    Wall time: 5min 35s
+    CPU times: user 52min 31s, sys: 1min 21s, total: 53min 53s
+    Wall time: 8min 2s
 
 
 .. code:: ipython3
@@ -128,8 +131,8 @@ several places throughout the notebook, and can take a long time to run.
 
 .. parsed-literal::
 
-    CPU times: user 4h 54min 10s, sys: 4min 44s, total: 4h 58min 55s
-    Wall time: 22min 23s
+    CPU times: user 5h 36min 15s, sys: 8min 53s, total: 5h 45min 8s
+    Wall time: 39min 40s
 
 
 Standard t-SNE
@@ -156,29 +159,29 @@ First, let’s see what standard t-SNE does.
 .. parsed-literal::
 
     --------------------------------------------------------------------------------
-    TSNE(n_jobs=32, verbose=True)
+    TSNE(early_exaggeration=12, n_jobs=32, verbose=True)
     --------------------------------------------------------------------------------
     ===> Running optimization with exaggeration=12.00, lr=108843.92 for 250 iterations...
-    Iteration   50, KL divergence 8.9036, 50 iterations in 43.6444 sec
-    Iteration  100, KL divergence 8.1739, 50 iterations in 45.7009 sec
-    Iteration  150, KL divergence 7.9832, 50 iterations in 45.4050 sec
-    Iteration  200, KL divergence 7.8977, 50 iterations in 43.9690 sec
-    Iteration  250, KL divergence 7.8511, 50 iterations in 44.4052 sec
-       --> Time elapsed: 223.13 seconds
-    ===> Running optimization with exaggeration=1.00, lr=108843.92 for 500 iterations...
-    Iteration   50, KL divergence 6.4946, 50 iterations in 43.9199 sec
-    Iteration  100, KL divergence 5.9617, 50 iterations in 43.6204 sec
-    Iteration  150, KL divergence 5.6756, 50 iterations in 44.2530 sec
-    Iteration  200, KL divergence 5.4932, 50 iterations in 45.1531 sec
-    Iteration  250, KL divergence 5.3658, 50 iterations in 47.1845 sec
-    Iteration  300, KL divergence 5.2714, 50 iterations in 47.4659 sec
-    Iteration  350, KL divergence 5.1981, 50 iterations in 49.2679 sec
-    Iteration  400, KL divergence 5.1394, 50 iterations in 49.6450 sec
-    Iteration  450, KL divergence 5.0913, 50 iterations in 51.5995 sec
-    Iteration  500, KL divergence 5.0511, 50 iterations in 53.0170 sec
-       --> Time elapsed: 475.13 seconds
-    CPU times: user 3h 21min 43s, sys: 5min 53s, total: 3h 27min 37s
-    Wall time: 11min 41s
+    Iteration   50, KL divergence 8.0820, 50 iterations in 49.5503 sec
+    Iteration  100, KL divergence 7.8989, 50 iterations in 52.9387 sec
+    Iteration  150, KL divergence 7.8314, 50 iterations in 52.7589 sec
+    Iteration  200, KL divergence 7.8026, 50 iterations in 53.2414 sec
+    Iteration  250, KL divergence 7.7870, 50 iterations in 52.9956 sec
+       --> Time elapsed: 261.49 seconds
+    ===> Running optimization with exaggeration=1.00, lr=1306127.00 for 500 iterations...
+    Iteration   50, KL divergence 5.7583, 50 iterations in 59.4852 sec
+    Iteration  100, KL divergence 5.4506, 50 iterations in 60.9192 sec
+    Iteration  150, KL divergence 5.2984, 50 iterations in 63.3280 sec
+    Iteration  200, KL divergence 5.2018, 50 iterations in 65.2476 sec
+    Iteration  250, KL divergence 5.1327, 50 iterations in 64.6718 sec
+    Iteration  300, KL divergence 5.0798, 50 iterations in 66.1166 sec
+    Iteration  350, KL divergence 5.0372, 50 iterations in 74.1704 sec
+    Iteration  400, KL divergence 5.0017, 50 iterations in 78.6565 sec
+    Iteration  450, KL divergence 4.9715, 50 iterations in 82.1395 sec
+    Iteration  500, KL divergence 4.9456, 50 iterations in 92.5772 sec
+       --> Time elapsed: 707.32 seconds
+    CPU times: user 3h 41min 29s, sys: 10min 8s, total: 3h 51min 37s
+    Wall time: 16min 14s
 
 
 .. code:: ipython3
@@ -212,29 +215,26 @@ clusters. Let’s see if that helps.
 .. parsed-literal::
 
     --------------------------------------------------------------------------------
-    TSNE(exaggeration=4, n_jobs=32, verbose=True)
+    TSNE(early_exaggeration=12, exaggeration=4, n_jobs=32, verbose=True)
     --------------------------------------------------------------------------------
     ===> Running optimization with exaggeration=12.00, lr=108843.92 for 250 iterations...
-    Iteration   50, KL divergence 8.9036, 50 iterations in 41.3583 sec
-    Iteration  100, KL divergence 8.1739, 50 iterations in 44.0357 sec
-    Iteration  150, KL divergence 7.9831, 50 iterations in 44.8030 sec
-    Iteration  200, KL divergence 7.8978, 50 iterations in 44.5963 sec
-    Iteration  250, KL divergence 7.8511, 50 iterations in 44.0719 sec
-       --> Time elapsed: 218.87 seconds
-    ===> Running optimization with exaggeration=4.00, lr=108843.92 for 500 iterations...
-    Iteration   50, KL divergence 7.0117, 50 iterations in 44.1787 sec
-    Iteration  100, KL divergence 6.8478, 50 iterations in 44.2544 sec
-    Iteration  150, KL divergence 6.7850, 50 iterations in 43.0467 sec
-    Iteration  200, KL divergence 6.7506, 50 iterations in 43.1292 sec
-    Iteration  250, KL divergence 6.7289, 50 iterations in 42.3653 sec
-    Iteration  300, KL divergence 6.7142, 50 iterations in 43.3017 sec
-    Iteration  350, KL divergence 6.7036, 50 iterations in 43.1021 sec
-    Iteration  400, KL divergence 6.6955, 50 iterations in 42.4524 sec
-    Iteration  450, KL divergence 6.6884, 50 iterations in 42.3116 sec
-    Iteration  500, KL divergence 6.6812, 50 iterations in 42.7694 sec
-       --> Time elapsed: 430.92 seconds
-    CPU times: user 3h 23min 13s, sys: 5min 47s, total: 3h 29min
-    Wall time: 10min 53s
+    Iteration   50, KL divergence 8.0820, 50 iterations in 51.7397 sec
+    Iteration  100, KL divergence 7.8994, 50 iterations in 54.2033 sec
+    Iteration  150, KL divergence 7.8317, 50 iterations in 54.2117 sec
+    Iteration  200, KL divergence 7.8020, 50 iterations in 55.0897 sec
+    Iteration   50, KL divergence 6.9432, 50 iterations in 56.7796 sec
+    Iteration  100, KL divergence 6.8014, 50 iterations in 57.5679 sec
+    Iteration  150, KL divergence 6.7409, 50 iterations in 56.7147 sec
+    Iteration  200, KL divergence 6.7068, 50 iterations in 56.3419 sec
+    Iteration  250, KL divergence 6.6856, 50 iterations in 56.2568 sec
+    Iteration  300, KL divergence 6.6712, 50 iterations in 56.5754 sec
+    Iteration  350, KL divergence 6.6609, 50 iterations in 56.0285 sec
+    Iteration  400, KL divergence 6.6529, 50 iterations in 55.7784 sec
+    Iteration  450, KL divergence 6.6468, 50 iterations in 55.4943 sec
+    Iteration  500, KL divergence 6.6425, 50 iterations in 55.6567 sec
+       --> Time elapsed: 563.20 seconds
+    CPU times: user 3h 51min 45s, sys: 9min 50s, total: 4h 1min 35s
+    Wall time: 13min 57s
 
 
 .. code:: ipython3
@@ -264,29 +264,29 @@ Using a larger perplexity
 .. parsed-literal::
 
     --------------------------------------------------------------------------------
-    TSNE(n_jobs=32, verbose=True)
+    TSNE(early_exaggeration=12, n_jobs=32, verbose=True)
     --------------------------------------------------------------------------------
     ===> Running optimization with exaggeration=12.00, lr=108843.92 for 250 iterations...
-    Iteration   50, KL divergence 6.6121, 50 iterations in 155.4301 sec
-    Iteration  100, KL divergence 6.0752, 50 iterations in 155.6532 sec
-    Iteration  150, KL divergence 5.9787, 50 iterations in 155.2036 sec
-    Iteration  200, KL divergence 5.9415, 50 iterations in 158.4592 sec
-    Iteration  250, KL divergence 5.9224, 50 iterations in 164.1987 sec
-       --> Time elapsed: 788.95 seconds
-    ===> Running optimization with exaggeration=1.00, lr=108843.92 for 500 iterations...
-    Iteration   50, KL divergence 4.4697, 50 iterations in 156.9712 sec
-    Iteration  100, KL divergence 4.0495, 50 iterations in 157.9296 sec
-    Iteration  150, KL divergence 3.8464, 50 iterations in 168.0550 sec
-    Iteration  200, KL divergence 3.7248, 50 iterations in 166.4940 sec
-    Iteration  250, KL divergence 3.6438, 50 iterations in 166.7832 sec
-    Iteration  300, KL divergence 3.5860, 50 iterations in 174.2202 sec
-    Iteration  350, KL divergence 3.5434, 50 iterations in 172.8181 sec
-    Iteration  400, KL divergence 3.5106, 50 iterations in 167.7604 sec
-    Iteration  450, KL divergence 3.4848, 50 iterations in 163.7755 sec
-    Iteration  500, KL divergence 3.4639, 50 iterations in 169.2613 sec
-       --> Time elapsed: 1664.07 seconds
-    CPU times: user 19h 11min 10s, sys: 6min 32s, total: 19h 17min 43s
-    Wall time: 41min 18s
+    Iteration   50, KL divergence 5.9688, 50 iterations in 216.9035 sec
+    Iteration  100, KL divergence 5.9218, 50 iterations in 218.9351 sec
+    Iteration  150, KL divergence 5.8993, 50 iterations in 218.5032 sec
+    Iteration  200, KL divergence 5.8900, 50 iterations in 223.6785 sec
+    Iteration  250, KL divergence 5.8854, 50 iterations in 224.3249 sec
+       --> Time elapsed: 1102.35 seconds
+    ===> Running optimization with exaggeration=1.00, lr=1306127.00 for 500 iterations...
+    Iteration   50, KL divergence 3.8664, 50 iterations in 237.2816 sec
+    Iteration  100, KL divergence 3.6473, 50 iterations in 226.6633 sec
+    Iteration  150, KL divergence 3.5520, 50 iterations in 235.5178 sec
+    Iteration  200, KL divergence 3.4979, 50 iterations in 231.3676 sec
+    Iteration  250, KL divergence 3.4621, 50 iterations in 240.6245 sec
+    Iteration  300, KL divergence 3.4373, 50 iterations in 255.3066 sec
+    Iteration  350, KL divergence 3.4183, 50 iterations in 241.8503 sec
+    Iteration  400, KL divergence 3.4035, 50 iterations in 248.7666 sec
+    Iteration  450, KL divergence 3.3922, 50 iterations in 251.1434 sec
+    Iteration  500, KL divergence 3.3823, 50 iterations in 272.1862 sec
+       --> Time elapsed: 2440.72 seconds
+    CPU times: user 1d 2h 32min 21s, sys: 10min 19s, total: 1d 2h 42min 40s
+    Wall time: 59min 32s
 
 
 .. code:: ipython3
@@ -314,29 +314,29 @@ Using a larger perplexity
 .. parsed-literal::
 
     --------------------------------------------------------------------------------
-    TSNE(exaggeration=4, n_jobs=32, verbose=True)
+    TSNE(early_exaggeration=12, exaggeration=4, n_jobs=32, verbose=True)
     --------------------------------------------------------------------------------
     ===> Running optimization with exaggeration=12.00, lr=108843.92 for 250 iterations...
-    Iteration   50, KL divergence 6.6121, 50 iterations in 165.1051 sec
-    Iteration  100, KL divergence 6.0752, 50 iterations in 170.2804 sec
-    Iteration  150, KL divergence 5.9787, 50 iterations in 167.2433 sec
-    Iteration  200, KL divergence 5.9415, 50 iterations in 167.1109 sec
-    Iteration  250, KL divergence 5.9224, 50 iterations in 166.6234 sec
-       --> Time elapsed: 836.37 seconds
-    ===> Running optimization with exaggeration=4.00, lr=108843.92 for 500 iterations...
-    Iteration   50, KL divergence 5.0955, 50 iterations in 165.1969 sec
-    Iteration  100, KL divergence 4.9934, 50 iterations in 167.7396 sec
-    Iteration  150, KL divergence 4.9625, 50 iterations in 166.0314 sec
-    Iteration  200, KL divergence 4.9504, 50 iterations in 165.1204 sec
-    Iteration  250, KL divergence 4.9438, 50 iterations in 164.4031 sec
-    Iteration  300, KL divergence 4.9396, 50 iterations in 165.8241 sec
-    Iteration  350, KL divergence 4.9365, 50 iterations in 164.0402 sec
-    Iteration  400, KL divergence 4.9342, 50 iterations in 163.1385 sec
-    Iteration  450, KL divergence 4.9322, 50 iterations in 162.8973 sec
-    Iteration  500, KL divergence 4.9307, 50 iterations in 163.9869 sec
-       --> Time elapsed: 1648.38 seconds
-    CPU times: user 19h 55min 34s, sys: 6min 25s, total: 20h 1min 59s
-    Wall time: 41min 57s
+    Iteration   50, KL divergence 5.9688, 50 iterations in 215.2427 sec
+    Iteration  100, KL divergence 5.9218, 50 iterations in 221.4924 sec
+    Iteration  150, KL divergence 5.8993, 50 iterations in 218.4626 sec
+    Iteration  200, KL divergence 5.8901, 50 iterations in 216.9501 sec
+    Iteration  250, KL divergence 5.8855, 50 iterations in 217.3419 sec
+       --> Time elapsed: 1089.49 seconds
+    ===> Running optimization with exaggeration=4.00, lr=326531.75 for 500 iterations...
+    Iteration   50, KL divergence 5.0544, 50 iterations in 216.4466 sec
+    Iteration  100, KL divergence 4.9857, 50 iterations in 214.6171 sec
+    Iteration  150, KL divergence 4.9611, 50 iterations in 214.4493 sec
+    Iteration  200, KL divergence 4.9495, 50 iterations in 213.1030 sec
+    Iteration  250, KL divergence 4.9430, 50 iterations in 214.2775 sec
+    Iteration  300, KL divergence 4.9384, 50 iterations in 214.3649 sec
+    Iteration  350, KL divergence 4.9351, 50 iterations in 213.4982 sec
+    Iteration  400, KL divergence 4.9327, 50 iterations in 213.9199 sec
+    Iteration  450, KL divergence 4.9306, 50 iterations in 213.1906 sec
+    Iteration  500, KL divergence 4.9288, 50 iterations in 212.4853 sec
+       --> Time elapsed: 2140.36 seconds
+    CPU times: user 1d 1h 28min 18s, sys: 9min 56s, total: 1d 1h 38min 15s
+    Wall time: 54min 23s
 
 
 .. code:: ipython3
@@ -386,11 +386,11 @@ Create sample embedding
 .. parsed-literal::
 
     ===> Finding 1500 nearest neighbors using Annoy approximate search using euclidean distance...
-       --> Time elapsed: 14.00 seconds
+       --> Time elapsed: 15.41 seconds
     ===> Calculating affinity matrix...
-       --> Time elapsed: 5.66 seconds
-    CPU times: user 4min 17s, sys: 3.09 s, total: 4min 20s
-    Wall time: 19.7 s
+       --> Time elapsed: 6.54 seconds
+    CPU times: user 3min 39s, sys: 4.97 s, total: 3min 44s
+    Wall time: 21.9 s
 
 
 .. code:: ipython3
@@ -400,8 +400,8 @@ Create sample embedding
 
 .. parsed-literal::
 
-    CPU times: user 1.66 s, sys: 96 ms, total: 1.76 s
-    Wall time: 86.1 ms
+    CPU times: user 5.35 s, sys: 657 ms, total: 6.01 s
+    Wall time: 171 ms
 
 
 .. code:: ipython3
@@ -412,29 +412,29 @@ Create sample embedding
 .. parsed-literal::
 
     --------------------------------------------------------------------------------
-    TSNE(n_jobs=32, verbose=True)
+    TSNE(early_exaggeration=12, n_jobs=32, verbose=True)
     --------------------------------------------------------------------------------
     ===> Running optimization with exaggeration=12.00, lr=2083.33 for 250 iterations...
-    Iteration   50, KL divergence 3.2514, 50 iterations in 2.8158 sec
-    Iteration  100, KL divergence 3.0818, 50 iterations in 2.8074 sec
-    Iteration  150, KL divergence 3.0695, 50 iterations in 2.8865 sec
-    Iteration  200, KL divergence 3.0668, 50 iterations in 2.7726 sec
-    Iteration  250, KL divergence 3.0662, 50 iterations in 2.6979 sec
-       --> Time elapsed: 13.98 seconds
-    ===> Running optimization with exaggeration=1.00, lr=2083.33 for 500 iterations...
-    Iteration   50, KL divergence 1.4430, 50 iterations in 2.8882 sec
-    Iteration  100, KL divergence 1.2700, 50 iterations in 2.7344 sec
-    Iteration  150, KL divergence 1.2087, 50 iterations in 2.7087 sec
-    Iteration  200, KL divergence 1.1795, 50 iterations in 2.8707 sec
-    Iteration  250, KL divergence 1.1639, 50 iterations in 2.9316 sec
-    Iteration  300, KL divergence 1.1553, 50 iterations in 3.0808 sec
-    Iteration  350, KL divergence 1.1490, 50 iterations in 3.0691 sec
-    Iteration  400, KL divergence 1.1456, 50 iterations in 3.2036 sec
-    Iteration  450, KL divergence 1.1433, 50 iterations in 3.2834 sec
-    Iteration  500, KL divergence 1.1413, 50 iterations in 3.2604 sec
-       --> Time elapsed: 30.04 seconds
-    CPU times: user 22min 52s, sys: 35.3 s, total: 23min 27s
-    Wall time: 44.5 s
+    Iteration   50, KL divergence 3.0347, 50 iterations in 4.0133 sec
+    Iteration  100, KL divergence 3.0733, 50 iterations in 3.9727 sec
+    Iteration  150, KL divergence 3.0691, 50 iterations in 4.0981 sec
+    Iteration  200, KL divergence 3.0690, 50 iterations in 3.9779 sec
+    Iteration  250, KL divergence 3.0690, 50 iterations in 3.9779 sec
+       --> Time elapsed: 20.04 seconds
+    ===> Running optimization with exaggeration=1.00, lr=25000.00 for 500 iterations...
+    Iteration   50, KL divergence 1.1925, 50 iterations in 4.2847 sec
+    Iteration  100, KL divergence 1.1550, 50 iterations in 4.4657 sec
+    Iteration  150, KL divergence 1.1452, 50 iterations in 4.8737 sec
+    Iteration  200, KL divergence 1.1407, 50 iterations in 5.5286 sec
+    Iteration  250, KL divergence 1.1382, 50 iterations in 5.5675 sec
+    Iteration  300, KL divergence 1.1366, 50 iterations in 5.9546 sec
+    Iteration  350, KL divergence 1.1356, 50 iterations in 5.3339 sec
+    Iteration  400, KL divergence 1.1349, 50 iterations in 5.9090 sec
+    Iteration  450, KL divergence 1.1342, 50 iterations in 6.5074 sec
+    Iteration  500, KL divergence 1.1339, 50 iterations in 5.7942 sec
+       --> Time elapsed: 54.23 seconds
+    CPU times: user 34min 13s, sys: 2min 15s, total: 36min 28s
+    Wall time: 1min 14s
 
 
 .. code:: ipython3
@@ -457,11 +457,11 @@ Learn the full embedding
 .. parsed-literal::
 
     ===> Finding 1 nearest neighbors in existing embedding using Annoy approximate search...
-       --> Time elapsed: 253.76 seconds
+       --> Time elapsed: 174.82 seconds
     ===> Calculating affinity matrix...
-       --> Time elapsed: 0.93 seconds
-    CPU times: user 6min 35s, sys: 41.5 s, total: 7min 16s
-    Wall time: 4min 14s
+       --> Time elapsed: 0.67 seconds
+    CPU times: user 4min 18s, sys: 32.3 s, total: 4min 51s
+    Wall time: 2min 55s
 
 
 .. code:: ipython3
@@ -487,7 +487,7 @@ Learn the full embedding
 
 .. parsed-literal::
 
-    array([1.00000000e-04, 1.15557926e-04])
+    array([1.00000000e-04, 1.06471542e-04])
 
 
 
@@ -503,25 +503,25 @@ Learn the full embedding
 
 .. code:: ipython3
 
-    %time embedding1 = embedding.optimize(n_iter=500, exaggeration=12, momentum=0.5)
+    %time embedding1 = embedding.optimize(n_iter=500, exaggeration=12)
 
 
 .. parsed-literal::
 
     ===> Running optimization with exaggeration=12.00, lr=108843.92 for 500 iterations...
-    Iteration   50, KL divergence 8.6100, 50 iterations in 43.9514 sec
-    Iteration  100, KL divergence 8.0667, 50 iterations in 46.7819 sec
-    Iteration  150, KL divergence 7.9223, 50 iterations in 45.6121 sec
-    Iteration  200, KL divergence 7.8557, 50 iterations in 45.4719 sec
-    Iteration  250, KL divergence 7.8177, 50 iterations in 45.1488 sec
-    Iteration  300, KL divergence 7.7932, 50 iterations in 45.0411 sec
-    Iteration  350, KL divergence 7.7764, 50 iterations in 44.9336 sec
-    Iteration  400, KL divergence 7.7640, 50 iterations in 44.5941 sec
-    Iteration  450, KL divergence 7.7548, 50 iterations in 44.5967 sec
-    Iteration  500, KL divergence 7.7478, 50 iterations in 44.8961 sec
-       --> Time elapsed: 451.03 seconds
-    CPU times: user 2h 21min 31s, sys: 3min 51s, total: 2h 25min 23s
-    Wall time: 7min 33s
+    Iteration   50, KL divergence 7.9326, 50 iterations in 48.9843 sec
+    Iteration  100, KL divergence 7.8311, 50 iterations in 51.0335 sec
+    Iteration  150, KL divergence 7.7772, 50 iterations in 51.2970 sec
+    Iteration  200, KL divergence 7.7543, 50 iterations in 51.3436 sec
+    Iteration  250, KL divergence 7.7423, 50 iterations in 51.4951 sec
+    Iteration  300, KL divergence 7.7350, 50 iterations in 51.2477 sec
+    Iteration  350, KL divergence 7.7299, 50 iterations in 51.5019 sec
+    Iteration  400, KL divergence 7.7263, 50 iterations in 51.7564 sec
+    Iteration  450, KL divergence 7.7237, 50 iterations in 51.6552 sec
+    Iteration  500, KL divergence 7.7216, 50 iterations in 51.2847 sec
+       --> Time elapsed: 511.60 seconds
+    CPU times: user 2h 22min 35s, sys: 6min 28s, total: 2h 29min 4s
+    Wall time: 8min 34s
 
 
 .. code:: ipython3
@@ -535,20 +535,20 @@ Learn the full embedding
 
 .. code:: ipython3
 
-    %time embedding2 = embedding1.optimize(n_iter=250, exaggeration=4, momentum=0.8)
+    %time embedding2 = embedding1.optimize(n_iter=250, exaggeration=4)
 
 
 .. parsed-literal::
 
-    ===> Running optimization with exaggeration=4.00, lr=108843.92 for 250 iterations...
-    Iteration   50, KL divergence 6.9774, 50 iterations in 45.0601 sec
-    Iteration  100, KL divergence 6.8239, 50 iterations in 44.5858 sec
-    Iteration  150, KL divergence 6.7657, 50 iterations in 43.4053 sec
-    Iteration  200, KL divergence 6.7341, 50 iterations in 43.8213 sec
-    Iteration  250, KL divergence 6.7131, 50 iterations in 43.4168 sec
-       --> Time elapsed: 220.29 seconds
-    CPU times: user 1h 10min 33s, sys: 1min 56s, total: 1h 12min 30s
-    Wall time: 3min 42s
+    ===> Running optimization with exaggeration=4.00, lr=326531.75 for 250 iterations...
+    Iteration   50, KL divergence 6.9325, 50 iterations in 55.0011 sec
+    Iteration  100, KL divergence 6.8182, 50 iterations in 54.9294 sec
+    Iteration  150, KL divergence 6.7678, 50 iterations in 54.4471 sec
+    Iteration  200, KL divergence 6.7398, 50 iterations in 54.4368 sec
+    Iteration  250, KL divergence 6.7219, 50 iterations in 53.8917 sec
+       --> Time elapsed: 272.71 seconds
+    CPU times: user 1h 13min 35s, sys: 3min 14s, total: 1h 16min 49s
+    Wall time: 4min 34s
 
 
 .. code:: ipython3
@@ -562,20 +562,20 @@ Learn the full embedding
 
 .. code:: ipython3
 
-    %time embedding3 = embedding2.optimize(n_iter=250, exaggeration=4, momentum=0.8)
+    %time embedding3 = embedding2.optimize(n_iter=250, exaggeration=4)
 
 
 .. parsed-literal::
 
-    ===> Running optimization with exaggeration=4.00, lr=108843.92 for 250 iterations...
-    Iteration   50, KL divergence 6.6988, 50 iterations in 42.4042 sec
-    Iteration  100, KL divergence 6.6849, 50 iterations in 41.8349 sec
-    Iteration  150, KL divergence 6.6753, 50 iterations in 42.8223 sec
-    Iteration  200, KL divergence 6.6687, 50 iterations in 41.5115 sec
-    Iteration  250, KL divergence 6.6634, 50 iterations in 41.6096 sec
-       --> Time elapsed: 210.19 seconds
-    CPU times: user 1h 6min 54s, sys: 1min 54s, total: 1h 8min 49s
-    Wall time: 3min 32s
+    ===> Running optimization with exaggeration=4.00, lr=326531.75 for 250 iterations...
+    Iteration   50, KL divergence 6.7076, 50 iterations in 51.7026 sec
+    Iteration  100, KL divergence 6.6960, 50 iterations in 51.7740 sec
+    Iteration  150, KL divergence 6.6850, 50 iterations in 51.9709 sec
+    Iteration  200, KL divergence 6.6749, 50 iterations in 51.9325 sec
+    Iteration  250, KL divergence 6.6667, 50 iterations in 51.3449 sec
+       --> Time elapsed: 258.73 seconds
+    CPU times: user 1h 9min 44s, sys: 3min 14s, total: 1h 12min 58s
+    Wall time: 4min 20s
 
 
 .. code:: ipython3
@@ -589,20 +589,20 @@ Learn the full embedding
 
 .. code:: ipython3
 
-    %time embedding4 = embedding3.optimize(n_iter=250, exaggeration=4, momentum=0.8)
+    %time embedding4 = embedding3.optimize(n_iter=250, exaggeration=4)
 
 
 .. parsed-literal::
 
-    ===> Running optimization with exaggeration=4.00, lr=108843.92 for 250 iterations...
-    Iteration   50, KL divergence 6.6576, 50 iterations in 41.6053 sec
-    Iteration  100, KL divergence 6.6519, 50 iterations in 41.5500 sec
-    Iteration  150, KL divergence 6.6474, 50 iterations in 41.7626 sec
-    Iteration  200, KL divergence 6.6439, 50 iterations in 42.2903 sec
-    Iteration  250, KL divergence 6.6410, 50 iterations in 41.6484 sec
-       --> Time elapsed: 208.86 seconds
-    CPU times: user 1h 7min 27s, sys: 1min 55s, total: 1h 9min 23s
-    Wall time: 3min 30s
+    ===> Running optimization with exaggeration=4.00, lr=326531.75 for 250 iterations...
+    Iteration   50, KL divergence 6.6604, 50 iterations in 51.5464 sec
+    Iteration  100, KL divergence 6.6554, 50 iterations in 51.8160 sec
+    Iteration  150, KL divergence 6.6514, 50 iterations in 51.7537 sec
+    Iteration  200, KL divergence 6.6484, 50 iterations in 51.8397 sec
+    Iteration  250, KL divergence 6.6455, 50 iterations in 51.6008 sec
+       --> Time elapsed: 258.56 seconds
+    CPU times: user 1h 11min 20s, sys: 3min 14s, total: 1h 14min 35s
+    Wall time: 4min 20s
 
 
 .. code:: ipython3
@@ -621,6 +621,21 @@ Comparison to UMAP
 
     from umap import UMAP
 
+
+.. parsed-literal::
+
+    /home/ppolicar/miniconda3/envs/tsne/lib/python3.10/site-packages/umap/distances.py:1063: NumbaDeprecationWarning: The 'nopython' keyword argument was not supplied to the 'numba.jit' decorator. The implicit default value for this argument is currently False, but it will be changed to True in Numba 0.59.0. See https://numba.readthedocs.io/en/stable/reference/deprecation.html#deprecation-of-object-mode-fall-back-behaviour-when-using-jit for details.
+      @numba.jit()
+    /home/ppolicar/miniconda3/envs/tsne/lib/python3.10/site-packages/umap/distances.py:1071: NumbaDeprecationWarning: The 'nopython' keyword argument was not supplied to the 'numba.jit' decorator. The implicit default value for this argument is currently False, but it will be changed to True in Numba 0.59.0. See https://numba.readthedocs.io/en/stable/reference/deprecation.html#deprecation-of-object-mode-fall-back-behaviour-when-using-jit for details.
+      @numba.jit()
+    /home/ppolicar/miniconda3/envs/tsne/lib/python3.10/site-packages/umap/distances.py:1086: NumbaDeprecationWarning: The 'nopython' keyword argument was not supplied to the 'numba.jit' decorator. The implicit default value for this argument is currently False, but it will be changed to True in Numba 0.59.0. See https://numba.readthedocs.io/en/stable/reference/deprecation.html#deprecation-of-object-mode-fall-back-behaviour-when-using-jit for details.
+      @numba.jit()
+    /home/ppolicar/miniconda3/envs/tsne/lib/python3.10/site-packages/tqdm/auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
+      from .autonotebook import tqdm as notebook_tqdm
+    /home/ppolicar/miniconda3/envs/tsne/lib/python3.10/site-packages/umap/umap_.py:660: NumbaDeprecationWarning: The 'nopython' keyword argument was not supplied to the 'numba.jit' decorator. The implicit default value for this argument is currently False, but it will be changed to True in Numba 0.59.0. See https://numba.readthedocs.io/en/stable/reference/deprecation.html#deprecation-of-object-mode-fall-back-behaviour-when-using-jit for details.
+      @numba.jit()
+
+
 .. code:: ipython3
 
     umap = UMAP(n_neighbors=15, min_dist=0.1, random_state=1)
@@ -632,45 +647,13 @@ Comparison to UMAP
 
 .. parsed-literal::
 
-    /home/ppolicar/local/miniconda3/envs/tsne/lib/python3.7/site-packages/numba/typed_passes.py:293: NumbaPerformanceWarning: 
-    The keyword argument 'parallel=True' was specified but no transformation for parallel execution was possible.
-    
-    To find out why, try turning on parallel diagnostics, see http://numba.pydata.org/numba-doc/latest/user/parallel.html#diagnostics for help.
-    
-    File "../../../local/miniconda3/envs/tsne/lib/python3.7/site-packages/umap/rp_tree.py", line 135:
-    @numba.njit(fastmath=True, nogil=True, parallel=True)
-    def euclidean_random_projection_split(data, indices, rng_state):
-    ^
-    
-      state.func_ir.loc))
-    /home/ppolicar/local/miniconda3/envs/tsne/lib/python3.7/site-packages/umap/nndescent.py:92: NumbaPerformanceWarning: 
-    The keyword argument 'parallel=True' was specified but no transformation for parallel execution was possible.
-    
-    To find out why, try turning on parallel diagnostics, see http://numba.pydata.org/numba-doc/latest/user/parallel.html#diagnostics for help.
-    
-    File "../../../local/miniconda3/envs/tsne/lib/python3.7/site-packages/umap/utils.py", line 409:
-    @numba.njit(parallel=True)
-    def build_candidates(current_graph, n_vertices, n_neighbors, max_candidates, rng_state):
-    ^
-    
-      current_graph, n_vertices, n_neighbors, max_candidates, rng_state
-    /home/ppolicar/local/miniconda3/envs/tsne/lib/python3.7/site-packages/numba/typed_passes.py:293: NumbaPerformanceWarning: 
-    The keyword argument 'parallel=True' was specified but no transformation for parallel execution was possible.
-    
-    To find out why, try turning on parallel diagnostics, see http://numba.pydata.org/numba-doc/latest/user/parallel.html#diagnostics for help.
-    
-    File "../../../local/miniconda3/envs/tsne/lib/python3.7/site-packages/umap/nndescent.py", line 47:
-        @numba.njit(parallel=True)
-        def nn_descent(
-        ^
-    
-      state.func_ir.loc))
+    OMP: Info #276: omp_set_nested routine deprecated, please use omp_set_max_active_levels instead.
 
 
 .. parsed-literal::
 
-    CPU times: user 6h 30min 53s, sys: 9min 34s, total: 6h 40min 27s
-    Wall time: 1h 6min 49s
+    CPU times: user 9h 39min 56s, sys: 1h 17min 49s, total: 10h 57min 45s
+    Wall time: 1h 21min 7s
 
 
 .. code:: ipython3
