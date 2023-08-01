@@ -34,7 +34,11 @@ cdef sqeuclidean(double[:] x, double[:] y):
     return result
 
 
-cpdef double kl_divergence_exact(double[:, ::1] P, double[:, ::1] embedding):
+cpdef double kl_divergence_exact(
+    double[:, ::1] P, 
+    double[:, ::1] embedding, 
+    double dof=1,
+):
     """Compute the exact KL divergence."""
     cdef:
         Py_ssize_t n_samples = embedding.shape[0]
@@ -47,7 +51,7 @@ cpdef double kl_divergence_exact(double[:, ::1] P, double[:, ::1] embedding):
         for j in range(n_samples):
             if i != j:
                 p_ij = P[i, j]
-                q_ij = 1 / (1 + sqeuclidean(embedding[i], embedding[j]))
+                q_ij = 1 / (1 + sqeuclidean(embedding[i], embedding[j]) / dof) ** dof
                 sum_Q += q_ij
                 sum_P += p_ij
                 if p_ij > 0:
