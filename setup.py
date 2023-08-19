@@ -10,13 +10,8 @@ from distutils.sysconfig import customize_compiler
 from os.path import join
 
 import setuptools
+from Cython.Distutils.build_ext import new_build_ext as build_ext
 from setuptools import setup, Extension
-
-try:
-    from Cython.Distutils.build_ext import new_build_ext as build_ext
-    have_cython = True
-except ImportError:
-    have_cython = False
 
 
 class ConvertNotebooksToDocs(distutils.cmd.Command):
@@ -55,16 +50,9 @@ class ConvertNotebooksToDocs(distutils.cmd.Command):
             writer.write(body, resources, nb_name)
 
 
-class get_numpy_include:
-    """Helper class to determine the numpy include path
-
-    The purpose of this class is to postpone importing numpy until it is
-    actually installed, so that the ``get_include()`` method can be invoked.
-
-    """
-    def __str__(self):
-        import numpy
-        return numpy.get_include()
+def get_numpy_include():
+    import numpy
+    return numpy.get_include()
 
 
 def get_include_dirs():
@@ -126,9 +114,6 @@ def has_c_library(library, extension=".c"):
 
 class CythonBuildExt(build_ext):
     def build_extensions(self):
-        if not have_cython:
-            raise RuntimeError("Missing build dependency: Cython")
-
         extra_compile_args = []
         extra_link_args = []
 
@@ -174,7 +159,7 @@ class CythonBuildExt(build_ext):
             if platform.machine() == "x86_64":
                 extra_compile_args += ["-march=native"]
 
-        # We will disable openmp flags if the compiler doesn"t support it. This
+        # We will disable openmp flags if the compiler doesn't support it. This
         # is only really an issue with OSX clang
         if has_c_library("omp"):
             print("Found openmp. Compiling with openmp flags...")
@@ -298,14 +283,11 @@ setup(
     ],
 
     packages=setuptools.find_packages(include=["openTSNE", "openTSNE.*"]),
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     install_requires=[
         "numpy>=1.16.6",
         "scikit-learn>=0.20",
         "scipy",
-    ],
-    setup_requires=[
-        "cython",
     ],
     extras_require={
         "hnsw": "hnswlib~=0.4.0",
