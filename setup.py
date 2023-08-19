@@ -159,7 +159,7 @@ class CythonBuildExt(build_ext):
             if platform.machine() == "x86_64":
                 extra_compile_args += ["-march=native"]
 
-        # We will disable openmp flags if the compiler doesn"t support it. This
+        # We will disable openmp flags if the compiler doesn't support it. This
         # is only really an issue with OSX clang
         if has_c_library("omp"):
             print("Found openmp. Compiling with openmp flags...")
