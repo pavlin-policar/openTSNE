@@ -10,13 +10,8 @@ from distutils.sysconfig import customize_compiler
 from os.path import join
 
 import setuptools
+from Cython.Distutils.build_ext import new_build_ext as build_ext
 from setuptools import setup, Extension
-
-try:
-    from Cython.Distutils.build_ext import new_build_ext as build_ext
-    have_cython = True
-except ImportError:
-    have_cython = False
 
 
 class ConvertNotebooksToDocs(distutils.cmd.Command):
@@ -119,9 +114,6 @@ def has_c_library(library, extension=".c"):
 
 class CythonBuildExt(build_ext):
     def build_extensions(self):
-        if not have_cython:
-            raise RuntimeError("Missing build dependency: Cython")
-
         extra_compile_args = []
         extra_link_args = []
 
