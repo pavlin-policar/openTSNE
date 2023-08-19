@@ -55,16 +55,9 @@ class ConvertNotebooksToDocs(distutils.cmd.Command):
             writer.write(body, resources, nb_name)
 
 
-class get_numpy_include:
-    """Helper class to determine the numpy include path
-
-    The purpose of this class is to postpone importing numpy until it is
-    actually installed, so that the ``get_include()`` method can be invoked.
-
-    """
-    def __str__(self):
-        import numpy
-        return numpy.get_include()
+def get_numpy_include():
+    import numpy
+    return numpy.get_include()
 
 
 def get_include_dirs():
