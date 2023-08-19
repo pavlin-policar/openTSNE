@@ -289,9 +289,6 @@ setup(
         "scikit-learn>=0.20",
         "scipy",
     ],
-    setup_requires=[
-        "cython",
-    ],
     extras_require={
         "hnsw": "hnswlib~=0.4.0",
         "pynndescent": "pynndescent~=0.5.0",
