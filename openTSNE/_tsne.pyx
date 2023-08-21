@@ -162,7 +162,11 @@ cpdef tuple estimate_positive_gradient_nn(
                 # is known
                 if should_eval_error:
                     sum_P += p_ij
-                    kl_divergence += p_ij * log((p_ij / (q_ij + EPSILON)) + EPSILON)
+                    if dof != 1:
+                        # Now we need to do the exp by dof
+                        kl_divergence += p_ij * log((p_ij / (q_ij ** dof + EPSILON)) + EPSILON)                    
+                    else:
+                        kl_divergence += p_ij * log((p_ij / (q_ij + EPSILON)) + EPSILON)
 
         free(diff)
 
