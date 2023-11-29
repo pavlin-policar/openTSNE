@@ -2,7 +2,8 @@ numpy
 sphinx
 sphinx-rtd-theme
 ipython
+scikit-learn
 
 # For whatever reason, the pip installation on readthedocs doesn't download the wheel fror 0.24,
 # and attempts to build the package from source; failing.
-scikit-learn==0.23.2
+# scikit-learn==0.23.2
