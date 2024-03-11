@@ -13,9 +13,6 @@ jobs:
 
   strategy:
     matrix:
-      linux-python37:
-        image.name: 'ubuntu-latest'
-        python.version: '3.7'
       linux-python38:
         image.name: 'ubuntu-latest'
         python.version: '3.8'
@@ -28,9 +25,9 @@ jobs:
       linux-python311:
         image.name: 'ubuntu-latest'
         python.version: '3.11'
-      osx-python37:
-        image.name: 'macos-12'
-        python.version: '3.7'
+      linux-python312:
+        image.name: 'ubuntu-latest'
+        python.version: '3.12'
       osx-python38:
         image.name: 'macos-12'
         python.version: '3.8'
@@ -43,9 +40,9 @@ jobs:
       osx-python311:
         image.name: 'macos-12'
         python.version: '3.11'
-      windows-python37:
-        image.name: 'windows-2019'
-        python.version: '3.7'
+      osx-python312:
+        image.name: 'macos-12'
+        python.version: '3.12'
       windows-python38:
         image.name: 'windows-2019'
         python.version: '3.8'
@@ -58,6 +55,9 @@ jobs:
       windows-python311:
         image.name: 'windows-2019'
         python.version: '3.11'
+      windows-python312:
+        image.name: 'windows-2019'
+        python.version: '3.12'
 
   steps:
   - task: UsePythonVersion@0

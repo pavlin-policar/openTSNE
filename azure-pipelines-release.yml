@@ -18,11 +18,6 @@ jobs:
 
     strategy:
       matrix:
-        osx - python37:
-          image.name: 'macos-12'
-          python.version: '3.7'
-          ciwb.build: cp37-macosx_x86_64
-          ciwb.archs: x86_64
         osx - python38:
           image.name: 'macos-12'
           python.version: '3.8'
@@ -43,12 +38,12 @@ jobs:
           python.version: '3.11'
           ciwb.build: cp311-macosx_universal2
           ciwb.archs: universal2
+        osx - python312:
+          image.name: 'macos-12'
+          python.version: '3.12'
+          ciwb.build: cp312-macosx_universal2
+          ciwb.archs: universal2
 
-        windows - python37:
-          image.name: 'windows-2019'
-          python.version: '3.7'
-          ciwb.build: cp37-win_amd64
-          ciwb.archs: AMD64
         windows - python38:
           image.name: 'windows-2019'
           python.version: '3.8'
@@ -68,6 +63,11 @@ jobs:
           image.name: 'windows-2019'
           python.version: '3.11'
           ciwb.build: cp311-win_amd64
+          ciwb.archs: AMD64
+        windows - python312:
+          image.name: 'windows-2019'
+          python.version: '3.12'
+          ciwb.build: cp312-win_amd64
           ciwb.archs: AMD64
 
     steps:
@@ -138,9 +138,6 @@ jobs:
 
     strategy:
       matrix:
-        python37:
-          python: '/opt/python/cp37-cp37m/bin'
-          python.version: '3.7'
         python38:
           python: '/opt/python/cp38-cp38/bin'
           python.version: '3.8'
@@ -153,6 +150,9 @@ jobs:
         python311:
           python: '/opt/python/cp311-cp311/bin'
           python.version: '3.11'
+        python312:
+          python: '/opt/python/cp312-cp312/bin'
+          python.version: '3.12'
 
     container:
       image: quay.io/pypa/manylinux2014_x86_64:latest
