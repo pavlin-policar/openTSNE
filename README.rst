@@ -96,15 +96,16 @@ If you make use of openTSNE for your work we would appreciate it if you would ci
 
 .. code::
 
-    @article {Poli{\v c}ar731877,
-        author = {Poli{\v c}ar, Pavlin G. and Stra{\v z}ar, Martin and Zupan, Bla{\v z}},
-        title = {openTSNE: a modular Python library for t-SNE dimensionality reduction and embedding},
-        year = {2019},
-        doi = {10.1101/731877},
-        publisher = {Cold Spring Harbor Laboratory},
-        URL = {https://www.biorxiv.org/content/early/2019/08/13/731877},
-        eprint = {https://www.biorxiv.org/content/early/2019/08/13/731877.full.pdf},
-        journal = {bioRxiv}
+    @article{Policar2024,
+        title={openTSNE: A Modular Python Library for t-SNE Dimensionality Reduction and Embedding},
+        author={Poli{\v c}ar, Pavlin G. and Stra{\v z}ar, Martin and Zupan, Bla{\v z}},
+        journal={Journal of Statistical Software},
+        year={2024},
+        volume={109},
+        number={3},
+        pages={1–30},
+        doi={10.18637/jss.v109.i03},
+        url={https://www.jstatsoft.org/index.php/jss/article/view/v109i03}
     }
     
 openTSNE implements two efficient algorithms for t-SNE. Please consider citing the original authors of the algorithm that you use. If you use FIt-SNE (default), then the citation is [5]_ below, but if you use Barnes-Hut the citations are [3]_ and [4]_.
