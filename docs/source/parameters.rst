@@ -43,7 +43,7 @@ momentum: float
     To increase convergence speed and reduce the number of iterations required, we can augment gradient descent with a momentum term. Momentum stores an exponentially decaying sum of gradient updates from previous iterations. By default, this is typically set to 0.8.
 
 max_grad_norm: float
-    By default, openTSNE does not apply gradient clipping. However, when embedding new data into an existing embedding, care must be taken that the data points do not "shoot off". Gradient clipping alevaites this issue.
+    By default, openTSNE does not apply gradient clipping. However, when embedding new data into an existing embedding, care must be taken that the data points do not "shoot off". Gradient clipping alleviates this issue.
 
 
 Barnes-Hut parameters
