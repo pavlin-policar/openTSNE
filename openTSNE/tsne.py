@@ -14,6 +14,7 @@ from openTSNE.affinity import Affinities, MultiscaleMixture
 from openTSNE.quad_tree import QuadTree
 from openTSNE import utils
 
+
 EPSILON = np.finfo(np.float64).eps
 
 log = logging.getLogger(__name__)

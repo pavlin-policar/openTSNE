@@ -3,7 +3,8 @@
 # cython: wraparound=False
 # cython: cdivision=True
 # cython: language_level=3
-import numpy as np
+cimport numpy as cnp
+cnp.import_array()
 
 ctypedef struct Node:
     Py_ssize_t n_dims

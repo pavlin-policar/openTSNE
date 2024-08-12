@@ -4,7 +4,8 @@
 # cython: initializedcheck=False
 # cython: warn.undeclared=True
 # cython: language_level=3
-cimport numpy as np
+cimport numpy as cnp
+cnp.import_array()
 import numpy as np
 from .quad_tree cimport QuadTree
 from ._tsne cimport (
@@ -17,6 +18,7 @@ from ._tsne import estimate_positive_gradient_nn
 
 
 cdef double EPSILON = np.finfo(np.float64).eps
+
 
 cdef extern from "math.h":
     double log(double x) nogil

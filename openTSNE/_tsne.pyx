@@ -4,7 +4,8 @@
 # cython: initializedcheck=False
 # cython: warn.undeclared=True
 # cython: language_level=3
-cimport numpy as np
+cimport numpy as cnp
+cnp.import_array()
 import numpy as np
 from cython.parallel import prange, parallel
 from cpython.mem cimport PyMem_Malloc, PyMem_Free

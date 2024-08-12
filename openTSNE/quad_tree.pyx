@@ -33,6 +33,8 @@ References
    algorithms." Journal of machine learning research 15.1 (2014): 3221-3245.
 
 """
+cimport numpy as cnp
+cnp.import_array()
 import numpy as np
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
 

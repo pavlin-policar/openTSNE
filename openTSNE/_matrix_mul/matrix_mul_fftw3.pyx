@@ -4,9 +4,10 @@
 # cython: initializedcheck=False
 # cython: warn.undeclared=True
 # cython: language_level=3
-cimport openTSNE._matrix_mul.matrix_mul
-cimport numpy as np
+cimport numpy as cnp
+cnp.import_array()
 import numpy as np
+cimport openTSNE._matrix_mul.matrix_mul
 
 
 cdef extern from 'fftw3.h':

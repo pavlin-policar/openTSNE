@@ -5,14 +5,15 @@
 # cython: initializedcheck=False
 # cython: warn.undeclared=True
 # cython: language_level=3
-cimport numpy as np
+cimport numpy as cnp
+cnp.import_array()
 
 from .quad_tree cimport QuadTree
 
 
 ctypedef fused sparse_index_type:
-    np.int32_t
-    np.int64_t
+    cnp.int32_t
+    cnp.int64_t
 
 
 cpdef double[:, ::1] compute_gaussian_perplexity(
