@@ -1,5 +1,6 @@
 variables:
   AZURE_BUILD: true
+  MACOSX_DEPLOYMENT_TARGET: "10.12"  # This should match the -mmacosx-version-min flag in setup.py
 
 trigger:
   tags:
@@ -18,54 +19,44 @@ jobs:
 
     strategy:
       matrix:
-        osx - python38:
-          image.name: 'macos-12'
-          python.version: '3.8'
-          ciwb.build: cp38-macosx_x86_64
-          ciwb.archs: x86_64
         osx - python39:
-          image.name: 'macos-12'
+          image.name: 'macos-latest'
           python.version: '3.9'
           ciwb.build: cp39-macosx_universal2
           ciwb.archs: universal2
         osx - python310:
-          image.name: 'macos-12'
+          image.name: 'macos-latest'
           python.version: '3.10'
           ciwb.build: cp310-macosx_universal2
           ciwb.archs: universal2
         osx - python311:
-          image.name: 'macos-12'
+          image.name: 'macos-latest'
           python.version: '3.11'
           ciwb.build: cp311-macosx_universal2
           ciwb.archs: universal2
         osx - python312:
-          image.name: 'macos-12'
+          image.name: 'macos-latest'
           python.version: '3.12'
           ciwb.build: cp312-macosx_universal2
           ciwb.archs: universal2
 
-        windows - python38:
-          image.name: 'windows-2019'
-          python.version: '3.8'
-          ciwb.build: cp38-win_amd64
-          ciwb.archs: AMD64
         windows - python39:
-          image.name: 'windows-2019'
+          image.name: 'windows-latest'
           python.version: '3.9'
           ciwb.build: cp39-win_amd64
           ciwb.archs: AMD64
         windows - python310:
-          image.name: 'windows-2019'
+          image.name: 'windows-latest'
           python.version: '3.10'
           ciwb.build: cp310-win_amd64
           ciwb.archs: AMD64
         windows - python311:
-          image.name: 'windows-2019'
+          image.name: 'windows-latest'
           python.version: '3.11'
           ciwb.build: cp311-win_amd64
           ciwb.archs: AMD64
         windows - python312:
-          image.name: 'windows-2019'
+          image.name: 'windows-latest'
           python.version: '3.12'
           ciwb.build: cp312-win_amd64
           ciwb.archs: AMD64
@@ -88,6 +79,7 @@ jobs:
         env:
           CIBW_BUILD: $(ciwb.build)
           CIBW_ARCHS: $(ciwb.archs)
+          CIBW_BUILD_VERBOSITY: 1
 
       # Since Python automatically adds `cwd` to `sys.path`, it's important we remove the local folder
       # containing our code from the working directory. Otherwise, the tests will use the local copy
@@ -98,7 +90,7 @@ jobs:
       - bash: ls -lRh dist
         displayName: 'List built files'
 
-      - bash: python -m pip install --force-reinstall --find-links dist openTSNE
+      - bash: python -m pip install -v --force-reinstall --find-links=dist/ openTSNE
         displayName: 'Install wheel'
 
       - script: pip install pynndescent
@@ -111,6 +103,9 @@ jobs:
 
       - bash: pip install pytest
         displayName: 'Install pytest'
+
+      - bash: pip freeze -v
+        displayName: 'List packages'
 
       - script: pytest -v
         timeoutInMinutes: 15
@@ -138,9 +133,6 @@ jobs:
 
     strategy:
       matrix:
-        python38:
-          python: '/opt/python/cp38-cp38/bin'
-          python.version: '3.8'
         python39:
           python: '/opt/python/cp39-cp39/bin'
           python.version: '3.9'
@@ -182,7 +174,10 @@ jobs:
       - bash: mv openTSNE src
         displayName: 'Remove source files from path'
 
-      - script: $(python)/pip install --force-reinstall --find-links wheelhouse openTSNE
+      - bash: ls -lRh wheelhouse
+        displayName: 'List built files'
+
+      - script: $(python)/pip install -v --force-reinstall --find-links=wheelhouse/ openTSNE
         displayName: 'Install openTSNE wheel'
 
       - script: $(python)/pip install pynndescent
@@ -194,12 +189,14 @@ jobs:
       - bash: $(python)/pip install --user pytest
         displayName: 'Install pytest'
 
+      - bash: $(python)/pip freeze -v
+        displayName: 'List packages'
+
       - script: $(python)/python -m pytest -v
         timeoutInMinutes: 15
         displayName: 'Run unit tests'
 
       - bash: |
-          ls -lRh wheelhouse
           mkdir -p dist
           cp wheelhouse/openTSNE*manylinux*.whl dist/
         displayName: 'Copy files to dist folder'
@@ -233,19 +230,13 @@ jobs:
       - script: python -m pip install build
         displayName: Installing build tools
 
-      - script: python -m build -s .
+      - script: python -m build -v --outdir dist --sdist
         displayName: 'Build sdist'
-
-      # Since Python automatically adds `cwd` to `sys.path`, it's important we remove the local folder
-      # containing our code from the working directory. Otherwise, the tests will use the local copy
-      # instead of the installed package. We can easily achieve this by renaming the source folder.
-      - bash: mv openTSNE src
-        displayName: 'Remove source files from path'
 
       - bash: ls -lRh dist
         displayName: 'List built files'
 
-      - bash: python -m pip install --force-reinstall --find-links dist openTSNE
+      - bash: python -m pip -v install --no-binary openTSNE --find-links=dist/ openTSNE --no-cache
         displayName: 'Install package'
 
       - script: pip install pynndescent
@@ -254,8 +245,17 @@ jobs:
       - script: pip install hnswlib
         displayName: 'Install optional dependencies - hnswlib'
 
+      # Since Python automatically adds `cwd` to `sys.path`, it's important we remove the local folder
+      # containing our code from the working directory. Otherwise, the tests will use the local copy
+      # instead of the installed package. We can easily achieve this by renaming the source folder.
+      - bash: mv openTSNE src
+        displayName: 'Remove source files from path'
+
       - bash: pip install pytest
         displayName: 'Install pytest'
+
+      - bash: pip freeze -v
+        displayName: 'List packages'
 
       - script: pytest -v
         timeoutInMinutes: 15

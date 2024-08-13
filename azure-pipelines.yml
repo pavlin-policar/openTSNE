@@ -13,9 +13,6 @@ jobs:
 
   strategy:
     matrix:
-      linux-python38:
-        image.name: 'ubuntu-latest'
-        python.version: '3.8'
       linux-python39:
         image.name: 'ubuntu-latest'
         python.version: '3.9'
@@ -28,35 +25,29 @@ jobs:
       linux-python312:
         image.name: 'ubuntu-latest'
         python.version: '3.12'
-      osx-python38:
-        image.name: 'macos-12'
-        python.version: '3.8'
       osx-python39:
-        image.name: 'macos-12'
+        image.name: 'macos-latest'
         python.version: '3.9'
       osx-python310:
-        image.name: 'macos-12'
+        image.name: 'macos-latest'
         python.version: '3.10'
       osx-python311:
-        image.name: 'macos-12'
+        image.name: 'macos-latest'
         python.version: '3.11'
       osx-python312:
-        image.name: 'macos-12'
+        image.name: 'macos-latest'
         python.version: '3.12'
-      windows-python38:
-        image.name: 'windows-2019'
-        python.version: '3.8'
       windows-python39:
-        image.name: 'windows-2019'
+        image.name: 'windows-latest'
         python.version: '3.9'
       windows-python310:
-        image.name: 'windows-2019'
+        image.name: 'windows-latest'
         python.version: '3.10'
       windows-python311:
-        image.name: 'windows-2019'
+        image.name: 'windows-latest'
         python.version: '3.11'
       windows-python312:
-        image.name: 'windows-2019'
+        image.name: 'windows-latest'
         python.version: '3.12'
 
   steps:

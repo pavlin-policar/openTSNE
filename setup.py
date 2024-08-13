@@ -147,8 +147,9 @@ class CythonBuildExt(build_ext):
 
         # Set minimum deployment version for MacOS
         if compiler == "unix" and platform.system() == "Darwin":
-            extra_compile_args += ["-mmacosx-version-min=10.12"]
-            extra_link_args += ["-stdlib=libc++", "-mmacosx-version-min=10.12"]
+            macos_deployment_target = os.environ.get("MACOSX_DEPLOYMENT_TARGET", "10.12")
+            extra_compile_args += [f"-mmacosx-version-min={macos_deployment_target}"]
+            extra_link_args += ["-stdlib=libc++", f"-mmacosx-version-min={macos_deployment_target}"]
 
         # We don't want the compiler to optimize for system architecture if
         # we're building packages to be distributed by conda-forge, but if the
@@ -283,7 +284,7 @@ setup(
     ],
 
     packages=setuptools.find_packages(include=["openTSNE", "openTSNE.*"]),
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     install_requires=[
         "numpy>=1.16.6",
         "scikit-learn>=0.20",
