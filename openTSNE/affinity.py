@@ -132,7 +132,7 @@ class PerplexityBasedNN(Affinities):
         it is set to three times the perplexity.
 
     knn_index: Optional[nearest_neighbors.KNNIndex]
-        Optionally, a precomptued ``openTSNE.nearest_neighbors.KNNIndex`` object
+        Optionally, a precomputed ``openTSNE.nearest_neighbors.KNNIndex`` object
         can be specified. This option will ignore any KNN-related parameters.
         When ``knn_index`` is specified, ``data`` must be set to None.
 
