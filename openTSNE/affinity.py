@@ -131,6 +131,9 @@ class PerplexityBasedNN(Affinities):
         The number of neighbors to use in the kNN graph. If ``auto`` (default),
         it is set to three times the perplexity.
 
+    knn_kwargs: Optional[None, dict]
+        Optional keyword arguments that will be passed to the ``knn_index``.
+
     knn_index: Optional[nearest_neighbors.KNNIndex]
         Optionally, a precomputed ``openTSNE.nearest_neighbors.KNNIndex`` object
         can be specified. This option will ignore any KNN-related parameters.
@@ -150,6 +153,7 @@ class PerplexityBasedNN(Affinities):
         random_state=None,
         verbose=False,
         k_neighbors="auto",
+        knn_kwargs=None,
         knn_index=None,
     ):
         # This can't work if neither data nor the knn index are specified
@@ -181,7 +185,7 @@ class PerplexityBasedNN(Affinities):
 
             self.knn_index = get_knn_index(
                 data, method, _k_neighbors, metric, metric_params, n_jobs,
-                random_state, verbose
+                random_state, verbose, knn_index
             )
 
         else:
@@ -205,6 +209,7 @@ class PerplexityBasedNN(Affinities):
         self.symmetrize = symmetrize
         self.n_jobs = n_jobs
         self.verbose = verbose
+        self.knn_kwargs = knn_kwargs
 
     def set_perplexity(self, new_perplexity):
         """Change the perplexity of the affinity matrix.
