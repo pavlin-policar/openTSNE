@@ -418,7 +418,9 @@ class NNDescent(KNNIndex):
         "yule",
     ]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+            self, *args, n_trees=None, n_iters=None, max_candidates=60, **kwargs
+    ):
         try:
             import pynndescent  # pylint: disable=unused-import,unused-variable
         except ImportError:
@@ -427,6 +429,9 @@ class NNDescent(KNNIndex):
                 "pynndescent` or `pip install pynndescent`."
             )
         super().__init__(*args, **kwargs)
+        self.n_trees = n_trees
+        self.n_iters = n_iters
+        self.max_candidates = max_candidates
 
     def check_metric(self, metric):
         import pynndescent
@@ -471,8 +476,14 @@ class NNDescent(KNNIndex):
         timer.__enter__()
 
         # These values were taken from UMAP, which we assume to be sensible defaults
-        n_trees = 5 + int(round((data.shape[0]) ** 0.5 / 20))
-        n_iters = max(5, int(round(np.log2(data.shape[0]))))
+        if self.n_trees is None:
+            n_trees = 5 + int(round((data.shape[0]) ** 0.5 / 20))
+        else:
+            n_trees = self.n_trees
+        if self.n_iters is None:
+            n_iters = max(5, int(round(np.log2(data.shape[0]))))
+        else:
+            n_iters = self.n_iters
 
         # Numba takes a while to load up, so there's little point in loading it
         # unless we're actually going to use it
@@ -492,7 +503,7 @@ class NNDescent(KNNIndex):
             random_state=self.random_state,
             n_trees=n_trees,
             n_iters=n_iters,
-            max_candidates=60,
+            max_candidates=self.max_candidates,
             n_jobs=self.n_jobs,
             verbose=self.verbose > 1,
         )
