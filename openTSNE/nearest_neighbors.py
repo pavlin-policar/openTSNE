@@ -217,8 +217,9 @@ class Annoy(KNNIndex):
         "taxicab",
     ]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, n_trees=50, **kwargs):
         super().__init__(*args, **kwargs)
+        self.n_trees = n_trees
 
     def build(self):
         data, k = self.data, self.k
@@ -253,7 +254,7 @@ class Annoy(KNNIndex):
             self.index.add_item(i, data[i])
 
         # Number of trees. FIt-SNE uses 50 by default.
-        self.index.build(50, n_jobs=self.n_jobs)
+        self.index.build(self.n_trees, n_jobs=self.n_jobs)
 
         # Return the nearest neighbors in the training set
         distances = np.zeros((N, k))
