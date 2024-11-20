@@ -352,7 +352,15 @@ class PerplexityBasedNN(Affinities):
 
 
 def get_knn_index(
-    data, method, k, metric, metric_params=None, n_jobs=1, random_state=None, verbose=False
+        data,
+        method,
+        k,
+        metric,
+        metric_params=None,
+        n_jobs=1,
+        random_state=None,
+        verbose=False,
+        knn_kwargs=None,
 ):
     # If we're dealing with a precomputed distance matrix, our job is very easy,
     # so we can skip all the remaining checks
@@ -402,6 +410,7 @@ def get_knn_index(
             n_jobs=n_jobs,
             random_state=random_state,
             verbose=verbose,
+            **knn_kwargs,
         )
 
     return knn_index
@@ -759,6 +768,9 @@ class MultiscaleMixture(Affinities):
 
     verbose: bool
 
+    knn_kwargs: Optional[None, dict]
+        Optional keyword arguments that will be passed to the ``knn_index``.
+
     knn_index: Optional[nearest_neighbors.KNNIndex]
         Optionally, a precomptued ``openTSNE.nearest_neighbors.KNNIndex`` object
         can be specified. This option will ignore any KNN-related parameters.
@@ -777,6 +789,7 @@ class MultiscaleMixture(Affinities):
         n_jobs=1,
         random_state=None,
         verbose=False,
+        knn_kwargs=None,
         knn_index=None,
     ):
         # Perplexities must be specified, but has default set to none, so the
@@ -805,7 +818,15 @@ class MultiscaleMixture(Affinities):
             k_neighbors = min(n_samples - 1, int(3 * max_perplexity))
 
             self.knn_index = get_knn_index(
-                data, method, k_neighbors, metric, metric_params, n_jobs, random_state, verbose
+                data,
+                method,
+                k_neighbors,
+                metric,
+                metric_params,
+                n_jobs,
+                random_state,
+                verbose,
+                knn_kwargs,
             )
 
         else:
