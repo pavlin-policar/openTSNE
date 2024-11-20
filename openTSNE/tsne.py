@@ -1198,7 +1198,7 @@ class TSNE(BaseEstimator):
         self.n_jobs = n_jobs
 
         self.neighbors = neighbors
-        self.knn_kwargs = knn_kwargs if knn_kwargs is not None else dict()
+        self.knn_kwargs = knn_kwargs
         self.negative_gradient_method = negative_gradient_method
 
         self.callbacks = callbacks
