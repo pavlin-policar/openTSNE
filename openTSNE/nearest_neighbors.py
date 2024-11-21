@@ -222,7 +222,7 @@ class Annoy(KNNIndex):
     def __init__(self, *args, knn_kwargs=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.knn_kwargs = dict() if knn_kwargs is None else knn_kwargs.copy()
-        self.n_trees = knn_kwargs.pop("n_trees", 50)
+        self.n_trees = self.knn_kwargs.pop("n_trees", 50)
 
     def build(self):
         data, k = self.data, self.k
