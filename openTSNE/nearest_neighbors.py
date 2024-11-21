@@ -222,7 +222,7 @@ class Annoy(KNNIndex):
     def __init__(self, *args, knn_kwargs=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.knn_kwargs = dict() if knn_kwargs is None else knn_kwargs.copy()
-        self.n_trees = knn_kwargs.get("n_trees", 50)
+        self.n_trees = knn_kwargs.pop("n_trees", 50)
 
     def build(self):
         data, k = self.data, self.k
@@ -248,7 +248,7 @@ class Annoy(KNNIndex):
         if annoy_metric in annoy_aliases:
             annoy_metric = annoy_aliases[annoy_metric]
 
-        self.index = AnnoyIndex(data.shape[1], annoy_metric)
+        self.index = AnnoyIndex(data.shape[1], annoy_metric, **self.knn_kwargs)
 
         random_state = check_random_state(self.random_state)
         self.index.set_seed(random_state.randint(np.iinfo(np.int32).max))
