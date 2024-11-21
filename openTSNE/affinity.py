@@ -407,7 +407,6 @@ def get_knn_index(
             "of the supported methods or provide a valid `KNNIndex` instance." % method
         )
     else:
-        kwargs = dict() if knn_kwargs is None else knn_kwargs
         knn_index = methods[method](
             data=data,
             k=k,
@@ -416,7 +415,7 @@ def get_knn_index(
             n_jobs=n_jobs,
             random_state=random_state,
             verbose=verbose,
-            **kwargs,
+            knn_kwargs=knn_kwargs,
         )
 
     return knn_index
