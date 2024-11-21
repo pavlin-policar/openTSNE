@@ -561,6 +561,9 @@ class FixedSigmaNN(Affinities):
 
     verbose: bool
 
+    knn_kwargs: Optional[None, dict]
+        Optional keyword arguments that will be passed to the ``knn_index``.
+
     knn_index: Optional[nearest_neighbors.KNNIndex]
         Optionally, a precomptued ``openTSNE.nearest_neighbors.KNNIndex`` object
         can be specified. This option will ignore any KNN-related parameters.
@@ -580,6 +583,7 @@ class FixedSigmaNN(Affinities):
         n_jobs=1,
         random_state=None,
         verbose=False,
+        knn_kwargs=None,
         knn_index=None,
     ):
         # Sigma must be specified, but has default set to none, so the parameter
@@ -606,7 +610,15 @@ class FixedSigmaNN(Affinities):
                 )
 
             self.knn_index = get_knn_index(
-                data, method, k, metric, metric_params, n_jobs, random_state, verbose
+                data,
+                method,
+                k,
+                metric,
+                metric_params,
+                n_jobs,
+                random_state,
+                verbose,
+                knn_kwargs,
             )
 
         else:
@@ -1173,6 +1185,9 @@ class Uniform(Affinities):
 
     verbose: bool
 
+    knn_kwargs: Optional[None, dict]
+        Optional keyword arguments that will be passed to the ``knn_index``.
+
     knn_index: Optional[nearest_neighbors.KNNIndex]
         Optionally, a precomptued ``openTSNE.nearest_neighbors.KNNIndex`` object
         can be specified. This option will ignore any KNN-related parameters.
@@ -1191,6 +1206,7 @@ class Uniform(Affinities):
         n_jobs=1,
         random_state=None,
         verbose=False,
+        knn_kwargs=None,
         knn_index=None,
     ):
         # This can't work if neither data nor the knn index are specified
@@ -1212,7 +1228,15 @@ class Uniform(Affinities):
                 )
 
             self.knn_index = get_knn_index(
-                data, method, k_neighbors, metric, metric_params, n_jobs, random_state, verbose
+                data,
+                method,
+                k_neighbors,
+                metric,
+                metric_params,
+                n_jobs,
+                random_state,
+                verbose,
+                knn_kwargs,
             )
 
         else:
