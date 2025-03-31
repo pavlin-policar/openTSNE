@@ -157,15 +157,19 @@ class PerplexityBasedNN(Affinities):
             raise ValueError(
                 "At least one of the parameters `data` or `knn_index` must be specified!"
             )
-        # This can't work if both data and the knn index are specified
+        # If both data and the knn index are specified, use the knn index
         if data is not None and knn_index is not None:
-            raise ValueError(
-                "Both `data` or `knn_index` were specified! Please pass only one."
+            log.warning(
+                "Both `data` and `knn_index` were specified. Using `knn_index`."
             )
+            data = None            
 
         # Find the nearest neighbors
         if knn_index is None:
-            n_samples = data.shape[0]
+            try:
+                n_samples = data.shape[0]
+            except Exception:
+                raise ValueError("`data` object is invalid!") 
 
             if k_neighbors == "auto":
                 _k_neighbors = min(n_samples - 1, int(3 * perplexity))
