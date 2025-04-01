@@ -783,11 +783,6 @@ class MultiscaleMixture(Affinities):
         verbose=False,
         knn_index=None,
     ):
-        # Perplexities must be specified, but has default set to none, so the
-        # parameter order makes more sense
-        if perplexities is None:
-            raise ValueError("`perplexities` must be specified!")
-
         # This can't work if neither data nor the knn index are specified
         if data is None and knn_index is None:
             raise ValueError(
@@ -977,35 +972,28 @@ class MultiscaleMixture(Affinities):
         perplexities: np.ndarray
             The validated and deduplicated perplexity values.
 
-        """
-        if perplexities is None:
-            raise ValueError("`perplexities` must be specified!")
+        """        
+        if not perplexities:
+            raise ValueError("`perplexities` must be non-empty")
 
-        if len(perplexities) == 0:
-            raise ValueError("`perplexities` must contain at least one value!")
-
-        perplexities = np.asarray(perplexities, dtype=int, copy=True)
+        perplexities = np.unique(np.asarray(perplexities, dtype=int, copy=True)) # deduplicates while sorting and ensuring dtype int
 
         if np.any(perplexities <= 0):
             raise ValueError("All perplexity values must be positive")
-       
-        perplexities = np.unique(perplexities) # deduplicates while preserving dtype int
 
-        requirement_not_met = 3 * perplexities > n_samples - 1
+        max_allowed_perplexity = (n_samples - 1) // 3
 
-        if not np.any(requirement_not_met):
-            log.info("All perplexity are in the valid range. Only returning unique values.")
-            return perplexities.astype(int) # Explicit dtype guaranteed, but redundant
-        else:
-            max_allowed_perplexity = (n_samples - 1) // 3
-            log.warning(
-                f"Perplexity values {perplexities[requirement_not_met]} are too high. "
-                f"Values have been clipped to {max_allowed_perplexity}."
-            )
-            perplexities = np.where(requirement_not_met, max_allowed_perplexity, perplexities)
+        clipped_perplexities = np.unique(np.clip(perplexities, None, max_allowed_perplexity))
 
-            return np.unique(perplexities).astype(int) # Explicit dtype guaranteed, but redundant
+        excess_perplexities = np.setdiff1d(perplexities, clipped_perplexities)
 
+        if len(excess_perplexities) > 0:
+            logging.warning(f"Excessively high perplexity values {excess_perplexities} were detected and clipped to {max_allowed_perplexity}")
+
+        logging.info("Perplexity values have been successfully validated.")
+
+        return clipped_perplexities.astype(int) # Explicit dtype guaranteed, but redundant
+        
 
 class Multiscale(MultiscaleMixture):
     """Calculate affinities using averaged Gaussian perplexities.
