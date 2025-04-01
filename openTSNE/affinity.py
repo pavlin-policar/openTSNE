@@ -38,6 +38,7 @@ class Affinities:
         self.P = None
         self.verbose = verbose
         self.knn_index: nearest_neighbors.KNNIndex = None
+        self.n_samples: int = None
 
     def to_new(self, data, return_distances=False):
         """Compute the affinities of new samples to the initial samples.
@@ -788,20 +789,26 @@ class MultiscaleMixture(Affinities):
             raise ValueError(
                 "At least one of the parameters `data` or `knn_index` must be specified!"
             )
-        # This can't work if both data and the knn index are specified
+        # If both data and the knn index are specified, use the knn index
         if data is not None and knn_index is not None:
-            raise ValueError(
-                "Both `data` or `knn_index` were specified! Please pass only one."
+            logging.warning(
+                "Both `data` or `knn_index` were specified! Using `knn_index`."
             )
+            data = None #set to None for readability but redundant
 
         # Find the nearest neighbors
         if knn_index is None:
             # We will compute the nearest neighbors to the max value of perplexity,
             # smaller values can just use indexing to truncate unneeded neighbors
-            n_samples = data.shape[0]
-            effective_perplexities = self.check_perplexities(perplexities, n_samples)
+            try:
+                n_samples = data.shape[0]
+            except (AttributeError, IndexError) as e:
+                raise ValueError(f"`data` object is invalid: {str(e)}") from e
+            self.n_samples = n_samples
+            
+            effective_perplexities = self.check_perplexities(perplexities) # validated and clipped integer perplexities
             max_perplexity = np.max(effective_perplexities)
-            k_neighbors = min(n_samples - 1, int(3 * max_perplexity))
+            k_neighbors = 3 * max_perplexity
 
             self.knn_index = get_knn_index(
                 data, method, k_neighbors, metric, metric_params, n_jobs, random_state, verbose
@@ -809,8 +816,7 @@ class MultiscaleMixture(Affinities):
 
         else:
             self.knn_index = knn_index
-            n_samples = self.knn_index.n_samples
-            effective_perplexities = self.check_perplexities(perplexities, n_samples)
+            effective_perplexities = self.check_perplexities(perplexities)
             log.info("KNN index provided. Ignoring KNN-related parameters.")
 
         self.__neighbors, self.__distances = self.knn_index.build()
@@ -961,7 +967,7 @@ class MultiscaleMixture(Affinities):
 
         return P
 
-    def check_perplexities(self, perplexities, n_samples):
+    def check_perplexities(self, perplexities):
         """Check and correct/truncate perplexities.
 
         Validate, deduplicate and clip perplexity values to the largest allowed
@@ -980,7 +986,12 @@ class MultiscaleMixture(Affinities):
 
         if np.any(perplexities <= 0):
             raise ValueError("All perplexity values must be positive")
-
+        
+        if self.knn_index is None:
+            n_samples = self.n_samples
+        else:
+            n_samples = self.knn_index.n_samples
+        
         max_allowed_perplexity = (n_samples - 1) // 3
 
         clipped_perplexities = np.unique(np.clip(perplexities, None, max_allowed_perplexity))
