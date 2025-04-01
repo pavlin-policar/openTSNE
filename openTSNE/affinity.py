@@ -110,7 +110,7 @@ class PerplexityBasedNN(Affinities):
         Additional keyword arguments for the metric function.
 
     symmetrize: bool
-        Symmetrize the affinity matrix. During standard t-SNE optimization, the
+        Symmetrize the affinity matrix. During Barnes-Hut-SNE optimization, the
         affinities are symmetrized. However, when embedding new data points into
         existing embeddings, symmetrization is not performed.
 
@@ -725,10 +725,10 @@ class MultiscaleMixture(Affinities):
         The data matrix.
 
     perplexities: List[float]
-        A list of perplexity values, which will be used in the multiscale
-        Gaussian kernel. Perplexity can be thought of as the continuous
-        :math:`k` number of nearest neighbors, for which t-SNE will attempt to
-        preserve distances.
+        A list of perplexity values to be used in the multiscale
+        Gaussian kernel. Each perplexity value determines the number of effective nearest neighbors
+        :math:`k` for each point, influencing how t-SNE will attempt to
+        preserve local affinities in the embedding.
 
     method: str
         Specifies the nearest neighbor method to use. Can be ``exact``, ``annoy``,
