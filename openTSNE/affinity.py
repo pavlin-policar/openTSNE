@@ -969,38 +969,42 @@ class MultiscaleMixture(Affinities):
     def check_perplexities(self, perplexities, n_samples):
         """Check and correct/truncate perplexities.
 
-        If a perplexity is too large, it is corrected to the largest allowed
-        value. It is then inserted into the list of perplexities only if that
-        value doesn't already exist in the list.
+        Validate, deduplicate and clip perplexity values to the largest allowed
+        value.
+
+        Returns
+        -------
+        perplexities: np.ndarray
+            The validated and deduplicated perplexity values.
 
         """
-        if isinstance(perplexities, numbers.Number):
-            perplexities = [perplexities]
+        if perplexities is None:
+            raise ValueError("`perplexities` must be specified!")
 
-        usable_perplexities = []
-        for perplexity in sorted(perplexities):
-            if perplexity <= 0:
-                raise ValueError("Perplexity must be >=0. %.2f given" % perplexity)
+        if len(perplexities) == 0:
+            raise ValueError("`perplexities` must contain at least one value!")
 
-            if 3 * perplexity > n_samples - 1:
-                new_perplexity = (n_samples - 1) / 3
+        perplexities = np.asarray(perplexities, dtype=int, copy=True)
 
-                if new_perplexity in usable_perplexities:
-                    log.warning(
-                        "Perplexity value %d is too high. Dropping "
-                        "because the max perplexity is already in the "
-                        "list." % perplexity
-                    )
-                else:
-                    usable_perplexities.append(new_perplexity)
-                    log.warning(
-                        "Perplexity value %d is too high. Using "
-                        "perplexity %.2f instead" % (perplexity, new_perplexity)
-                    )
-            else:
-                usable_perplexities.append(perplexity)
+        if np.any(perplexities <= 0):
+            raise ValueError("All perplexity values must be positive")
+       
+        perplexities = np.unique(perplexities) # deduplicates while preserving dtype int
 
-        return usable_perplexities
+        requirement_not_met = 3 * perplexities > n_samples - 1
+
+        if not np.any(requirement_not_met):
+            log.info("All perplexity are in the valid range. Only returning unique values.")
+            return perplexities.astype(int) # Explicit dtype guaranteed, but redundant
+        else:
+            max_allowed_perplexity = (n_samples - 1) // 3
+            log.warning(
+                f"Perplexity values {perplexities[requirement_not_met]} are too high. "
+                f"Values have been clipped to {max_allowed_perplexity}."
+            )
+            perplexities = np.where(requirement_not_met, max_allowed_perplexity, perplexities)
+
+            return np.unique(perplexities).astype(int) # Explicit dtype guaranteed, but redundant
 
 
 class Multiscale(MultiscaleMixture):
