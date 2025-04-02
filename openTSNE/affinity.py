@@ -804,7 +804,7 @@ class MultiscaleMixture(Affinities):
             except (AttributeError, IndexError) as e:
                 raise ValueError(f"`data` object is invalid: {str(e)}") from e
             
-            effective_perplexities = self.check_perplexities(perplexities) # validated and clipped integer perplexities
+            effective_perplexities = self.check_perplexities(perplexities, n_samples) # validated and clipped integer perplexities
             max_perplexity = np.max(effective_perplexities)
             k_neighbors = 3 * max_perplexity
 
@@ -814,7 +814,8 @@ class MultiscaleMixture(Affinities):
 
         else:
             self.knn_index = knn_index
-            effective_perplexities = self.check_perplexities(perplexities)
+            n_samples = self.knn_index.n_samples
+            effective_perplexities = self.check_perplexities(perplexities, n_samples)
             log.info("KNN index provided. Ignoring KNN-related parameters.")
 
         self.__neighbors, self.__distances = self.knn_index.build()
@@ -965,7 +966,7 @@ class MultiscaleMixture(Affinities):
 
         return P
 
-    def check_perplexities(self, perplexities):
+    def check_perplexities(self, perplexities, n_samples):
         """Check and correct/truncate perplexities.
 
         Validate, deduplicate and clip perplexity values to the largest allowed
@@ -984,11 +985,6 @@ class MultiscaleMixture(Affinities):
 
         if np.any(perplexities <= 0):
             raise ValueError("All perplexity values must be positive")
-        
-        if self.knn_index is None:
-            n_samples = self.n_samples
-        else:
-            n_samples = self.knn_index.n_samples
         
         max_allowed_perplexity = (n_samples - 1) // 3
 
