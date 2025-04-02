@@ -38,7 +38,6 @@ class Affinities:
         self.P = None
         self.verbose = verbose
         self.knn_index: nearest_neighbors.KNNIndex = None
-        self.n_samples: int = None
 
     def to_new(self, data, return_distances=False):
         """Compute the affinities of new samples to the initial samples.
@@ -804,7 +803,6 @@ class MultiscaleMixture(Affinities):
                 n_samples = data.shape[0]
             except (AttributeError, IndexError) as e:
                 raise ValueError(f"`data` object is invalid: {str(e)}") from e
-            self.n_samples = n_samples
             
             effective_perplexities = self.check_perplexities(perplexities) # validated and clipped integer perplexities
             max_perplexity = np.max(effective_perplexities)
