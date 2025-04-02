@@ -783,51 +783,51 @@ class MultiscaleMixture(Affinities):
         verbose=False,
         knn_index=None,
     ):
-        # This can't work if neither data nor the knn index are specified
-        if data is None and knn_index is None:
-            raise ValueError(
-                "At least one of the parameters `data` or `knn_index` must be specified!"
-            )
-        # If both data and the knn index are specified, use the knn index
-        if data is not None and knn_index is not None:
-            logging.warning(
-                "Both `data` or `knn_index` were specified! Using `knn_index`."
-            )
-            data = None #set to None for readability but redundant
-
-        # Find the nearest neighbors
-        if knn_index is None:
-            # We will compute the nearest neighbors to the max value of perplexity,
-            # smaller values can just use indexing to truncate unneeded neighbors
+        if knn_index is not None:
+            self.knn_index = knn_index
+            try:        
+                n_samples = self.knn_index.n_samples
+            except (AttributeError, IndexError) as e:
+                raise ValueError(f"`knn_index` object is invalid: {str(e)}") from e
+            log.info("KNN index provided. Ignoring KNN-related parameters and data, if provided.")
+        elif data is not None:
             try:
                 n_samples = data.shape[0]
             except (AttributeError, IndexError) as e:
                 raise ValueError(f"`data` object is invalid: {str(e)}") from e
-            
-            effective_perplexities = self.check_perplexities(perplexities, n_samples) # validated and clipped integer perplexities
+            log.info("Provided data will be used to compute nearest neighbors.")
+        else:
+            raise ValueError("Either `data` or `knn_index` must be provided!")
+        
+        effective_perplexities = self.check_perplexities(perplexities, n_samples) # validated and clipped integer perplexities
+
+        if knn_index is None:
+            # We will compute the nearest neighbors to the max value of perplexity,
+            # smaller values can just use indexing to truncate unneeded neighbors
             max_perplexity = np.max(effective_perplexities)
             k_neighbors = 3 * max_perplexity
 
-            self.knn_index = get_knn_index(
-                data, method, k_neighbors, metric, metric_params, n_jobs, random_state, verbose
-            )
+            try:
+                self.knn_index = get_knn_index(
+                    data, method, k_neighbors, metric, metric_params, n_jobs, random_state, verbose
+                )
+            except Exception as e:
+                raise ValueError(f"Error computing nearest neighbors: {str(e)}") from e
 
-        else:
-            self.knn_index = knn_index
-            n_samples = self.knn_index.n_samples
-            effective_perplexities = self.check_perplexities(perplexities, n_samples)
-            log.info("KNN index provided. Ignoring KNN-related parameters.")
 
         self.__neighbors, self.__distances = self.knn_index.build()
 
-        with utils.Timer("Calculating affinity matrix...", verbose):
-            self.P = self._calculate_P(
-                self.__neighbors,
-                self.__distances,
-                effective_perplexities,
-                symmetrize=symmetrize,
-                n_jobs=n_jobs,
-            )
+        try:
+            with utils.Timer("Calculating affinity matrix...", verbose):
+                self.P = self._calculate_P(
+                    self.__neighbors,
+                    self.__distances,
+                    effective_perplexities,
+                    symmetrize=symmetrize,
+                    n_jobs=n_jobs,
+                )
+        except Exception as e:
+            raise ValueError(f"Error calculating affinity matrix: {str(e)}") from e
 
         self.perplexities = perplexities
         self.effective_perplexities_ = effective_perplexities
