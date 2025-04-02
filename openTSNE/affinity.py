@@ -110,7 +110,7 @@ class PerplexityBasedNN(Affinities):
         Additional keyword arguments for the metric function.
 
     symmetrize: bool
-        Symmetrize the affinity matrix. During Barnes-Hut-SNE optimization, the
+        Symmetrize the affinity matrix. During standard t-SNE optimization, the
         affinities are symmetrized. However, when embedding new data points into
         existing embeddings, symmetrization is not performed.
 
@@ -157,19 +157,15 @@ class PerplexityBasedNN(Affinities):
             raise ValueError(
                 "At least one of the parameters `data` or `knn_index` must be specified!"
             )
-        # If both data and the knn index are specified, use the knn index
+        # This can't work if both data and the knn index are specified
         if data is not None and knn_index is not None:
-            log.warning(
-                "Both `data` and `knn_index` were specified. Using `knn_index`."
+            raise ValueError(
+                "Both `data` or `knn_index` were specified! Please pass only one."
             )
-            data = None            
 
         # Find the nearest neighbors
         if knn_index is None:
-            try:
-                n_samples = data.shape[0]
-            except Exception:
-                raise ValueError("`data` object is invalid!") 
+            n_samples = data.shape[0]
 
             if k_neighbors == "auto":
                 _k_neighbors = min(n_samples - 1, int(3 * perplexity))
@@ -981,7 +977,7 @@ class MultiscaleMixture(Affinities):
         if not perplexities:
             raise ValueError("`perplexities` must be non-empty")
 
-        perplexities = np.unique(np.asarray(perplexities, dtype=int, copy=True)) # deduplicates while sorting and ensuring dtype int
+        perplexities = np.unique(np.asarray(perplexities, dtype=int)) # deduplicates while sorting and ensuring dtype int
 
         if np.any(perplexities <= 0):
             raise ValueError("All perplexity values must be positive")
