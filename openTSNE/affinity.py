@@ -781,17 +781,25 @@ class MultiscaleMixture(Affinities):
     ):
         if knn_index is not None:
             self.knn_index = knn_index
+            
             try:        
                 n_samples = self.knn_index.n_samples
             except (AttributeError, IndexError) as e:
                 raise ValueError(f"`knn_index` object is invalid: {str(e)}") from e
-            log.info("KNN index provided. Ignoring KNN-related parameters and data, if provided.")
+            
+            log.info("KNN index provided. Ignoring KNN-related parameters.")
+            
+            if data is not None: # if-clause redundant but keeping for finer grain logging
+                logging.warning("`data` will be ignored as `knn_index` was provided.")
+                
         elif data is not None:
             try:
                 n_samples = data.shape[0]
             except (AttributeError, IndexError) as e:
                 raise ValueError(f"`data` object is invalid: {str(e)}") from e
+            
             log.info("Provided data will be used to compute nearest neighbors.")
+        
         else:
             raise ValueError("Either `data` or `knn_index` must be provided!")
         
