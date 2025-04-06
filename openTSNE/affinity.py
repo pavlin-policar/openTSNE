@@ -834,7 +834,7 @@ class MultiscaleMixture(Affinities):
             raise RuntimeError(f"Error calculating affinity matrix: {str(e)}") from e
 
         self.perplexities = perplexities
-        self.effective_perplexities_ = effective_perplexities.tolist()
+        self.effective_perplexities_ = effective_perplexities
         self.symmetrize = symmetrize
         self.n_jobs = n_jobs
         self.verbose = verbose
@@ -890,7 +890,7 @@ class MultiscaleMixture(Affinities):
         k_neighbors = 3 * max_perplexity # Perplexities: integers clipped to max allowed value and deduplicated. 
 
         self.perplexities = new_perplexities
-        self.effective_perplexities_ = effective_perplexities.tolist()
+        self.effective_perplexities_ = effective_perplexities
         
         try:
             with utils.Timer(
