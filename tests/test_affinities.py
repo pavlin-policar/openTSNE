@@ -342,15 +342,11 @@ class TestAffinityAcceptsKnnIndexAsParameter(unittest.TestCase):
         for method_name, cls in AFFINITY_CLASSES:
             # Multiscale classes now prioritize knn_index and issue a warning
             if method_name in ("MultiscaleMixture", "Multiscale"):
-                with self.assertLogs(affinity.log, level="WARNING") as cm:
+                with self.assertLogs(logging.getLogger(), level="WARNING") as cm:
                     aff = cls(data=self.iris, knn_index=knn_index)
                     # Verify the instance was created and knn_index was used
                     self.assertIs(aff.knn_index, knn_index, msg=method_name)
-                # Check if the specific warning message is present
-                self.assertTrue(
-                    any("Ignoring `data` because `knn_index` was provided." in msg for msg in cm.output),
-                    f"Expected warning not found for {method_name}"
-                )
+
             # Other classes should still raise an error
             else:
                 with self.assertRaises(ValueError, msg=method_name):

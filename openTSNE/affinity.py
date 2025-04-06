@@ -816,7 +816,7 @@ class MultiscaleMixture(Affinities):
                     data, method, k_neighbors, metric, metric_params, n_jobs, random_state, verbose
                 )
             except Exception as e:
-                raise ValueError(f"Error computing nearest neighbors: {str(e)}") from e
+                raise RuntimeError(f"Error computing nearest neighbors: {str(e)}") from e
 
 
         self.__neighbors, self.__distances = self.knn_index.build()
@@ -831,10 +831,10 @@ class MultiscaleMixture(Affinities):
                     n_jobs=n_jobs,
                 )
         except Exception as e:
-            raise ValueError(f"Error calculating affinity matrix: {str(e)}") from e
+            raise RuntimeError(f"Error calculating affinity matrix: {str(e)}") from e
 
         self.perplexities = perplexities
-        self.effective_perplexities_ = effective_perplexities
+        self.effective_perplexities_ = effective_perplexities.tolist()
         self.symmetrize = symmetrize
         self.n_jobs = n_jobs
         self.verbose = verbose
@@ -874,36 +874,37 @@ class MultiscaleMixture(Affinities):
         ----------
         new_perplexities: List[float]
             The new list of perplexities.
-
         """
-        if np.array_equal(self.perplexities, new_perplexities):
-            return
-
         effective_perplexities = self.check_perplexities(new_perplexities, self.n_samples)
-        max_perplexity = np.max(effective_perplexities)
-        k_neighbors = min(self.n_samples - 1, int(3 * max_perplexity))
+        
+        duplicates = np.isin(effective_perplexities, self.effective_perplexities_)
 
-        if k_neighbors > self.__neighbors.shape[1]:
-            raise RuntimeError(
-                "The largest perplexity `%.2f` is larger than the initial one "
-                "used. This would need to recompute the nearest neighbors, "
-                "which is not efficient. Please create a new `%s` instance "
-                "with the increased perplexity."
-                % (max_perplexity, self.__class__.__name__)
-            )
+        if np.all(duplicates):
+            logging.warning("All perplexities are duplicates. Skipping update.")
+            return
+        elif np.any(duplicates):
+            logging.warning(f"Ignoring duplicates: {effective_perplexities[duplicates]}")
+            effective_perplexities = effective_perplexities[~duplicates]
+
+        max_perplexity = np.max(effective_perplexities)
+        k_neighbors = 3 * max_perplexity # Perplexities: integers clipped to max allowed value and deduplicated. 
 
         self.perplexities = new_perplexities
-        self.effective_perplexities_ = effective_perplexities
-        with utils.Timer(
-            "Perplexity changed. Recomputing affinity matrix...", self.verbose
-        ):
-            self.P = self._calculate_P(
-                self.__neighbors[:, :k_neighbors],
-                self.__distances[:, :k_neighbors],
-                self.effective_perplexities_,
-                symmetrize=self.symmetrize,
-                n_jobs=self.n_jobs,
-            )
+        self.effective_perplexities_ = effective_perplexities.tolist()
+        
+        try:
+            with utils.Timer(
+                "Perplexity changed. Recomputing affinity matrix...", self.verbose
+            ):
+                self.P = self._calculate_P(
+                    self.__neighbors[:, :k_neighbors],
+                    self.__distances[:, :k_neighbors],
+                    self.effective_perplexities_,
+                    symmetrize=self.symmetrize,
+                    n_jobs=self.n_jobs,
+                )
+        except Exception as e:
+            raise RuntimeError(f"Error calculating affinity matrix: {str(e)}") from e
 
     def to_new(self, data, perplexities=None, return_distances=False):
         """Compute the affinities of new samples to the initial samples.
@@ -950,20 +951,26 @@ class MultiscaleMixture(Affinities):
         effective_perplexities = self.check_perplexities(perplexities, self.n_samples)
 
         max_perplexity = np.max(effective_perplexities)
-        k_neighbors = min(self.n_samples - 1, int(3 * max_perplexity))
+        k_neighbors = 3 * max_perplexity # validated perplexities are clipped to max allowed value 
 
-        neighbors, distances = self.knn_index.query(data, k_neighbors)
+        try:
+            neighbors, distances = self.knn_index.query(data, k_neighbors)
+        except Exception as e:
+            raise RuntimeError(f"Error calculating neareast neighbors: {str(e)}") from e
 
-        with utils.Timer("Calculating affinity matrix...", self.verbose):
-            P = self._calculate_P(
-                neighbors,
-                distances,
-                effective_perplexities,
-                symmetrize=False,
-                normalization="point-wise",
-                n_reference_samples=self.n_samples,
-                n_jobs=self.n_jobs,
-            )
+        try:
+            with utils.Timer("Calculating affinity matrix...", self.verbose):
+                P = self._calculate_P(
+                    neighbors,
+                    distances,
+                    effective_perplexities,
+                    symmetrize=False,
+                    normalization="point-wise",
+                    n_reference_samples=self.n_samples,
+                    n_jobs=self.n_jobs,
+                )
+        except Exception as e:
+            raise RuntimeError(f"Error calculating affinity matrix: {str(e)}") from e
 
         if return_distances:
             return P, neighbors, distances
@@ -985,23 +992,25 @@ class MultiscaleMixture(Affinities):
         if not perplexities:
             raise ValueError("`perplexities` must be non-empty")
 
-        perplexities = np.unique(np.asarray(perplexities, dtype=int)) # deduplicates while sorting and ensuring dtype int
+        perplexities = np.asarray(perplexities, dtype=int)
+        if perplexities.size > 1: # deduplicates while sorting and ensuring dtype int
+            perplexities = np.unique(perplexities)
 
         if np.any(perplexities <= 0):
             raise ValueError("All perplexity values must be positive")
         
         max_allowed_perplexity = (n_samples - 1) // 3
 
-        clipped_perplexities = np.unique(np.clip(perplexities, None, max_allowed_perplexity))
+        perplexities_above_max = perplexities > max_allowed_perplexity
+        
+        if np.any(perplexities_above_max):
+            logging.warning(f"Excessively high perplexity values {perplexities[perplexities_above_max]} were detected and clipped to {max_allowed_perplexity}")
 
-        excess_perplexities = np.setdiff1d(perplexities, clipped_perplexities)
-
-        if len(excess_perplexities) > 0:
-            logging.warning(f"Excessively high perplexity values {excess_perplexities} were detected and clipped to {max_allowed_perplexity}")
+            perplexities = np.unique(np.clip(perplexities, None, max_allowed_perplexity))
 
         logging.info("Perplexity values have been successfully validated.")
 
-        return clipped_perplexities.astype(int) # Explicit dtype guaranteed, but redundant
+        return perplexities.astype(int) # Explicit dtype guaranteed, but redundant
         
 
 class Multiscale(MultiscaleMixture):
