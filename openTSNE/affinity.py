@@ -989,7 +989,10 @@ class MultiscaleMixture(Affinities):
             The validated and deduplicated perplexity values.
 
         """        
-        if not perplexities:
+        if isinstance(perplexities, np.ndarray):
+            if perplexities.size == 0:
+                raise ValueError("`perplexities` must be non-empty")
+        elif not perplexities:
             raise ValueError("`perplexities` must be non-empty")
 
         perplexities = np.asarray(perplexities, dtype=int)
