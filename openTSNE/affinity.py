@@ -876,15 +876,29 @@ class MultiscaleMixture(Affinities):
             The new list of perplexities.
         """
         effective_perplexities = self.check_perplexities(new_perplexities, self.n_samples)
-        
-        duplicates = np.isin(effective_perplexities, self.effective_perplexities_)
 
-        if np.all(duplicates):
+        current_max = np.max(self.effective_perplexities_)
+        
+        exceeds_max = effective_perplexities > current_max
+
+        if np.any(exceeds_max): #np.any() for backward compability but can be refined (rm only exceeding value)
+            invalid_perplexity = effective_perplexities[exceeds_max]
+            raise RuntimeError(
+                f"Cannot set perplexities {invalid_perplexity.tolist()} - exceeds current maximum of {current_max}. "
+                f"Maximum allowed perplexity is (n_samples-1)//3 = {(self.n_samples-1)//3}. "
+                "Either:\n"
+                "  1. Use values ≤ {current_max}\n"
+                "  2. Reinitialize with higher n_neighbors to support larger perplexities"
+            )
+
+        is_duplicate = np.isin(effective_perplexities, self.effective_perplexities_)
+        
+        if np.all(is_duplicate):
             logging.warning("All perplexities are duplicates. Skipping update.")
             return
-        elif np.any(duplicates):
-            logging.warning(f"Ignoring duplicates: {effective_perplexities[duplicates]}")
-            effective_perplexities = effective_perplexities[~duplicates]
+        elif np.any(is_duplicate):
+            logging.warning(f"Ignoring duplicates: {effective_perplexities[is_duplicate]}")        
+            effective_perplexities = effective_perplexities[~is_duplicate]
 
         max_perplexity = np.max(effective_perplexities)
         k_neighbors = 3 * max_perplexity # Perplexities: integers clipped to max allowed value and deduplicated. 
@@ -995,7 +1009,11 @@ class MultiscaleMixture(Affinities):
         elif not perplexities:
             raise ValueError("`perplexities` must be non-empty")
 
-        perplexities = np.asarray(perplexities, dtype=int)
+        perplexities = np.asarray(perplexities, dtype=int) # the value in the argument is of integer nature (knn <= n_samples - 1)
+        
+        if perplexities.ndim == 0:
+            perplexities = perplexities.ravel()
+
         if perplexities.size > 1: # deduplicates while sorting and ensuring dtype int
             perplexities = np.unique(perplexities)
 
@@ -1013,7 +1031,7 @@ class MultiscaleMixture(Affinities):
 
         logging.info("Perplexity values have been successfully validated.")
 
-        return perplexities.astype(int) # Explicit dtype guaranteed, but redundant
+        return perplexities.astype(int) # Explicit dtype guaranteed for knn, but redundant
         
 
 class Multiscale(MultiscaleMixture):
