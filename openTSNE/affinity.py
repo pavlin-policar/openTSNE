@@ -180,8 +180,14 @@ class PerplexityBasedNN(Affinities):
                 )
 
             self.knn_index = get_knn_index(
-                data, method, _k_neighbors, metric, metric_params, n_jobs,
-                random_state, verbose
+                data,
+                method,
+                _k_neighbors,
+                metric,
+                metric_params,
+                n_jobs,
+                random_state,
+                verbose,
             )
 
         else:
@@ -262,9 +268,7 @@ class PerplexityBasedNN(Affinities):
                 n_jobs=self.n_jobs,
             )
 
-    def to_new(
-        self, data, perplexity=None, return_distances=False, k_neighbors="auto"
-    ):
+    def to_new(self, data, perplexity=None, return_distances=False, k_neighbors="auto"):
         """Compute the affinities of new samples to the initial samples.
 
         This is necessary for embedding new data points into an existing
@@ -352,7 +356,14 @@ class PerplexityBasedNN(Affinities):
 
 
 def get_knn_index(
-    data, method, k, metric, metric_params=None, n_jobs=1, random_state=None, verbose=False
+    data,
+    method,
+    k,
+    metric,
+    metric_params=None,
+    n_jobs=1,
+    random_state=None,
+    verbose=False,
 ):
     # If we're dealing with a precomputed distance matrix, our job is very easy,
     # so we can skip all the remaining checks
@@ -360,16 +371,20 @@ def get_knn_index(
         return nearest_neighbors.PrecomputedDistanceMatrix(data, k=k)
 
     preferred_approx_method = nearest_neighbors.Annoy
-    if is_package_installed("pynndescent") and (sp.issparse(data) or metric not in [
-        "cosine",
-        "euclidean",
-        "manhattan",
-        "hamming",
-        "dot",
-        "l1",
-        "l2",
-        "taxicab",
-    ]):
+    if is_package_installed("pynndescent") and (
+        sp.issparse(data)
+        or metric
+        not in [
+            "cosine",
+            "euclidean",
+            "manhattan",
+            "hamming",
+            "dot",
+            "l1",
+            "l2",
+            "taxicab",
+        ]
+    ):
         preferred_approx_method = nearest_neighbors.NNDescent
 
     if data.shape[0] < 1000:
@@ -383,7 +398,7 @@ def get_knn_index(
         "approx": preferred_approx_method,
         "annoy": nearest_neighbors.Annoy,
         "pynndescent": nearest_neighbors.NNDescent,
-        "hnsw": nearest_neighbors.HNSW
+        "hnsw": nearest_neighbors.HNSW,
     }
     if isinstance(method, nearest_neighbors.KNNIndex):
         knn_index = method
@@ -603,7 +618,7 @@ class FixedSigmaNN(Affinities):
 
         with utils.Timer("Calculating affinity matrix...", verbose):
             # Compute asymmetric pairwise input similarities
-            conditional_P = np.exp(-(distances ** 2) / (2 * sigma ** 2))
+            conditional_P = np.exp(-(distances**2) / (2 * sigma**2))
             conditional_P /= np.sum(conditional_P, axis=1)[:, np.newaxis]
 
             n_samples = self.knn_index.n_samples
@@ -686,7 +701,7 @@ class FixedSigmaNN(Affinities):
 
         with utils.Timer("Calculating affinity matrix...", self.verbose):
             # Compute asymmetric pairwise input similarities
-            conditional_P = np.exp(-(distances ** 2) / (2 * sigma ** 2))
+            conditional_P = np.exp(-(distances**2) / (2 * sigma**2))
 
             # Convert weights to probabilities
             conditional_P /= np.sum(conditional_P, axis=1)[:, np.newaxis]
@@ -781,29 +796,33 @@ class MultiscaleMixture(Affinities):
     ):
         if knn_index is not None:
             self.knn_index = knn_index
-            
-            try:        
+
+            try:
                 n_samples = self.knn_index.n_samples
             except (AttributeError, IndexError) as e:
                 raise ValueError(f"`knn_index` object is invalid: {str(e)}") from e
-            
+
             log.info("KNN index provided. Ignoring KNN-related parameters.")
-            
-            if data is not None: # if-clause redundant but keeping for finer grain logging
+
+            if (
+                data is not None
+            ):  # if-clause redundant but keeping for finer grain logging
                 logging.warning("`data` will be ignored as `knn_index` was provided.")
-                
+
         elif data is not None:
             try:
                 n_samples = data.shape[0]
             except (AttributeError, IndexError) as e:
                 raise ValueError(f"`data` object is invalid: {str(e)}") from e
-            
+
             log.info("Provided data will be used to compute nearest neighbors.")
-        
+
         else:
             raise ValueError("Either `data` or `knn_index` must be provided!")
-        
-        effective_perplexities = self.check_perplexities(perplexities, n_samples) # validated and clipped integer perplexities
+
+        effective_perplexities = self.check_perplexities(
+            perplexities, n_samples
+        )  # validated and clipped integer perplexities
 
         if knn_index is None:
             # We will compute the nearest neighbors to the max value of perplexity,
@@ -813,11 +832,19 @@ class MultiscaleMixture(Affinities):
 
             try:
                 self.knn_index = get_knn_index(
-                    data, method, k_neighbors, metric, metric_params, n_jobs, random_state, verbose
+                    data,
+                    method,
+                    k_neighbors,
+                    metric,
+                    metric_params,
+                    n_jobs,
+                    random_state,
+                    verbose,
                 )
             except Exception as e:
-                raise RuntimeError(f"Error computing nearest neighbors: {str(e)}") from e
-
+                raise RuntimeError(
+                    f"Error computing nearest neighbors: {str(e)}"
+                ) from e
 
         self.__neighbors, self.__distances = self.knn_index.build()
 
@@ -875,13 +902,17 @@ class MultiscaleMixture(Affinities):
         new_perplexities: List[float]
             The new list of perplexities.
         """
-        effective_perplexities = self.check_perplexities(new_perplexities, self.n_samples)
+        effective_perplexities = self.check_perplexities(
+            new_perplexities, self.n_samples
+        )
 
         current_max = np.max(self.effective_perplexities_)
-        
+
         exceeds_max = effective_perplexities > current_max
 
-        if np.any(exceeds_max): #np.any() for backward compability but can be refined (rm only exceeding value)
+        if np.any(
+            exceeds_max
+        ):  # np.any() for backward compability but can be refined (rm only exceeding value)
             invalid_perplexity = effective_perplexities[exceeds_max]
             raise RuntimeError(
                 f"Cannot set perplexities {invalid_perplexity.tolist()} - exceeds current maximum of {current_max}. "
@@ -892,20 +923,24 @@ class MultiscaleMixture(Affinities):
             )
 
         is_duplicate = np.isin(effective_perplexities, self.effective_perplexities_)
-        
+
         if np.all(is_duplicate):
             logging.warning("All perplexities are duplicates. Skipping update.")
             return
         elif np.any(is_duplicate):
-            logging.warning(f"Ignoring duplicates: {effective_perplexities[is_duplicate]}")        
+            logging.warning(
+                f"Ignoring duplicates: {effective_perplexities[is_duplicate]}"
+            )
             effective_perplexities = effective_perplexities[~is_duplicate]
 
         max_perplexity = np.max(effective_perplexities)
-        k_neighbors = 3 * max_perplexity # Perplexities: integers clipped to max allowed value and deduplicated. 
+        k_neighbors = (
+            3 * max_perplexity
+        )  # Perplexities: integers clipped to max allowed value and deduplicated.
 
         self.perplexities = new_perplexities
         self.effective_perplexities_ = effective_perplexities
-        
+
         try:
             with utils.Timer(
                 "Perplexity changed. Recomputing affinity matrix...", self.verbose
@@ -965,7 +1000,9 @@ class MultiscaleMixture(Affinities):
         effective_perplexities = self.check_perplexities(perplexities, self.n_samples)
 
         max_perplexity = np.max(effective_perplexities)
-        k_neighbors = 3 * max_perplexity # validated perplexities are clipped to max allowed value 
+        k_neighbors = (
+            3 * max_perplexity
+        )  # validated perplexities are clipped to max allowed value
 
         try:
             neighbors, distances = self.knn_index.query(data, k_neighbors)
@@ -1002,37 +1039,45 @@ class MultiscaleMixture(Affinities):
         perplexities: np.ndarray
             The validated and deduplicated perplexity values.
 
-        """        
+        """
         if isinstance(perplexities, np.ndarray):
             if perplexities.size == 0:
                 raise ValueError("`perplexities` must be non-empty")
         elif not perplexities:
             raise ValueError("`perplexities` must be non-empty")
 
-        perplexities = np.asarray(perplexities, dtype=int) # the value in the argument is of integer nature (knn <= n_samples - 1)
-        
+        perplexities = np.asarray(
+            perplexities, dtype=int
+        )  # the value in the argument is of integer nature (knn <= n_samples - 1)
+
         if perplexities.ndim == 0:
             perplexities = perplexities.ravel()
 
-        if perplexities.size > 1: # deduplicates while sorting and ensuring dtype int
+        if perplexities.size > 1:  # deduplicates while sorting and ensuring dtype int
             perplexities = np.unique(perplexities)
 
         if np.any(perplexities <= 0):
             raise ValueError("All perplexity values must be positive")
-        
+
         max_allowed_perplexity = (n_samples - 1) // 3
 
         perplexities_above_max = perplexities > max_allowed_perplexity
-        
-        if np.any(perplexities_above_max):
-            logging.warning(f"Excessively high perplexity values {perplexities[perplexities_above_max]} were detected and clipped to {max_allowed_perplexity}")
 
-            perplexities = np.unique(np.clip(perplexities, None, max_allowed_perplexity))
+        if np.any(perplexities_above_max):
+            logging.warning(
+                f"Excessively high perplexity values {perplexities[perplexities_above_max]} were detected and clipped to {max_allowed_perplexity}"
+            )
+
+            perplexities = np.unique(
+                np.clip(perplexities, None, max_allowed_perplexity)
+            )
 
         logging.info("Perplexity values have been successfully validated.")
 
-        return perplexities.astype(int) # Explicit dtype guaranteed for knn, but redundant
-        
+        return perplexities.astype(
+            int
+        )  # Explicit dtype guaranteed for knn, but redundant
+
 
 class Multiscale(MultiscaleMixture):
     """Calculate affinities using averaged Gaussian perplexities.
@@ -1216,12 +1261,19 @@ class Uniform(Affinities):
         if knn_index is None:
             if k_neighbors >= data.shape[0]:
                 raise ValueError(
-                    "`k_neighbors` (%d) cannot be larger than N-1 (%d)." %
-                    (k_neighbors, data.shape[0])
+                    "`k_neighbors` (%d) cannot be larger than N-1 (%d)."
+                    % (k_neighbors, data.shape[0])
                 )
 
             self.knn_index = get_knn_index(
-                data, method, k_neighbors, metric, metric_params, n_jobs, random_state, verbose
+                data,
+                method,
+                k_neighbors,
+                metric,
+                metric_params,
+                n_jobs,
+                random_state,
+                verbose,
             )
 
         else:
@@ -1257,9 +1309,7 @@ class Uniform(Affinities):
                 category=FutureWarning,
             )
         else:
-            raise ValueError(
-                f"Symmetrization method `{symmetrize}` is not recognized."
-            )
+            raise ValueError(f"Symmetrization method `{symmetrize}` is not recognized.")
 
         # Convert weights to probabilities
         P /= np.sum(P)

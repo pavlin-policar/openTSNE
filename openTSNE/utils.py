@@ -31,7 +31,9 @@ def deprecate_parameter(parameter):
                     category=FutureWarning,
                 )
             return f(*args, **kwargs)
+
         return func
+
     return wrapper
 
 
