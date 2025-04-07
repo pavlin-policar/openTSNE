@@ -89,10 +89,10 @@ def random(n_samples, n_components=2, random_state=None, verbose=False):
 
 def pca(
     X,
-    n_components=2, 
-    svd_solver="auto", 
-    random_state=None, 
-    verbose=False, 
+    n_components=2,
+    svd_solver="auto",
+    random_state=None,
+    verbose=False,
     add_jitter=True,
 ):
     """Initialize an embedding using the top principal components.
@@ -115,11 +115,11 @@ def pca(
         number generator is the RandomState instance used by `np.random`.
 
     verbose: bool
-    
+
     add_jitter: bool
         If True, jitter with small standard deviation is added to the
         initialization to prevent points overlapping exactly, which may lead to
-        numerical issues during optimization. 
+        numerical issues during optimization.
 
     Returns
     -------
