@@ -19,7 +19,7 @@ openTSNE is a modular Python implementation of t-Distributed Stochasitc Neighbor
 Installation
 ------------
 
-openTSNE requires Python 3.8 or higher in order to run.
+openTSNE requires Python 3.9 or higher in order to run.
 
 Conda
 ~~~~~

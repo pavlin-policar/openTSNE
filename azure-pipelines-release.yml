@@ -39,6 +39,11 @@ jobs:
           python.version: '3.12'
           ciwb.build: cp312-macosx_universal2
           ciwb.archs: universal2
+        osx - python313:
+          image.name: 'macos-latest'
+          python.version: '3.13'
+          ciwb.build: cp313-macosx_universal2
+          ciwb.archs: universal2
 
         windows - python39:
           image.name: 'windows-latest'
@@ -59,6 +64,11 @@ jobs:
           image.name: 'windows-latest'
           python.version: '3.12'
           ciwb.build: cp312-win_amd64
+          ciwb.archs: AMD64
+        windows - python313:
+          image.name: 'windows-latest'
+          python.version: '3.13'
+          ciwb.build: cp313-win_amd64
           ciwb.archs: AMD64
 
     steps:
@@ -145,6 +155,9 @@ jobs:
         python312:
           python: '/opt/python/cp312-cp312/bin'
           python.version: '3.12'
+        python313:
+          python: '/opt/python/cp313-cp313/bin'
+          python.version: '3.13'
 
     container:
       image: quay.io/pypa/manylinux2014_x86_64:latest
