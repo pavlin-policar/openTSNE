@@ -10,7 +10,7 @@ trigger:
 pr: none
 
 jobs:
-  - job: 'PackageWinOsx'
+  - job: 'BuildWheels'
     timeoutInMinutes: 0
     cancelTimeoutInMinutes: 10
     displayName: 'Build wheels ::'
@@ -39,6 +39,11 @@ jobs:
           python.version: '3.12'
           ciwb.build: cp312-macosx_universal2
           ciwb.archs: universal2
+        osx - python313:
+          image.name: 'macos-latest'
+          python.version: '3.13'
+          ciwb.build: cp313-macosx_universal2
+          ciwb.archs: universal2
 
         windows - python39:
           image.name: 'windows-latest'
@@ -60,14 +65,39 @@ jobs:
           python.version: '3.12'
           ciwb.build: cp312-win_amd64
           ciwb.archs: AMD64
+        windows - python313:
+          image.name: 'windows-latest'
+          python.version: '3.13'
+          ciwb.build: cp313-win_amd64
+          ciwb.archs: AMD64
+
+        linux - python39:
+          image.name: 'ubuntu-latest'
+          python.version: '3.9'
+          ciwb.build: cp39-manylinux_x86_64
+          ciwb.archs: auto
+        linux - python310:
+          image.name: 'ubuntu-latest'
+          python.version: '3.10'
+          ciwb.build: cp310-manylinux_x86_64
+          ciwb.archs: auto
+        linux - python311:
+          image.name: 'ubuntu-latest'
+          python.version: '3.11'
+          ciwb.build: cp311-manylinux_x86_64
+          ciwb.archs: auto
+        linux - python312:
+          image.name: 'ubuntu-latest'
+          python.version: '3.12'
+          ciwb.build: cp312-manylinux_x86_64
+          ciwb.archs: auto
+        linux - python313:
+          image.name: 'ubuntu-latest'
+          python.version: '3.13'
+          ciwb.build: cp313-manylinux_x86_64
+          ciwb.archs: auto
 
     steps:
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: '$(python.version)'
-          architecture: 'x64'
-        displayName: 'Use Python $(python.version)'
-
       - script: env
         displayName: 'List enviromental variables'
 
@@ -90,6 +120,13 @@ jobs:
       - bash: ls -lRh dist
         displayName: 'List built files'
 
+      # We need to install Python, so we can test out the wheel we just built
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: 'x64'
+        displayName: 'Use Python $(python.version)'
+
       - bash: python -m pip install -v --force-reinstall --find-links=dist/ openTSNE
         displayName: 'Install wheel'
 
@@ -110,96 +147,6 @@ jobs:
       - script: pytest -v
         timeoutInMinutes: 15
         displayName: 'Run unit tests'
-
-      - task: CopyFiles@2
-        condition: eq(variables['Agent.JobStatus'], 'Succeeded')
-        inputs:
-          contents: dist/**
-          targetFolder: $(Build.ArtifactStagingDirectory)
-
-      - task: PublishBuildArtifacts@1
-        condition: eq(variables['Agent.JobStatus'], 'Succeeded')
-        inputs:
-          artifactName: 'build'
-          pathtoPublish: $(Build.ArtifactStagingDirectory)
-
-
-  - job: 'PackageLinux'
-    timeoutInMinutes: 0
-    cancelTimeoutInMinutes: 10
-    displayName: 'Build wheels :: linux -'
-    pool:
-      vmImage: 'ubuntu-latest'
-
-    strategy:
-      matrix:
-        python39:
-          python: '/opt/python/cp39-cp39/bin'
-          python.version: '3.9'
-        python310:
-          python: '/opt/python/cp310-cp310/bin'
-          python.version: '3.10'
-        python311:
-          python: '/opt/python/cp311-cp311/bin'
-          python.version: '3.11'
-        python312:
-          python: '/opt/python/cp312-cp312/bin'
-          python.version: '3.12'
-
-    container:
-      image: quay.io/pypa/manylinux2014_x86_64:latest
-      options: -e PLAT=manylinux2014_x86_64
-
-    steps:
-      - bash: ls -R /opt/python
-        displayName: 'List available Python binaries'
-
-      - script: $(python)/pip install --user build
-        displayName: 'Installing build tools'
-
-      - script: $(python)/python -m build -w -o wheelhouse/ .
-        displayName: 'Build wheels'
-
-      # Bundle external shared libraries into the wheels
-      - script: |
-          for whl in wheelhouse/openTSNE*.whl; do
-              auditwheel show "$whl"
-              auditwheel repair "$whl" --plat $PLAT -w wheelhouse/
-          done
-        displayName: 'Repair wheels'
-
-      # Since Python automatically adds `cwd` to `sys.path`, it's important we remove the local folder
-      # containing our code from the working directory. Otherwise, the tests will use the local copy
-      # instead of the installed package. We can easily achieve this by renaming the source folder.
-      - bash: mv openTSNE src
-        displayName: 'Remove source files from path'
-
-      - bash: ls -lRh wheelhouse
-        displayName: 'List built files'
-
-      - script: $(python)/pip install -v --force-reinstall --find-links=wheelhouse/ openTSNE
-        displayName: 'Install openTSNE wheel'
-
-      - script: $(python)/pip install pynndescent
-        displayName: 'Install optional dependencies - pynndescent'
-
-      - script: $(python)/pip install hnswlib
-        displayName: 'Install optional dependencies - hnswlib'
-
-      - bash: $(python)/pip install --user pytest
-        displayName: 'Install pytest'
-
-      - bash: $(python)/pip freeze -v
-        displayName: 'List packages'
-
-      - script: $(python)/python -m pytest -v
-        timeoutInMinutes: 15
-        displayName: 'Run unit tests'
-
-      - bash: |
-          mkdir -p dist
-          cp wheelhouse/openTSNE*manylinux*.whl dist/
-        displayName: 'Copy files to dist folder'
 
       - task: CopyFiles@2
         condition: eq(variables['Agent.JobStatus'], 'Succeeded')
