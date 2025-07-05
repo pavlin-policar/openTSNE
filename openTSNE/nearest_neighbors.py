@@ -108,7 +108,9 @@ class Sklearn(KNNIndex):
         "sokalmichener",
         "sokalsneath",
         "wminkowski",
-    ] + ["cosine"]  # our own workaround implementation
+    ] + [
+        "cosine"
+    ]  # our own workaround implementation
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -608,7 +610,9 @@ class HNSW(KNNIndex):
         self.index.set_ef(min(2 * k, self.index.get_current_count()))
 
         # Query for kNN
-        indices, distances = self.index.knn_query(data, k=k + 1, num_threads=self.n_jobs)
+        indices, distances = self.index.knn_query(
+            data, k=k + 1, num_threads=self.n_jobs
+        )
 
         # Stop timer
         timer.__exit__()
