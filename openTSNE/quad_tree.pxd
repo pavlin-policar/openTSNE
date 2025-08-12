@@ -18,7 +18,7 @@ ctypedef struct Node:
     Py_ssize_t num_points
 
 
-cdef bint is_close(Node * node, double * point, double eps) nogil
+cdef bint is_close(Node * node, double * point, double eps) noexcept nogil
 
 
 cdef class QuadTree:
