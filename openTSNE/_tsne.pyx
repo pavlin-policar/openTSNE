@@ -229,7 +229,7 @@ cdef void _estimate_negative_gradient_single(
     double * sum_Q,
     double theta,
     double dof,
-) nogil:
+) noexcept nogil:
     # Make sure that we spend no time on empty nodes or simple self-interactions
     if node.num_points == 0 or node.is_leaf and is_close(node, point, EPSILON):
         return
@@ -275,28 +275,28 @@ cdef void _estimate_negative_gradient_single(
         _estimate_negative_gradient_single(&node.children[d], point, gradient, sum_Q, theta, dof)
 
 
-cdef inline double cauchy_1d(double x, double y, double dof) nogil:
+cdef inline double cauchy_1d(double x, double y, double dof) noexcept nogil:
     if dof != 1:
         return (1 + ((x - y) ** 2) / dof) ** -dof
     else:
         return (1 + (x - y) ** 2) ** -1
 
 
-cdef inline double cauchy_1d_exp1p(double x, double y, double dof) nogil:
+cdef inline double cauchy_1d_exp1p(double x, double y, double dof) noexcept nogil:
     if dof != 1:
         return (1 + ((x - y) ** 2) / dof) ** -(dof + 1)
     else:
         return (1 + (x - y) ** 2) ** -2
 
 
-cdef inline double cauchy_2d(double x1, double x2, double y1, double y2, double dof) nogil:
+cdef inline double cauchy_2d(double x1, double x2, double y1, double y2, double dof) noexcept nogil:
     if dof != 1:
         return (1 + ((x1 - y1) ** 2 + (x2 - y2) ** 2) / dof) ** -dof
     else:
         return (1 + (x1 - y1) ** 2 + (x2 - y2) ** 2) ** -1
 
 
-cdef inline double cauchy_2d_exp1p(double x1, double x2, double y1, double y2, double dof) nogil:
+cdef inline double cauchy_2d_exp1p(double x1, double x2, double y1, double y2, double dof) noexcept nogil:
     if dof != 1:
         return (1 + ((x1 - y1) ** 2 + (x2 - y2) ** 2) / dof) ** -(dof + 1)
     else:

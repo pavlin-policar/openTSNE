@@ -61,7 +61,7 @@ cdef void init_node(Node * node, Py_ssize_t n_dim, double * center, double lengt
     node.num_points = 0
 
 
-cdef Py_ssize_t get_child_idx_for(Node * node, double * point) nogil:
+cdef Py_ssize_t get_child_idx_for(Node * node, double * point) noexcept nogil:
     cdef Py_ssize_t idx = 0, d
 
     for d in range(node.n_dims):
@@ -70,7 +70,7 @@ cdef Py_ssize_t get_child_idx_for(Node * node, double * point) nogil:
     return idx
 
 
-cdef inline void update_center_of_mass(Node * node, double * point) nogil:
+cdef inline void update_center_of_mass(Node * node, double * point) noexcept nogil:
     cdef Py_ssize_t d
     for d in range(node.n_dims):
         node.center_of_mass[d] = (node.center_of_mass[d] * node.num_points + point[d]) / (node.num_points + 1)
@@ -127,7 +127,7 @@ cdef void split_node(Node * node):
     PyMem_Free(new_center)
 
 
-cdef inline bint is_close(Node * node, double * point, double eps) nogil:
+cdef inline bint is_close(Node * node, double * point, double eps) noexcept nogil:
     cdef Py_ssize_t d
     for d in range(node.n_dims):
         if fabs(node.center_of_mass[d] - point[d]) >= eps:
