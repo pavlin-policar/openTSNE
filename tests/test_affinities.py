@@ -340,8 +340,17 @@ class TestAffinityAcceptsKnnIndexAsParameter(unittest.TestCase):
     def test_fails_if_both_data_and_index_specified(self):
         knn_index = nearest_neighbors.Sklearn(self.iris, k=30)
         for method_name, cls in AFFINITY_CLASSES:
-            with self.assertRaises(ValueError, msg=method_name):
-                cls(data=self.iris, knn_index=knn_index)
+            # Multiscale classes now prioritize knn_index and issue a warning
+            if method_name in ("MultiscaleMixture", "Multiscale"):
+                with self.assertLogs(logging.getLogger(), level="WARNING") as cm:
+                    aff = cls(data=self.iris, knn_index=knn_index)
+                    # Verify the instance was created and knn_index was used
+                    self.assertIs(aff.knn_index, knn_index, msg=method_name)
+
+            # Other classes should still raise an error
+            else:
+                with self.assertRaises(ValueError, msg=method_name):
+                    cls(data=self.iris, knn_index=knn_index)
 
     def test_accepts_knn_index(self):
         knn_index = nearest_neighbors.Sklearn(self.iris, k=30)

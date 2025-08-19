@@ -264,11 +264,11 @@ class TestTSNEParameterFlow(unittest.TestCase):
     def test_raises_error_on_unrecognized_metric(self):
         """Unknown distance metric should raise error"""
         tsne = TSNE(metric="imaginary", neighbors="exact")
-        with self.assertRaises(ValueError):
+        with self.assertRaises(RuntimeError):
             tsne.prepare_initial(self.x)
 
         tsne = TSNE(metric="imaginary", neighbors="approx")
-        with self.assertRaises(ValueError):
+        with self.assertRaises(RuntimeError):
             tsne.prepare_initial(self.x)
 
 
