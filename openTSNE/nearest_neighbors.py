@@ -110,9 +110,10 @@ class Sklearn(KNNIndex):
         "wminkowski",
     ] + ["cosine"]  # our own workaround implementation
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, knn_kwargs=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.__data = None
+        self.knn_kwargs = dict() if knn_kwargs is None else knn_kwargs
 
     def build(self):
         data, k = self.data, self.k
@@ -144,6 +145,7 @@ class Sklearn(KNNIndex):
             metric=effective_metric,
             metric_params=self.metric_params,
             n_jobs=self.n_jobs,
+            **self.knn_kwargs,
         )
         self.index.fit(effective_data)
 
@@ -217,8 +219,10 @@ class Annoy(KNNIndex):
         "taxicab",
     ]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, knn_kwargs=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.knn_kwargs = dict() if knn_kwargs is None else knn_kwargs.copy()
+        self.n_trees = self.knn_kwargs.pop("n_trees", 50)
 
     def build(self):
         data, k = self.data, self.k
@@ -244,7 +248,7 @@ class Annoy(KNNIndex):
         if annoy_metric in annoy_aliases:
             annoy_metric = annoy_aliases[annoy_metric]
 
-        self.index = AnnoyIndex(data.shape[1], annoy_metric)
+        self.index = AnnoyIndex(data.shape[1], annoy_metric, **self.knn_kwargs)
 
         random_state = check_random_state(self.random_state)
         self.index.set_seed(random_state.randint(np.iinfo(np.int32).max))
@@ -253,7 +257,7 @@ class Annoy(KNNIndex):
             self.index.add_item(i, data[i])
 
         # Number of trees. FIt-SNE uses 50 by default.
-        self.index.build(50, n_jobs=self.n_jobs)
+        self.index.build(self.n_trees, n_jobs=self.n_jobs)
 
         # Return the nearest neighbors in the training set
         distances = np.zeros((N, k))
@@ -417,7 +421,7 @@ class NNDescent(KNNIndex):
         "yule",
     ]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, knn_kwargs=None, **kwargs):
         try:
             import pynndescent  # pylint: disable=unused-import,unused-variable
         except ImportError:
@@ -426,6 +430,15 @@ class NNDescent(KNNIndex):
                 "pynndescent` or `pip install pynndescent`."
             )
         super().__init__(*args, **kwargs)
+        self.knn_kwargs = dict() if knn_kwargs is None else knn_kwargs.copy()
+
+        # These values were taken from UMAP, which we assume to be sensible defaults
+        n_trees_default = 5 + int(round((self.data.shape[0]) ** 0.5 / 20))
+        n_iters_default = max(5, int(round(np.log2(self.data.shape[0]))))
+
+        self.n_trees = self.knn_kwargs.pop("n_trees", n_trees_default)
+        self.n_iters = self.knn_kwargs.pop("n_iters", n_iters_default)
+        self.max_candidates = self.knn_kwargs.pop("max_candidates", 60)
 
     def check_metric(self, metric):
         import pynndescent
@@ -469,10 +482,6 @@ class NNDescent(KNNIndex):
         )
         timer.__enter__()
 
-        # These values were taken from UMAP, which we assume to be sensible defaults
-        n_trees = 5 + int(round((data.shape[0]) ** 0.5 / 20))
-        n_iters = max(5, int(round(np.log2(data.shape[0]))))
-
         # Numba takes a while to load up, so there's little point in loading it
         # unless we're actually going to use it
         import pynndescent
@@ -489,11 +498,12 @@ class NNDescent(KNNIndex):
             metric=self.metric,
             metric_kwds=self.metric_params,
             random_state=self.random_state,
-            n_trees=n_trees,
-            n_iters=n_iters,
-            max_candidates=60,
+            n_trees=self.n_trees,
+            n_iters=self.n_iters,
+            max_candidates=self.max_candidates,
             n_jobs=self.n_jobs,
             verbose=self.verbose > 1,
+            **self.knn_kwargs,
         )
 
         # -1 in indices means that pynndescent failed
@@ -558,7 +568,7 @@ class HNSW(KNNIndex):
         "ip",
     ]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, knn_kwargs=None, **kwargs):
         try:
             from hnswlib import Index  # pylint: disable=unused-import,unused-variable
         except ImportError:
@@ -567,6 +577,7 @@ class HNSW(KNNIndex):
                 "hnswlib` or `pip install hnswlib`."
             )
         super().__init__(*args, **kwargs)
+        self.knn_kwargs = dict() if knn_kwargs is None else knn_kwargs
 
     def build(self):
         data, k = self.data, self.k
@@ -591,7 +602,9 @@ class HNSW(KNNIndex):
         random_state = check_random_state(self.random_state)
         random_seed = random_state.randint(np.iinfo(np.int32).max)
 
-        self.index = Index(space=hnsw_space, dim=data.shape[1])
+        self.index = Index(
+            space=hnsw_space, dim=data.shape[1], **self.knn_kwargs
+        )
 
         # Initialize HNSW Index
         self.index.init_index(
