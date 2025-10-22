@@ -1,6 +1,7 @@
 import inspect
 import logging
 import multiprocessing
+from dataclasses import dataclass
 from collections.abc import Iterable
 from types import SimpleNamespace
 from time import time
@@ -18,6 +19,15 @@ from openTSNE import utils
 EPSILON = np.finfo(np.float64).eps
 
 log = logging.getLogger(__name__)
+
+
+@dataclass
+class OptimizationStats:
+    iteration: list
+    KLs: list
+    alphas: list
+    alpha_gradients: list
+    embeddings: list
 
 
 def _check_callbacks(callbacks):
@@ -538,7 +548,7 @@ class TSNEEmbedding(np.ndarray):
         obj.interp_coeffs = None
         obj.box_x_lower_bounds = None
         obj.box_y_lower_bounds = None
-
+        obj.optimization_stats = None  # initialize optimization stats to re
         return obj
 
     def optimize(
@@ -676,7 +686,7 @@ class TSNEEmbedding(np.ndarray):
         try:
             # Run gradient descent with the embedding optimizer so gains are
             # properly updated and kept
-            error, embedding = embedding.optimizer(
+            error, embedding, alpha_grad, optimization_stats = embedding.optimizer(
                 embedding=embedding, P=self.affinities.P, **optim_params
             )
 
@@ -687,6 +697,7 @@ class TSNEEmbedding(np.ndarray):
             error, embedding = ex.error, ex.final_embedding
 
         embedding.kl_divergence = error
+        embedding.optimization_stats = optimization_stats
 
         return embedding
 
@@ -1467,7 +1478,7 @@ def kl_divergence_bh(
 
     # Compute negative gradient
     tree = QuadTree(reference_embedding)
-    sum_Q = _tsne.estimate_negative_gradient_bh(
+    sum_Q, alpha_grad_neg = _tsne.estimate_negative_gradient_bh(
         tree,
         embedding,
         gradient,
@@ -1479,7 +1490,7 @@ def kl_divergence_bh(
     del tree
 
     # Compute positive gradient
-    sum_P, kl_divergence_ = _tsne.estimate_positive_gradient_nn(
+    sum_P, kl_divergence_, alpha_grad_pos = _tsne.estimate_positive_gradient_nn(
         P.indices,
         P.indptr,
         P.data,
@@ -1496,7 +1507,9 @@ def kl_divergence_bh(
     if should_eval_error:
         kl_divergence_ += sum_P * np.log(sum_Q + EPSILON)
 
-    return kl_divergence_, gradient
+    alpha_grad = alpha_grad_pos - alpha_grad_neg
+
+    return kl_divergence_, gradient, alpha_grad
 
 
 def kl_divergence_fft(
@@ -1593,6 +1606,8 @@ class gradient_descent:
         momentum=0.8,
         exaggeration=None,
         dof=1,
+        optimize_for_alpha=False,
+        dof_lr=0.5,
         min_gain=0.01,
         max_grad_norm=None,
         max_step_norm=5,
@@ -1605,6 +1620,7 @@ class gradient_descent:
         use_callbacks=False,
         callbacks=None,
         callbacks_every_iters=50,
+        eval_error_every_iter=50,
         verbose=False,
     ):
         """Perform batch gradient descent with momentum and gains.
@@ -1644,6 +1660,13 @@ class gradient_descent:
 
         dof: float
             Degrees of freedom of the Student's t-distribution.
+
+        optimize_for_alpha: bool
+            If True, perform the optimization for the alpha via gradient descent.
+            **Implemented only for the Barnes-Hut objective function.**
+
+        dof_lr: float
+            Learning rate for the degrees of freedom parameter.
 
         min_gain: float
             Minimum individual gain for each parameter.
@@ -1703,6 +1726,8 @@ class gradient_descent:
         callbacks_every_iters: int
             How many iterations should pass between each time the callbacks are
             invoked.
+        eval_error_every_iter: int
+            How often should the error be evaluated, by default 50
 
         Returns
         -------
@@ -1780,14 +1805,20 @@ class gradient_descent:
 
         if verbose:
             start_time = time()
-
+        optimization_stats = OptimizationStats(
+            iteration=[],
+            alphas=[],
+            alpha_gradients=[],
+            KLs=[],
+            embeddings=[],
+        )
         for iteration in range(n_iter):
             should_call_callback = use_callbacks and (iteration + 1) % callbacks_every_iters == 0
             # Evaluate error on 50 iterations for logging, or when callbacks
             should_eval_error = should_call_callback or \
                 (verbose and (iteration + 1) % 50 == 0)
 
-            error, gradient = objective_function(
+            error, gradient, alpha_grad = objective_function(
                 embedding,
                 P,
                 dof=dof,
@@ -1797,6 +1828,18 @@ class gradient_descent:
                 n_jobs=n_jobs,
                 should_eval_error=should_eval_error,
             )
+
+            if optimize_for_alpha:
+                dof -= dof_lr * alpha_grad
+                optimization_stats.alpha_gradients.append(alpha_grad)
+
+            else:
+                optimization_stats.alpha_gradients.append(0)
+
+            optimization_stats.iteration.append(iteration)
+            optimization_stats.alphas.append(dof)
+            optimization_stats.KLs.append(error)
+            optimization_stats.embeddings.append(embedding)
 
             # Clip gradients to avoid points shooting off. This can be an issue
             # when applying transform and points are initialized so that the new
@@ -1874,7 +1917,7 @@ class gradient_descent:
         # The error from the loop is the one for the previous, non-updated
         # embedding. We need to return the error for the actual final embedding, so
         # compute that at the end before returning
-        error, _ = objective_function(
+        error, _, alpha_grad = objective_function(
             embedding,
             P,
             dof=dof,
@@ -1885,4 +1928,4 @@ class gradient_descent:
             should_eval_error=True,
         )
 
-        return error, embedding
+        return error, embedding, alpha_grad, optimization_stats
