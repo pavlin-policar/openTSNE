@@ -272,6 +272,18 @@ class TestTSNEParameterFlow(unittest.TestCase):
         with self.assertRaises(ValueError):
             tsne.prepare_initial(self.x)
 
+    def test_knn_kwargs(self):
+        import sklearn
+
+        with patch(
+            "sklearn.neighbors.NearestNeighbors",
+            wraps=sklearn.neighbors.NearestNeighbors,
+        ) as mock:
+            params = dict(algorithm="kd_tree", leaf_size=10)
+            tsne = TSNE(neighbors="exact", knn_kwargs=params)
+            tsne.fit(self.x)
+            check_mock_called_with_kwargs(mock, params)
+
 
 class TestTSNEInplaceOptimization(unittest.TestCase):
     @classmethod
