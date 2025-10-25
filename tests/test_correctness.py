@@ -289,15 +289,35 @@ class TestTSNECorrectnessUsingNonStandardDof(TestTSNECorrectness):
 
 class TestTSNECorrectnessUsingPrecomputedDistanceMatrix(unittest.TestCase):
     def test_iris(self):
-        x = datasets.load_iris().data
-        x += np.random.normal(0, 1e-3, x.shape)  # iris contains duplicate rows
+        rng = np.random.RandomState(0)
 
+        x = datasets.load_iris().data
+        x += rng.normal(0, 1e-3, x.shape)  # iris contains duplicate rows
+
+        # We don't run for any iterations, because even though the distances are
+        # the *same*, they are only the same up to float64 machine precision,
+        # which is 1e-16. If we optimize this, the numeric errors will
+        # eventually build up and result in slightly different embeddings
+        # (visually indistinguishable).
+        # See https://github.com/pavlin-policar/openTSNE/issues/247 to see this
+        # problem in action. However, we can also check for correctness if the P
+        # matrix is the same (up to machine precision), since this will lead to
+        # the same embedding.
         distances = squareform(pdist(x))
-        params = dict(initialization="random", random_state=0)
+        params = dict(
+            early_exaggeration_iter=0,
+            n_iter=0,
+            initialization="random",
+            random_state=0,
+        )
         embedding1 = TSNE(metric="precomputed", **params).fit(distances)
         embedding2 = TSNE(metric="euclidean", **params).fit(x)
 
-        np.testing.assert_almost_equal(embedding1, embedding2)
+        np.testing.assert_almost_equal(
+            embedding1.affinities.P.toarray(),
+            embedding2.affinities.P.toarray(),
+            decimal=16,
+        )
 
 
 class TestSpectralInitializationCorrectness(unittest.TestCase):
@@ -305,18 +325,18 @@ class TestSpectralInitializationCorrectness(unittest.TestCase):
         # Generate some random data and stretch it, to give it some structure
         np.random.seed(42)
         x = np.random.randn(100, 20)
-        x[:,0] *= 5
+        x[:, 0] *= 5
 
         # Perform spectral embedding via sklearn and via openTSNE
         P = openTSNE.affinity.PerplexityBasedNN(x).P
         embedding1 = openTSNE.initialization.spectral(P, tol=0, add_jitter=False)
-        embedding2 = SpectralEmbedding(affinity='precomputed').fit_transform(P)
+        embedding2 = SpectralEmbedding(affinity="precomputed").fit_transform(P)
 
         np.testing.assert_almost_equal(
-            np.abs(np.corrcoef(embedding1[:,0], embedding2[:,0])[0,1]), 1
+            np.abs(np.corrcoef(embedding1[:, 0], embedding2[:, 0])[0, 1]), 1
         )
         np.testing.assert_almost_equal(
-            np.abs(np.corrcoef(embedding1[:,1], embedding2[:,1])[0,1]), 1
+            np.abs(np.corrcoef(embedding1[:, 1], embedding2[:, 1])[0, 1]), 1
         )
 
 
