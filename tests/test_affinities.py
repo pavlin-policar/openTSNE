@@ -1,6 +1,7 @@
 import logging
 import unittest
 from functools import partial
+from unittest.mock import patch
 
 import numpy as np
 from scipy.spatial.distance import squareform, pdist
@@ -8,6 +9,7 @@ from sklearn import datasets
 from sklearn.model_selection import train_test_split
 
 from openTSNE import affinity, nearest_neighbors
+from tests.test_tsne import check_mock_called_with_kwargs
 
 affinity.log.setLevel(logging.ERROR)
 
@@ -379,3 +381,21 @@ class TestPrecomputedAffinity(unittest.TestCase):
             aff2.P.toarray(),
             err_msg="Precomputed affinities are not normalized to sum to 1.",
         )
+
+
+class TestGenericAffinity(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.x = datasets.load_iris().data
+
+    def test_knn_kwargs(self):
+        import sklearn
+
+        for method_name, cls in AFFINITY_CLASSES:
+            with patch(
+                "sklearn.neighbors.NearestNeighbors",
+                wraps=sklearn.neighbors.NearestNeighbors,
+            ) as mock:
+                params = dict(algorithm="kd_tree", leaf_size=10)
+                cls(self.x, method="exact", knn_kwargs=params)
+                check_mock_called_with_kwargs(mock, params)
