@@ -45,9 +45,9 @@ def check_params(params: dict) -> Callable:
 
 
 def check_call_contains_kwargs(
-        call: Tuple,
-        params: dict,
-        param_mapping: Optional[dict] = None,
+    call: Tuple,
+    params: dict,
+    param_mapping: Optional[dict] = None,
 ) -> None:
     """Check whether a `call` object was called with some params, but also some
     others we don't care about"""
@@ -81,6 +81,7 @@ def check_call_contains_kwargs(
 def check_mock_called_with_kwargs(mock: MagicMock, params: dict) -> None:
     """Check whether a mock was called with kwargs, but also some other params
     we don't care about."""
+    assert len(mock.mock_calls) > 0, "Mock never called"
     for call in mock.mock_calls:
         check_call_contains_kwargs(call, params)
 
