@@ -101,7 +101,13 @@ jobs:
       - script: env
         displayName: 'List enviromental variables'
 
-      - script: python -m pip install cibuildwheel
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '3.13'
+          architecture: 'x64'
+        displayName: 'Use Python 3.13 to run cibuildwheel'
+
+      - script: python -m pip install "cibuildwheel>=3.1"
         displayName: Installing build tools
 
       - script: python -m cibuildwheel --output-dir dist/
