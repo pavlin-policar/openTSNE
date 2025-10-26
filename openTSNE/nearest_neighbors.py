@@ -422,6 +422,8 @@ class NNDescent(KNNIndex):
         "sokalsneath",
         "sokalmichener",
         "yule",
+        "bit_hamming",
+        "bit_jaccard",
     ]
 
     def __init__(self, *args, **kwargs):

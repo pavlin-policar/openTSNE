@@ -1264,20 +1264,12 @@ class Uniform(Affinities):
         )
 
         # Symmetrize the probability matrix
-        if symmetrize == "max":
+        if symmetrize == "max" or symmetrize is True:
             P = (P + P.T > 0).astype(float)
         elif symmetrize == "mean":
             P = (P + P.T) / 2
         elif symmetrize == "none" or symmetrize is False:
             pass
-        elif symmetrize is True:
-            # Backward compatibility
-            P = (P + P.T) / 2
-            warnings.warn(
-                f"Using `mean` symmetrization, but the default behaviour is going to "
-                f"change to `max` in future versions.",
-                category=FutureWarning,
-            )
         else:
             raise ValueError(
                 f"Symmetrization method `{symmetrize}` is not recognized."
