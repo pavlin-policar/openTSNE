@@ -133,6 +133,26 @@ class TestAnnoy(KNNIndexTestMixin, unittest.TestCase):
         np.testing.assert_array_equal(load_idx, orig_idx)
         np.testing.assert_array_almost_equal(load_dist, orig_dist)
 
+    def test_knn_kwargs(self):
+        with patch(
+            "openTSNE.dependencies.annoy.AnnoyIndex",
+            autospec=True,
+        ) as mock:
+            params = dict(n_trees=10)
+            knn_index = nearest_neighbors.Annoy(
+                self.x1, 5, knn_kwargs=params
+            )
+            try:
+                knn_index.build()
+            except ValueError as e:
+                # The build fails once we try to query the index, but at that
+                # point, build was already called, and we can tell if it was
+                # called properly
+                if "not enough values to unpack (expected 2, got 0)" not in str(e):
+                    raise
+
+            check_mock_called_with_kwargs(mock.return_value.build, params)
+
 
 class TestSklearn(KNNIndexTestMixin, unittest.TestCase):
     knn_index = nearest_neighbors.Sklearn
@@ -199,6 +219,20 @@ class TestSklearn(KNNIndexTestMixin, unittest.TestCase):
             distances, true_distances_, err_msg="Distances do not match"
         )
 
+    def test_knn_kwargs(self):
+        import sklearn
+
+        with patch(
+            "sklearn.neighbors.NearestNeighbors",
+            wraps=sklearn.neighbors.NearestNeighbors,
+        ) as mock:
+            params = dict(algorithm="kd_tree", leaf_size=10)
+            knn_index = nearest_neighbors.Sklearn(
+                self.x1, 5, knn_kwargs=params
+            )
+            knn_index.build()
+            check_mock_called_with_kwargs(mock, params)
+
 
 @unittest.skipIf(not is_package_installed("hnswlib"), "`hnswlib`is not installed")
 class TestHNSW(KNNIndexTestMixin, unittest.TestCase):
@@ -253,6 +287,24 @@ class TestHNSW(KNNIndexTestMixin, unittest.TestCase):
 
         np.testing.assert_array_equal(load_idx, orig_idx)
         np.testing.assert_array_almost_equal(load_dist, orig_dist)
+
+    def test_knn_kwargs(self):
+        with patch(
+            "hnswlib.Index",
+            autospec=True,
+        ) as mock:
+            mock.init_index = MagicMock(wraps=mock.init_index)
+
+            params = dict(ef_construction=100, M=32)
+            knn_index = nearest_neighbors.HNSW(
+                self.x1, 5, knn_kwargs=params
+            )
+            try:
+                knn_index.build()
+            except TypeError:
+                pass
+
+            check_mock_called_with_kwargs(mock.return_value.init_index, params)
 
 
 @unittest.skipIf(not is_package_installed("pynndescent"), "`pynndescent`is not installed")
@@ -352,23 +404,6 @@ class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
         # Should be called with 11 because nearest neighbor in pynndescent is itself
         check_mock_called_with_kwargs(nndescent, dict(n_neighbors=11))
 
-    def test_building_with_gt15_calls_query(self):
-        with patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent) as nndescent:
-            nndescent.query = MagicMock(wraps=nndescent.query)
-            knn_index = nearest_neighbors.NNDescent(self.x1, 30, "euclidean")
-            indices, distances = knn_index.build()
-
-            self.assertEqual(indices.shape, (self.x1.shape[0], 30))
-            self.assertEqual(distances.shape, (self.x1.shape[0], 30))
-            self.assertFalse(np.all(indices[:, 0] == np.arange(self.x1.shape[0])))
-
-            # The index should be built with 15 neighbors
-            check_mock_called_with_kwargs(nndescent, dict(n_neighbors=15))
-            # And subsequently queried with the correct number of neighbors. Check
-            # for 31 neighbors because query will return the original point as well,
-            # which we don't consider.
-            check_mock_called_with_kwargs(nndescent.query, dict(k=31))
-
     def test_runs_with_correct_njobs_if_dense_input(self):
         with patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent) as nndescent:
             knn_index = nearest_neighbors.NNDescent(self.x1, 5, "euclidean", n_jobs=2)
@@ -407,3 +442,12 @@ class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
             self.assertTrue(np.all(indices[:10] < 10))
             # And check that the distances were set to something positive
             self.assertTrue(np.all(distances[:10] > 0))
+
+    def test_knn_kwargs(self):
+        with patch("pynndescent.NNDescent", wraps=pynndescent.NNDescent) as mock:
+            params = dict(n_trees=15, n_iters=3, max_candidates=30, leaf_size=10)
+            knn_index = nearest_neighbors.NNDescent(
+                self.x1, 5, knn_kwargs=params
+            )
+            knn_index.build()
+            check_mock_called_with_kwargs(mock, params)

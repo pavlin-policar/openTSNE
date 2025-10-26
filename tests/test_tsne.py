@@ -45,9 +45,9 @@ def check_params(params: dict) -> Callable:
 
 
 def check_call_contains_kwargs(
-        call: Tuple,
-        params: dict,
-        param_mapping: Optional[dict] = None,
+    call: Tuple,
+    params: dict,
+    param_mapping: Optional[dict] = None,
 ) -> None:
     """Check whether a `call` object was called with some params, but also some
     others we don't care about"""
@@ -81,6 +81,7 @@ def check_call_contains_kwargs(
 def check_mock_called_with_kwargs(mock: MagicMock, params: dict) -> None:
     """Check whether a mock was called with kwargs, but also some other params
     we don't care about."""
+    assert len(mock.mock_calls) > 0, "Mock never called"
     for call in mock.mock_calls:
         check_call_contains_kwargs(call, params)
 
@@ -270,6 +271,18 @@ class TestTSNEParameterFlow(unittest.TestCase):
         tsne = TSNE(metric="imaginary", neighbors="approx")
         with self.assertRaises(ValueError):
             tsne.prepare_initial(self.x)
+
+    def test_knn_kwargs(self):
+        import sklearn
+
+        with patch(
+            "sklearn.neighbors.NearestNeighbors",
+            wraps=sklearn.neighbors.NearestNeighbors,
+        ) as mock:
+            params = dict(algorithm="kd_tree", leaf_size=10)
+            tsne = TSNE(neighbors="exact", knn_kwargs=params)
+            tsne.fit(self.x)
+            check_mock_called_with_kwargs(mock, params)
 
 
 class TestTSNEInplaceOptimization(unittest.TestCase):

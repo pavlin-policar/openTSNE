@@ -184,8 +184,15 @@ class PerplexityBasedNN(Affinities):
                 )
 
             self.knn_index = get_knn_index(
-                data, method, _k_neighbors, metric, metric_params, n_jobs,
-                random_state, verbose, knn_index
+                data,
+                method,
+                k=_k_neighbors,
+                metric=metric,
+                metric_params=metric_params,
+                n_jobs=n_jobs,
+                random_state=random_state,
+                verbose=verbose,
+                knn_kwargs=knn_kwargs,
             )
 
         else:
@@ -612,13 +619,13 @@ class FixedSigmaNN(Affinities):
             self.knn_index = get_knn_index(
                 data,
                 method,
-                k,
-                metric,
-                metric_params,
-                n_jobs,
-                random_state,
-                verbose,
-                knn_kwargs,
+                k=k,
+                metric=metric,
+                metric_params=metric_params,
+                n_jobs=n_jobs,
+                random_state=random_state,
+                verbose=verbose,
+                knn_kwargs=knn_kwargs,
             )
 
         else:
@@ -837,13 +844,13 @@ class MultiscaleMixture(Affinities):
             self.knn_index = get_knn_index(
                 data,
                 method,
-                k_neighbors,
-                metric,
-                metric_params,
-                n_jobs,
-                random_state,
-                verbose,
-                knn_kwargs,
+                k=k_neighbors,
+                metric=metric,
+                metric_params=metric_params,
+                n_jobs=n_jobs,
+                random_state=random_state,
+                verbose=verbose,
+                knn_kwargs=knn_kwargs,
             )
 
         else:
@@ -1230,13 +1237,13 @@ class Uniform(Affinities):
             self.knn_index = get_knn_index(
                 data,
                 method,
-                k_neighbors,
-                metric,
-                metric_params,
-                n_jobs,
-                random_state,
-                verbose,
-                knn_kwargs,
+                k=k_neighbors,
+                metric=metric,
+                metric_params=metric_params,
+                n_jobs=n_jobs,
+                random_state=random_state,
+                verbose=verbose,
+                knn_kwargs=knn_kwargs,
             )
 
         else:
