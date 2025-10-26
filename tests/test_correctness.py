@@ -273,6 +273,26 @@ class TestTSNECorrectness(unittest.TestCase):
 
         np.testing.assert_equal(new_embedding_1, new_embedding_2)
 
+    def test_bh_with_n_components_gt_3(self):
+        tsne = openTSNE.TSNE(
+            n_components=4,
+            negative_gradient_method="bh",
+            neighbors="exact",
+        )
+        x = np.random.rand(100, 100)
+        with self.assertRaises(RuntimeError):
+            tsne.fit(x)
+
+    def test_fft_with_n_components_gt_2(self):
+        tsne = openTSNE.TSNE(
+            n_components=3,
+            negative_gradient_method="fft",
+            neighbors="exact",
+        )
+        x = np.random.rand(100, 100)
+        with self.assertRaises(RuntimeError):
+            tsne.fit(x)
+
 
 class TestTSNECorrectnessUsingNonStandardDof(TestTSNECorrectness):
     @classmethod

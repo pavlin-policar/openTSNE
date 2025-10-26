@@ -1463,6 +1463,12 @@ def kl_divergence_bh(
     n_jobs=1,
     **_,
 ):
+    if not (embedding.ndim == 1 or embedding.shape[1] in [1, 2]):
+        raise RuntimeError(
+            "BH t-SNE for >3 dimensions is currently unsupported (and "
+            "generally a bad idea)"
+        )
+
     gradient = np.zeros_like(embedding, dtype=np.float64, order="C")
 
     # In the event that we wish to embed new points into an existing embedding
