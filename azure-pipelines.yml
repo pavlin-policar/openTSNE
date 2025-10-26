@@ -25,6 +25,9 @@ jobs:
       linux-python313:
         image.name: 'ubuntu-latest'
         python.version: '3.13'
+      linux-python314:
+        image.name: 'ubuntu-latest'
+        python.version: '3.14'
       osx-python310:
         image.name: 'macos-latest'
         python.version: '3.10'
@@ -37,6 +40,9 @@ jobs:
       osx-python313:
         image.name: 'macos-latest'
         python.version: '3.13'
+      osx-python314:
+        image.name: 'macos-latest'
+        python.version: '3.14'
       windows-python310:
         image.name: 'windows-latest'
         python.version: '3.10'
@@ -49,6 +55,9 @@ jobs:
       windows-python313:
         image.name: 'windows-latest'
         python.version: '3.13'
+      windows-python314:
+        image.name: 'windows-latest'
+        python.version: '3.14'
 
   steps:
   - task: UsePythonVersion@0
@@ -74,6 +83,7 @@ jobs:
     displayName: 'Install package'
 
   - script: pip install pynndescent
+    condition: ne(variables['python.version'], '3.14')  # numba currently not supported on 3.14
     displayName: 'Install optional dependencies - pynndescent'
 
   - script: pip install hnswlib
