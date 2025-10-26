@@ -464,6 +464,9 @@ class TSNEEmbedding(np.ndarray):
         ``ints_in_interval`` parameter. Higher values provide more accurate
         gradient estimations.
 
+    knn_kwargs: Optional[None, dict]
+        Optional keyword arguments that will be passed to the ``knn_index``.
+
     random_state: Union[int, RandomState]
         The random state parameter follows the convention used in scikit-learn.
         If the value is an int, random_state is the seed used by the random
@@ -1103,6 +1106,9 @@ class TSNE(BaseEstimator):
         the given metric. Otherwise it uses Pynndescent. ``auto`` uses exact
         nearest neighbors for N<1000 and the same heuristic as ``approx`` for N>=1000.
 
+    knn_kwargs: Optional[None, dict]
+        Optional keyword arguments that will be passed to the ``knn_index``.
+
     negative_gradient_method: str
         Specifies the negative gradient approximation method to use. For smaller
         data sets, the Barnes-Hut approximation is appropriate and can be set
@@ -1152,6 +1158,7 @@ class TSNE(BaseEstimator):
         max_step_norm=5,
         n_jobs=1,
         neighbors="auto",
+        knn_kwargs=None,
         negative_gradient_method="auto",
         callbacks=None,
         callbacks_every_iters=50,
@@ -1191,6 +1198,7 @@ class TSNE(BaseEstimator):
         self.n_jobs = n_jobs
 
         self.neighbors = neighbors
+        self.knn_kwargs = knn_kwargs
         self.negative_gradient_method = negative_gradient_method
 
         self.callbacks = callbacks
@@ -1331,6 +1339,7 @@ class TSNE(BaseEstimator):
                 n_jobs=self.n_jobs,
                 random_state=self.random_state,
                 verbose=self.verbose,
+                knn_kwargs=self.knn_kwargs,
             )
         else:
             if not isinstance(affinities, Affinities):
