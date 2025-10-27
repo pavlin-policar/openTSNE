@@ -1,5 +1,4 @@
 import logging
-import os
 import warnings
 
 import numpy as np
@@ -14,6 +13,7 @@ log = logging.getLogger(__name__)
 
 class KNNIndex:
     VALID_METRICS = []
+    supports_callable = False
 
     def __init__(
         self,
@@ -72,7 +72,15 @@ class KNNIndex:
     def check_metric(self, metric):
         """Check that the metric is supported by the KNNIndex instance."""
         if callable(metric):
-            pass
+            if not self.supports_callable:
+                raise ValueError(
+                    f"`{self.__class__.__name__}` does not support callable "
+                    f"metrics. Please choose one of the supported metrics: "
+                    f"{', '.join(self.VALID_METRICS)} or use one of the KNN "
+                    f"methods that supports callable metrics: `exact` and "
+                    f"`pynndescent`. You may first need to install pynndescent "
+                    f"(pip install pynndescent)."
+                )
         elif metric not in self.VALID_METRICS:
             raise ValueError(
                 f"`{self.__class__.__name__}` does not support the `{metric}` "
@@ -111,6 +119,7 @@ class Sklearn(KNNIndex):
         "sokalsneath",
         "wminkowski",
     ] + ["cosine"]  # our own workaround implementation
+    supports_callable = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -425,6 +434,7 @@ class NNDescent(KNNIndex):
         "bit_hamming",
         "bit_jaccard",
     ]
+    supports_callable = True
 
     def __init__(self, *args, **kwargs):
         try:
