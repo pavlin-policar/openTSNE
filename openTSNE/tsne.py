@@ -1,6 +1,7 @@
 import inspect
 import logging
 import multiprocessing
+import warnings
 from collections.abc import Iterable
 from types import SimpleNamespace
 from time import time
@@ -1463,11 +1464,17 @@ def kl_divergence_bh(
     n_jobs=1,
     **_,
 ):
-    if not (embedding.ndim == 1 or embedding.shape[1] in [1, 2]):
-        raise RuntimeError(
-            "BH t-SNE for >3 dimensions is currently unsupported (and "
-            "generally a bad idea)"
+    if embedding.ndim != 1 and embedding.shape[1] > 3:
+        warnings.warn(
+            "BH t-SNE for >3 dimensions can lead to segfaults and is generally "
+            "a bad idea. In the future, calling BH with >3 dimensions will "
+            "raise a RuntimeError",
+            category=FutureWarning,
         )
+        # raise RuntimeError(
+        #     "BH t-SNE for >3 dimensions is currently unsupported (and "
+        #     "generally a bad idea)"
+        # )
 
     gradient = np.zeros_like(embedding, dtype=np.float64, order="C")
 

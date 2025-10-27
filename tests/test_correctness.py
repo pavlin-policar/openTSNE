@@ -280,7 +280,8 @@ class TestTSNECorrectness(unittest.TestCase):
             neighbors="exact",
         )
         x = np.random.rand(100, 100)
-        with self.assertRaises(RuntimeError):
+        with self.assertWarns(FutureWarning):
+        # with self.assertRaises(RuntimeError):
             tsne.fit(x)
 
     def test_fft_with_n_components_gt_2(self):
