@@ -131,6 +131,9 @@ class PerplexityBasedNN(Affinities):
         The number of neighbors to use in the kNN graph. If ``auto`` (default),
         it is set to three times the perplexity.
 
+    knn_kwargs: Optional[None, dict]
+        Optional keyword arguments that will be passed to the ``knn_index``.
+
     knn_index: Optional[nearest_neighbors.KNNIndex]
         Optionally, a precomputed ``openTSNE.nearest_neighbors.KNNIndex`` object
         can be specified. This option will ignore any KNN-related parameters.
@@ -150,6 +153,7 @@ class PerplexityBasedNN(Affinities):
         random_state=None,
         verbose=False,
         k_neighbors="auto",
+        knn_kwargs=None,
         knn_index=None,
     ):
         # This can't work if neither data nor the knn index are specified
@@ -180,8 +184,15 @@ class PerplexityBasedNN(Affinities):
                 )
 
             self.knn_index = get_knn_index(
-                data, method, _k_neighbors, metric, metric_params, n_jobs,
-                random_state, verbose
+                data,
+                method,
+                k=_k_neighbors,
+                metric=metric,
+                metric_params=metric_params,
+                n_jobs=n_jobs,
+                random_state=random_state,
+                verbose=verbose,
+                knn_kwargs=knn_kwargs,
             )
 
         else:
@@ -205,6 +216,7 @@ class PerplexityBasedNN(Affinities):
         self.symmetrize = symmetrize
         self.n_jobs = n_jobs
         self.verbose = verbose
+        self.knn_kwargs = knn_kwargs
 
     def set_perplexity(self, new_perplexity):
         """Change the perplexity of the affinity matrix.
@@ -352,7 +364,15 @@ class PerplexityBasedNN(Affinities):
 
 
 def get_knn_index(
-    data, method, k, metric, metric_params=None, n_jobs=1, random_state=None, verbose=False
+        data,
+        method,
+        k,
+        metric,
+        metric_params=None,
+        n_jobs=1,
+        random_state=None,
+        verbose=False,
+        knn_kwargs=None,
 ):
     # If we're dealing with a precomputed distance matrix, our job is very easy,
     # so we can skip all the remaining checks
@@ -402,6 +422,7 @@ def get_knn_index(
             n_jobs=n_jobs,
             random_state=random_state,
             verbose=verbose,
+            knn_kwargs=knn_kwargs,
         )
 
     return knn_index
@@ -547,6 +568,9 @@ class FixedSigmaNN(Affinities):
 
     verbose: bool
 
+    knn_kwargs: Optional[None, dict]
+        Optional keyword arguments that will be passed to the ``knn_index``.
+
     knn_index: Optional[nearest_neighbors.KNNIndex]
         Optionally, a precomptued ``openTSNE.nearest_neighbors.KNNIndex`` object
         can be specified. This option will ignore any KNN-related parameters.
@@ -566,6 +590,7 @@ class FixedSigmaNN(Affinities):
         n_jobs=1,
         random_state=None,
         verbose=False,
+        knn_kwargs=None,
         knn_index=None,
     ):
         # Sigma must be specified, but has default set to none, so the parameter
@@ -592,7 +617,15 @@ class FixedSigmaNN(Affinities):
                 )
 
             self.knn_index = get_knn_index(
-                data, method, k, metric, metric_params, n_jobs, random_state, verbose
+                data,
+                method,
+                k=k,
+                metric=metric,
+                metric_params=metric_params,
+                n_jobs=n_jobs,
+                random_state=random_state,
+                verbose=verbose,
+                knn_kwargs=knn_kwargs,
             )
 
         else:
@@ -759,6 +792,9 @@ class MultiscaleMixture(Affinities):
 
     verbose: bool
 
+    knn_kwargs: Optional[None, dict]
+        Optional keyword arguments that will be passed to the ``knn_index``.
+
     knn_index: Optional[nearest_neighbors.KNNIndex]
         Optionally, a precomptued ``openTSNE.nearest_neighbors.KNNIndex`` object
         can be specified. This option will ignore any KNN-related parameters.
@@ -777,6 +813,7 @@ class MultiscaleMixture(Affinities):
         n_jobs=1,
         random_state=None,
         verbose=False,
+        knn_kwargs=None,
         knn_index=None,
     ):
         # Perplexities must be specified, but has default set to none, so the
@@ -805,7 +842,15 @@ class MultiscaleMixture(Affinities):
             k_neighbors = min(n_samples - 1, int(3 * max_perplexity))
 
             self.knn_index = get_knn_index(
-                data, method, k_neighbors, metric, metric_params, n_jobs, random_state, verbose
+                data,
+                method,
+                k=k_neighbors,
+                metric=metric,
+                metric_params=metric_params,
+                n_jobs=n_jobs,
+                random_state=random_state,
+                verbose=verbose,
+                knn_kwargs=knn_kwargs,
             )
 
         else:
@@ -1147,6 +1192,9 @@ class Uniform(Affinities):
 
     verbose: bool
 
+    knn_kwargs: Optional[None, dict]
+        Optional keyword arguments that will be passed to the ``knn_index``.
+
     knn_index: Optional[nearest_neighbors.KNNIndex]
         Optionally, a precomptued ``openTSNE.nearest_neighbors.KNNIndex`` object
         can be specified. This option will ignore any KNN-related parameters.
@@ -1165,6 +1213,7 @@ class Uniform(Affinities):
         n_jobs=1,
         random_state=None,
         verbose=False,
+        knn_kwargs=None,
         knn_index=None,
     ):
         # This can't work if neither data nor the knn index are specified
@@ -1186,7 +1235,15 @@ class Uniform(Affinities):
                 )
 
             self.knn_index = get_knn_index(
-                data, method, k_neighbors, metric, metric_params, n_jobs, random_state, verbose
+                data,
+                method,
+                k=k_neighbors,
+                metric=metric,
+                metric_params=metric_params,
+                n_jobs=n_jobs,
+                random_state=random_state,
+                verbose=verbose,
+                knn_kwargs=knn_kwargs,
             )
 
         else:
@@ -1207,20 +1264,12 @@ class Uniform(Affinities):
         )
 
         # Symmetrize the probability matrix
-        if symmetrize == "max":
+        if symmetrize == "max" or symmetrize is True:
             P = (P + P.T > 0).astype(float)
         elif symmetrize == "mean":
             P = (P + P.T) / 2
         elif symmetrize == "none" or symmetrize is False:
             pass
-        elif symmetrize is True:
-            # Backward compatibility
-            P = (P + P.T) / 2
-            warnings.warn(
-                f"Using `mean` symmetrization, but the default behaviour is going to "
-                f"change to `max` in future versions.",
-                category=FutureWarning,
-            )
         else:
             raise ValueError(
                 f"Symmetrization method `{symmetrize}` is not recognized."

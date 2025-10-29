@@ -122,7 +122,7 @@ class CythonBuildExt(build_ext):
         if compiler == "unix":
             extra_compile_args += ["-O3"]
         elif compiler == "msvc":
-            extra_compile_args += ["/Ox", "/fp:fast"]
+            extra_compile_args += ["/Ox", "/fp:precise"]  # can't use fp:fast because we use inf
 
         if compiler == "unix":
             # https://stackoverflow.com/questions/22931147/stdisinf-does-not-work-with-ffast-math-how-to-check-for-infinity

@@ -619,7 +619,7 @@ cpdef tuple prepare_negative_gradient_fft_interpolation_grid_1d(
     for i in range(1, n_interpolation_points):
         y_tilde[i] = y_tilde[i - 1] + h
 
-    # Evaluate the the squared cauchy kernel at the interpolation nodes
+    # Evaluate the squared cauchy kernel at the interpolation nodes
     cdef double[::1] sq_kernel_tilde = compute_kernel_tilde_1d(
         &cauchy_1d_exp1p, n_interpolation_points_1d, y_min, h * box_width, dof
     )
@@ -880,7 +880,7 @@ cpdef double estimate_negative_gradient_fft_2d(
     for i in range(1, n_interpolation_points):
         y_tilde[i] = y_tilde[i - 1] + h
 
-    # Evaluate the the squared cauchy kernel at the interpolation nodes
+    # Evaluate the squared cauchy kernel at the interpolation nodes
     cdef double[:, ::1] sq_kernel_tilde = compute_kernel_tilde_2d(
          &cauchy_2d_exp1p, n_interpolation_points * n_boxes_1d, coord_min, h * box_width, dof,
     )

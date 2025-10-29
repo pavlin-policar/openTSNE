@@ -1,6 +1,7 @@
 import logging
 import unittest
 from functools import partial
+from unittest.mock import patch
 
 import numpy as np
 from scipy.spatial.distance import squareform, pdist
@@ -8,6 +9,8 @@ from sklearn import datasets
 from sklearn.model_selection import train_test_split
 
 from openTSNE import affinity, nearest_neighbors
+from openTSNE.utils import is_package_installed
+from tests.test_tsne import check_mock_called_with_kwargs
 
 affinity.log.setLevel(logging.ERROR)
 
@@ -379,3 +382,41 @@ class TestPrecomputedAffinity(unittest.TestCase):
             aff2.P.toarray(),
             err_msg="Precomputed affinities are not normalized to sum to 1.",
         )
+
+
+class TestGenericAffinity(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.x = datasets.load_iris().data
+
+    def test_knn_kwargs(self):
+        import sklearn
+
+        for method_name, cls in AFFINITY_CLASSES:
+            with patch(
+                "sklearn.neighbors.NearestNeighbors",
+                wraps=sklearn.neighbors.NearestNeighbors,
+            ) as mock:
+                params = dict(algorithm="kd_tree", leaf_size=10)
+                cls(self.x, method="exact", knn_kwargs=params)
+                check_mock_called_with_kwargs(mock, params)
+
+    @unittest.skipUnless(is_package_installed("pynndescent"), "pynndescent not installed")
+    def test_call_with_custom_metric(self):
+        # Let's define some custom metric
+        def metric(x, y):
+            return np.sum(x + y ** 2)
+
+        for method_name, cls in AFFINITY_CLASSES:
+            for neighbor_method in ["exact", "approx"]:
+                cls(self.x[:50], metric=metric, method=neighbor_method)
+
+    def test_call_with_custom_metric_with_unsupported_knn(self):
+        # Let's define some custom metric
+        def metric(x, y):
+            return np.sum(x + y ** 2)
+
+        for method_name, cls in AFFINITY_CLASSES:
+            for neighbor_method in ["annoy", "hnsw"]:
+                with self.assertRaisesRegex(ValueError, "does not support callable metrics"):
+                    cls(self.x[:50], metric=metric, method=neighbor_method)

@@ -13,9 +13,6 @@ jobs:
 
   strategy:
     matrix:
-      linux-python39:
-        image.name: 'ubuntu-latest'
-        python.version: '3.9'
       linux-python310:
         image.name: 'ubuntu-latest'
         python.version: '3.10'
@@ -28,9 +25,9 @@ jobs:
       linux-python313:
         image.name: 'ubuntu-latest'
         python.version: '3.13'
-      osx-python39:
-        image.name: 'macos-latest'
-        python.version: '3.9'
+      linux-python314:
+        image.name: 'ubuntu-latest'
+        python.version: '3.14'
       osx-python310:
         image.name: 'macos-latest'
         python.version: '3.10'
@@ -43,9 +40,9 @@ jobs:
       osx-python313:
         image.name: 'macos-latest'
         python.version: '3.13'
-      windows-python39:
-        image.name: 'windows-latest'
-        python.version: '3.9'
+      osx-python314:
+        image.name: 'macos-latest'
+        python.version: '3.14'
       windows-python310:
         image.name: 'windows-latest'
         python.version: '3.10'
@@ -58,6 +55,9 @@ jobs:
       windows-python313:
         image.name: 'windows-latest'
         python.version: '3.13'
+      windows-python314:
+        image.name: 'windows-latest'
+        python.version: '3.14'
 
   steps:
   - task: UsePythonVersion@0
@@ -79,10 +79,11 @@ jobs:
   - script: flake8 . --count --select=E901,E999,F821,F822,F823 --show-source --statistics
     displayName: 'Check for syntax errors'
 
-  - script: pip install -vv .
+  - script: pip install -v .
     displayName: 'Install package'
 
   - script: pip install pynndescent
+    condition: ne(variables['python.version'], '3.14')  # numba currently not supported on 3.14
     displayName: 'Install optional dependencies - pynndescent'
 
   - script: pip install hnswlib

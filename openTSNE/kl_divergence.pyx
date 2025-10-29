@@ -13,7 +13,7 @@ from ._tsne cimport (
     estimate_negative_gradient_fft_1d,
     estimate_negative_gradient_fft_2d,
 )
-# This returns a tuple, and can"t be called from C
+# This returns a tuple, and can't be called from C
 from ._tsne import estimate_positive_gradient_nn
 
 
@@ -78,7 +78,7 @@ cpdef double kl_divergence_approx_bh(
         Py_ssize_t i, j
 
         QuadTree tree = QuadTree(embedding)
-        # We don"t actually care about the gradient, so don"t waste time
+        # We don't actually care about the gradient, so don't waste time
         # initializing memory
         double[:, ::1] gradient = np.empty_like(embedding, dtype=float)
 
@@ -119,7 +119,7 @@ cpdef double kl_divergence_approx_fft(
         Py_ssize_t n_dims = embedding.shape[1]
         Py_ssize_t i, j
 
-        # We don"t actually care about the gradient, so don"t waste time
+        # We don't actually care about the gradient, so don't waste time
         # initializing memory
         double[:, ::1] gradient = np.empty_like(embedding, dtype=float)
 

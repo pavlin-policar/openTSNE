@@ -19,11 +19,6 @@ jobs:
 
     strategy:
       matrix:
-        osx - python39:
-          image.name: 'macos-latest'
-          python.version: '3.9'
-          ciwb.build: cp39-macosx_universal2
-          ciwb.archs: universal2
         osx - python310:
           image.name: 'macos-latest'
           python.version: '3.10'
@@ -44,12 +39,12 @@ jobs:
           python.version: '3.13'
           ciwb.build: cp313-macosx_universal2
           ciwb.archs: universal2
+        osx - python314:
+          image.name: 'macos-latest'
+          python.version: '3.14'
+          ciwb.build: cp314-macosx_universal2
+          ciwb.archs: universal2
 
-        windows - python39:
-          image.name: 'windows-latest'
-          python.version: '3.9'
-          ciwb.build: cp39-win_amd64
-          ciwb.archs: AMD64
         windows - python310:
           image.name: 'windows-latest'
           python.version: '3.10'
@@ -70,12 +65,12 @@ jobs:
           python.version: '3.13'
           ciwb.build: cp313-win_amd64
           ciwb.archs: AMD64
+        windows - python314:
+          image.name: 'windows-latest'
+          python.version: '3.14'
+          ciwb.build: cp314-win_amd64
+          ciwb.archs: AMD64
 
-        linux - python39:
-          image.name: 'ubuntu-latest'
-          python.version: '3.9'
-          ciwb.build: cp39-manylinux_x86_64
-          ciwb.archs: auto
         linux - python310:
           image.name: 'ubuntu-latest'
           python.version: '3.10'
@@ -96,12 +91,23 @@ jobs:
           python.version: '3.13'
           ciwb.build: cp313-manylinux_x86_64
           ciwb.archs: auto
+        linux - python314:
+          image.name: 'ubuntu-latest'
+          python.version: '3.14'
+          ciwb.build: cp314-manylinux_x86_64
+          ciwb.archs: auto
 
     steps:
       - script: env
         displayName: 'List enviromental variables'
 
-      - script: python -m pip install cibuildwheel
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '3.13'
+          architecture: 'x64'
+        displayName: 'Use Python 3.13 to run cibuildwheel'
+
+      - script: python -m pip install "cibuildwheel>=3.1"
         displayName: Installing build tools
 
       - script: python -m cibuildwheel --output-dir dist/
@@ -131,6 +137,7 @@ jobs:
         displayName: 'Install wheel'
 
       - script: pip install pynndescent
+        condition: ne(variables['python.version'], '3.14')  # numba currently not supported on 3.14
         displayName: 'Install optional dependencies - pynndescent'
 
       - script: pip install hnswlib
@@ -187,6 +194,7 @@ jobs:
         displayName: 'Install package'
 
       - script: pip install pynndescent
+        condition: ne(variables['python.version'], '3.14')  # numba currently not supported on 3.14
         displayName: 'Install optional dependencies - pynndescent'
 
       - script: pip install hnswlib
