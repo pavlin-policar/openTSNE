@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from pathlib import Path
 import re
-from mpl_toolkits.mplot3d import Axes3D
 
 
 def plot_tsne_result(
