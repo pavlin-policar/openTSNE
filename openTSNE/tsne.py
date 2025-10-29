@@ -396,7 +396,7 @@ class PartialTSNEEmbedding(np.ndarray):
         try:
             # Run gradient descent with the embedding optimizer so gains are
             # properly updated and kept
-            error, embedding = embedding.optimizer(
+            error, embedding, alpha_grad, optimization_stats = embedding.optimizer(
                 embedding=embedding,
                 reference_embedding=self.reference_embedding,
                 P=self.P,
@@ -1159,6 +1159,10 @@ class TSNE(BaseEstimator):
         n_iter=500,
         exaggeration=None,
         dof=1,
+        # dof optimization parameters
+        initial_dof=1,
+        dof_learning_rate=0.5,
+        dof_optimizer="delta_bar_delta",
         theta=0.5,
         n_interpolation_points=3,
         min_num_intervals=50,
@@ -1192,6 +1196,9 @@ class TSNE(BaseEstimator):
         self.n_iter = n_iter
         self.exaggeration = exaggeration
         self.dof = dof
+        self.dof_optimizer = dof_optimizer
+        self.initial_dof = initial_dof
+        self.dof_learning_rate = dof_learning_rate
         self.theta = theta
         self.n_interpolation_points = n_interpolation_points
         self.min_num_intervals = min_num_intervals
@@ -1273,6 +1280,7 @@ class TSNE(BaseEstimator):
                 n_iter=self.early_exaggeration_iter,
                 exaggeration=self.early_exaggeration,
                 momentum=self.initial_momentum,
+                dof=self.initial_dof,
                 inplace=True,
                 propagate_exception=True,
             )
@@ -1455,6 +1463,10 @@ class TSNE(BaseEstimator):
             # Callback params
             "callbacks": self.callbacks,
             "callbacks_every_iters": self.callbacks_every_iters,
+            # dof optimization params
+            "initial_dof": self.initial_dof,
+            "dof_lr": self.dof_learning_rate,
+            "dof_optimizer": self.dof_optimizer,
         }
 
         return TSNEEmbedding(
@@ -1507,7 +1519,7 @@ def kl_divergence_bh(
         embedding,
         reference_embedding,
         gradient,
-        dof,
+        dof=dof,
         num_threads=n_jobs,
         should_eval_error=should_eval_error,
     )
@@ -1575,7 +1587,7 @@ def kl_divergence_fft(
         reference_embedding = embedding
 
     # Compute positive gradient
-    sum_P, kl_divergence_ = _tsne.estimate_positive_gradient_nn(
+    sum_P, kl_divergence_, alpha_grad_pos = _tsne.estimate_positive_gradient_nn(
         P.indices,
         P.indptr,
         P.data,
@@ -1597,6 +1609,8 @@ class gradient_descent:
     def __init__(self):
         self.gains = None
         self.update = None
+        self.dof_update = 0.0
+        self.dof_gain = 1.0
 
     def copy(self):
         optimizer = self.__class__()
@@ -1616,7 +1630,8 @@ class gradient_descent:
         momentum=0.8,
         exaggeration=None,
         dof=1,
-        optimize_for_alpha=False,
+        initial_dof=1,
+        dof_optimizer="delta_bar_delta",
         dof_lr=0.5,
         min_gain=0.01,
         max_grad_norm=None,
@@ -1785,6 +1800,8 @@ class gradient_descent:
         if self.gains is None:
             self.gains = np.ones_like(embedding).view(np.ndarray)
 
+        # if dof == "auto":
+        #     dof = initial_dof
         bh_params = {"theta": theta}
         fft_params = {
             "n_interpolation_points": n_interpolation_points,
@@ -1821,6 +1838,9 @@ class gradient_descent:
             KLs=[],
             embeddings=[],
         )
+
+        dof_ = initial_dof if dof == "auto" else dof
+
         for iteration in range(n_iter):
             should_call_callback = (
                 use_callbacks and (iteration + 1) % callbacks_every_iters == 0
@@ -1833,23 +1853,15 @@ class gradient_descent:
             error, gradient, alpha_grad = objective_function(
                 embedding,
                 P,
-                dof=dof,
+                dof=dof_,
                 bh_params=bh_params,
                 fft_params=fft_params,
                 reference_embedding=reference_embedding,
                 n_jobs=n_jobs,
                 should_eval_error=should_eval_error,
             )
-
-            if optimize_for_alpha:
-                dof -= dof_lr * alpha_grad
-                optimization_stats.alpha_gradients.append(alpha_grad)
-
-            else:
-                optimization_stats.alpha_gradients.append(0)
-
             optimization_stats.iteration.append(iteration)
-            optimization_stats.alphas.append(dof)
+            optimization_stats.alphas.append(dof_)
             optimization_stats.KLs.append(error)
             optimization_stats.embeddings.append(embedding)
 
@@ -1877,6 +1889,40 @@ class gradient_descent:
                     if exaggeration != 1:
                         P /= exaggeration
                     raise OptimizationInterrupt(error=error, final_embedding=embedding)
+
+            # === DOF UPDATE ===
+
+            if dof == "auto":
+                # === DoF UPDATE WITH DELTA-BAR-DELTA ===
+                if dof_optimizer == "delta_bar_delta":
+                    # Delta-bar-delta: check if gradient direction changed
+                    dof_grad_direction_flipped = np.sign(self.dof_update) != np.sign(
+                        alpha_grad
+                    )
+
+                    if dof_grad_direction_flipped:
+                        self.dof_gain += 0.2
+                    else:
+                        self.dof_gain = self.dof_gain * 0.8 + min_gain
+
+                    # Normalize learning rate by n_samples to get appropriate scale for DoF
+                    n_samples = embedding.shape[0]
+                    dof_lr = learning_rate / n_samples
+
+                    # Update DoF with momentum and adaptive gain
+                    self.dof_update = (
+                        momentum * self.dof_update - dof_lr * self.dof_gain * alpha_grad
+                    )
+                    dof_ += self.dof_update
+
+                # === DoF UPDATE WITH SIMPLE GRADIENT ===
+                elif dof_optimizer == "simple_gradient":
+                    self.dof_update = dof_lr * alpha_grad
+                    dof_ -= self.dof_update
+                optimization_stats.alpha_gradients.append(alpha_grad)
+            else:
+                optimization_stats.alpha_gradients.append(0)
+            # === END DOF UPDATE ===
 
             # Update the embedding using the gradient
             grad_direction_flipped = np.sign(self.update) != np.sign(gradient)
@@ -1919,8 +1965,14 @@ class gradient_descent:
             if verbose and (iteration + 1) % 50 == 0:
                 stop_time = time()
                 print(
-                    "Iteration %4d, KL divergence %6.4f, 50 iterations in %.4f sec"
-                    % (iteration + 1, error, stop_time - start_time)
+                    "Iteration %4d, KL divergence %6.4f, DoF %6.4f, DoF gradient %6.4f, 50 iterations in %.4f sec"
+                    % (
+                        iteration + 1,
+                        error,
+                        dof_,
+                        self.dof_update,
+                        stop_time - start_time,
+                    )
                 )
                 start_time = time()
 
@@ -1936,7 +1988,7 @@ class gradient_descent:
         error, _, alpha_grad = objective_function(
             embedding,
             P,
-            dof=dof,
+            dof=dof_,
             bh_params=bh_params,
             fft_params=fft_params,
             reference_embedding=reference_embedding,
