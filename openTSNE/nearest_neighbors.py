@@ -336,7 +336,7 @@ class Annoy(KNNIndex):
         d = dict(self.__dict__)
         # If the index is not None, we want to save the encoded index
         if self.index is not None:
-            with tempfile.TemporaryFile(delete_on_close=False) as tmp:
+            with tempfile.NamedTemporaryFile(delete_on_close=False) as tmp:
                 self.index.save(tmp.name)
 
                 with open(tmp.name, "rb") as f:
@@ -371,10 +371,10 @@ class Annoy(KNNIndex):
                 annoy_metric = annoy_aliases[annoy_metric]
 
             self.index = AnnoyIndex(state["data"].shape[1], annoy_metric)
-            with tempfile.TemporaryDirectory() as dirname:
-                with open(path.join(dirname, "tmp.ann"), "wb") as f:
+            with tempfile.NamedTemporaryFile(delete_on_close=False) as tmp:
+                with open(tmp.name, "wb") as f:
                     f.write(base64.b64decode(b64_index))
-                self.index.load(path.join(dirname, "tmp.ann"))
+                self.index.load(tmp.name)
 
         self.__dict__.update(state)
 
