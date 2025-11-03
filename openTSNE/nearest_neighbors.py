@@ -338,6 +338,7 @@ class Annoy(KNNIndex):
         if self.index is not None:
             with tempfile.NamedTemporaryFile(delete_on_close=False) as tmp:
                 self.index.save(tmp.name)
+                tmp.close()
 
                 with open(tmp.name, "rb") as f:
                     b64_index = base64.b64encode(f.read())
@@ -372,8 +373,8 @@ class Annoy(KNNIndex):
 
             self.index = AnnoyIndex(state["data"].shape[1], annoy_metric)
             with tempfile.NamedTemporaryFile(delete_on_close=False) as tmp:
-                with open(tmp.name, "wb") as f:
-                    f.write(base64.b64decode(b64_index))
+                # with open(tmp.name, "wb") as f:
+                tmp.write(base64.b64decode(b64_index))
                 self.index.load(tmp.name)
 
         self.__dict__.update(state)
@@ -670,6 +671,7 @@ class HNSW(KNNIndex):
         if self.index is not None:
             with tempfile.NamedTemporaryFile(delete_on_close=False) as tmp:
                 self.index.save_index(tmp.name)
+                tmp.close()
 
                 with open(tmp.name, "rb") as f:
                     b64_index = base64.b64encode(f.read())
@@ -705,8 +707,8 @@ class HNSW(KNNIndex):
 
             self.index = Index(space=hnsw_metric, dim=state["data"].data.shape[1])
             with tempfile.NamedTemporaryFile(delete_on_close=False) as tmp:
-                with open(tmp.name, "wb") as f:
-                    f.write(base64.b64decode(b64_index))
+                # with open(tmp.name, "wb") as f:
+                tmp.write(base64.b64decode(b64_index))
                 self.index.load_index(tmp.name)
 
         self.__dict__.update(state)
