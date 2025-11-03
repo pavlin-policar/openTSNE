@@ -93,11 +93,11 @@ class TestAnnoy(KNNIndexTestMixin, unittest.TestCase):
         knn_index = nearest_neighbors.Annoy(self.iris, k=30)
         self.assertIsNone(knn_index.index)
 
-        with tempfile.TemporaryDirectory() as dirname:
-            with open(path.join(dirname, "index.pkl"), "wb") as f:
+        with tempfile.TemporaryFile(delete_on_close=False) as tmp:
+            with open(tmp.name, "wb") as f:
                 pickle.dump(knn_index, f)
 
-            with open(path.join(dirname, "index.pkl"), "rb") as f:
+            with open(tmp.name, "rb") as f:
                 loaded_obj = pickle.load(f)
 
         self.assertIsNone(loaded_obj.index)
@@ -105,11 +105,11 @@ class TestAnnoy(KNNIndexTestMixin, unittest.TestCase):
     @unittest.skipIf(platform.system() == "Windows", "Files locked on Windows")
     def test_pickle_without_built_index_cleans_up_fname(self):
         knn_index = nearest_neighbors.Annoy(self.iris, k=30)
-        with tempfile.TemporaryDirectory() as dirname:
-            with open(path.join(dirname, "index.pkl"), "wb") as f:
+        with tempfile.TemporaryFile(delete_on_close=False) as tmp:
+            with open(tmp.name, "wb") as f:
                 pickle.dump(knn_index, f)
 
-            with open(path.join(dirname, "index.pkl"), "rb") as f:
+            with open(tmp.name, "rb") as f:
                 loaded_obj = pickle.load(f)
 
         self.assertIsNone(loaded_obj.index)
@@ -120,11 +120,11 @@ class TestAnnoy(KNNIndexTestMixin, unittest.TestCase):
         knn_index.build()
         self.assertIsNotNone(knn_index.index)
 
-        with tempfile.TemporaryDirectory() as dirname:
-            with open(path.join(dirname, "index.pkl"), "wb") as f:
+        with tempfile.TemporaryFile(delete_on_close=False) as tmp:
+            with open(tmp.name, "wb") as f:
                 pickle.dump(knn_index, f)
 
-            with open(path.join(dirname, "index.pkl"), "rb") as f:
+            with open(tmp.name, "rb") as f:
                 loaded_obj = pickle.load(f)
 
         load_idx, load_dist = loaded_obj.query(self.iris, 15)
@@ -248,11 +248,11 @@ class TestHNSW(KNNIndexTestMixin, unittest.TestCase):
         knn_index = nearest_neighbors.HNSW(self.iris, k=30)
         self.assertIsNone(knn_index.index)
 
-        with tempfile.TemporaryDirectory() as dirname:
-            with open(path.join(dirname, "index.pkl"), "wb") as f:
+        with tempfile.TemporaryFile(delete_on_close=False) as tmp:
+            with open(tmp.name, "wb") as f:
                 pickle.dump(knn_index, f)
 
-            with open(path.join(dirname, "index.pkl"), "rb") as f:
+            with open(tmp.name, "rb") as f:
                 loaded_obj = pickle.load(f)
 
         self.assertIsNone(loaded_obj.index)
@@ -260,11 +260,11 @@ class TestHNSW(KNNIndexTestMixin, unittest.TestCase):
     @unittest.skipIf(platform.system() == "Windows", "Files locked on Windows")
     def test_pickle_without_built_index_cleans_up_fname(self):
         knn_index = nearest_neighbors.HNSW(self.iris, k=30)
-        with tempfile.TemporaryDirectory() as dirname:
-            with open(path.join(dirname, "index.pkl"), "wb") as f:
+        with tempfile.TemporaryFile(delete_on_close=False) as tmp:
+            with open(tmp.name, "wb") as f:
                 pickle.dump(knn_index, f)
 
-            with open(path.join(dirname, "index.pkl"), "rb") as f:
+            with open(tmp.name, "rb") as f:
                 loaded_obj = pickle.load(f)
 
         self.assertIsNone(loaded_obj.index)
@@ -275,11 +275,11 @@ class TestHNSW(KNNIndexTestMixin, unittest.TestCase):
         knn_index.build()
         self.assertIsNotNone(knn_index.index)
 
-        with tempfile.TemporaryDirectory() as dirname:
-            with open(path.join(dirname, "index.pkl"), "wb") as f:
+        with tempfile.TemporaryFile(delete_on_close=False) as tmp:
+            with open(tmp.name, "wb") as f:
                 pickle.dump(knn_index, f)
 
-            with open(path.join(dirname, "index.pkl"), "rb") as f:
+            with open(tmp.name, "rb") as f:
                 loaded_obj = pickle.load(f)
 
         load_idx, load_dist = loaded_obj.query(self.iris, 15)

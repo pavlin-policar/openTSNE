@@ -336,10 +336,10 @@ class Annoy(KNNIndex):
         d = dict(self.__dict__)
         # If the index is not None, we want to save the encoded index
         if self.index is not None:
-            with tempfile.TemporaryDirectory() as dirname:
-                self.index.save(path.join(dirname, "tmp.ann"))
+            with tempfile.TemporaryFile(delete_on_close=False) as tmp:
+                self.index.save(tmp.name)
 
-                with open(path.join(dirname, "tmp.ann"), "rb") as f:
+                with open(tmp.name, "rb") as f:
                     b64_index = base64.b64encode(f.read())
 
             d["b64_index"] = b64_index
@@ -668,10 +668,10 @@ class HNSW(KNNIndex):
         d = dict(self.__dict__)
         # If the index is not None, we want to save the encoded index
         if self.index is not None:
-            with tempfile.TemporaryDirectory() as dirname:
-                self.index.save_index(path.join(dirname, "tmp.bin"))
+            with tempfile.TemporaryFile(delete_on_close=False) as tmp:
+                self.index.save_index(tmp.name)
 
-                with open(path.join(dirname, "tmp.bin"), "rb") as f:
+                with open(tmp.name, "rb") as f:
                     b64_index = base64.b64encode(f.read())
 
             d["b64_index"] = b64_index
@@ -704,10 +704,10 @@ class HNSW(KNNIndex):
                 hnsw_metric = hnsw_aliases[hnsw_metric]
 
             self.index = Index(space=hnsw_metric, dim=state["data"].data.shape[1])
-            with tempfile.TemporaryDirectory() as dirname:
-                with open(path.join(dirname, "tmp.bin"), "wb") as f:
+            with tempfile.TemporaryFile(delete_on_close=False) as tmp:
+                with open(tmp.name, "wb") as f:
                     f.write(base64.b64decode(b64_index))
-                self.index.load_index(path.join(dirname, "tmp.bin"))
+                self.index.load_index(tmp.name)
 
         self.__dict__.update(state)
 
