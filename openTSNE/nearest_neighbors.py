@@ -668,7 +668,7 @@ class HNSW(KNNIndex):
         d = dict(self.__dict__)
         # If the index is not None, we want to save the encoded index
         if self.index is not None:
-            with tempfile.TemporaryFile(delete_on_close=False) as tmp:
+            with tempfile.NamedTemporaryFile(delete_on_close=False) as tmp:
                 self.index.save_index(tmp.name)
 
                 with open(tmp.name, "rb") as f:
@@ -704,7 +704,7 @@ class HNSW(KNNIndex):
                 hnsw_metric = hnsw_aliases[hnsw_metric]
 
             self.index = Index(space=hnsw_metric, dim=state["data"].data.shape[1])
-            with tempfile.TemporaryFile(delete_on_close=False) as tmp:
+            with tempfile.NamedTemporaryFile(delete_on_close=False) as tmp:
                 with open(tmp.name, "wb") as f:
                     f.write(base64.b64decode(b64_index))
                 self.index.load_index(tmp.name)
