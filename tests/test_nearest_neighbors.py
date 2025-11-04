@@ -88,13 +88,11 @@ class KNNIndexTestMixin:
 class TestAnnoy(KNNIndexTestMixin, unittest.TestCase):
     knn_index = nearest_neighbors.Annoy
 
-    # @unittest.skipIf(platform.system() == "Windows", "Files locked on Windows")
     def test_pickle_without_built_index(self):
         knn_index = nearest_neighbors.Annoy(self.iris, k=30)
         self.assertIsNone(knn_index.index)
 
         with tempfile.NamedTemporaryFile(delete_on_close=False) as tmp:
-            # with open(tmp.name, "wb") as f:
             pickle.dump(knn_index, tmp)
             tmp.close()
 
@@ -103,11 +101,9 @@ class TestAnnoy(KNNIndexTestMixin, unittest.TestCase):
 
         self.assertIsNone(loaded_obj.index)
 
-    # @unittest.skipIf(platform.system() == "Windows", "Files locked on Windows")
     def test_pickle_without_built_index_cleans_up_fname(self):
         knn_index = nearest_neighbors.Annoy(self.iris, k=30)
         with tempfile.NamedTemporaryFile(delete_on_close=False) as tmp:
-            # with open(tmp.name, "wb") as f:
             pickle.dump(knn_index, tmp)
             tmp.close()
 
@@ -116,14 +112,12 @@ class TestAnnoy(KNNIndexTestMixin, unittest.TestCase):
 
         self.assertIsNone(loaded_obj.index)
 
-    # @unittest.skipIf(platform.system() == "Windows", "Files locked on Windows")
     def test_pickle_with_built_index(self):
         knn_index = nearest_neighbors.Annoy(self.iris, k=30)
         knn_index.build()
         self.assertIsNotNone(knn_index.index)
 
         with tempfile.NamedTemporaryFile(delete_on_close=False) as tmp:
-            # with open(tmp.name, "wb") as f:
             pickle.dump(knn_index, tmp)
             tmp.close()
 
@@ -246,13 +240,11 @@ class TestHNSW(KNNIndexTestMixin, unittest.TestCase):
         global hnswlib
         import hnswlib
 
-    # @unittest.skipIf(platform.system() == "Windows", "Files locked on Windows")
     def test_pickle_without_built_index(self):
         knn_index = nearest_neighbors.HNSW(self.iris, k=30)
         self.assertIsNone(knn_index.index)
 
         with tempfile.NamedTemporaryFile(delete_on_close=False) as tmp:
-            # with open(tmp.name, "wb") as f:
             pickle.dump(knn_index, tmp)
             tmp.close()
 
@@ -261,11 +253,9 @@ class TestHNSW(KNNIndexTestMixin, unittest.TestCase):
 
         self.assertIsNone(loaded_obj.index)
 
-    # @unittest.skipIf(platform.system() == "Windows", "Files locked on Windows")
     def test_pickle_without_built_index_cleans_up_fname(self):
         knn_index = nearest_neighbors.HNSW(self.iris, k=30)
         with tempfile.NamedTemporaryFile(delete_on_close=False) as tmp:
-            # with open(tmp.name, "wb") as f:
             pickle.dump(knn_index, tmp)
             tmp.close()
 
@@ -274,14 +264,12 @@ class TestHNSW(KNNIndexTestMixin, unittest.TestCase):
 
         self.assertIsNone(loaded_obj.index)
 
-    # @unittest.skipIf(platform.system() == "Windows", "Files locked on Windows")
     def test_pickle_with_built_index(self):
         knn_index = nearest_neighbors.HNSW(self.iris, k=30)
         knn_index.build()
         self.assertIsNotNone(knn_index.index)
 
         with tempfile.NamedTemporaryFile(delete_on_close=False) as tmp:
-            # with open(tmp.name, "wb") as f:
             pickle.dump(knn_index, tmp)
             tmp.close()
 
