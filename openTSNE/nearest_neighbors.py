@@ -375,6 +375,8 @@ class Annoy(KNNIndex):
             with tempfile.NamedTemporaryFile(delete_on_close=False) as tmp:
                 # with open(tmp.name, "wb") as f:
                 tmp.write(base64.b64decode(b64_index))
+                tmp.close()
+                
                 self.index.load(tmp.name)
 
         self.__dict__.update(state)
@@ -709,6 +711,8 @@ class HNSW(KNNIndex):
             with tempfile.NamedTemporaryFile(delete_on_close=False) as tmp:
                 # with open(tmp.name, "wb") as f:
                 tmp.write(base64.b64decode(b64_index))
+                tmp.close()
+                
                 self.index.load_index(tmp.name)
 
         self.__dict__.update(state)
