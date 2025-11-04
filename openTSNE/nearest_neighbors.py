@@ -338,7 +338,7 @@ class Annoy(KNNIndex):
         if self.index is not None:
             with tempfile.NamedTemporaryFile(delete_on_close=False) as tmp:
                 self.index.save(tmp.name)
-                tmp.close()
+                # tmp.close() # Just trying out if maybe it's closed already
 
                 with open(tmp.name, "rb") as f:
                     b64_index = base64.b64encode(f.read())
