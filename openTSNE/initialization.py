@@ -208,8 +208,9 @@ def spectral(
     eigvals, eigvecs = sp.linalg.eigsh(
         A, M=D, k=k, tol=tol, maxiter=max_iter, which="LM", v0=v0
     )
-    # Sort the eigenvalues in decreasing order
+    # Sort the eigenvalues in decreasing order, and reorder eigenvectors accordingly
     order = np.argsort(eigvals)[::-1]
+    eigvals = eigvals[order]
     eigvecs = eigvecs[:, order]
 
     # In diffusion maps, we multiply the eigenvectors by their eigenvalues
