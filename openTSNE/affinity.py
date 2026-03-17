@@ -613,7 +613,7 @@ class FixedSigmaNN(Affinities):
         if knn_index is None:
             if k >= data.shape[0]:
                 raise ValueError(
-                    "`k` (%d) cannot be larger than N-1 (%d)." % (k, data.shape[0])
+                    "`k` (%d) cannot be larger than N-1 (%d)." % (k, data.shape[0] - 1)
                 )
 
             self.knn_index = get_knn_index(
@@ -1176,8 +1176,8 @@ class Uniform(Affinities):
         same. The ``mean`` symmetrization performs symmetrization via
         (A + A.T) / 2, resulting in the affinity matrix with two possible
         non-zero values. Applying no symmetrization results in a non-symmetric
-        affinity matrix. We default to ``mean`` symmetrization, but the default
-        will change to ``max`` in future versions.
+        affinity matrix. The default is ``max``. ``symmetrize=True`` is equivalent
+        to ``max``.
 
     n_jobs: int
         The number of threads to use while running t-SNE. This follows the
@@ -1209,7 +1209,7 @@ class Uniform(Affinities):
         method="auto",
         metric="euclidean",
         metric_params=None,
-        symmetrize=True,
+        symmetrize="max",
         n_jobs=1,
         random_state=None,
         verbose=False,
@@ -1231,7 +1231,7 @@ class Uniform(Affinities):
             if k_neighbors >= data.shape[0]:
                 raise ValueError(
                     "`k_neighbors` (%d) cannot be larger than N-1 (%d)." %
-                    (k_neighbors, data.shape[0])
+                    (k_neighbors, data.shape[0] - 1)
                 )
 
             self.knn_index = get_knn_index(
