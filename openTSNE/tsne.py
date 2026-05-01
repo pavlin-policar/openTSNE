@@ -1256,7 +1256,6 @@ class TSNE(BaseEstimator):
         exaggeration=None,
         dof=1,
         initial_dof=None,
-        dof_learning_rate=0.5,
         theta=0.5,
         n_interpolation_points=3,
         min_num_intervals=50,
@@ -1292,7 +1291,6 @@ class TSNE(BaseEstimator):
         self.exaggeration = exaggeration
         self.dof = dof
         self.initial_dof = initial_dof
-        self.dof_learning_rate = dof_learning_rate
         self.theta = theta
         self.n_interpolation_points = n_interpolation_points
         self.min_num_intervals = min_num_intervals
