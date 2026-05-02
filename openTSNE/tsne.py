@@ -2045,10 +2045,12 @@ class gradient_descent:
                 error = error / exaggeration - np.log(exaggeration)
 
             if should_call_callback:
+                embedding_snapshot = embedding.copy()
+                embedding_snapshot.dof_ = dof_
                 state = IterationState(
                     iteration=iteration + 1,
                     exaggeration=exaggeration,
-                    embedding=embedding.copy(),
+                    embedding=embedding_snapshot,
                     gradient=gradient_snapshot,
                     error=error,
                     dof=dof_,
@@ -2111,10 +2113,7 @@ class gradient_descent:
 
         timer.__exit__()
 
-        # Persist the learned dof on the embedding so the next `optimize()`
-        # call resumes from this value instead of restarting from `initial_dof`.
-        if dof == "auto":
-            embedding.dof_ = dof_
+        embedding.dof_ = dof_
 
         # Make sure to un-exaggerate P so it's not corrupted in future runs
         if exaggeration != 1:
