@@ -285,15 +285,15 @@ setup(
     ],
 
     packages=setuptools.find_packages(include=["openTSNE", "openTSNE.*"]),
-    python_requires=">=3.9",
+    python_requires=">=3.10",
     install_requires=[
         "numpy>=1.16.6",
         "scikit-learn>=0.20",
         "scipy",
     ],
     extras_require={
-        "hnsw": "hnswlib~=0.4.0",
-        "pynndescent": "pynndescent~=0.5.0",
+        "hnsw": "hnswlib",
+        "pynndescent": "pynndescent",
     },
     ext_modules=extensions,
     cmdclass={"build_ext": CythonBuildExt, "convert_notebooks": ConvertNotebooksToDocs},

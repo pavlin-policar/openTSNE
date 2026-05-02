@@ -82,11 +82,11 @@ jobs:
   - script: pip install -v .
     displayName: 'Install package'
 
-  - script: pip install pynndescent
+  - script: pip install ".[pynndescent]"
     condition: ne(variables['python.version'], '3.14')  # numba currently not supported on 3.14
     displayName: 'Install optional dependencies - pynndescent'
 
-  - script: pip install hnswlib
+  - script: pip install ".[hnsw]"
     env:
       HNSWLIB_NO_NATIVE: 1  # -march=native is not available on clang, so just disable it
     displayName: 'Install optional dependencies - hnswlib'
