@@ -38,6 +38,7 @@ class ConvertNotebooksToDocs(distutils.cmd.Command):
             join("examples", "02_advanced_usage.ipynb"),
             join("examples", "03_preserving_global_structure.ipynb"),
             join("examples", "04_large_data_sets.ipynb"),
+            join("examples", "learnable_dof.ipynb"),
         ]
         target_dir = join("docs", "source", "examples")
 
