@@ -82,11 +82,18 @@ jobs:
   - script: pip install -v .
     displayName: 'Install package'
 
-  - script: pip install pynndescent
-    condition: ne(variables['python.version'], '3.14')  # numba currently not supported on 3.14
+  # Skipped on:
+  #   - Python 3.14: numba does not support it yet.
+  #   - macOS: Azure DevOps hosted macOS agents are Intel (x86_64), but numba
+  #     and llvmlite no longer publish x86_64 macOS wheels (arm64-only), so pip
+  #     would have to compile llvmlite from source and fail. Re-enable once
+  #     Apple Silicon hosted agents (macOS-*-arm64) are generally available.
+  #     The pynndescent backend is still exercised on Linux and Windows.
+  - script: pip install ".[pynndescent]"
+    condition: and(ne(variables['python.version'], '3.14'), ne(variables['Agent.OS'], 'Darwin'))
     displayName: 'Install optional dependencies - pynndescent'
 
-  - script: pip install hnswlib
+  - script: pip install ".[hnsw]"
     env:
       HNSWLIB_NO_NATIVE: 1  # -march=native is not available on clang, so just disable it
     displayName: 'Install optional dependencies - hnswlib'

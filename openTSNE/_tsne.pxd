@@ -34,9 +34,10 @@ cpdef tuple estimate_positive_gradient_nn(
     double dof=*,
     Py_ssize_t num_threads=*,
     bint should_eval_error=*,
+    bint compute_dof_grad=*,
 )
 
-cpdef double estimate_negative_gradient_bh(
+cpdef tuple estimate_negative_gradient_bh(
     QuadTree tree,
     double[:, ::1] embedding,
     double[:, ::1] gradient,
@@ -44,6 +45,7 @@ cpdef double estimate_negative_gradient_bh(
     double dof=*,
     Py_ssize_t num_threads=*,
     bint pairwise_normalization=*,
+    bint compute_dof_grad=*,
 )
 
 cpdef double estimate_negative_gradient_fft_1d(

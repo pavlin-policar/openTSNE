@@ -136,12 +136,10 @@ jobs:
       - bash: python -m pip install -v --force-reinstall --find-links=dist/ openTSNE
         displayName: 'Install wheel'
 
-      - script: pip install pynndescent
-        condition: ne(variables['python.version'], '3.14')  # numba currently not supported on 3.14
+      - script: pip install "openTSNE[pynndescent]"        condition: ne(variables['python.version'], '3.14')  # numba currently not supported on 3.14
         displayName: 'Install optional dependencies - pynndescent'
 
-      - script: pip install hnswlib
-        env:
+      - script: pip install "openTSNE[hnsw]"        env:
           HNSWLIB_NO_NATIVE: 1  # -march=native is not available on clang, so just disable it
         displayName: 'Install optional dependencies - hnswlib'
 
@@ -193,11 +191,11 @@ jobs:
       - bash: python -m pip -v install --no-binary openTSNE --find-links=dist/ openTSNE --no-cache
         displayName: 'Install package'
 
-      - script: pip install pynndescent
-        condition: ne(variables['python.version'], '3.14')  # numba currently not supported on 3.14
+      - script: pip install "openTSNE[pynndescent]"        condition: ne(variables['python.version'], '3.14')  # numba currently not supported on 3.14
         displayName: 'Install optional dependencies - pynndescent'
 
-      - script: pip install hnswlib
+      - script: pip install "openTSNE[hnsw]"        env:
+          HNSWLIB_NO_NATIVE: 1  # -march=native is not available on clang, so just disable it
         displayName: 'Install optional dependencies - hnswlib'
 
       # Since Python automatically adds `cwd` to `sys.path`, it's important we remove the local folder
