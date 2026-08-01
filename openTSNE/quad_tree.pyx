@@ -208,10 +208,19 @@ cdef class QuadTree:
         Raises
         ------
         ValueError
-            If any point lies outside the tree's bounding box. No points are
-            inserted in that case.
+            If the points do not match the dimension of the tree, or if any
+            point lies outside the tree's bounding box. No points are inserted
+            in that case.
 
         """
+        # The tree indexes each point up to its own dimension, so a narrower
+        # array would be read past the end of its rows
+        if points.shape[1] != self.root.n_dims:
+            raise ValueError(
+                "Points have %d dimension(s), but the tree was built for %d."
+                % (points.shape[1], self.root.n_dims)
+            )
+
         cdef Py_ssize_t i
         for i in range(points.shape[0]):
             if not is_in_bounds(&self.root, &points[i, 0]):
@@ -226,9 +235,16 @@ cdef class QuadTree:
         Raises
         ------
         ValueError
-            If the point lies outside the tree's bounding box.
+            If the point does not match the dimension of the tree, or if it
+            lies outside the tree's bounding box.
 
         """
+        if point.shape[0] != self.root.n_dims:
+            raise ValueError(
+                "Point has %d dimension(s), but the tree was built for %d."
+                % (point.shape[0], self.root.n_dims)
+            )
+
         if not is_in_bounds(&self.root, &point[0]):
             raise_out_of_bounds(&self.root, &point[0])
         add_point_to(&self.root, &point[0])

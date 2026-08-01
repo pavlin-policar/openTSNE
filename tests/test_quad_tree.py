@@ -83,6 +83,29 @@ class TestQuadTreeBounds(unittest.TestCase):
         inside = np.ascontiguousarray(rs.uniform(-0.5, 0.5, size=(100, 2)))
         tree.add_points(inside)
 
+    def test_add_points_with_too_few_dimensions(self):
+        rs = np.random.RandomState(0)
+        tree = QuadTree(np.ascontiguousarray(rs.randn(50, 3)))
+
+        # Indexing a 2 column array up to the tree's 3 dimensions reads past the
+        # end of each row
+        with self.assertRaises(ValueError):
+            tree.add_points(np.ascontiguousarray(np.zeros((4, 2))))
+
+    def test_add_points_with_too_many_dimensions(self):
+        rs = np.random.RandomState(0)
+        tree = QuadTree(np.ascontiguousarray(rs.randn(50, 2)))
+
+        with self.assertRaises(ValueError):
+            tree.add_points(np.ascontiguousarray(np.zeros((4, 3))))
+
+    def test_add_point_with_mismatched_dimensions(self):
+        rs = np.random.RandomState(0)
+        tree = QuadTree(np.ascontiguousarray(rs.randn(50, 3)))
+
+        with self.assertRaises(ValueError):
+            tree.add_point(np.ascontiguousarray(np.zeros(2)))
+
     def test_construction_admits_points_on_the_bounding_box_edge(self):
         """The extremes of the data define the box and must always be accepted.
 
