@@ -82,8 +82,14 @@ jobs:
   - script: pip install -v .
     displayName: 'Install package'
 
-  - script: pip install pynndescent
-    condition: ne(variables['python.version'], '3.14')  # numba currently not supported on 3.14
+  # Optional, and installed wherever its numba/llvmlite stack has usable wheels.
+  # Wheels only, so a platform without them stops in seconds rather than
+  # attempting the LLVM source build numba's sdist needs. Where no released
+  # wheel matches, pip falls back to pre-release ones whose bundled LLVM may not
+  # load, so the install is kept only if it imports. Tests requiring pynndescent
+  # skip themselves when it is missing.
+  - script: 'pip install --only-binary=:all: pynndescent && python -c "import pynndescent" || pip uninstall -y pynndescent numba llvmlite'
+    continueOnError: true
     displayName: 'Install optional dependencies - pynndescent'
 
   - script: pip install hnswlib

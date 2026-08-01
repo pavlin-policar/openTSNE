@@ -78,6 +78,11 @@ cdef inline void update_center_of_mass(Node * node, double * point) noexcept nog
 
 
 cdef void add_point_to(Node * node, double * point):
+    # The point must lie inside the node's bounding box. The descent terminates
+    # because each child box is half the size of its parent and still contains
+    # the point, so the box eventually shrinks around it. For a point outside
+    # the box, every child is equally far from it and the descent never ends.
+
     # If the node is a leaf node and empty, we're done. We'll also limit the
     # branching of each node to prevent memory explosions. 1e-6 here is
     # effectively the minimum size that a node can take
@@ -135,6 +140,30 @@ cdef inline bint is_close(Node * node, double * point, double eps) noexcept nogi
     return True
 
 
+cdef inline bint is_in_bounds(Node * node, double * point) noexcept nogil:
+    cdef Py_ssize_t d
+    cdef double half_length = node.length / 2
+    for d in range(node.n_dims):
+        if not node.center[d] - half_length <= point[d] <= node.center[d] + half_length:
+            return False
+    return True
+
+
+cdef raise_out_of_bounds(Node * node, double * point):
+    cdef Py_ssize_t d
+    cdef double half_length = node.length / 2
+    raise ValueError(
+        "Point %s lies outside the bounding box of the tree, which spans %s to "
+        "%s. The bounding box is fixed at construction time by the data the tree "
+        "was built from, and cannot grow to accommodate new points."
+        % (
+            [point[d] for d in range(node.n_dims)],
+            [node.center[d] - half_length for d in range(node.n_dims)],
+            [node.center[d] + half_length for d in range(node.n_dims)],
+        )
+    )
+
+
 cdef void delete_node(Node * node):
     PyMem_Free(node.center)
     PyMem_Free(node.center_of_mass)
@@ -156,7 +185,7 @@ cdef class QuadTree:
 
             double[:] center = np.zeros(n_dim)
             double length = 0
-            Py_ssize_t d
+            Py_ssize_t d, i
 
         for d in range(n_dim):
             center[d] = (x_max[d] + x_min[d]) / 2
@@ -165,14 +194,59 @@ cdef class QuadTree:
 
         self.root = Node()
         init_node(&self.root, n_dim, &center[0], length)
-        self.add_points(data)
+
+        # These points define the bounding box, so they bypass the bounds check
+        # the public insertion methods apply. Rounding in the center and side
+        # length above can leave an extreme point a fraction of an ulp outside
+        # the very box it defines.
+        for i in range(data.shape[0]):
+            add_point_to(&self.root, &data[i, 0])
 
     cpdef void add_points(self, double[:, ::1] points):
+        """Insert points into the tree.
+
+        Raises
+        ------
+        ValueError
+            If the points do not match the dimension of the tree, or if any
+            point lies outside the tree's bounding box. No points are inserted
+            in that case.
+
+        """
+        # The tree indexes each point up to its own dimension, so a narrower
+        # array would be read past the end of its rows
+        if points.shape[1] != self.root.n_dims:
+            raise ValueError(
+                "Points have %d dimension(s), but the tree was built for %d."
+                % (points.shape[1], self.root.n_dims)
+            )
+
         cdef Py_ssize_t i
+        for i in range(points.shape[0]):
+            if not is_in_bounds(&self.root, &points[i, 0]):
+                raise_out_of_bounds(&self.root, &points[i, 0])
+
         for i in range(points.shape[0]):
             add_point_to(&self.root, &points[i, 0])
 
     cpdef void add_point(self, double[::1] point):
+        """Insert a single point into the tree.
+
+        Raises
+        ------
+        ValueError
+            If the point does not match the dimension of the tree, or if it
+            lies outside the tree's bounding box.
+
+        """
+        if point.shape[0] != self.root.n_dims:
+            raise ValueError(
+                "Point has %d dimension(s), but the tree was built for %d."
+                % (point.shape[0], self.root.n_dims)
+            )
+
+        if not is_in_bounds(&self.root, &point[0]):
+            raise_out_of_bounds(&self.root, &point[0])
         add_point_to(&self.root, &point[0])
 
     def __dealloc__(self):

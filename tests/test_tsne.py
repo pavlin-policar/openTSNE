@@ -483,7 +483,9 @@ class TestAlternativeFitUsageWithAffinityAndInitialization(unittest.TestCase):
         embedding = TSNE(
             early_exaggeration_iter=0, n_iter=0, initialization="pca", random_state=42
         ).fit(affinities=aff)
-        np.testing.assert_array_equal(embedding, desired_init)
+        # The two spectral decompositions are run separately, and need only
+        # agree to within the eigensolver's reproducibility
+        np.testing.assert_allclose(embedding, desired_init)
 
 
 class TSNEInitialization(unittest.TestCase):
