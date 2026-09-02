@@ -48,13 +48,14 @@ cpdef tuple estimate_negative_gradient_bh(
     bint compute_dof_grad=*,
 )
 
-cpdef double estimate_negative_gradient_fft_1d(
+cpdef tuple estimate_negative_gradient_fft_1d(
     double[::1] embedding,
     double[::1] gradient,
     Py_ssize_t n_interpolation_points=*,
     Py_ssize_t min_num_intervals=*,
     double ints_in_interval=*,
     double dof=*,
+    bint compute_dof_grad=*,
 )
 
 cpdef tuple prepare_negative_gradient_fft_interpolation_grid_1d(
@@ -75,13 +76,14 @@ cpdef double estimate_negative_gradient_fft_1d_with_grid(
     double dof,
 )
 
-cpdef double estimate_negative_gradient_fft_2d(
+cpdef tuple estimate_negative_gradient_fft_2d(
     double[:, ::1] embedding,
     double[:, ::1] gradient,
     Py_ssize_t n_interpolation_points=*,
     Py_ssize_t min_num_intervals=*,
     double ints_in_interval=*,
     double dof=*,
+    bint compute_dof_grad=*,
 )
 
 cpdef tuple prepare_negative_gradient_fft_interpolation_grid_2d(
