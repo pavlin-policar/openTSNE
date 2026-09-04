@@ -1041,8 +1041,7 @@ class TSNE(BaseEstimator):
         This is the trade-off parameter between speed and accuracy of the tree
         approximation method. Typical values range from 0.2 to 0.8. The value 0
         indicates that no approximation is to be made and produces exact results
-        also producing longer runtime. Alternatively, you can use ``auto`` to
-        approximately select the faster method.
+        also producing longer runtime. Default is 0.5.
 
     n_interpolation_points: int
         Only used when ``negative_gradient_method="fft"`` or its other aliases.
