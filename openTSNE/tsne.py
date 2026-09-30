@@ -1878,7 +1878,7 @@ class gradient_descent:
                     embedding, mask = utils.clip_point_to_disc(embedding, r_limit, inplace=True)
 
                 # Zero out the momentum terms for the points that hit the boundary
-                self.gains[~mask] = 0
+                self.gains[mask] = 0
 
             if verbose and (iteration + 1) % 50 == 0:
                 stop_time = time()
