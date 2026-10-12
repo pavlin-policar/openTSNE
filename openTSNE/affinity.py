@@ -139,6 +139,12 @@ class PerplexityBasedNN(Affinities):
         can be specified. This option will ignore any KNN-related parameters.
         When ``knn_index`` is specified, ``data`` must be set to None.
 
+    gamma: float
+        Exponent of a row-wise power transform applied to the conditional
+        probabilities before symmetrization. ``gamma=1`` (default) gives
+        standard t-SNE affinities, ``0 <= gamma < 1`` smooths each row, and
+        ``gamma > 1`` sharpens it.
+
     """
 
     def __init__(
@@ -155,6 +161,7 @@ class PerplexityBasedNN(Affinities):
         k_neighbors="auto",
         knn_kwargs=None,
         knn_index=None,
+        gamma=1.0,
     ):
         # This can't work if neither data nor the knn index are specified
         if data is None and knn_index is None:
@@ -209,6 +216,7 @@ class PerplexityBasedNN(Affinities):
                 [effective_perplexity],
                 symmetrize=symmetrize,
                 n_jobs=n_jobs,
+                gamma=gamma,
             )
 
         self.perplexity = perplexity
@@ -217,6 +225,7 @@ class PerplexityBasedNN(Affinities):
         self.n_jobs = n_jobs
         self.verbose = verbose
         self.knn_kwargs = knn_kwargs
+        self.gamma = gamma
 
     def set_perplexity(self, new_perplexity):
         """Change the perplexity of the affinity matrix.
@@ -272,6 +281,7 @@ class PerplexityBasedNN(Affinities):
                 [self.effective_perplexity_],
                 symmetrize=self.symmetrize,
                 n_jobs=self.n_jobs,
+                gamma=self.gamma,
             )
 
     def to_new(
@@ -341,6 +351,7 @@ class PerplexityBasedNN(Affinities):
                 normalization="point-wise",
                 n_reference_samples=self.n_samples,
                 n_jobs=self.n_jobs,
+                gamma=self.gamma,
             )
 
         if return_distances:
@@ -436,6 +447,7 @@ def joint_probabilities_nn(
     normalization="pair-wise",
     n_reference_samples=None,
     n_jobs=1,
+    gamma=1.0,
 ):
     """Compute the conditional probability matrix P_{j|i}.
 
@@ -468,6 +480,13 @@ def joint_probabilities_nn(
         properly construct the sparse P matrix.
     n_jobs: int
         Number of threads.
+    gamma: float
+        Exponent of a row-wise power transform applied to the conditional
+        probabilities before symmetrization: each row is raised to the power
+        ``gamma`` and renormalized to sum to 1. ``gamma=1`` (default) leaves
+        the affinities unchanged, ``0 <= gamma < 1`` smooths each row, and
+        ``gamma > 1`` sharpens it. The transform is monotonic, so neighbor
+        support and rank order are preserved.
 
     Returns
     -------
@@ -481,6 +500,9 @@ def joint_probabilities_nn(
         "point-wise",
     ), f"Unrecognized normalization scheme `{normalization}`."
 
+    if gamma < 0:
+       raise ValueError(f"`gamma` must be non-negative, got {gamma}.")
+
     n_samples, k_neighbors = distances.shape
 
     if n_reference_samples is None:
@@ -493,6 +515,13 @@ def joint_probabilities_nn(
         num_threads=n_jobs,
     )
     conditional_P = np.asarray(conditional_P)
+
+    # Row-wise power transform: p_{j|i} -> p_{j|i}^gamma / sum_m p_{m|i}^gamma.
+    # It is monotonic, so rank order and sparsity are preserved. gamma=1 is the
+    # identity, so we skip the computation in that case.
+    if gamma != 1.0:
+        conditional_P = conditional_P**gamma
+        conditional_P /= conditional_P.sum(axis=1, keepdims=True)
 
     P = sp.csr_matrix(
         (

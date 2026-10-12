@@ -101,6 +101,94 @@ class TestPerplexityBased(unittest.TestCase):
         self.assertAlmostEqual(np.sum(aff.P - aff.P.T), 0, delta=1e-16)
 
 
+class TestGammaSmoothing(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        rng = np.random.RandomState(42)
+        cls.x = rng.normal(0, 1, (200, 5))
+
+    def test_gamma_one_is_identical_to_default(self):
+        default = PerplexityBasedNN(self.x, perplexity=20, random_state=0)
+        gamma_one = PerplexityBasedNN(self.x, perplexity=20, random_state=0, gamma=1.0)
+        self.assertEqual(abs(default.P - gamma_one.P).max(), 0)
+
+    def test_gamma_preserves_support_and_normalization(self):
+        default = PerplexityBasedNN(self.x, perplexity=20, random_state=0)
+        for gamma in [0.0, 0.5, 0.7, 1.5, 2.0]:
+            aff = PerplexityBasedNN(self.x, perplexity=20, random_state=0, gamma=gamma)
+            self.assertEqual(aff.P.nnz, default.P.nnz)
+            self.assertAlmostEqual(aff.P.sum(), 1.0)
+            self.assertTrue((aff.P.data >= 0).all())
+
+    def test_gamma_smooths_and_sharpens(self):
+        # Compare how much mass the largest affinity of each row carries
+        def max_row_mass(aff):
+            return np.asarray(aff.P.max(axis=1).todense()).ravel().mean()
+
+        default = PerplexityBasedNN(self.x, perplexity=20, random_state=0)
+        smooth = PerplexityBasedNN(self.x, perplexity=20, random_state=0, gamma=0.5)
+        sharp = PerplexityBasedNN(self.x, perplexity=20, random_state=0, gamma=2.0)
+        self.assertLess(max_row_mass(smooth), max_row_mass(default))
+        self.assertGreater(max_row_mass(sharp), max_row_mass(default))
+
+    def test_gamma_zero_gives_uniform_conditional_rows(self):
+        aff = PerplexityBasedNN(self.x, perplexity=20, random_state=0)
+        k = aff.knn_index.k
+        neighbors, distances = aff.knn_index.build()
+        P = affinity.joint_probabilities_nn(
+            neighbors, distances, [20], symmetrize=False,
+            normalization="point-wise", gamma=0.0,
+        )
+        np.testing.assert_allclose(P.data, 1.0 / k)
+
+    def test_gamma_equals_rescaled_gaussian_bandwidth(self):
+        """Eq. 6: p^gamma renormalized equals a Gaussian with precision gamma * beta_i."""
+        aff = PerplexityBasedNN(self.x, perplexity=20, random_state=0)
+        neighbors, distances = aff.knn_index.build()
+        gamma = 0.7
+
+        kwargs = dict(symmetrize=False, normalization="point-wise")
+        P1 = affinity.joint_probabilities_nn(neighbors, distances, [20], **kwargs)
+        Pg = affinity.joint_probabilities_nn(
+            neighbors, distances, [20], gamma=gamma, **kwargs
+        )
+        n, k = neighbors.shape
+        rows = np.arange(n)[:, None]
+        p1 = P1.toarray()[rows, neighbors]
+        pg = Pg.toarray()[rows, neighbors]
+
+        # Recover the precision beta_i of each row from the standard affinities,
+        # using log p_ij = -beta_i * d_ij^2 + const
+        d2 = distances ** 2
+        beta = -(np.log(p1[:, 0]) - np.log(p1[:, -1])) / (d2[:, 0] - d2[:, -1])
+
+        expected = np.exp(-gamma * beta[:, None] * d2)
+        expected /= expected.sum(axis=1, keepdims=True)
+        np.testing.assert_allclose(pg, expected, rtol=1e-4, atol=1e-8)
+
+    def test_negative_gamma_raises(self):
+        with self.assertRaises(ValueError):
+            PerplexityBasedNN(self.x, perplexity=20, gamma=-0.5)
+
+    def test_gamma_is_kept_by_set_perplexity(self):
+        aff = PerplexityBasedNN(self.x, perplexity=30, random_state=0, gamma=0.7)
+        aff.set_perplexity(20)
+        direct = PerplexityBasedNN(self.x, perplexity=20, random_state=0, gamma=0.7)
+        self.assertEqual(aff.gamma, 0.7)
+        self.assertAlmostEqual(abs(aff.P - direct.P).max(), 0, places=6)
+
+    def test_gamma_is_used_for_new_points(self):
+        aff_default = PerplexityBasedNN(self.x[:150], perplexity=20, random_state=0)
+        aff_smooth = PerplexityBasedNN(
+            self.x[:150], perplexity=20, random_state=0, gamma=0.5
+        )
+        new_default = aff_default.to_new(self.x[150:])
+        new_smooth = aff_smooth.to_new(self.x[150:])
+        # Rows are normalized, and smoothing makes the largest entry smaller
+        np.testing.assert_allclose(np.asarray(new_smooth.sum(axis=1)).ravel(), 1.0)
+        self.assertLess(new_smooth.max(axis=1).mean(), new_default.max(axis=1).mean())
+
+
 class TestMultiscale(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
