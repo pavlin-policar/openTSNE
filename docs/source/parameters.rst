@@ -73,7 +73,7 @@ ints_in_interval: float
 Affinity smoothing parameter
 ----------------------------
 
-In standard t-SNE, the Gaussian bandwidth of every point is chosen so that each row of the affinity matrix has the same perplexity. However, these rows are generally sharp, meaning that the first few nearest neighbors often carry most of the probability mass in a row. The ``gamma`` parameter changes how sharp each row is. Each row of the conditional probabilities :math:`p_{j|i}` is raised to the power :math:`gamma` and renormalized, before the matrix is symmetrized.
+In standard t-SNE, the Gaussian bandwidth of every point is chosen so that each row of the affinity matrix has the same perplexity. However, these rows are generally sharp, meaning that the first few nearest neighbors often carry most of the probability mass in a row. The ``gamma`` parameter changes how sharp each row is. Each row of the conditional probabilities :math:`p_{j|i}` is raised to the power :math:`gamma` and renormalized, before the matrix is symmetrized.The effect of this parameter on neighborhood preservation is studied in [4]_.
 
 gamma: float
     The exponent of the row-wise power transform. The default, ``1``, gives the standard t-SNE affinities. Values between 0 and 1 smooth each row, moving probability mass from the nearest neighbors to farther ones. Values above 1 make each row sharper. The value cannot be negative. With ``gamma=0``, all neighbors get the same weight. For any ``gamma`` above 0, the neighbors and their order stay the same.
@@ -86,3 +86,5 @@ References
 .. [2] Linderman, George C., and Stefan Steinerberger. `“Clustering with t-SNE, provably.” <https://epubs.siam.org/doi/abs/10.1137/18M1216134>`__, SIAM Journal on Mathematics of Data Science (2019).
 
 .. [3] Jacobs, Robert A. `"Increased rates of convergence through learning rate adaptation." <https://www.sciencedirect.com/science/article/abs/pii/0893608088900032>`__, Neural Networks (1988).
+
+.. [4] Mohebi, Shirin, Bied, Guillaume, and Lijffijt, Jefrey. `“How smoothing the affinity matrix affects neighborhood preservation in t-SNE” <https://arxiv.org/abs/2608.17190>`__, arXiv (2026).
