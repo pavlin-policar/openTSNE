@@ -501,7 +501,7 @@ def joint_probabilities_nn(
     ), f"Unrecognized normalization scheme `{normalization}`."
 
     if gamma < 0:
-       raise ValueError(f"`gamma` must be non-negative, got {gamma}.")
+        raise ValueError(f"`gamma` must be non-negative, got {gamma}.")
 
     n_samples, k_neighbors = distances.shape
 
