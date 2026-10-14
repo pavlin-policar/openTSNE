@@ -73,7 +73,7 @@ ints_in_interval: float
 Affinity smoothing parameter
 ----------------------------
 
-In standard t-SNE, the Gaussian bandwidth of every point is chosen so that each row of the affinity matrix has the same perplexity. However, these rows are generally sharp, meaning that the first few nearest neighbors often carry most of the probability mass in a row. The ``gamma`` parameter changes how sharp each row is. Each row of the conditional probabilities :math:`p_{j|i}` is raised to the power :math:`gamma` and renormalized, before the matrix is symmetrized.The effect of this parameter on neighborhood preservation is studied in [4]_.
+In standard t-SNE, the Gaussian bandwidth of every point is chosen so that each row of the affinity matrix has the same perplexity. However, these rows are generally sharp, meaning that the first few nearest neighbors often carry most of the probability mass in a row. The ``gamma`` parameter changes how probability is spread among each point's neighbors. Each row of the conditional probabilities :math:`p_{j|i}` is raised to the power :math:`\gamma` and renormalized, before the matrix is symmetrized. The effect of this parameter on neighborhood preservation is studied in [4]_.
 
 gamma: float
     The exponent of the row-wise power transform. The default, ``1``, gives the standard t-SNE affinities. Values between 0 and 1 smooth each row, moving probability mass from the nearest neighbors to farther ones. Values above 1 make each row sharper. The value cannot be negative. With ``gamma=0``, all neighbors get the same weight. For any ``gamma`` above 0, the neighbors and their order stay the same.
