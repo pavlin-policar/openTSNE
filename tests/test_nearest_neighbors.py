@@ -43,6 +43,35 @@ class KNNIndexTestMixin:
         indices, distances = index.build()
         self.assertTrue(np.isfinite(distances).all())
 
+    def test_returns_euclidean_distances_query_train(self):
+        index: nearest_neighbors.KNNIndex = self.knn_index(self.x1, 15, "euclidean")
+        indices, distances = index.build()
+
+        true_distances = np.vstack(
+            [cdist(x[None, :], self.x1[idx]) for x, idx in zip(self.x1, indices)]
+        )
+        np.testing.assert_allclose(distances, true_distances, rtol=1e-4)
+
+    def test_returns_euclidean_distances_query(self):
+        index: nearest_neighbors.KNNIndex = self.knn_index(self.x1, 15, "euclidean")
+        index.build()
+        indices, distances = index.query(self.x2, 15)
+
+        true_distances = np.vstack(
+            [cdist(x[None, :], self.x1[idx]) for x, idx in zip(self.x2, indices)]
+        )
+        np.testing.assert_allclose(distances, true_distances, rtol=1e-4)
+
+    def test_returns_consistent_dtypes(self):
+        index: nearest_neighbors.KNNIndex = self.knn_index(self.x1, 15, "euclidean")
+        build_indices, build_distances = index.build()
+        query_indices, query_distances = index.query(self.x2, 15)
+
+        for indices in (build_indices, query_indices):
+            self.assertTrue(np.issubdtype(indices.dtype, np.signedinteger))
+        for distances in (build_distances, query_distances):
+            self.assertEqual(distances.dtype, np.float64)
+
     def test_returns_correct_number_neighbors_query(self):
         ks = [1, 5, 10, 30, 50]
         n_samples = self.x2.shape[0]
@@ -134,6 +163,57 @@ class TestAnnoy(KNNIndexTestMixin, unittest.TestCase):
 
         np.testing.assert_array_equal(load_idx, orig_idx)
         np.testing.assert_array_almost_equal(load_dist, orig_dist)
+
+    def test_returns_cosine_distances(self):
+        knn_index = nearest_neighbors.Annoy(self.x1, 15, "cosine")
+        indices, distances = knn_index.build()
+        query_indices, query_distances = knn_index.query(self.x2, 15)
+
+        for x, idx, dist in [
+            (self.x1, indices, distances),
+            (self.x2, query_indices, query_distances),
+        ]:
+            true_distances = np.vstack(
+                [cdist(xi[None, :], self.x1[i], "cosine") for xi, i in zip(x, idx)]
+            )
+            np.testing.assert_allclose(dist, true_distances, rtol=1e-4, atol=1e-6)
+
+    def test_returns_one_minus_inner_product_for_dot(self):
+        # Normalized data, for which one minus the inner product is a distance
+        x_train = self.x1 / np.linalg.norm(self.x1, axis=1, keepdims=True)
+        x_test = self.x2 / np.linalg.norm(self.x2, axis=1, keepdims=True)
+
+        knn_index = nearest_neighbors.Annoy(x_train, 15, "dot")
+        indices, distances = knn_index.build()
+        query_indices, query_distances = knn_index.query(x_test, 15)
+
+        for x, idx, dist in [
+            (x_train, indices, distances),
+            (x_test, query_indices, query_distances),
+        ]:
+            true_distances = np.vstack([1 - x_train[i] @ xi for xi, i in zip(x, idx)])
+            np.testing.assert_allclose(dist, true_distances, rtol=1e-4, atol=1e-6)
+            # The most similar neighbors come first
+            self.assertTrue(np.all(np.diff(dist, axis=1) >= -1e-6))
+
+    def test_build_excludes_point_itself_with_duplicate_points(self):
+        x = np.vstack([self.x1, self.x1])
+        n = self.x1.shape[0]
+        knn_index = nearest_neighbors.Annoy(x, 5, "euclidean")
+        indices, distances = knn_index.build()
+
+        self.assertFalse(np.any(indices == np.arange(2 * n)[:, None]))
+        # Each point's duplicate is its nearest neighbor, at distance zero
+        twins = np.concatenate([np.arange(n, 2 * n), np.arange(n)])
+        np.testing.assert_array_equal(indices[:, 0], twins)
+        np.testing.assert_allclose(distances[:, 0], 0, atol=1e-3)
+
+    def test_build_excludes_point_itself_with_dot(self):
+        knn_index = nearest_neighbors.Annoy(self.x1, 15, "dot")
+        indices, distances = knn_index.build()
+
+        self.assertEqual(indices.shape, (self.x1.shape[0], 15))
+        self.assertFalse(np.any(indices == np.arange(self.x1.shape[0])[:, None]))
 
     def test_knn_kwargs(self):
         with patch(
@@ -356,6 +436,116 @@ class TestHNSW(KNNIndexTestMixin, unittest.TestCase):
         import pandas as pd
 
         self._assert_loads_base64_encoded_state(pd.DataFrame(self.iris))
+
+    def test_returns_int64_indices_and_float64_distances(self):
+        for metric in nearest_neighbors.HNSW.VALID_METRICS:
+            with self.subTest(metric=metric):
+                knn_index = nearest_neighbors.HNSW(self.x1, 15, metric)
+                build_indices, build_distances = knn_index.build()
+                query_indices, query_distances = knn_index.query(self.x2, 15)
+
+                self.assertEqual(build_indices.dtype, np.int64)
+                self.assertEqual(query_indices.dtype, np.int64)
+                self.assertEqual(build_distances.dtype, np.float64)
+                self.assertEqual(query_distances.dtype, np.float64)
+
+    def test_same_result_as_exact_search(self):
+        # Low-dimensional data, on which HNSW finds the exact neighbors
+        random_state = np.random.RandomState(0)
+        x_train = random_state.normal(0, 1, (200, 5))
+        x_test = random_state.normal(0, 1, (50, 5))
+
+        k = 15
+        for metric in ["euclidean", "l2", "cosine"]:
+            with self.subTest(metric=metric):
+                exact_index = nearest_neighbors.Sklearn(x_train, k, metric)
+                true_indices, true_distances = exact_index.build()
+                true_query_indices, true_query_distances = exact_index.query(x_test, k)
+
+                knn_index = nearest_neighbors.HNSW(x_train, k, metric, random_state=0)
+                indices, distances = knn_index.build()
+                query_indices, query_distances = knn_index.query(x_test, k)
+
+                np.testing.assert_array_equal(indices, true_indices)
+                np.testing.assert_allclose(distances, true_distances, rtol=1e-4)
+                np.testing.assert_array_equal(query_indices, true_query_indices)
+                np.testing.assert_allclose(
+                    query_distances, true_query_distances, rtol=1e-4
+                )
+
+    def test_build_excludes_point_itself_with_duplicate_points(self):
+        x = np.vstack([self.x1, self.x1])
+        n = self.x1.shape[0]
+        knn_index = nearest_neighbors.HNSW(x, 5, "euclidean")
+        indices, distances = knn_index.build()
+
+        self.assertFalse(np.any(indices == np.arange(2 * n)[:, None]))
+        # Each point's duplicate is its nearest neighbor, at distance zero
+        twins = np.concatenate([np.arange(n, 2 * n), np.arange(n)])
+        np.testing.assert_array_equal(indices[:, 0], twins)
+        np.testing.assert_allclose(distances[:, 0], 0, atol=1e-3)
+
+    def test_build_excludes_point_itself_with_inner_product(self):
+        for metric in ["ip", "dot"]:
+            with self.subTest(metric=metric):
+                knn_index = nearest_neighbors.HNSW(self.x1, 15, metric)
+                indices, distances = knn_index.build()
+
+                self.assertEqual(indices.shape, (self.x1.shape[0], 15))
+                self.assertFalse(
+                    np.any(indices == np.arange(self.x1.shape[0])[:, None])
+                )
+
+    def test_default_ef(self):
+        knn_index = nearest_neighbors.HNSW(self.x1, 5, "euclidean")
+        knn_index.build()
+        self.assertEqual(knn_index.index.ef, 100)
+
+        knn_index.query(self.x2, 60)
+        self.assertEqual(knn_index.index.ef, 120)
+
+        # `ef` cannot exceed the number of indexed points
+        knn_index.query(self.x2, 90)
+        self.assertEqual(knn_index.index.ef, self.x1.shape[0])
+
+    def test_ef_from_knn_kwargs(self):
+        knn_index = nearest_neighbors.HNSW(
+            self.x1, 5, "euclidean", knn_kwargs=dict(ef=50)
+        )
+        knn_index.build()
+        self.assertEqual(knn_index.index.ef, 50)
+
+        knn_index.query(self.x2, 15)
+        self.assertEqual(knn_index.index.ef, 50)
+
+    def test_negative_n_jobs_follows_sklearn_convention(self):
+        import joblib
+
+        n_cores = joblib.cpu_count()
+        for n_jobs, num_threads in [(-1, n_cores), (-2, max(n_cores - 1, 1))]:
+            with self.subTest(n_jobs=n_jobs):
+                knn_index = nearest_neighbors.HNSW(self.x1, 5, n_jobs=n_jobs)
+                knn_index.build()
+                knn_index.index = MagicMock(wraps=knn_index.index)
+                knn_index.query(self.x2, 5)
+                check_mock_called_with_kwargs(
+                    knn_index.index.knn_query, dict(num_threads=num_threads)
+                )
+
+    def test_warns_if_random_state_with_multiple_threads(self):
+        knn_index = nearest_neighbors.HNSW(self.x1, 5, n_jobs=2, random_state=1)
+        with self.assertWarnsRegex(UserWarning, "not deterministic"):
+            knn_index.build()
+
+    def test_no_warning_if_random_state_with_single_thread(self):
+        for n_jobs, random_state in [(1, 1), (2, None)]:
+            with self.subTest(n_jobs=n_jobs, random_state=random_state):
+                knn_index = nearest_neighbors.HNSW(
+                    self.x1, 5, n_jobs=n_jobs, random_state=random_state
+                )
+                with warnings.catch_warnings():
+                    warnings.simplefilter("error")
+                    knn_index.build()
 
     def test_knn_kwargs(self):
         with patch(

@@ -11,6 +11,29 @@ from openTSNE import utils
 log = logging.getLogger(__name__)
 
 
+def _exclude_self(indices, distances):
+    """Remove each point from its own list of ``k + 1`` nearest neighbors.
+
+    Row ``i`` of ``indices`` and ``distances`` holds the neighbors of point
+    ``i``. The point itself need not be the first result: duplicate points
+    are at distance zero, and under the inner product a point need not be its
+    own nearest neighbor. Rows that do not contain the point itself drop their
+    furthest result.
+
+    Returns
+    -------
+    indices: np.ndarray
+    distances: np.ndarray
+        Both of shape ``(n_samples, k)``.
+
+    """
+    n_samples, k = indices.shape[0], indices.shape[1] - 1
+    is_self = indices == np.arange(n_samples)[:, None]
+    is_self[~is_self.any(axis=1), -1] = True
+    keep = ~is_self
+    return indices[keep].reshape(n_samples, k), distances[keep].reshape(n_samples, k)
+
+
 class KNNIndex:
     VALID_METRICS = []
     supports_callable = False
@@ -271,17 +294,15 @@ class Annoy(KNNIndex):
 
         self.index.build(n_jobs=self.n_jobs, **knn_kwargs_)
 
-        # Return the nearest neighbors in the training set
-        distances = np.zeros((N, k))
-        indices = np.zeros((N, k)).astype(int)
+        # Return the nearest neighbors in the training set, which include the
+        # query points themselves
+        distances = np.zeros((N, k + 1))
+        indices = np.zeros((N, k + 1)).astype(int)
 
         def getnns(i):
-            # Annoy returns the query point itself as the first element
-            indices_i, distances_i = self.index.get_nns_by_item(
+            indices[i], distances[i] = self.index.get_nns_by_item(
                 i, k + 1, include_distances=True
             )
-            indices[i] = indices_i[1:]
-            distances[i] = distances_i[1:]
 
         if self.n_jobs == 1:
             for i in range(N):
@@ -295,7 +316,7 @@ class Annoy(KNNIndex):
 
         timer.__exit__()
 
-        return indices, distances
+        return _exclude_self(indices, self._convert_distances(distances))
 
     def query(self, query, k):
         timer = utils.Timer(
@@ -326,7 +347,20 @@ class Annoy(KNNIndex):
 
         timer.__exit__()
 
-        return indices, distances
+        return indices, self._convert_distances(distances)
+
+    def _convert_distances(self, distances):
+        """Convert distances reported by Annoy to the scale of the metric."""
+        if self.metric == "cosine":
+            # Annoy's angular distance is the euclidean distance between the
+            # normalized vectors, sqrt(2 - 2 cos)
+            return distances ** 2 / 2
+        if self.metric == "dot":
+            # Annoy ranks by the largest inner product and reports the inner
+            # product itself, a similarity. One minus the inner product is a
+            # distance for normalized data, matching HNSW and pynndescent.
+            return 1 - distances
+        return distances
 
     def __getstate__(self):
         import tempfile
@@ -553,7 +587,8 @@ class NNDescent(KNNIndex):
 
         timer.__exit__()
 
-        return indices[:, 1:], distances[:, 1:]
+        # pynndescent returns float32 distances; the other indices return float64
+        return indices[:, 1:], distances[:, 1:].astype(np.float64)
 
     def query(self, query, k):
         timer = utils.Timer(
@@ -567,10 +602,27 @@ class NNDescent(KNNIndex):
 
         timer.__exit__()
 
-        return indices, distances
+        return indices, distances.astype(np.float64)
 
 
 class HNSW(KNNIndex):
+    """Approximate nearest neighbor search using hierarchical navigable small
+    world graphs, as implemented in hnswlib.
+
+    Distances are returned on the scale of the metric: ``euclidean`` and
+    ``l2`` give euclidean distances, ``cosine`` gives one minus the cosine
+    similarity, and ``ip`` and ``dot`` give one minus the inner product. The
+    inner-product distances are negative whenever the inner product exceeds
+    one, so they are only meaningful as t-SNE input for normalized data.
+
+    The ``M`` and ``ef_construction`` entries of ``knn_kwargs`` are passed to
+    ``hnswlib.Index.init_index``. ``ef`` sets the size of the candidate list
+    searched for each query point, trading speed for recall; it defaults to
+    ``max(2 * k, 100)``. Building the index with more than one thread is not
+    deterministic, so results are reproducible with a fixed ``random_state``
+    only when ``n_jobs=1``.
+
+    """
     VALID_METRICS = [
         "cosine",
         "euclidean",
@@ -618,6 +670,8 @@ class HNSW(KNNIndex):
         knn_kwargs_ = dict(ef_construction=200, M=16)
         if self.knn_kwargs is not None:
             knn_kwargs_.update(self.knn_kwargs)
+        # `ef` is a search-time parameter, set in `_set_ef`
+        knn_kwargs_.pop("ef", None)
 
         # Initialize HNSW Index
         self.index.init_index(
@@ -626,20 +680,27 @@ class HNSW(KNNIndex):
             **knn_kwargs_,
         )
 
-        # Build index tree from data
-        self.index.add_items(data, num_threads=self.n_jobs)
+        num_threads = self._num_threads()
+        if self.random_state is not None and num_threads > 1:
+            warnings.warn(
+                "Building an HNSW index with multiple threads is not "
+                "deterministic, so the nearest neighbors may differ between "
+                "runs even with a fixed `random_state`. Set `n_jobs=1` for "
+                "reproducible results."
+            )
 
-        # Set ef parameter for (ideal) precision/recall
-        self.index.set_ef(min(2 * k, self.index.get_current_count()))
+        # Build index tree from data
+        self.index.add_items(data, num_threads=num_threads)
+
+        self._set_ef(k)
 
         # Query for kNN
-        indices, distances = self.index.knn_query(data, k=k + 1, num_threads=self.n_jobs)
+        indices, distances = self.index.knn_query(data, k=k + 1, num_threads=num_threads)
 
         # Stop timer
         timer.__exit__()
 
-        # return indices and distances, skip first entry, which is always the point itself
-        return indices[:, 1:], distances[:, 1:]
+        return _exclude_self(*self._convert_output(indices, distances))
 
     def query(self, query, k):
         timer = utils.Timer(
@@ -649,16 +710,50 @@ class HNSW(KNNIndex):
         )
         timer.__enter__()
 
-        # Set ef parameter for (ideal) precision/recall
-        self.index.set_ef(min(2 * k, self.index.get_current_count()))
+        self._set_ef(k)
 
         # Query for kNN
-        indices, distances = self.index.knn_query(query, k=k, num_threads=self.n_jobs)
+        indices, distances = self.index.knn_query(
+            query, k=k, num_threads=self._num_threads()
+        )
 
         # Stop timer
         timer.__exit__()
 
         # return indices and distances
+        return self._convert_output(indices, distances)
+
+    def _num_threads(self):
+        """Resolve `n_jobs` following the scikit-learn convention, ``-1``
+        meaning all processors, ``-2`` all but one, etc. hnswlib itself treats
+        every non-positive value as all processors."""
+        from joblib import effective_n_jobs
+
+        return effective_n_jobs(self.n_jobs)
+
+    def _set_ef(self, k):
+        """Set the size of the candidate list searched for each query point.
+
+        Larger values give higher recall at the cost of slower queries. The
+        default, ``max(2 * k, 100)``, can be overridden through the ``ef`` key
+        of ``knn_kwargs``. The lower bound keeps recall high for small ``k``,
+        where a candidate list of ``2 * k`` misses many true neighbors.
+        """
+        ef = None
+        if self.knn_kwargs is not None:
+            ef = self.knn_kwargs.get("ef")
+        if ef is None:
+            ef = max(2 * k, 100)
+        self.index.set_ef(min(ef, self.index.get_current_count()))
+
+    def _convert_output(self, indices, distances):
+        """Convert hnswlib results to the conventions of the other indices:
+        int64 indices and float64 distances on the scale of the metric."""
+        indices = indices.astype(np.int64)
+        distances = distances.astype(np.float64)
+        # The hnswlib `l2` space returns squared euclidean distances
+        if self.HNSW_SPACES[self.metric] == "l2":
+            np.sqrt(distances, out=distances)
         return indices, distances
 
     def __setstate__(self, state):
