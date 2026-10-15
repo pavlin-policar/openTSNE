@@ -640,8 +640,16 @@ class HNSW(KNNIndex):
 
         indices, distances = self._convert_output(indices, distances)
 
-        # return indices and distances, skip first entry, which is always the point itself
-        return indices[:, 1:], distances[:, 1:]
+        # Remove each point from its own neighbor list. The point itself need
+        # not be the first result: duplicate points are at distance zero, and
+        # under the inner product a point need not be its own nearest neighbor.
+        # Rows that do not contain the point itself drop their furthest result.
+        n_samples = data.shape[0]
+        is_self = indices == np.arange(n_samples)[:, None]
+        is_self[~is_self.any(axis=1), -1] = True
+        keep = ~is_self
+
+        return indices[keep].reshape(n_samples, k), distances[keep].reshape(n_samples, k)
 
     def query(self, query, k):
         timer = utils.Timer(
