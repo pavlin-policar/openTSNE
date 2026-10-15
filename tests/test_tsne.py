@@ -945,6 +945,20 @@ class TestTSNEEmebedding(unittest.TestCase):
         loaded_obj: openTSNE.TSNEEmbedding = pickle.loads(pickle.dumps(embedding))
         loaded_obj.transform(np.random.randn(100, 4))
 
+    @unittest.skipIf(not is_package_installed("hnswlib"), "`hnswlib` is not installed")
+    def test_pickling_with_transform_hnsw(self):
+        x, x_new = np.random.randn(100, 4), np.random.randn(20, 4)
+        tsne = TSNE(neighbors="hnsw", random_state=4)
+        embedding: openTSNE.TSNEEmbedding = tsne.fit(x)
+        loaded_obj: openTSNE.TSNEEmbedding = pickle.loads(pickle.dumps(embedding))
+        self.assertIsInstance(
+            loaded_obj.affinities.knn_index, openTSNE.nearest_neighbors.HNSW
+        )
+
+        np.testing.assert_array_almost_equal(
+            loaded_obj.transform(x_new), embedding.transform(x_new)
+        )
+
 
 class TestPrecomputedDistanceMatrices(unittest.TestCase):
     def test_precomputed_dist_matrix_via_affinities_uses_spectral_init(self):

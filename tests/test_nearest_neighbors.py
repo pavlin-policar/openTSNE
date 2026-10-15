@@ -1,7 +1,9 @@
+import base64
 import pickle
 import platform
 import tempfile
 import unittest
+import warnings
 from os import path
 from unittest.mock import patch, MagicMock
 
@@ -243,7 +245,6 @@ class TestHNSW(KNNIndexTestMixin, unittest.TestCase):
         global hnswlib
         import hnswlib
 
-    @unittest.skipIf(platform.system() == "Windows", "Files locked on Windows")
     def test_pickle_without_built_index(self):
         knn_index = nearest_neighbors.HNSW(self.iris, k=30)
         self.assertIsNone(knn_index.index)
@@ -257,7 +258,6 @@ class TestHNSW(KNNIndexTestMixin, unittest.TestCase):
 
         self.assertIsNone(loaded_obj.index)
 
-    @unittest.skipIf(platform.system() == "Windows", "Files locked on Windows")
     def test_pickle_without_built_index_cleans_up_fname(self):
         knn_index = nearest_neighbors.HNSW(self.iris, k=30)
         with tempfile.TemporaryDirectory() as dirname:
@@ -269,7 +269,6 @@ class TestHNSW(KNNIndexTestMixin, unittest.TestCase):
 
         self.assertIsNone(loaded_obj.index)
 
-    @unittest.skipIf(platform.system() == "Windows", "Files locked on Windows")
     def test_pickle_with_built_index(self):
         knn_index = nearest_neighbors.HNSW(self.iris, k=30)
         knn_index.build()
@@ -287,6 +286,76 @@ class TestHNSW(KNNIndexTestMixin, unittest.TestCase):
 
         np.testing.assert_array_equal(load_idx, orig_idx)
         np.testing.assert_array_almost_equal(load_dist, orig_dist)
+
+    def test_pickle_with_built_index_preserves_metric(self):
+        for metric in nearest_neighbors.HNSW.VALID_METRICS:
+            with self.subTest(metric=metric):
+                knn_index = nearest_neighbors.HNSW(self.iris, k=30, metric=metric)
+                knn_index.build()
+
+                with warnings.catch_warnings():
+                    warnings.simplefilter("error")
+                    loaded_obj = pickle.loads(pickle.dumps(knn_index))
+                self.assertEqual(loaded_obj.metric, metric)
+
+                load_idx, load_dist = loaded_obj.query(self.iris, 15)
+                orig_idx, orig_dist = knn_index.query(self.iris, 15)
+
+                np.testing.assert_array_equal(load_idx, orig_idx)
+                np.testing.assert_array_almost_equal(load_dist, orig_dist)
+
+    @unittest.skipIf(not is_package_installed("pandas"), "`pandas` is not installed")
+    def test_pickle_with_built_index_on_dataframe(self):
+        import pandas as pd
+
+        knn_index = nearest_neighbors.HNSW(pd.DataFrame(self.iris), k=30)
+        knn_index.build()
+
+        loaded_obj = pickle.loads(pickle.dumps(knn_index))
+
+        load_idx, load_dist = loaded_obj.query(self.iris, 15)
+        orig_idx, orig_dist = knn_index.query(self.iris, 15)
+
+        np.testing.assert_array_equal(load_idx, orig_idx)
+        np.testing.assert_array_almost_equal(load_dist, orig_dist)
+
+    @staticmethod
+    def _base64_encoded_state(knn_index):
+        """The pickled state written by openTSNE<=1.0.4, which stores the index
+        as a base64-encoded hnswlib index file."""
+        state = dict(knn_index.__dict__)
+        with tempfile.TemporaryDirectory() as dirname:
+            fname = path.join(dirname, "index.bin")
+            state.pop("index").save_index(fname)
+            with open(fname, "rb") as f:
+                state["b64_index"] = base64.b64encode(f.read())
+        return state
+
+    def _assert_loads_base64_encoded_state(self, data):
+        knn_index = nearest_neighbors.HNSW(data, k=30, metric="cosine")
+        knn_index.build()
+
+        # Unpickling creates the instance without calling `__init__`
+        loaded_obj = nearest_neighbors.HNSW.__new__(nearest_neighbors.HNSW)
+        with self.assertWarns(FutureWarning):
+            loaded_obj.__setstate__(self._base64_encoded_state(knn_index))
+        self.assertIsInstance(loaded_obj.index, hnswlib.Index)
+        self.assertEqual(loaded_obj.index.space, "cosine")
+
+        load_idx, load_dist = loaded_obj.query(self.iris, 15)
+        orig_idx, orig_dist = knn_index.query(self.iris, 15)
+
+        np.testing.assert_array_equal(load_idx, orig_idx)
+        np.testing.assert_array_almost_equal(load_dist, orig_dist)
+
+    def test_unpickle_base64_encoded_index(self):
+        self._assert_loads_base64_encoded_state(self.iris)
+
+    @unittest.skipIf(not is_package_installed("pandas"), "`pandas` is not installed")
+    def test_unpickle_base64_encoded_index_on_dataframe(self):
+        import pandas as pd
+
+        self._assert_loads_base64_encoded_state(pd.DataFrame(self.iris))
 
     def test_knn_kwargs(self):
         with patch(
