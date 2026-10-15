@@ -43,6 +43,35 @@ class KNNIndexTestMixin:
         indices, distances = index.build()
         self.assertTrue(np.isfinite(distances).all())
 
+    def test_returns_euclidean_distances_query_train(self):
+        index: nearest_neighbors.KNNIndex = self.knn_index(self.x1, 15, "euclidean")
+        indices, distances = index.build()
+
+        true_distances = np.vstack(
+            [cdist(x[None, :], self.x1[idx]) for x, idx in zip(self.x1, indices)]
+        )
+        np.testing.assert_allclose(distances, true_distances, rtol=1e-4)
+
+    def test_returns_euclidean_distances_query(self):
+        index: nearest_neighbors.KNNIndex = self.knn_index(self.x1, 15, "euclidean")
+        index.build()
+        indices, distances = index.query(self.x2, 15)
+
+        true_distances = np.vstack(
+            [cdist(x[None, :], self.x1[idx]) for x, idx in zip(self.x2, indices)]
+        )
+        np.testing.assert_allclose(distances, true_distances, rtol=1e-4)
+
+    def test_returns_consistent_dtypes(self):
+        index: nearest_neighbors.KNNIndex = self.knn_index(self.x1, 15, "euclidean")
+        build_indices, build_distances = index.build()
+        query_indices, query_distances = index.query(self.x2, 15)
+
+        for indices in (build_indices, query_indices):
+            self.assertTrue(np.issubdtype(indices.dtype, np.signedinteger))
+        for distances in (build_distances, query_distances):
+            self.assertEqual(distances.dtype, np.float64)
+
     def test_returns_correct_number_neighbors_query(self):
         ks = [1, 5, 10, 30, 50]
         n_samples = self.x2.shape[0]
@@ -356,6 +385,42 @@ class TestHNSW(KNNIndexTestMixin, unittest.TestCase):
         import pandas as pd
 
         self._assert_loads_base64_encoded_state(pd.DataFrame(self.iris))
+
+    def test_returns_int64_indices_and_float64_distances(self):
+        for metric in nearest_neighbors.HNSW.VALID_METRICS:
+            with self.subTest(metric=metric):
+                knn_index = nearest_neighbors.HNSW(self.x1, 15, metric)
+                build_indices, build_distances = knn_index.build()
+                query_indices, query_distances = knn_index.query(self.x2, 15)
+
+                self.assertEqual(build_indices.dtype, np.int64)
+                self.assertEqual(query_indices.dtype, np.int64)
+                self.assertEqual(build_distances.dtype, np.float64)
+                self.assertEqual(query_distances.dtype, np.float64)
+
+    def test_same_result_as_exact_search(self):
+        # Low-dimensional data, on which HNSW finds the exact neighbors
+        random_state = np.random.RandomState(0)
+        x_train = random_state.normal(0, 1, (200, 5))
+        x_test = random_state.normal(0, 1, (50, 5))
+
+        k = 15
+        for metric in ["euclidean", "l2", "cosine"]:
+            with self.subTest(metric=metric):
+                exact_index = nearest_neighbors.Sklearn(x_train, k, metric)
+                true_indices, true_distances = exact_index.build()
+                true_query_indices, true_query_distances = exact_index.query(x_test, k)
+
+                knn_index = nearest_neighbors.HNSW(x_train, k, metric, random_state=0)
+                indices, distances = knn_index.build()
+                query_indices, query_distances = knn_index.query(x_test, k)
+
+                np.testing.assert_array_equal(indices, true_indices)
+                np.testing.assert_allclose(distances, true_distances, rtol=1e-4)
+                np.testing.assert_array_equal(query_indices, true_query_indices)
+                np.testing.assert_allclose(
+                    query_distances, true_query_distances, rtol=1e-4
+                )
 
     def test_knn_kwargs(self):
         with patch(

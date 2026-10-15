@@ -638,6 +638,8 @@ class HNSW(KNNIndex):
         # Stop timer
         timer.__exit__()
 
+        indices, distances = self._convert_output(indices, distances)
+
         # return indices and distances, skip first entry, which is always the point itself
         return indices[:, 1:], distances[:, 1:]
 
@@ -659,6 +661,16 @@ class HNSW(KNNIndex):
         timer.__exit__()
 
         # return indices and distances
+        return self._convert_output(indices, distances)
+
+    def _convert_output(self, indices, distances):
+        """Convert hnswlib results to the conventions of the other indices:
+        int64 indices and float64 distances on the scale of the metric."""
+        indices = indices.astype(np.int64)
+        distances = distances.astype(np.float64)
+        # The hnswlib `l2` space returns squared euclidean distances
+        if self.HNSW_SPACES[self.metric] == "l2":
+            np.sqrt(distances, out=distances)
         return indices, distances
 
     def __setstate__(self, state):
