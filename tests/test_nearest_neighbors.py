@@ -178,6 +178,24 @@ class TestAnnoy(KNNIndexTestMixin, unittest.TestCase):
             )
             np.testing.assert_allclose(dist, true_distances, rtol=1e-4, atol=1e-6)
 
+    def test_returns_one_minus_inner_product_for_dot(self):
+        # Normalized data, for which one minus the inner product is a distance
+        x_train = self.x1 / np.linalg.norm(self.x1, axis=1, keepdims=True)
+        x_test = self.x2 / np.linalg.norm(self.x2, axis=1, keepdims=True)
+
+        knn_index = nearest_neighbors.Annoy(x_train, 15, "dot")
+        indices, distances = knn_index.build()
+        query_indices, query_distances = knn_index.query(x_test, 15)
+
+        for x, idx, dist in [
+            (x_train, indices, distances),
+            (x_test, query_indices, query_distances),
+        ]:
+            true_distances = np.vstack([1 - x_train[i] @ xi for xi, i in zip(x, idx)])
+            np.testing.assert_allclose(dist, true_distances, rtol=1e-4, atol=1e-6)
+            # The most similar neighbors come first
+            self.assertTrue(np.all(np.diff(dist, axis=1) >= -1e-6))
+
     def test_knn_kwargs(self):
         with patch(
             "openTSNE.dependencies.annoy.AnnoyIndex",

@@ -334,6 +334,11 @@ class Annoy(KNNIndex):
             # Annoy's angular distance is the euclidean distance between the
             # normalized vectors, sqrt(2 - 2 cos)
             return distances ** 2 / 2
+        if self.metric == "dot":
+            # Annoy ranks by the largest inner product and reports the inner
+            # product itself, a similarity. One minus the inner product is a
+            # distance for normalized data, matching HNSW and pynndescent.
+            return 1 - distances
         return distances
 
     def __getstate__(self):
