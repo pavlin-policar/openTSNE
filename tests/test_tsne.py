@@ -891,6 +891,42 @@ class TestGradientDescentOptimizer(unittest.TestCase):
             "Failed loading after optimization (differing gains)",
         )
 
+    def test_gains_are_kept_for_points_inside_interpolation_grid(self):
+        embedding = self.tsne.prepare_initial(self.x)
+        embedding.optimize(10, inplace=True)
+
+        partial = embedding.prepare_partial(self.x_test)
+        partial = partial.optimize(10, negative_gradient_method="fft", learning_rate=0.1)
+
+        self.assertTrue(
+            np.all(partial.optimizer.gains > 0),
+            "Gains of points inside the interpolation grid were zeroed out.",
+        )
+
+    def test_gains_are_zeroed_only_for_points_hitting_grid_boundary(self):
+        for n_components in (1, 2):
+            tsne = TSNE(n_components=n_components, negative_gradient_method="fft")
+            embedding = tsne.prepare_initial(self.x)
+            embedding.optimize(10, inplace=True)
+
+            # Start the first point far outside of the interpolation grid, so
+            # it is clipped to the boundary in every iteration
+            initialization = np.array(embedding.prepare_partial(self.x_test))
+            initialization[0] = 1e3
+            partial = embedding.prepare_partial(
+                self.x_test, initialization=initialization
+            )
+            partial = partial.optimize(5, learning_rate=0.1)
+
+            gains = partial.optimizer.gains
+            np.testing.assert_array_equal(
+                gains[0], 0, "%dd: point at the boundary kept its gains" % n_components
+            )
+            self.assertTrue(
+                np.all(gains[1:] > 0),
+                "%dd: points inside the grid had their gains zeroed" % n_components,
+            )
+
 
 class TestAffinityIntegration(unittest.TestCase):
     @classmethod
