@@ -664,8 +664,16 @@ class HNSW(KNNIndex):
     def __setstate__(self, state):
         # `hnswlib.Index` pickles natively, so `index` is part of the state.
         # Pickles written by openTSNE<=1.0.4 instead store the index as a
-        # base64-encoded hnswlib index file under `b64_index`.
+        # base64-encoded hnswlib index file under `b64_index`; loading these
+        # is deprecated.
         if "b64_index" in state:
+            warnings.warn(
+                "This HNSW index was pickled with openTSNE<=1.0.4. Loading this "
+                "format is deprecated and will be removed in a future version. "
+                "Please re-save the object to store it in the current format.",
+                category=FutureWarning,
+            )
+
             import tempfile
             import base64
             from os import path

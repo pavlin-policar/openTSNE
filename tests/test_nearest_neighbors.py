@@ -3,6 +3,7 @@ import pickle
 import platform
 import tempfile
 import unittest
+import warnings
 from os import path
 from unittest.mock import patch, MagicMock
 
@@ -292,7 +293,9 @@ class TestHNSW(KNNIndexTestMixin, unittest.TestCase):
                 knn_index = nearest_neighbors.HNSW(self.iris, k=30, metric=metric)
                 knn_index.build()
 
-                loaded_obj = pickle.loads(pickle.dumps(knn_index))
+                with warnings.catch_warnings():
+                    warnings.simplefilter("error")
+                    loaded_obj = pickle.loads(pickle.dumps(knn_index))
                 self.assertEqual(loaded_obj.metric, metric)
 
                 load_idx, load_dist = loaded_obj.query(self.iris, 15)
@@ -334,7 +337,8 @@ class TestHNSW(KNNIndexTestMixin, unittest.TestCase):
 
         # Unpickling creates the instance without calling `__init__`
         loaded_obj = nearest_neighbors.HNSW.__new__(nearest_neighbors.HNSW)
-        loaded_obj.__setstate__(self._base64_encoded_state(knn_index))
+        with self.assertWarns(FutureWarning):
+            loaded_obj.__setstate__(self._base64_encoded_state(knn_index))
         self.assertIsInstance(loaded_obj.index, hnswlib.Index)
         self.assertEqual(loaded_obj.index.space, "cosine")
 
