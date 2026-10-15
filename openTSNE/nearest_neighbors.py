@@ -571,6 +571,23 @@ class NNDescent(KNNIndex):
 
 
 class HNSW(KNNIndex):
+    """Approximate nearest neighbor search using hierarchical navigable small
+    world graphs, as implemented in hnswlib.
+
+    Distances are returned on the scale of the metric: ``euclidean`` and
+    ``l2`` give euclidean distances, ``cosine`` gives one minus the cosine
+    similarity, and ``ip`` and ``dot`` give one minus the inner product. The
+    inner-product distances are negative whenever the inner product exceeds
+    one, so they are only meaningful as t-SNE input for normalized data.
+
+    The ``M`` and ``ef_construction`` entries of ``knn_kwargs`` are passed to
+    ``hnswlib.Index.init_index``. ``ef`` sets the size of the candidate list
+    searched for each query point, trading speed for recall; it defaults to
+    ``max(2 * k, 100)``. Building the index with more than one thread is not
+    deterministic, so results are reproducible with a fixed ``random_state``
+    only when ``n_jobs=1``.
+
+    """
     VALID_METRICS = [
         "cosine",
         "euclidean",

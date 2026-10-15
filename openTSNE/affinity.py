@@ -101,6 +101,9 @@ class PerplexityBasedNN(Affinities):
         supports the given metric. Otherwise, it uses Pynndescent. ``auto`` uses
         exact nearest neighbors for N<1000 and the same heuristic as ``approx``
         for N>=1000.
+        ``hnsw`` uses hnswlib, which must be installed separately
+        (``pip install hnswlib``) and supports the ``euclidean``, ``l2``,
+        ``cosine``, ``dot``, and ``ip`` metrics.
 
     metric: Union[str, Callable]
         The metric to be used to compute affinities between points in the
@@ -542,6 +545,9 @@ class FixedSigmaNN(Affinities):
         supports the given metric. Otherwise, it uses Pynndescent. ``auto`` uses
         exact nearest neighbors for N<1000 and the same heuristic as ``approx``
         for N>=1000.
+        ``hnsw`` uses hnswlib, which must be installed separately
+        (``pip install hnswlib``) and supports the ``euclidean``, ``l2``,
+        ``cosine``, ``dot``, and ``ip`` metrics.
 
     metric: Union[str, Callable]
         The metric to be used to compute affinities between points in the
@@ -766,6 +772,9 @@ class MultiscaleMixture(Affinities):
         supports the given metric. Otherwise, it uses Pynndescent. ``auto`` uses
         exact nearest neighbors for N<1000 and the same heuristic as ``approx``
         for N>=1000.
+        ``hnsw`` uses hnswlib, which must be installed separately
+        (``pip install hnswlib``) and supports the ``euclidean``, ``l2``,
+        ``cosine``, ``dot``, and ``ip`` metrics.
 
     metric: Union[str, Callable]
         The metric to be used to compute affinities between points in the
@@ -1071,6 +1080,9 @@ class Multiscale(MultiscaleMixture):
         supports the given metric. Otherwise, it uses Pynndescent. ``auto`` uses
         exact nearest neighbors for N<1000 and the same heuristic as ``approx``
         for N>=1000.
+        ``hnsw`` uses hnswlib, which must be installed separately
+        (``pip install hnswlib``) and supports the ``euclidean``, ``l2``,
+        ``cosine``, ``dot``, and ``ip`` metrics.
 
     metric: Union[str, Callable]
         The metric to be used to compute affinities between points in the
@@ -1157,6 +1169,9 @@ class Uniform(Affinities):
         supports the given metric. Otherwise, it uses Pynndescent. ``auto`` uses
         exact nearest neighbors for N<1000 and the same heuristic as ``approx``
         for N>=1000.
+        ``hnsw`` uses hnswlib, which must be installed separately
+        (``pip install hnswlib``) and supports the ``euclidean``, ``l2``,
+        ``cosine``, ``dot``, and ``ip`` metrics.
 
     metric: Union[str, Callable]
         The metric to be used to compute affinities between points in the
