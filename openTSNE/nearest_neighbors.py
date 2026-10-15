@@ -628,13 +628,22 @@ class HNSW(KNNIndex):
             **knn_kwargs_,
         )
 
+        num_threads = self._num_threads()
+        if self.random_state is not None and num_threads > 1:
+            warnings.warn(
+                "Building an HNSW index with multiple threads is not "
+                "deterministic, so the nearest neighbors may differ between "
+                "runs even with a fixed `random_state`. Set `n_jobs=1` for "
+                "reproducible results."
+            )
+
         # Build index tree from data
-        self.index.add_items(data, num_threads=self.n_jobs)
+        self.index.add_items(data, num_threads=num_threads)
 
         self._set_ef(k)
 
         # Query for kNN
-        indices, distances = self.index.knn_query(data, k=k + 1, num_threads=self.n_jobs)
+        indices, distances = self.index.knn_query(data, k=k + 1, num_threads=num_threads)
 
         # Stop timer
         timer.__exit__()
@@ -663,13 +672,23 @@ class HNSW(KNNIndex):
         self._set_ef(k)
 
         # Query for kNN
-        indices, distances = self.index.knn_query(query, k=k, num_threads=self.n_jobs)
+        indices, distances = self.index.knn_query(
+            query, k=k, num_threads=self._num_threads()
+        )
 
         # Stop timer
         timer.__exit__()
 
         # return indices and distances
         return self._convert_output(indices, distances)
+
+    def _num_threads(self):
+        """Resolve `n_jobs` following the scikit-learn convention, ``-1``
+        meaning all processors, ``-2`` all but one, etc. hnswlib itself treats
+        every non-positive value as all processors."""
+        from joblib import effective_n_jobs
+
+        return effective_n_jobs(self.n_jobs)
 
     def _set_ef(self, k):
         """Set the size of the candidate list searched for each query point.

@@ -467,6 +467,35 @@ class TestHNSW(KNNIndexTestMixin, unittest.TestCase):
         knn_index.query(self.x2, 15)
         self.assertEqual(knn_index.index.ef, 50)
 
+    def test_negative_n_jobs_follows_sklearn_convention(self):
+        import joblib
+
+        n_cores = joblib.cpu_count()
+        for n_jobs, num_threads in [(-1, n_cores), (-2, max(n_cores - 1, 1))]:
+            with self.subTest(n_jobs=n_jobs):
+                knn_index = nearest_neighbors.HNSW(self.x1, 5, n_jobs=n_jobs)
+                knn_index.build()
+                knn_index.index = MagicMock(wraps=knn_index.index)
+                knn_index.query(self.x2, 5)
+                check_mock_called_with_kwargs(
+                    knn_index.index.knn_query, dict(num_threads=num_threads)
+                )
+
+    def test_warns_if_random_state_with_multiple_threads(self):
+        knn_index = nearest_neighbors.HNSW(self.x1, 5, n_jobs=2, random_state=1)
+        with self.assertWarnsRegex(UserWarning, "not deterministic"):
+            knn_index.build()
+
+    def test_no_warning_if_random_state_with_single_thread(self):
+        for n_jobs, random_state in [(1, 1), (2, None)]:
+            with self.subTest(n_jobs=n_jobs, random_state=random_state):
+                knn_index = nearest_neighbors.HNSW(
+                    self.x1, 5, n_jobs=n_jobs, random_state=random_state
+                )
+                with warnings.catch_warnings():
+                    warnings.simplefilter("error")
+                    knn_index.build()
+
     def test_knn_kwargs(self):
         with patch(
             "hnswlib.Index",
