@@ -11,6 +11,29 @@ from openTSNE import utils
 log = logging.getLogger(__name__)
 
 
+def _exclude_self(indices, distances):
+    """Remove each point from its own list of ``k + 1`` nearest neighbors.
+
+    Row ``i`` of ``indices`` and ``distances`` holds the neighbors of point
+    ``i``. The point itself need not be the first result: duplicate points
+    are at distance zero, and under the inner product a point need not be its
+    own nearest neighbor. Rows that do not contain the point itself drop their
+    furthest result.
+
+    Returns
+    -------
+    indices: np.ndarray
+    distances: np.ndarray
+        Both of shape ``(n_samples, k)``.
+
+    """
+    n_samples, k = indices.shape[0], indices.shape[1] - 1
+    is_self = indices == np.arange(n_samples)[:, None]
+    is_self[~is_self.any(axis=1), -1] = True
+    keep = ~is_self
+    return indices[keep].reshape(n_samples, k), distances[keep].reshape(n_samples, k)
+
+
 class KNNIndex:
     VALID_METRICS = []
     supports_callable = False
@@ -271,17 +294,15 @@ class Annoy(KNNIndex):
 
         self.index.build(n_jobs=self.n_jobs, **knn_kwargs_)
 
-        # Return the nearest neighbors in the training set
-        distances = np.zeros((N, k))
-        indices = np.zeros((N, k)).astype(int)
+        # Return the nearest neighbors in the training set, which include the
+        # query points themselves
+        distances = np.zeros((N, k + 1))
+        indices = np.zeros((N, k + 1)).astype(int)
 
         def getnns(i):
-            # Annoy returns the query point itself as the first element
-            indices_i, distances_i = self.index.get_nns_by_item(
+            indices[i], distances[i] = self.index.get_nns_by_item(
                 i, k + 1, include_distances=True
             )
-            indices[i] = indices_i[1:]
-            distances[i] = distances_i[1:]
 
         if self.n_jobs == 1:
             for i in range(N):
@@ -295,7 +316,7 @@ class Annoy(KNNIndex):
 
         timer.__exit__()
 
-        return indices, self._convert_distances(distances)
+        return _exclude_self(indices, self._convert_distances(distances))
 
     def query(self, query, k):
         timer = utils.Timer(
@@ -678,18 +699,7 @@ class HNSW(KNNIndex):
         # Stop timer
         timer.__exit__()
 
-        indices, distances = self._convert_output(indices, distances)
-
-        # Remove each point from its own neighbor list. The point itself need
-        # not be the first result: duplicate points are at distance zero, and
-        # under the inner product a point need not be its own nearest neighbor.
-        # Rows that do not contain the point itself drop their furthest result.
-        n_samples = data.shape[0]
-        is_self = indices == np.arange(n_samples)[:, None]
-        is_self[~is_self.any(axis=1), -1] = True
-        keep = ~is_self
-
-        return indices[keep].reshape(n_samples, k), distances[keep].reshape(n_samples, k)
+        return _exclude_self(*self._convert_output(indices, distances))
 
     def query(self, query, k):
         timer = utils.Timer(

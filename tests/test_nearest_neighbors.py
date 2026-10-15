@@ -196,6 +196,25 @@ class TestAnnoy(KNNIndexTestMixin, unittest.TestCase):
             # The most similar neighbors come first
             self.assertTrue(np.all(np.diff(dist, axis=1) >= -1e-6))
 
+    def test_build_excludes_point_itself_with_duplicate_points(self):
+        x = np.vstack([self.x1, self.x1])
+        n = self.x1.shape[0]
+        knn_index = nearest_neighbors.Annoy(x, 5, "euclidean")
+        indices, distances = knn_index.build()
+
+        self.assertFalse(np.any(indices == np.arange(2 * n)[:, None]))
+        # Each point's duplicate is its nearest neighbor, at distance zero
+        twins = np.concatenate([np.arange(n, 2 * n), np.arange(n)])
+        np.testing.assert_array_equal(indices[:, 0], twins)
+        np.testing.assert_allclose(distances[:, 0], 0, atol=1e-3)
+
+    def test_build_excludes_point_itself_with_dot(self):
+        knn_index = nearest_neighbors.Annoy(self.x1, 15, "dot")
+        indices, distances = knn_index.build()
+
+        self.assertEqual(indices.shape, (self.x1.shape[0], 15))
+        self.assertFalse(np.any(indices == np.arange(self.x1.shape[0])[:, None]))
+
     def test_knn_kwargs(self):
         with patch(
             "openTSNE.dependencies.annoy.AnnoyIndex",
