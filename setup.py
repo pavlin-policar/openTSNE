@@ -291,7 +291,7 @@ setup(
         "scipy",
     ],
     extras_require={
-        "hnsw": "hnswlib~=0.4.0",
+        "hnsw": "hnswlib>=0.5.0",
         "pynndescent": "pynndescent~=0.5.0",
     },
     ext_modules=extensions,

@@ -578,6 +578,13 @@ class HNSW(KNNIndex):
         "l2",
         "ip",
     ]
+    HNSW_SPACES = {
+        "cosine": "cosine",
+        "dot": "ip",
+        "euclidean": "l2",
+        "ip": "ip",
+        "l2": "l2",
+    }
 
     def __init__(self, *args, **kwargs):
         try:
@@ -601,13 +608,7 @@ class HNSW(KNNIndex):
 
         from hnswlib import Index
 
-        hnsw_space = {
-            "cosine": "cosine",
-            "dot": "ip",
-            "euclidean": "l2",
-            "ip": "ip",
-            "l2": "l2",
-        }[self.metric]
+        hnsw_space = self.HNSW_SPACES[self.metric]
 
         random_state = check_random_state(self.random_state)
         random_seed = random_state.randint(np.iinfo(np.int32).max)
@@ -660,54 +661,30 @@ class HNSW(KNNIndex):
         # return indices and distances
         return indices, distances
 
-    def __getstate__(self):
-        import tempfile
-        import base64
-        from os import path
-
-        d = dict(self.__dict__)
-        # If the index is not None, we want to save the encoded index
-        if self.index is not None:
-            with tempfile.TemporaryDirectory() as dirname:
-                self.index.save_index(path.join(dirname, "tmp.bin"))
-
-                with open(path.join(dirname, "tmp.bin"), "rb") as f:
-                    b64_index = base64.b64encode(f.read())
-
-            d["b64_index"] = b64_index
-            del d["index"]
-
-        return d
-
     def __setstate__(self, state):
-        import tempfile
-        import base64
-        from os import path
-
-        from hnswlib import Index
-
-        # If a base64 index is given, we have to load the index
+        # `hnswlib.Index` pickles natively, so `index` is part of the state.
+        # Pickles written by openTSNE<=1.0.4 instead store the index as a
+        # base64-encoded hnswlib index file under `b64_index`.
         if "b64_index" in state:
+            import tempfile
+            import base64
+            from os import path
+
+            from hnswlib import Index
+
             assert "index" not in state
-            b64_index = state["b64_index"]
-            del state["b64_index"]
+            state = dict(state)
+            b64_index = state.pop("b64_index")
 
-            hnsw_metric = state["metric"]
-            hnsw_aliases = {
-                "cosine": "cosine",
-                "dot": "ip",
-                "euclidean": "l2",
-                "ip": "ip",
-                "l2": "l2",
-            }
-            if hnsw_metric in hnsw_aliases:
-                hnsw_metric = hnsw_aliases[hnsw_metric]
-
-            self.index = Index(space=hnsw_metric, dim=state["data"].data.shape[1])
+            index = Index(
+                space=self.HNSW_SPACES[state["metric"]],
+                dim=state["data"].shape[1],
+            )
             with tempfile.TemporaryDirectory() as dirname:
                 with open(path.join(dirname, "tmp.bin"), "wb") as f:
                     f.write(base64.b64decode(b64_index))
-                self.index.load_index(path.join(dirname, "tmp.bin"))
+                index.load_index(path.join(dirname, "tmp.bin"))
+            state["index"] = index
 
         self.__dict__.update(state)
 
