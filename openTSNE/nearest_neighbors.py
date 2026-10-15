@@ -618,6 +618,8 @@ class HNSW(KNNIndex):
         knn_kwargs_ = dict(ef_construction=200, M=16)
         if self.knn_kwargs is not None:
             knn_kwargs_.update(self.knn_kwargs)
+        # `ef` is a search-time parameter, set in `_set_ef`
+        knn_kwargs_.pop("ef", None)
 
         # Initialize HNSW Index
         self.index.init_index(
@@ -629,8 +631,7 @@ class HNSW(KNNIndex):
         # Build index tree from data
         self.index.add_items(data, num_threads=self.n_jobs)
 
-        # Set ef parameter for (ideal) precision/recall
-        self.index.set_ef(min(2 * k, self.index.get_current_count()))
+        self._set_ef(k)
 
         # Query for kNN
         indices, distances = self.index.knn_query(data, k=k + 1, num_threads=self.n_jobs)
@@ -659,8 +660,7 @@ class HNSW(KNNIndex):
         )
         timer.__enter__()
 
-        # Set ef parameter for (ideal) precision/recall
-        self.index.set_ef(min(2 * k, self.index.get_current_count()))
+        self._set_ef(k)
 
         # Query for kNN
         indices, distances = self.index.knn_query(query, k=k, num_threads=self.n_jobs)
@@ -670,6 +670,21 @@ class HNSW(KNNIndex):
 
         # return indices and distances
         return self._convert_output(indices, distances)
+
+    def _set_ef(self, k):
+        """Set the size of the candidate list searched for each query point.
+
+        Larger values give higher recall at the cost of slower queries. The
+        default, ``max(2 * k, 100)``, can be overridden through the ``ef`` key
+        of ``knn_kwargs``. The lower bound keeps recall high for small ``k``,
+        where a candidate list of ``2 * k`` misses many true neighbors.
+        """
+        ef = None
+        if self.knn_kwargs is not None:
+            ef = self.knn_kwargs.get("ef")
+        if ef is None:
+            ef = max(2 * k, 100)
+        self.index.set_ef(min(ef, self.index.get_current_count()))
 
     def _convert_output(self, indices, distances):
         """Convert hnswlib results to the conventions of the other indices:

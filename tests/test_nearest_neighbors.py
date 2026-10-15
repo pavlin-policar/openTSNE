@@ -445,6 +445,28 @@ class TestHNSW(KNNIndexTestMixin, unittest.TestCase):
                     np.any(indices == np.arange(self.x1.shape[0])[:, None])
                 )
 
+    def test_default_ef(self):
+        knn_index = nearest_neighbors.HNSW(self.x1, 5, "euclidean")
+        knn_index.build()
+        self.assertEqual(knn_index.index.ef, 100)
+
+        knn_index.query(self.x2, 60)
+        self.assertEqual(knn_index.index.ef, 120)
+
+        # `ef` cannot exceed the number of indexed points
+        knn_index.query(self.x2, 90)
+        self.assertEqual(knn_index.index.ef, self.x1.shape[0])
+
+    def test_ef_from_knn_kwargs(self):
+        knn_index = nearest_neighbors.HNSW(
+            self.x1, 5, "euclidean", knn_kwargs=dict(ef=50)
+        )
+        knn_index.build()
+        self.assertEqual(knn_index.index.ef, 50)
+
+        knn_index.query(self.x2, 15)
+        self.assertEqual(knn_index.index.ef, 50)
+
     def test_knn_kwargs(self):
         with patch(
             "hnswlib.Index",
