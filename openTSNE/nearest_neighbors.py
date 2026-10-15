@@ -587,7 +587,8 @@ class NNDescent(KNNIndex):
 
         timer.__exit__()
 
-        return indices[:, 1:], distances[:, 1:]
+        # pynndescent returns float32 distances; the other indices return float64
+        return indices[:, 1:], distances[:, 1:].astype(np.float64)
 
     def query(self, query, k):
         timer = utils.Timer(
@@ -601,7 +602,7 @@ class NNDescent(KNNIndex):
 
         timer.__exit__()
 
-        return indices, distances
+        return indices, distances.astype(np.float64)
 
 
 class HNSW(KNNIndex):
