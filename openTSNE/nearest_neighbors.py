@@ -295,7 +295,7 @@ class Annoy(KNNIndex):
 
         timer.__exit__()
 
-        return indices, distances
+        return indices, self._convert_distances(distances)
 
     def query(self, query, k):
         timer = utils.Timer(
@@ -326,7 +326,15 @@ class Annoy(KNNIndex):
 
         timer.__exit__()
 
-        return indices, distances
+        return indices, self._convert_distances(distances)
+
+    def _convert_distances(self, distances):
+        """Convert distances reported by Annoy to the scale of the metric."""
+        if self.metric == "cosine":
+            # Annoy's angular distance is the euclidean distance between the
+            # normalized vectors, sqrt(2 - 2 cos)
+            return distances ** 2 / 2
+        return distances
 
     def __getstate__(self):
         import tempfile

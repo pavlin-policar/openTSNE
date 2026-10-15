@@ -164,6 +164,20 @@ class TestAnnoy(KNNIndexTestMixin, unittest.TestCase):
         np.testing.assert_array_equal(load_idx, orig_idx)
         np.testing.assert_array_almost_equal(load_dist, orig_dist)
 
+    def test_returns_cosine_distances(self):
+        knn_index = nearest_neighbors.Annoy(self.x1, 15, "cosine")
+        indices, distances = knn_index.build()
+        query_indices, query_distances = knn_index.query(self.x2, 15)
+
+        for x, idx, dist in [
+            (self.x1, indices, distances),
+            (self.x2, query_indices, query_distances),
+        ]:
+            true_distances = np.vstack(
+                [cdist(xi[None, :], self.x1[i], "cosine") for xi, i in zip(x, idx)]
+            )
+            np.testing.assert_allclose(dist, true_distances, rtol=1e-4, atol=1e-6)
+
     def test_knn_kwargs(self):
         with patch(
             "openTSNE.dependencies.annoy.AnnoyIndex",
