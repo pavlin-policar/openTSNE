@@ -139,12 +139,6 @@ class PerplexityBasedNN(Affinities):
         can be specified. This option will ignore any KNN-related parameters.
         When ``knn_index`` is specified, ``data`` must be set to None.
 
-    gamma: float
-        Exponent of a row-wise power transform applied to the conditional
-        probabilities before symmetrization. ``gamma=1`` (default) gives
-        standard t-SNE affinities, ``0 <= gamma < 1`` smooths each row, and
-        ``gamma > 1`` sharpens it.
-
     """
 
     def __init__(
@@ -161,7 +155,6 @@ class PerplexityBasedNN(Affinities):
         k_neighbors="auto",
         knn_kwargs=None,
         knn_index=None,
-        gamma=1.0,
     ):
         # This can't work if neither data nor the knn index are specified
         if data is None and knn_index is None:
@@ -216,7 +209,6 @@ class PerplexityBasedNN(Affinities):
                 [effective_perplexity],
                 symmetrize=symmetrize,
                 n_jobs=n_jobs,
-                gamma=gamma,
             )
 
         self.perplexity = perplexity
@@ -225,7 +217,6 @@ class PerplexityBasedNN(Affinities):
         self.n_jobs = n_jobs
         self.verbose = verbose
         self.knn_kwargs = knn_kwargs
-        self.gamma = gamma
 
     def set_perplexity(self, new_perplexity):
         """Change the perplexity of the affinity matrix.
@@ -281,7 +272,6 @@ class PerplexityBasedNN(Affinities):
                 [self.effective_perplexity_],
                 symmetrize=self.symmetrize,
                 n_jobs=self.n_jobs,
-                gamma=self.gamma,
             )
 
     def to_new(
@@ -351,11 +341,354 @@ class PerplexityBasedNN(Affinities):
                 normalization="point-wise",
                 n_reference_samples=self.n_samples,
                 n_jobs=self.n_jobs,
-                gamma=self.gamma,
             )
 
         if return_distances:
             return P, neighbors, distances
+
+        return P
+
+    @staticmethod
+    def check_perplexity(perplexity, k_neighbors):
+        if perplexity <= 0:
+            raise ValueError("Perplexity must be >=0. %.2f given" % perplexity)
+
+        if perplexity > k_neighbors:
+            old_perplexity, perplexity = perplexity, k_neighbors / 3
+            log.warning(
+                "Perplexity value %d is too high. Using perplexity %.2f instead"
+                % (old_perplexity, perplexity)
+            )
+
+        return perplexity
+
+
+class GammaSmoothedPerplexityNN(Affinities):
+    """Compute Gaussian affinities using nearest neighbors, with row-wise smoothing.
+
+    This is the standard perplexity-based affinity of :class:`PerplexityBasedNN`,
+    followed by a row-wise power transform. Each row of the conditional
+    probabilities :math:`p_{j|i}` is raised to the power :math:`\\gamma` and
+    renormalized, before the matrix is symmetrized. With ``gamma=1`` the result
+    is the same as :class:`PerplexityBasedNN`.
+
+    Please see the :ref:`choosing-an-affinity-class` guide for more information.
+
+    Parameters
+    ----------
+    data: np.ndarray
+        The data matrix.
+
+    perplexity: float
+        Perplexity can be thought of as the continuous :math:`k` number of
+        nearest neighbors, for which t-SNE will attempt to preserve distances.
+
+    method: str
+        Specifies the nearest neighbor method to use. Can be ``exact``, ``annoy``,
+        ``pynndescent``, ``hnsw``, ``approx``, or ``auto`` (default). ``approx``
+        uses Annoy if the input data matrix is not a sparse object and if Annoy
+        supports the given metric. Otherwise, it uses Pynndescent. ``auto`` uses
+        exact nearest neighbors for N<1000 and the same heuristic as ``approx``
+        for N>=1000.
+
+    metric: Union[str, Callable]
+        The metric to be used to compute affinities between points in the
+        original space.
+
+    metric_params: dict
+        Additional keyword arguments for the metric function.
+
+    symmetrize: bool
+        Symmetrize the affinity matrix. During standard t-SNE optimization, the
+        affinities are symmetrized. However, when embedding new data points into
+        existing embeddings, symmetrization is not performed.
+
+    n_jobs: int
+        The number of threads to use while running t-SNE. This follows the
+        scikit-learn convention, ``-1`` meaning all processors, ``-2`` meaning
+        all but one, etc.
+
+    random_state: Union[int, RandomState]
+        If the value is an int, random_state is the seed used by the random
+        number generator. If the value is a RandomState instance, then it will
+        be used as the random number generator. If the value is None, the random
+        number generator is the RandomState instance used by `np.random`.
+
+    verbose: bool
+
+    k_neighbors: int or ``auto``
+        The number of neighbors to use in the kNN graph. If ``auto`` (default),
+        it is set to three times the perplexity.
+
+    knn_kwargs: Optional[None, dict]
+        Optional keyword arguments that will be passed to the ``knn_index``.
+
+    knn_index: Optional[nearest_neighbors.KNNIndex]
+        Optionally, a precomputed ``openTSNE.nearest_neighbors.KNNIndex`` object
+        can be specified. This option will ignore any KNN-related parameters.
+        When ``knn_index`` is specified, ``data`` must be set to None.
+
+    gamma: float
+        The exponent of the row-wise power transform. The default, ``1``, gives
+        the standard t-SNE affinities. Values between 0 and 1 smooth each row,
+        moving probability mass from the nearest neighbors to farther ones.
+        Values above 1 make each row sharper. The value cannot be negative.
+        With ``gamma=0``, all neighbors get the same weight. For any ``gamma``
+        above 0, the neighbors and their order stay the same.
+
+    """
+
+    def __init__(
+        self,
+        data=None,
+        perplexity=30,
+        method="auto",
+        metric="euclidean",
+        metric_params=None,
+        symmetrize=True,
+        n_jobs=1,
+        random_state=None,
+        verbose=False,
+        k_neighbors="auto",
+        knn_kwargs=None,
+        knn_index=None,
+        gamma=1.0,
+    ):
+        if gamma < 0:
+            raise ValueError(f"`gamma` must be non-negative, got {gamma}.")
+
+        # This can't work if neither data nor the knn index are specified
+        if data is None and knn_index is None:
+            raise ValueError(
+                "At least one of the parameters `data` or `knn_index` must be specified!"
+            )
+        # This can't work if both data and the knn index are specified
+        if data is not None and knn_index is not None:
+            raise ValueError(
+                "Both `data` or `knn_index` were specified! Please pass only one."
+            )
+
+        # Find the nearest neighbors
+        if knn_index is None:
+            n_samples = data.shape[0]
+
+            if k_neighbors == "auto":
+                _k_neighbors = min(n_samples - 1, int(3 * perplexity))
+            else:
+                _k_neighbors = k_neighbors
+
+            effective_perplexity = self.check_perplexity(perplexity, _k_neighbors)
+            if _k_neighbors > int(3 * effective_perplexity):
+                log.warning(
+                    "The k_neighbors value is over 3 times larger than the perplexity value. "
+                    "This may result in an unnecessary slowdown."
+                )
+
+            self.knn_index = get_knn_index(
+                data,
+                method,
+                k=_k_neighbors,
+                metric=metric,
+                metric_params=metric_params,
+                n_jobs=n_jobs,
+                random_state=random_state,
+                verbose=verbose,
+                knn_kwargs=knn_kwargs,
+            )
+
+        else:
+            self.knn_index = knn_index
+            effective_perplexity = self.check_perplexity(perplexity, self.knn_index.k)
+            log.info("KNN index provided. Ignoring KNN-related parameters.")
+
+        self.__neighbors, self.__distances = self.knn_index.build()
+
+        with utils.Timer("Calculating affinity matrix...", verbose):
+            self.P = self._calculate_P(
+                self.__neighbors,
+                self.__distances,
+                [effective_perplexity],
+                gamma=gamma,
+                symmetrize=symmetrize,
+                n_jobs=n_jobs,
+            )
+
+        self.perplexity = perplexity
+        self.effective_perplexity_ = effective_perplexity
+        self.symmetrize = symmetrize
+        self.n_jobs = n_jobs
+        self.verbose = verbose
+        self.knn_kwargs = knn_kwargs
+        self.gamma = gamma
+
+    def set_perplexity(self, new_perplexity):
+        """Change the perplexity of the affinity matrix.
+
+        Note that we only allow setting the perplexity to a value not larger
+        than the number of neighbors used for the original perplexity. This
+        restriction exists because setting a higher perplexity value requires
+        recomputing all the nearest neighbors, which can take a long time.
+        To avoid potential confusion as to why execution time is slow, this
+        is not allowed. If you would like to increase the perplexity above
+        that value, simply create a new instance.
+
+        Parameters
+        ----------
+        new_perplexity: float
+            The new perplexity.
+
+        """
+        # If the value hasn't changed, there's nothing to do
+        if new_perplexity == self.perplexity:
+            return
+        # Verify that the perplexity isn't negative
+        effective_perplexity = self.check_perplexity(new_perplexity, np.inf)
+        # Verify that the perplexity isn't too large for the kNN graph
+        if effective_perplexity > self.__neighbors.shape[1]:
+            raise RuntimeError(
+                "The desired perplexity `%.2f` is larger than the kNN graph "
+                "allows. This would need to recompute the nearest neighbors, "
+                "which is not efficient. Please create a new `%s` instance "
+                "with the increased perplexity."
+                % (effective_perplexity, self.__class__.__name__)
+            )
+        # Warn if the perplexity is larger than the heuristic
+        if 3 * effective_perplexity > self.__neighbors.shape[1]:
+            log.warning(
+                "The new perplexity is quite close to the computed number of "
+                "nearest neighbors. The results may be unexpected. Consider "
+                "creating a new `%s` instance with the increased perplexity."
+                % self.__class__.__name__
+            )
+
+        # Recompute the affinity matrix
+        self.perplexity = new_perplexity
+        self.effective_perplexity_ = effective_perplexity
+        k_neighbors = int(3 * new_perplexity)
+
+        with utils.Timer(
+            "Perplexity changed. Recomputing affinity matrix...", self.verbose
+        ):
+            self.P = self._calculate_P(
+                self.__neighbors[:, :k_neighbors],
+                self.__distances[:, :k_neighbors],
+                [self.effective_perplexity_],
+                gamma=self.gamma,
+                symmetrize=self.symmetrize,
+                n_jobs=self.n_jobs,
+            )
+
+    def to_new(
+        self, data, perplexity=None, return_distances=False, k_neighbors="auto"
+    ):
+        """Compute the affinities of new samples to the initial samples.
+
+        This is necessary for embedding new data points into an existing
+        embedding.
+
+        Please see the :ref:`parameter-guide` for more information.
+
+        Parameters
+        ----------
+        data: np.ndarray
+            The data points to be added to the existing embedding.
+
+        perplexity: float
+            Perplexity can be thought of as the continuous :math:`k` number of
+            nearest neighbors, for which t-SNE will attempt to preserve
+            distances.
+
+        return_distances: bool
+            If needed, the function can return the indices of the nearest
+            neighbors and their corresponding distances.
+
+        k_neighbors: int or ``auto``
+            The number of neighbors to query kNN graph for. If ``auto``
+            (default), it is set to three times the perplexity.
+
+        Returns
+        -------
+        P: array_like
+            An :math:`N \\times M` affinity matrix expressing interactions
+            between :math:`N` new data points the initial :math:`M` data
+            samples.
+
+        indices: np.ndarray
+            Returned if ``return_distances=True``. The indices of the :math:`k`
+            nearest neighbors in the existing embedding for every new data
+            point.
+
+        distances: np.ndarray
+            Returned if ``return_distances=True``. The distances to the
+            :math:`k` nearest neighbors in the existing embedding for every new
+            data point.
+
+        """
+
+        perplexity = perplexity if perplexity is not None else self.perplexity
+
+        if k_neighbors == "auto":
+            _k_neighbors = min(self.n_samples, int(3 * perplexity))
+        else:
+            _k_neighbors = k_neighbors
+
+        effective_perplexity = self.check_perplexity(perplexity, _k_neighbors)
+
+        neighbors, distances = self.knn_index.query(data, _k_neighbors)
+
+        with utils.Timer("Calculating affinity matrix...", self.verbose):
+            P = self._calculate_P(
+                neighbors,
+                distances,
+                [effective_perplexity],
+                gamma=self.gamma,
+                symmetrize=False,
+                normalization="point-wise",
+                n_reference_samples=self.n_samples,
+                n_jobs=self.n_jobs,
+            )
+
+        if return_distances:
+            return P, neighbors, distances
+
+        return P
+
+    @staticmethod
+    def _calculate_P(
+        neighbors,
+        distances,
+        perplexities,
+        gamma=1.0,
+        symmetrize=True,
+        normalization="pair-wise",
+        n_reference_samples=None,
+        n_jobs=1,
+    ):
+        # Standard conditional probabilities, with each row summing to 1
+        P = joint_probabilities_nn(
+            neighbors,
+            distances,
+            perplexities,
+            symmetrize=False,
+            normalization="point-wise",
+            n_reference_samples=n_reference_samples,
+            n_jobs=n_jobs,
+        )
+
+        # Row-wise power transform: p_{j|i} -> p_{j|i}^gamma / sum_m p_{m|i}^gamma.
+        # It is monotonic, so rank order and sparsity are preserved.
+        if gamma != 1.0:
+            P.data = P.data**gamma
+            P = sp.diags(1 / np.asarray(P.sum(axis=1)).ravel()) @ P
+
+        # Symmetrize and normalize, as in the standard affinities
+        if symmetrize:
+            P = (P + P.T) / 2
+
+        if normalization == "pair-wise":
+            P /= np.sum(P)
+        elif normalization == "point-wise":
+            P = sp.diags(np.asarray(1 / P.sum(axis=1)).ravel()) @ P
 
         return P
 
@@ -447,7 +780,6 @@ def joint_probabilities_nn(
     normalization="pair-wise",
     n_reference_samples=None,
     n_jobs=1,
-    gamma=1.0,
 ):
     """Compute the conditional probability matrix P_{j|i}.
 
@@ -480,13 +812,6 @@ def joint_probabilities_nn(
         properly construct the sparse P matrix.
     n_jobs: int
         Number of threads.
-    gamma: float
-        Exponent of a row-wise power transform applied to the conditional
-        probabilities before symmetrization: each row is raised to the power
-        ``gamma`` and renormalized to sum to 1. ``gamma=1`` (default) leaves
-        the affinities unchanged, ``0 <= gamma < 1`` smooths each row, and
-        ``gamma > 1`` sharpens it. The transform is monotonic, so neighbor
-        support and rank order are preserved.
 
     Returns
     -------
@@ -500,9 +825,6 @@ def joint_probabilities_nn(
         "point-wise",
     ), f"Unrecognized normalization scheme `{normalization}`."
 
-    if gamma < 0:
-        raise ValueError(f"`gamma` must be non-negative, got {gamma}.")
-
     n_samples, k_neighbors = distances.shape
 
     if n_reference_samples is None:
@@ -515,13 +837,6 @@ def joint_probabilities_nn(
         num_threads=n_jobs,
     )
     conditional_P = np.asarray(conditional_P)
-
-    # Row-wise power transform: p_{j|i} -> p_{j|i}^gamma / sum_m p_{m|i}^gamma.
-    # It is monotonic, so rank order and sparsity are preserved. gamma=1 is the
-    # identity, so we skip the computation in that case.
-    if gamma != 1.0:
-        conditional_P = conditional_P**gamma
-        conditional_P /= conditional_P.sum(axis=1, keepdims=True)
 
     P = sp.csr_matrix(
         (

@@ -17,11 +17,13 @@ affinity.log.setLevel(logging.ERROR)
 Multiscale = partial(affinity.Multiscale, method="exact")
 MultiscaleMixture = partial(affinity.MultiscaleMixture, method="exact")
 PerplexityBasedNN = partial(affinity.PerplexityBasedNN, method="exact")
+GammaSmoothedPerplexityNN = partial(affinity.GammaSmoothedPerplexityNN, method="exact")
 FixedSigmaNN = partial(affinity.FixedSigmaNN, method="exact")
 Uniform = partial(affinity.Uniform, method="exact")
 
 AFFINITY_CLASSES = [
     ("PerplexityBasedNN", PerplexityBasedNN),
+    ("GammaSmoothedPerplexityNN", partial(GammaSmoothedPerplexityNN, gamma=0.7)),
     ("FixedSigmaNN", partial(FixedSigmaNN, sigma=1)),
     ("MultiscaleMixture", partial(MultiscaleMixture, perplexities=[10, 20])),
     ("Multiscale", partial(Multiscale, perplexities=[10, 20])),
@@ -101,22 +103,29 @@ class TestPerplexityBased(unittest.TestCase):
         self.assertAlmostEqual(np.sum(aff.P - aff.P.T), 0, delta=1e-16)
 
 
-class TestGammaSmoothing(unittest.TestCase):
+class TestGammaSmoothedPerplexityNN(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         rng = np.random.RandomState(42)
         cls.x = rng.normal(0, 1, (200, 5))
 
-    def test_gamma_one_is_identical_to_default(self):
-        default = PerplexityBasedNN(self.x, perplexity=20, random_state=0)
-        gamma_one = PerplexityBasedNN(self.x, perplexity=20, random_state=0, gamma=1.0)
-        self.assertEqual(abs(default.P - gamma_one.P).max(), 0)
+    def test_gamma_one_is_identical_to_perplexity_based(self):
+        standard = PerplexityBasedNN(self.x, perplexity=20, random_state=0)
+        gamma_one = GammaSmoothedPerplexityNN(
+            self.x, perplexity=20, random_state=0, gamma=1.0
+        )
+        self.assertEqual(gamma_one.P.nnz, standard.P.nnz)
+        np.testing.assert_allclose(
+            gamma_one.P.toarray(), standard.P.toarray(), rtol=0, atol=1e-12
+        )
 
     def test_gamma_preserves_support_and_normalization(self):
-        default = PerplexityBasedNN(self.x, perplexity=20, random_state=0)
+        standard = PerplexityBasedNN(self.x, perplexity=20, random_state=0)
         for gamma in [0.0, 0.5, 0.7, 1.5, 2.0]:
-            aff = PerplexityBasedNN(self.x, perplexity=20, random_state=0, gamma=gamma)
-            self.assertEqual(aff.P.nnz, default.P.nnz)
+            aff = GammaSmoothedPerplexityNN(
+                self.x, perplexity=20, random_state=0, gamma=gamma
+            )
+            self.assertEqual(aff.P.nnz, standard.P.nnz)
             self.assertAlmostEqual(aff.P.sum(), 1.0)
             self.assertTrue((aff.P.data >= 0).all())
 
@@ -125,37 +134,40 @@ class TestGammaSmoothing(unittest.TestCase):
         def max_row_mass(aff):
             return np.asarray(aff.P.max(axis=1).todense()).ravel().mean()
 
-        default = PerplexityBasedNN(self.x, perplexity=20, random_state=0)
-        smooth = PerplexityBasedNN(self.x, perplexity=20, random_state=0, gamma=0.5)
-        sharp = PerplexityBasedNN(self.x, perplexity=20, random_state=0, gamma=2.0)
-        self.assertLess(max_row_mass(smooth), max_row_mass(default))
-        self.assertGreater(max_row_mass(sharp), max_row_mass(default))
-
-    def test_gamma_zero_gives_uniform_conditional_rows(self):
-        aff = PerplexityBasedNN(self.x, perplexity=20, random_state=0)
-        k = aff.knn_index.k
-        neighbors, distances = aff.knn_index.build()
-        P = affinity.joint_probabilities_nn(
-            neighbors, distances, [20], symmetrize=False,
-            normalization="point-wise", gamma=0.0,
+        standard = PerplexityBasedNN(self.x, perplexity=20, random_state=0)
+        smooth = GammaSmoothedPerplexityNN(
+            self.x, perplexity=20, random_state=0, gamma=0.5
         )
-        np.testing.assert_allclose(P.data, 1.0 / k)
+        sharp = GammaSmoothedPerplexityNN(
+            self.x, perplexity=20, random_state=0, gamma=2.0
+        )
+        self.assertLess(max_row_mass(smooth), max_row_mass(standard))
+        self.assertGreater(max_row_mass(sharp), max_row_mass(standard))
+
+    def test_gamma_zero_gives_uniform_rows(self):
+        # Without symmetrization, every row is uniform over its k neighbors
+        aff = GammaSmoothedPerplexityNN(
+            self.x, perplexity=20, random_state=0, gamma=0.0, symmetrize=False
+        )
+        n = self.x.shape[0]
+        k = aff.knn_index.k
+        np.testing.assert_allclose(aff.P.data, 1.0 / (n * k))
 
     def test_gamma_equals_rescaled_gaussian_bandwidth(self):
-        """Eq. 6: p^gamma renormalized equals a Gaussian with precision gamma * beta_i."""
-        aff = PerplexityBasedNN(self.x, perplexity=20, random_state=0)
-        neighbors, distances = aff.knn_index.build()
+        """p^gamma renormalized equals a Gaussian with precision gamma * beta_i."""
         gamma = 0.7
-
-        kwargs = dict(symmetrize=False, normalization="point-wise")
-        P1 = affinity.joint_probabilities_nn(neighbors, distances, [20], **kwargs)
-        Pg = affinity.joint_probabilities_nn(
-            neighbors, distances, [20], gamma=gamma, **kwargs
+        n = self.x.shape[0]
+        standard = PerplexityBasedNN(
+            self.x, perplexity=20, random_state=0, symmetrize=False
         )
-        n, k = neighbors.shape
+        smooth = GammaSmoothedPerplexityNN(
+            self.x, perplexity=20, random_state=0, symmetrize=False, gamma=gamma
+        )
+        neighbors, distances = standard.knn_index.build()
         rows = np.arange(n)[:, None]
-        p1 = P1.toarray()[rows, neighbors]
-        pg = Pg.toarray()[rows, neighbors]
+        # Without symmetrization, P is the conditional matrix divided by n
+        p1 = n * standard.P.toarray()[rows, neighbors]
+        pg = n * smooth.P.toarray()[rows, neighbors]
 
         # Recover the precision beta_i of each row from the standard affinities,
         # using log p_ij = -beta_i * d_ij^2 + const
@@ -168,25 +180,29 @@ class TestGammaSmoothing(unittest.TestCase):
 
     def test_negative_gamma_raises(self):
         with self.assertRaises(ValueError):
-            PerplexityBasedNN(self.x, perplexity=20, gamma=-0.5)
+            GammaSmoothedPerplexityNN(self.x, perplexity=20, gamma=-0.5)
 
     def test_gamma_is_kept_by_set_perplexity(self):
-        aff = PerplexityBasedNN(self.x, perplexity=30, random_state=0, gamma=0.7)
+        aff = GammaSmoothedPerplexityNN(
+            self.x, perplexity=30, random_state=0, gamma=0.7
+        )
         aff.set_perplexity(20)
-        direct = PerplexityBasedNN(self.x, perplexity=20, random_state=0, gamma=0.7)
+        direct = GammaSmoothedPerplexityNN(
+            self.x, perplexity=20, random_state=0, gamma=0.7
+        )
         self.assertEqual(aff.gamma, 0.7)
         self.assertAlmostEqual(abs(aff.P - direct.P).max(), 0, places=6)
 
     def test_gamma_is_used_for_new_points(self):
-        aff_default = PerplexityBasedNN(self.x[:150], perplexity=20, random_state=0)
-        aff_smooth = PerplexityBasedNN(
+        standard = PerplexityBasedNN(self.x[:150], perplexity=20, random_state=0)
+        smooth = GammaSmoothedPerplexityNN(
             self.x[:150], perplexity=20, random_state=0, gamma=0.5
         )
-        new_default = aff_default.to_new(self.x[150:])
-        new_smooth = aff_smooth.to_new(self.x[150:])
+        new_standard = standard.to_new(self.x[150:])
+        new_smooth = smooth.to_new(self.x[150:])
         # Rows are normalized, and smoothing makes the largest entry smaller
         np.testing.assert_allclose(np.asarray(new_smooth.sum(axis=1)).ravel(), 1.0)
-        self.assertLess(new_smooth.max(axis=1).mean(), new_default.max(axis=1).mean())
+        self.assertLess(new_smooth.max(axis=1).mean(), new_standard.max(axis=1).mean())
 
 
 class TestMultiscale(unittest.TestCase):
