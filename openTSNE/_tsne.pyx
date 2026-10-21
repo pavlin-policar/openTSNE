@@ -14,7 +14,7 @@ from libc.stdlib cimport malloc, free
 from .quad_tree cimport QuadTree, Node, is_close
 from ._matrix_mul.matrix_mul cimport matrix_multiply_fft_1d, matrix_multiply_fft_2d
 
-
+from libc.math cimport sqrt, log, pow, exp, fabs, fmax, INFINITY  # Add pow and log
 cdef double EPSILON = np.finfo(np.float64).eps
 
 
@@ -111,12 +111,15 @@ cpdef tuple estimate_positive_gradient_nn(
     double dof=1,
     Py_ssize_t num_threads=1,
     bint should_eval_error=False,
+    bint compute_dof_grad=False,
 ):
     cdef:
         Py_ssize_t n_samples = gradient.shape[0]
         Py_ssize_t n_dims = gradient.shape[1]
         double * diff
         double d_ij, p_ij, q_ij, kl_divergence = 0, sum_P = 0
+        double alpha_grad_pos = 0.0
+        double log_s, frac
 
         Py_ssize_t i, j, k, d
 
@@ -126,7 +129,7 @@ cpdef tuple estimate_positive_gradient_nn(
     # Degrees of freedom cannot be negative
     if dof <= 0:
         dof = 1e-8
-
+    
     with nogil, parallel(num_threads=num_threads):
         # Use `malloc` here instead of `PyMem_Malloc` because we're in a
         # `nogil` clause and we won't be allocating much memory
@@ -157,6 +160,13 @@ cpdef tuple estimate_positive_gradient_nn(
                 for d in range(n_dims):
                     gradient[i, d] = gradient[i, d] + q_ij * p_ij * diff[d]
 
+                # Compute the alpha gradient positive term (only when needed
+                # for dof learning — this adds a log + divide per edge).
+                if compute_dof_grad:
+                    log_s = log(1.0 + d_ij / dof)
+                    frac = d_ij / (dof + d_ij)
+                    alpha_grad_pos += p_ij * (log_s - frac)
+
                 # Evaluating the following expressions can slow things down
                 # considerably if evaluated every iteration. Note that the q_ij
                 # is unnormalized, so we need to normalize once the sum of q_ij
@@ -168,13 +178,12 @@ cpdef tuple estimate_positive_gradient_nn(
                         kl_divergence += p_ij * log((p_ij / (q_ij ** dof + EPSILON)) + EPSILON)                    
                     else:
                         kl_divergence += p_ij * log((p_ij / (q_ij + EPSILON)) + EPSILON)
-
         free(diff)
 
-    return sum_P, kl_divergence
+    return sum_P, kl_divergence, alpha_grad_pos
 
 
-cpdef double estimate_negative_gradient_bh(
+cpdef tuple estimate_negative_gradient_bh(
     QuadTree tree,
     double[:, ::1] embedding,
     double[:, ::1] gradient,
@@ -182,21 +191,31 @@ cpdef double estimate_negative_gradient_bh(
     double dof=1,
     Py_ssize_t num_threads=1,
     bint pairwise_normalization=True,
+    bint compute_dof_grad=False,
 ):
     """Estimate the negative t-SNE gradient using the Barnes-Hut approximation.
-    
+
+    Returns
+    -------
+    sum_Q : double
+        The sum of all q_{ij} values.
+    alpha_grad_neg : double
+        The negative term of the gradient with respect to alpha. Zero unless
+        ``compute_dof_grad`` is set.
+
     Notes
     -----
     Changes the gradient inplace to avoid needless memory allocation. As
     such, this must be run before estimating the positive gradients, since
     the negative gradient must be normalized at the end with the sum of
     q_{ij}s.
-    
     """
     cdef:
         Py_ssize_t i, j, num_points = embedding.shape[0]
-        double sum_Q = 0
+        double sum_Q = 0.0
+        double alpha_grad_neg = 0.0
         double[::1] sum_Qi = np.zeros(num_points, dtype=float)
+        double[::1] alpha_grad_neg_i = np.zeros(num_points, dtype=float)
 
     if num_threads < 1:
         num_threads = 1
@@ -205,9 +224,17 @@ cpdef double estimate_negative_gradient_bh(
     # worker its own memory slot to write sum_Qs
     for i in prange(num_points, nogil=True, num_threads=num_threads, schedule="guided"):
         _estimate_negative_gradient_single(
-            &tree.root, &embedding[i, 0], &gradient[i, 0], &sum_Qi[i], theta, dof
+            &tree.root,
+            &embedding[i, 0],
+            &gradient[i, 0],
+            &sum_Qi[i],
+            theta,
+            dof,
+            &alpha_grad_neg_i[i],
+            compute_dof_grad,
         )
 
+    # Aggregate sum_Q from all points
     for i in range(num_points):
         sum_Q += sum_Qi[i]
 
@@ -219,16 +246,31 @@ cpdef double estimate_negative_gradient_bh(
             else:
                 gradient[i, j] /= sum_Qi[i] + EPSILON
 
-    return sum_Q
+    # The negative dof-gradient term must use the same normalization as the
+    # q_{ij}s above: a single global sum_Q for a self-embedding, but each
+    # point's own row sum when embedding against a fixed reference. Using the
+    # global sum_Q in the reference case leaves this term ~N times too small,
+    # so it cannot balance the (row-normalized) positive term and dof diverges.
+    if compute_dof_grad:
+        if pairwise_normalization:
+            for i in range(num_points):
+                alpha_grad_neg += alpha_grad_neg_i[i]
+            alpha_grad_neg /= sum_Q + EPSILON
+        else:
+            for i in range(num_points):
+                alpha_grad_neg += alpha_grad_neg_i[i] / (sum_Qi[i] + EPSILON)
+    return sum_Q, alpha_grad_neg
 
 
 cdef void _estimate_negative_gradient_single(
-    Node * node,
-    double * point,
-    double * gradient,
-    double * sum_Q,
+    Node *node,
+    double *point,
+    double *gradient,
+    double *sum_Q,
     double theta,
     double dof,
+    double *alpha_grad_neg,
+    bint compute_dof_grad,
 ) noexcept nogil:
     # Make sure that we spend no time on empty nodes or simple self-interactions
     if node.num_points == 0 or node.is_leaf and is_close(node, point, EPSILON):
@@ -236,43 +278,62 @@ cdef void _estimate_negative_gradient_single(
 
     cdef:
         double distance = EPSILON
-        double q_ij, tmp
+        double q_ij, qij_term, tmp
+        double grad_coeff
+        double log_s, frac
         Py_ssize_t d
 
     # Compute the squared euclidean distance in the embedding space from the
     # new point to the center of mass
     for d in range(node.n_dims):
         tmp = node.center_of_mass[d] - point[d]
-        distance += (tmp * tmp)
+        distance += tmp * tmp
 
     # Degrees of freedom cannot be negative
     if dof <= 0:
         dof = 1e-8
 
-    # Check whether we can use this node as a summary
+    # Check if the node can be used as a summary (Barnes-Hut criterion)
     if node.is_leaf or node.length / sqrt(distance) < theta:
         if dof != 1:
-            q_ij = 1 / (1 + distance / dof) ** dof
+            q_ij = 1 / pow(1.0 + distance / dof, dof)
         else:
             q_ij = 1 / (1 + distance)
 
-        sum_Q[0] += node.num_points * q_ij
+        qij_term = q_ij * node.num_points
 
-        # These two expressions are the same, but multiplication with itself is
-        # faster (dof=1: (1 + 1) / 1 = 2
+        sum_Q[0] += qij_term
+
+        # Compute the gradient contribution
         if dof != 1:
-            q_ij = q_ij ** ((dof + 1) / dof)
+            grad_coeff = qij_term * pow(q_ij, 1.0 / dof)
         else:
-            q_ij = q_ij * q_ij
+            grad_coeff = qij_term * q_ij
 
         for d in range(node.n_dims):
-            gradient[d] -= node.num_points * q_ij * (point[d] - node.center_of_mass[d])
+            gradient[d] -= grad_coeff * (point[d] - node.center_of_mass[d])
+
+        # Compute the negative alpha gradient contribution (only when needed
+        # for dof learning — this adds a log + divide per visited node).
+        if compute_dof_grad:
+            log_s = log(1.0 + distance / dof)
+            frac = distance / (dof + distance)
+            alpha_grad_neg[0] += qij_term * (log_s - frac)
 
         return
 
-    # Otherwise we have to look for summaries in the children
+    # Recurse into child nodes
     for d in range(1 << node.n_dims):
-        _estimate_negative_gradient_single(&node.children[d], point, gradient, sum_Q, theta, dof)
+        _estimate_negative_gradient_single(
+            &node.children[d],
+            point,
+            gradient,
+            sum_Q,
+            theta,
+            dof,
+            alpha_grad_neg,
+            compute_dof_grad,
+        )
 
 
 cdef inline double cauchy_1d(double x, double y, double dof) noexcept nogil:
@@ -301,6 +362,31 @@ cdef inline double cauchy_2d_exp1p(double x1, double x2, double y1, double y2, d
         return (1 + ((x1 - y1) ** 2 + (x2 - y2) ** 2) / dof) ** -(dof + 1)
     else:
         return (1 + (x1 - y1) ** 2 + (x2 - y2) ** 2) ** -2
+
+
+cdef inline double dof_grad_g(double sq_dist, double dof) noexcept nogil:
+    # g(x) = log(1 + x) - x / (1 + x) with x = d / dof, the per-pair factor of
+    # the dof gradient (d/d(dof) log k = -g). The closed form subtracts two
+    # O(x) quantities to produce an O(x^2) result, so for small x it is
+    # evaluated via the series g(x) = x^2/2 - 2x^3/3 + 3x^4/4 - 4x^5/5 + O(x^6)
+    # to avoid catastrophic cancellation.
+    cdef double x = sq_dist / dof
+    if x < 1e-3:
+        return x * x * (0.5 - x * (2.0 / 3.0 - x * (0.75 - x * 0.8)))
+    return log(1.0 + x) - x / (1.0 + x)
+
+
+cdef inline double cauchy_1d_dofgrad(double x, double y, double dof) noexcept nogil:
+    # The dof-gradient kernel M(d) = k(d) g(d), where k = (1 + d/dof)^-dof.
+    # M(0) = 0, so the spurious self-interaction terms picked up by the grid
+    # contribute nothing and need no correction.
+    cdef double sq_dist = (x - y) ** 2
+    return (1 + sq_dist / dof) ** -dof * dof_grad_g(sq_dist, dof)
+
+
+cdef inline double cauchy_2d_dofgrad(double x1, double x2, double y1, double y2, double dof) noexcept nogil:
+    cdef double sq_dist = (x1 - y1) ** 2 + (x2 - y2) ** 2
+    return (1 + sq_dist / dof) ** -dof * dof_grad_g(sq_dist, dof)
 
 
 cdef double[:, ::1] interpolate(double[::1] y_in_box, double[::1] y_tilde):
@@ -360,14 +446,25 @@ cdef double[::1] compute_kernel_tilde_1d(
     return kernel_tilde
 
 
-cpdef double estimate_negative_gradient_fft_1d(
+cpdef tuple estimate_negative_gradient_fft_1d(
     double[::1] embedding,
     double[::1] gradient,
     Py_ssize_t n_interpolation_points=3,
     Py_ssize_t min_num_intervals=10,
     double ints_in_interval=1,
     double dof=1,
+    bint compute_dof_grad=False,
 ):
+    """Estimate the negative t-SNE gradient using the FFT interpolation scheme.
+
+    Returns
+    -------
+    sum_Q : double
+        The sum of all q_{ij} values.
+    alpha_grad_neg : double
+        The negative term of the gradient with respect to alpha, i.e.
+        (1/Z) sum_ij k(d_ij) g(d_ij). Zero unless ``compute_dof_grad`` is set.
+    """
     cdef Py_ssize_t i, j, d, box_idx, n_samples = embedding.shape[0]
     cdef double y_max = -INFINITY, y_min = INFINITY
     # Determine the min/max values of the embedding
@@ -441,6 +538,12 @@ cpdef double estimate_negative_gradient_fft_1d(
         kernel_tilde = compute_kernel_tilde_1d(
             &cauchy_1d, n_interpolation_points_1d, y_min, h * box_width, dof
         )
+    # The dof-gradient kernel M = k * g is only needed when learning dof
+    cdef double[::1] dof_kernel_tilde
+    if compute_dof_grad:
+        dof_kernel_tilde = compute_kernel_tilde_1d(
+            &cauchy_1d_dofgrad, n_interpolation_points_1d, y_min, h * box_width, dof
+        )
 
     # STEP 1: Compute the w coefficients
     # Set up q_j values
@@ -482,14 +585,24 @@ cpdef double estimate_negative_gradient_fft_1d(
     else:
         matrix_multiply_fft_1d(sq_kernel_tilde, w_coefficients, y_tilde_values)
 
+    # The dof-gradient potential is a convolution of the M kernel against unit
+    # charges, which are exactly the w coefficients of the first term
+    cdef double[:, ::1] dof_y_tilde_values
+    if compute_dof_grad:
+        dof_y_tilde_values = np.empty((n_interpolation_points_1d, 1), dtype=float)
+        matrix_multiply_fft_1d(dof_kernel_tilde, w_coefficients[:, :1], dof_y_tilde_values)
 
     # STEP 3: Compute the potentials \tilde{\phi(y_i)}
     cdef double[:, ::1] phi = np.zeros((n_samples, n_terms), dtype=float)
+    cdef double dof_grad_neg_unnormalized = 0
     for i in range(n_samples):
         box_idx = point_box_idx[i] * n_interpolation_points
         for j in range(n_interpolation_points):
             for d in range(n_terms):
                 phi[i, d] += interpolated_values[i, j] * y_tilde_values[box_idx + j, d]
+            if compute_dof_grad:
+                dof_grad_neg_unnormalized += \
+                    interpolated_values[i, j] * dof_y_tilde_values[box_idx + j, 0]
 
     PyMem_Free(point_box_idx)
 
@@ -506,11 +619,18 @@ cpdef double estimate_negative_gradient_fft_1d(
 
     sum_Q -= n_samples
 
+    # The negative dof-gradient term shares the normalization Z = sum_Q. The
+    # M kernel vanishes at zero distance, so unlike sum_Q it needs no
+    # self-interaction correction.
+    cdef double alpha_grad_neg = 0
+    if compute_dof_grad:
+        alpha_grad_neg = dof_grad_neg_unnormalized / (sum_Q + EPSILON)
+
     # The phis used here are not affected if dof != 1
     for i in range(n_samples):
         gradient[i] -= (embedding[i] * phi[i, 0] - phi[i, 1]) / (sum_Q + EPSILON)
 
-    return sum_Q
+    return sum_Q, alpha_grad_neg
 
 
 cpdef tuple prepare_negative_gradient_fft_interpolation_grid_1d(
@@ -745,14 +865,25 @@ cdef double[:, ::1] compute_kernel_tilde_2d(
     return kernel_tilde
 
 
-cpdef double estimate_negative_gradient_fft_2d(
+cpdef tuple estimate_negative_gradient_fft_2d(
     double[:, ::1] embedding,
     double[:, ::1] gradient,
     Py_ssize_t n_interpolation_points=3,
     Py_ssize_t min_num_intervals=10,
     double ints_in_interval=1,
     double dof=1,
+    bint compute_dof_grad=False,
 ):
+    """Estimate the negative t-SNE gradient using the FFT interpolation scheme.
+
+    Returns
+    -------
+    sum_Q : double
+        The sum of all q_{ij} values.
+    alpha_grad_neg : double
+        The negative term of the gradient with respect to alpha, i.e.
+        (1/Z) sum_ij k(d_ij) g(d_ij). Zero unless ``compute_dof_grad`` is set.
+    """
     cdef:
         Py_ssize_t i, j, d, box_idx
         Py_ssize_t n_samples = embedding.shape[0]
@@ -846,6 +977,12 @@ cpdef double estimate_negative_gradient_fft_2d(
         kernel_tilde = compute_kernel_tilde_2d(
             &cauchy_2d, n_interpolation_points * n_boxes_1d, coord_min, h * box_width, dof,
         )
+    # The dof-gradient kernel M = k * g is only needed when learning dof
+    cdef double[:, ::1] dof_kernel_tilde
+    if compute_dof_grad:
+        dof_kernel_tilde = compute_kernel_tilde_2d(
+            &cauchy_2d_dofgrad, n_interpolation_points * n_boxes_1d, coord_min, h * box_width, dof,
+        )
 
     # STEP 1: Compute the w coefficients
     # Set up q_j values
@@ -911,8 +1048,16 @@ cpdef double estimate_negative_gradient_fft_2d(
     else:
         matrix_multiply_fft_2d(sq_kernel_tilde, w_coefficients, y_tilde_values)
 
+    # The dof-gradient potential is a convolution of the M kernel against unit
+    # charges, which are exactly the w coefficients of the first term
+    cdef double[:, ::1] dof_y_tilde_values
+    if compute_dof_grad:
+        dof_y_tilde_values = np.empty((total_interpolation_points, 1), dtype=float)
+        matrix_multiply_fft_2d(dof_kernel_tilde, w_coefficients[:, :1], dof_y_tilde_values)
+
     # STEP 3: Compute the potentials \tilde{\phi(y_i)}
     cdef double[:, ::1] phi = np.zeros((n_samples, n_terms), dtype=float)
+    cdef double dof_grad_neg_unnormalized = 0
     for i in range(n_samples):
         box_idx = point_box_idx[i]
         box_i = box_idx % n_boxes_1d
@@ -927,6 +1072,11 @@ cpdef double estimate_negative_gradient_fft_2d(
                     phi[i, d] += x_interpolated_values[i, interp_i] * \
                                  y_interpolated_values[i, interp_j] * \
                                  y_tilde_values[idx, d]
+                if compute_dof_grad:
+                    dof_grad_neg_unnormalized += \
+                        x_interpolated_values[i, interp_i] * \
+                        y_interpolated_values[i, interp_j] * \
+                        dof_y_tilde_values[idx, 0]
 
     PyMem_Free(point_box_idx)
 
@@ -946,12 +1096,19 @@ cpdef double estimate_negative_gradient_fft_2d(
 
     sum_Q -= n_samples
 
+    # The negative dof-gradient term shares the normalization Z = sum_Q. The
+    # M kernel vanishes at zero distance, so unlike sum_Q it needs no
+    # self-interaction correction.
+    cdef double alpha_grad_neg = 0
+    if compute_dof_grad:
+        alpha_grad_neg = dof_grad_neg_unnormalized / (sum_Q + EPSILON)
+
     # The phis used here are not affected if dof != 1
     for i in range(n_samples):
         gradient[i, 0] -= (embedding[i, 0] * phi[i, 0] - phi[i, 1]) / (sum_Q + EPSILON)
         gradient[i, 1] -= (embedding[i, 1] * phi[i, 0] - phi[i, 2]) / (sum_Q + EPSILON)
 
-    return sum_Q
+    return sum_Q, alpha_grad_neg
 
 
 cpdef tuple prepare_negative_gradient_fft_interpolation_grid_2d(
