@@ -115,6 +115,47 @@ class KNNIndexTestMixin:
         np.testing.assert_equal(indices1, indices2)
         np.testing.assert_equal(distances1, distances2)
 
+    def test_build_excludes_point_itself_with_duplicate_points(self):
+        # A point and its duplicate are both at distance zero, so the index may
+        # return either one first. k = 5 and k = 30 cover the NNDescent paths
+        # with and without a follow-up query.
+        x = np.vstack([self.x1, self.x1])
+        n = self.x1.shape[0]
+        twins = np.concatenate([np.arange(n, 2 * n), np.arange(n)])
+
+        for k in [5, 30]:
+            with self.subTest(k=k):
+                knn_index = self.knn_index(x, k, "euclidean", random_state=0)
+                indices, distances = knn_index.build()
+
+                self.assertEqual(indices.shape, (2 * n, k))
+                self.assertFalse(np.any(indices == np.arange(2 * n)[:, None]))
+                # Each point's duplicate is its nearest neighbor
+                np.testing.assert_array_equal(indices[:, 0], twins)
+                np.testing.assert_allclose(distances[:, 0], 0, atol=1e-3)
+
+
+class TestExcludeSelf(unittest.TestCase):
+    def test_removes_one_entry_per_row(self):
+        indices = np.array([
+            [0, 1, 2],  # self first
+            [0, 1, 2],  # self in the middle
+            [0, 1, 3],  # self absent: drop the furthest
+            [3, 0, 3],  # self listed twice: drop the first
+        ])
+        distances = np.arange(12, dtype=float).reshape(4, 3)
+
+        new_indices, new_distances = nearest_neighbors._exclude_self(
+            indices, distances
+        )
+
+        np.testing.assert_array_equal(
+            new_indices, [[1, 2], [0, 2], [0, 1], [0, 3]]
+        )
+        np.testing.assert_array_equal(
+            new_distances, [[1, 2], [3, 5], [6, 7], [10, 11]]
+        )
+
 
 class TestAnnoy(KNNIndexTestMixin, unittest.TestCase):
     knn_index = nearest_neighbors.Annoy
@@ -195,18 +236,6 @@ class TestAnnoy(KNNIndexTestMixin, unittest.TestCase):
             np.testing.assert_allclose(dist, true_distances, rtol=1e-4, atol=1e-6)
             # The most similar neighbors come first
             self.assertTrue(np.all(np.diff(dist, axis=1) >= -1e-6))
-
-    def test_build_excludes_point_itself_with_duplicate_points(self):
-        x = np.vstack([self.x1, self.x1])
-        n = self.x1.shape[0]
-        knn_index = nearest_neighbors.Annoy(x, 5, "euclidean")
-        indices, distances = knn_index.build()
-
-        self.assertFalse(np.any(indices == np.arange(2 * n)[:, None]))
-        # Each point's duplicate is its nearest neighbor, at distance zero
-        twins = np.concatenate([np.arange(n, 2 * n), np.arange(n)])
-        np.testing.assert_array_equal(indices[:, 0], twins)
-        np.testing.assert_allclose(distances[:, 0], 0, atol=1e-3)
 
     def test_build_excludes_point_itself_with_dot(self):
         knn_index = nearest_neighbors.Annoy(self.x1, 15, "dot")
@@ -472,18 +501,6 @@ class TestHNSW(KNNIndexTestMixin, unittest.TestCase):
                 np.testing.assert_allclose(
                     query_distances, true_query_distances, rtol=1e-4
                 )
-
-    def test_build_excludes_point_itself_with_duplicate_points(self):
-        x = np.vstack([self.x1, self.x1])
-        n = self.x1.shape[0]
-        knn_index = nearest_neighbors.HNSW(x, 5, "euclidean")
-        indices, distances = knn_index.build()
-
-        self.assertFalse(np.any(indices == np.arange(2 * n)[:, None]))
-        # Each point's duplicate is its nearest neighbor, at distance zero
-        twins = np.concatenate([np.arange(n, 2 * n), np.arange(n)])
-        np.testing.assert_array_equal(indices[:, 0], twins)
-        np.testing.assert_allclose(distances[:, 0], 0, atol=1e-3)
 
     def test_build_excludes_point_itself_with_inner_product(self):
         for metric in ["ip", "dot"]:
