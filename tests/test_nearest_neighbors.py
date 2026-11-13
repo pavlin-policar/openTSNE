@@ -157,6 +157,32 @@ class TestExcludeSelf(unittest.TestCase):
         )
 
 
+class TestKNNIndexCoverage(unittest.TestCase):
+    # These take neighbors or distances from the user and are tested separately
+    not_searching = {
+        nearest_neighbors.PrecomputedDistanceMatrix,
+        nearest_neighbors.PrecomputedNeighbors,
+    }
+
+    def test_every_knn_index_runs_shared_tests(self):
+        def subclasses(cls):
+            for sub in cls.__subclasses__():
+                yield sub
+                yield from subclasses(sub)
+
+        indices = {
+            cls for cls in subclasses(nearest_neighbors.KNNIndex)
+            if cls.__module__ == nearest_neighbors.__name__
+        } - self.not_searching
+        tested = {cls.knn_index for cls in subclasses(KNNIndexTestMixin)}
+
+        self.assertEqual(
+            indices - tested, set(),
+            "Every KNNIndex must have a test case that subclasses "
+            "KNNIndexTestMixin",
+        )
+
+
 class TestAnnoy(KNNIndexTestMixin, unittest.TestCase):
     knn_index = nearest_neighbors.Annoy
 
