@@ -175,54 +175,6 @@ def _adapt_callback(c):
     )
 
 
-def _adapt_objective(objective_function):
-    """Wrap a user-supplied objective function so the optimizer can call it
-    like the built-in ones.
-
-    ``compute_dof_grad`` is passed on only if the objective accepts it. An
-    objective returning an ``(error, gradient)`` tuple is still accepted with a
-    FutureWarning, but since it provides no dof gradient, it cannot be used
-    with ``dof="auto"``.
-    """
-    try:
-        parameters = inspect.signature(objective_function).parameters.values()
-        accepts_compute_dof_grad = any(
-            p.name == "compute_dof_grad" or p.kind is inspect.Parameter.VAR_KEYWORD
-            for p in parameters
-        )
-    except (TypeError, ValueError):
-        accepts_compute_dof_grad = True
-    warned = False
-
-    def wrapped(*args, compute_dof_grad=False, **kwargs):
-        nonlocal warned
-        if accepts_compute_dof_grad:
-            kwargs["compute_dof_grad"] = compute_dof_grad
-        result = objective_function(*args, **kwargs)
-        if isinstance(result, GradientResult):
-            return result
-
-        if compute_dof_grad:
-            raise ValueError(
-                "`dof='auto'` requires the objective function to return an "
-                "`openTSNE.tsne.GradientResult` that includes the dof gradient, "
-                "but it returned %s." % type(result).__name__
-            )
-        if not warned:
-            warnings.warn(
-                "Objective functions returning an (error, gradient) tuple are "
-                "deprecated and will not be supported in a future release. "
-                "Return an `openTSNE.tsne.GradientResult` instead.",
-                FutureWarning,
-                stacklevel=2,
-            )
-            warned = True
-        error, gradient = result
-        return GradientResult(error=error, gradient=gradient)
-
-    return wrapped
-
-
 _DOF_AUTO_FOR_NEW_POINTS_ERROR = (
     "`dof='auto'` is not supported when embedding new points into an existing "
     "embedding. Against a fixed reference embedding the objective has no "
@@ -279,8 +231,7 @@ def _handle_nice_params(embedding: np.ndarray, optim_params: dict) -> None:
         )
 
     if callable(negative_gradient_method):
-        if negative_gradient_method not in (kl_divergence_bh, kl_divergence_fft):
-            negative_gradient_method = _adapt_objective(negative_gradient_method)
+        negative_gradient_method = negative_gradient_method
     elif negative_gradient_method in {"bh", "BH", "barnes-hut"}:
         negative_gradient_method = kl_divergence_bh
     elif negative_gradient_method in {"fft", "FFT", "interpolation"}:
@@ -2203,9 +2154,9 @@ class gradient_descent:
         n_iter: int
             The number of iterations to run for.
 
-        objective_function: Callable[..., Tuple[float, np.ndarray]]
+        objective_function: Callable[..., GradientResult]
             A callable that evaluates the error and gradient for the current
-            embedding.
+            embedding, and the dof gradient when ``compute_dof_grad`` is set.
 
         learning_rate: Union[str, float]
             The learning rate for t-SNE optimization. When
