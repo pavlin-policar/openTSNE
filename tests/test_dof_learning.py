@@ -1224,8 +1224,8 @@ class TestTransformWithLearnedDof(unittest.TestCase):
 
 
 class TestPartialDof(unittest.TestCase):
-    """New points always use the dof the reference embedding was optimized
-    with; dof is never learned for them."""
+    """New points use the reference embedding's dof unless given a fixed one;
+    dof is never learned for them."""
 
     @classmethod
     def setUpClass(cls):
@@ -1277,14 +1277,47 @@ class TestPartialDof(unittest.TestCase):
         for d in self._dof_history(partial):
             self.assertEqual(d, 5.0)
 
+    def test_fixed_dof(self):
+        partial = self.auto_reference.prepare_partial(self.x_new, dof=3.0)
+        self.assertEqual(partial.gradient_descent_params["dof"], 3.0)
+        self.assertEqual(partial.dof_, 3.0)
+        for d in self._dof_history(partial):
+            self.assertEqual(d, 3.0)
+
+        new_embedding = self.auto_reference.transform(self.x_new, dof=3.0, n_iter=10)
+        self.assertEqual(new_embedding.dof_, 3.0)
+
+    def test_fft_grid_is_built_for_the_dof_of_new_points(self):
+        # The interpolation grid encodes the kernel, so transforming with a
+        # fixed dof must give the same points as transforming against a
+        # reference that was optimized with that dof
+        reference = TSNE_FFT(dof=5, early_exaggeration_iter=5, n_iter=20).fit(
+            self.x_train
+        )
+        reference.transform(self.x_new, n_iter=5)
+        self.assertEqual(reference.interp_dof, 5)
+
+        fixed = reference.transform(self.x_new, dof=1, n_iter=5)
+        self.assertEqual(reference.interp_dof, 1)
+
+        reference_at_one = reference.optimize(0, dof=1)
+        self.assertEqual(reference_at_one.dof_, 1)
+        expected = reference_at_one.transform(self.x_new, n_iter=5)
+        np.testing.assert_allclose(fixed, expected)
+
     def test_learning_dof_for_new_points_raises(self):
         # Against a fixed reference the objective has no interior optimum in
-        # dof, so the optimizer rejects learning it
+        # dof, so learning it is rejected on every entry point
         for name, TSNE_ in (("bh", TSNE_BH), ("fft", TSNE_FFT)):
             with self.subTest(method=name):
                 reference = TSNE_(
                     dof="auto", early_exaggeration_iter=5, n_iter=20,
                 ).fit(self.x_train)
+                with self.assertRaisesRegex(ValueError, "new points"):
+                    reference.prepare_partial(self.x_new, dof="auto")
+                with self.assertRaisesRegex(ValueError, "new points"):
+                    reference.transform(self.x_new, dof="auto")
+
                 partial = reference.prepare_partial(self.x_new)
                 P_before = partial.P.copy()
                 with self.assertRaisesRegex(ValueError, "new points"):

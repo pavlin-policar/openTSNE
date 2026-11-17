@@ -414,8 +414,10 @@ class PartialTSNEEmbedding(np.ndarray):
         The KL divergence or error of the embedding.
 
     dof_: float
-        The degrees of freedom the new points are optimized with, which is
-        the reference embedding's ``dof_``.
+        The degrees of freedom the new points are optimized with: the
+        reference embedding's ``dof_`` unless a fixed ``dof`` was given to
+        :meth:`TSNEEmbedding.prepare_partial` or
+        :meth:`TSNEEmbedding.transform`.
 
     optimization_iters_: int
         The total number of optimization iterations this embedding has
@@ -810,6 +812,7 @@ class TSNEEmbedding(np.ndarray):
 
         # Interpolation grid variables
         obj.interp_coeffs = None
+        obj.interp_dof = None
         obj.box_x_lower_bounds = None
         obj.box_y_lower_bounds = None
 
@@ -1002,6 +1005,7 @@ class TSNEEmbedding(np.ndarray):
         final_momentum=0.8,
         max_grad_norm=0.25,
         max_step_norm=None,
+        dof=None,
     ):
         """Embed new points into the existing embedding.
 
@@ -1079,6 +1083,13 @@ class TSNEEmbedding(np.ndarray):
             clipped. This prevents points from "shooting off" from
             the embedding.
 
+        dof: Optional[float]
+            Degrees of freedom for the new points, held fixed during their
+            optimization. Defaults to the embedding's ``dof_``. dof cannot be
+            learned for new points: against a fixed reference embedding the
+            objective has no interior optimum in dof, so ``dof="auto"`` raises a
+            ``ValueError``.
+
         Returns
         -------
         PartialTSNEEmbedding
@@ -1108,6 +1119,7 @@ class TSNEEmbedding(np.ndarray):
             X,
             initialization=initialization,
             k=k,
+            dof=dof,
             **affinity_params,
         )
 
@@ -1144,6 +1156,7 @@ class TSNEEmbedding(np.ndarray):
         X,
         initialization="median",
         k=25,
+        dof=None,
         **affinity_params,
     ):
         """Prepare a partial embedding which can be optimized.
@@ -1165,6 +1178,13 @@ class TSNEEmbedding(np.ndarray):
             because perplexity affects optimization while this only affects the
             initial point positions.
 
+        dof: Optional[float]
+            Degrees of freedom for the new points, held fixed during their
+            optimization. Defaults to the embedding's ``dof_``. dof cannot be
+            learned for new points: against a fixed reference embedding the
+            objective has no interior optimum in dof, so ``dof="auto"`` raises a
+            ``ValueError``.
+
         **affinity_params: dict
             Additional params to be passed to the ``Affinities.to_new`` method.
             Please see individual :class:`~openTSNE.affinity.Affinities`
@@ -1177,6 +1197,15 @@ class TSNEEmbedding(np.ndarray):
             optimization.
 
         """
+        if dof is None:
+            dof = self.dof_
+        elif dof == "auto":
+            raise ValueError(
+                "`dof='auto'` is not supported when embedding new points into an "
+                "existing embedding: against a fixed reference embedding the "
+                "objective has no interior optimum in dof. Pass a fixed `dof`, or "
+                "leave it unset to use the embedding's `dof_`."
+            )
 
         # To maintain perfect backwards compatibility and to handle the very
         # specific case when the user wants to pass in `perplexity` to the
@@ -1215,12 +1244,10 @@ class TSNEEmbedding(np.ndarray):
         else:
             raise ValueError(f"Unrecognized initialization scheme `{initialization}`.")
 
-        # New points use the dof the reference embedding was optimized with,
-        # which, unlike the stored `dof`, is never "auto"
-        gd_params = dict(self.gradient_descent_params, dof=self.dof_)
+        gd_params = dict(self.gradient_descent_params, dof=dof)
         return PartialTSNEEmbedding(embedding, self, P=P, **gd_params)
 
-    def prepare_interpolation_grid(self, padding=0.25):
+    def prepare_interpolation_grid(self, padding=0.25, dof=None):
         """Evaluate and save the interpolation grid coefficients.
 
         Parameters
@@ -1231,7 +1258,15 @@ class TSNEEmbedding(np.ndarray):
             transform. This paraemter specifies how much empty space should be
             appended in each dimension. The values are given in percentages.
 
+        dof: Optional[float]
+            The degrees of freedom of the kernel the grid encodes, i.e. the dof
+            the new points are optimized with. Defaults to the embedding's
+            ``dof_``.
+
         """
+        if dof is None:
+            dof = self.dof_
+
         # Center embedding into our grid
         self -= (np.max(self, axis=0) + np.min(self, axis=0)) / 2
 
@@ -1242,16 +1277,15 @@ class TSNEEmbedding(np.ndarray):
         else:
             raise RuntimeError("Cannot prepare interpolation grid for >2d embeddings")
 
-        # The grid encodes the reference kernel, so it must be built with the
-        # dof the embedding was last optimized with
         result = f(
             self.ravel() if self.shape[1] == 1 else self,
             self.gradient_descent_params["n_interpolation_points"],
             self.gradient_descent_params["min_num_intervals"],
             self.gradient_descent_params["ints_in_interval"],
-            self.dof_,
+            dof,
             padding=padding,
         )
+        self.interp_dof = dof
 
         if len(result) == 2:  # 1d case
             self.interp_coeffs, self.box_x_lower_bounds = result
@@ -1282,6 +1316,7 @@ class TSNEEmbedding(np.ndarray):
             "random_state": self.random_state,
             "kl_divergence_": self.kl_divergence_,
             "interp_coeffs": self.interp_coeffs,
+            "interp_dof": self.interp_dof,
             "box_x_lower_bounds": self.box_x_lower_bounds,
             "box_y_lower_bounds": self.box_y_lower_bounds,
             "dof_": self.dof_,
@@ -1317,6 +1352,7 @@ class TSNEEmbedding(np.ndarray):
         self.random_state = payload["random_state"]
         self.kl_divergence_ = payload["kl_divergence_"]
         self.interp_coeffs = payload["interp_coeffs"]
+        self.interp_dof = payload["interp_dof"]
         self.box_x_lower_bounds = payload["box_x_lower_bounds"]
         self.box_y_lower_bounds = payload["box_y_lower_bounds"]
         self.dof_ = payload["dof_"]
@@ -1341,6 +1377,8 @@ class TSNEEmbedding(np.ndarray):
 
         dof = self.gradient_descent_params.get("dof")
         self.dof_ = dof if isinstance(dof, (int, float)) else None
+        # A stored grid was built with the embedding's own, fixed dof
+        self.interp_dof = self.dof_
 
         if len(state) == 12:
             self.optimizer = gradient_descent()
@@ -1420,7 +1458,8 @@ class TSNE(BaseEstimator):
         gradient is then not the gradient of the KL divergence. The learned
         value is written to ``embedding.dof_``, and further ``optimize()``
         calls continue learning from it. dof cannot be learned for new points
-        added with ``transform``; they use the embedding's ``dof_``.
+        added with ``transform``; they use the embedding's ``dof_`` or a fixed
+        value.
 
     initial_dof: Optional[float]
         Value that dof learning starts from at the beginning of the normal
@@ -2241,30 +2280,6 @@ class gradient_descent:
                 "`%s` instead" % type(reference_embedding)
             )
 
-        # If the interpolation grid has not yet been evaluated, do it now
-        if (
-            reference_embedding is not None
-            and reference_embedding.interp_coeffs is None
-            and objective_function is kl_divergence_fft
-        ):
-            reference_embedding.prepare_interpolation_grid()
-
-        # If we're running transform and using the interpolation scheme, then we
-        # should limit the range where new points can go to
-        should_limit_range = False
-        if reference_embedding is not None:
-            if reference_embedding.box_x_lower_bounds is not None:
-                should_limit_range = True
-                lower_limit = reference_embedding.box_x_lower_bounds[0]
-                upper_limit = reference_embedding.box_x_lower_bounds[-1]
-
-        bh_params = {"theta": theta}
-        fft_params = {
-            "n_interpolation_points": n_interpolation_points,
-            "min_num_intervals": min_num_intervals,
-            "ints_in_interval": ints_in_interval,
-        }
-
         if exaggeration is None:
             exaggeration = 1
 
@@ -2296,6 +2311,34 @@ class gradient_descent:
                 % (initial_dof, dof),
                 stacklevel=2,
             )
+
+        # The interpolation grid encodes the kernel the new points are optimized
+        # with, so it is rebuilt whenever they use a different dof
+        if (
+            reference_embedding is not None
+            and objective_function is kl_divergence_fft
+            and (
+                reference_embedding.interp_coeffs is None
+                or reference_embedding.interp_dof != dof
+            )
+        ):
+            reference_embedding.prepare_interpolation_grid(dof=dof)
+
+        # If we're running transform and using the interpolation scheme, then we
+        # should limit the range where new points can go to
+        should_limit_range = False
+        if reference_embedding is not None:
+            if reference_embedding.box_x_lower_bounds is not None:
+                should_limit_range = True
+                lower_limit = reference_embedding.box_x_lower_bounds[0]
+                upper_limit = reference_embedding.box_x_lower_bounds[-1]
+
+        bh_params = {"theta": theta}
+        fft_params = {
+            "n_interpolation_points": n_interpolation_points,
+            "min_num_intervals": min_num_intervals,
+            "ints_in_interval": ints_in_interval,
+        }
 
         # Lie about the P values for bigger attraction forces
         if exaggeration != 1:
