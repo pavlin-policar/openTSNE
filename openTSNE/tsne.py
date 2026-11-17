@@ -86,9 +86,7 @@ class IterationState:
 
     dof_grad: float
         The gradient of the loss with respect to ``dof``. Zero for
-        fixed-dof runs, and when optimizing against a fixed reference
-        embedding under the FFT objective, which does not compute the dof
-        gradient in that case.
+        fixed-dof runs.
     """
 
     iteration: int
@@ -222,6 +220,14 @@ def _adapt_objective(objective_function):
         return GradientResult(error=error, gradient=gradient)
 
     return wrapped
+
+
+_DOF_AUTO_FOR_NEW_POINTS_ERROR = (
+    "`dof='auto'` is not supported when embedding new points into an existing "
+    "embedding. Against a fixed reference embedding the objective has no "
+    "interior optimum in dof, so the learned value drifts upward instead of "
+    "settling. Use `dof='inherit'` (the default) or a fixed number."
+)
 
 
 def _check_initial_dof(initial_dof):
@@ -463,9 +469,10 @@ class PartialTSNEEmbedding(np.ndarray):
     kl_divergence_: float
         The KL divergence or error of the embedding.
 
-    dof_: float or None
-        The degrees-of-freedom the embedding was last optimized with. See
-        :class:`IterationState` for details.
+    dof_: float
+        The degrees of freedom the new points are optimized with. dof is
+        never learned for new points; see
+        :meth:`TSNEEmbedding.prepare_partial`.
 
     optimization_iters_: int
         The total number of optimization iterations this embedding has
@@ -508,11 +515,11 @@ class PartialTSNEEmbedding(np.ndarray):
         obj.optimizer = optimizer
 
         obj.kl_divergence_ = None
-        # Mirror the parent embedding's behavior: a fixed dof is reflected on
-        # the embedding immediately; `dof="auto"` stays as None until the
-        # optimizer warm-starts.
-        partial_dof = gradient_descent_params.get("dof")
-        obj.dof_ = partial_dof if isinstance(partial_dof, (int, float)) else None
+        # New points are always optimized with a fixed dof
+        partial_dof = gradient_descent_params.get("dof", 1)
+        if partial_dof == "auto":
+            raise ValueError(_DOF_AUTO_FOR_NEW_POINTS_ERROR)
+        obj.dof_ = partial_dof
         obj.optimization_iters_ = 0
 
         return obj
@@ -1056,7 +1063,6 @@ class TSNEEmbedding(np.ndarray):
         max_grad_norm=0.25,
         max_step_norm=None,
         dof="inherit",
-        initial_dof=None,
     ):
         """Embed new points into the existing embedding.
 
@@ -1135,25 +1141,15 @@ class TSNEEmbedding(np.ndarray):
             the embedding.
 
         dof: Union[float, str]
-            Degrees of freedom for the new points. One of:
+            Degrees of freedom for the new points, held fixed. One of:
 
-            - ``"inherit"`` (default): pin dof at the parent embedding's
-              effective dof so the new points live in the same kernel as the
-              reference. Almost always the right choice.
-            - ``"auto"``: learn dof for the new points independently of the
-              parent. Warm-starts from ``initial_dof`` if given, otherwise
-              from the parent's learned dof, otherwise from 1.0. This is
-              uncharted territory and should be used at your own risk: against a
-              fixed reference the objective has no interior optimum in dof (it
-              decreases monotonically, with sharply diminishing returns, as dof
-              grows), so the learned value drifts upward with more iterations
-              rather than settling, and a warning is emitted. ``"inherit"`` (the
-              default) is recommended.
-            - a float: pin dof at that fixed value.
+            - ``"inherit"`` (default): use the embedding's ``dof_``, so the
+              new points live in the same kernel as the reference.
+            - a float: use that fixed value.
 
-        initial_dof: Optional[float]
-            Starting value for the learnable dof when ``dof="auto"``. Ignored
-            otherwise.
+            dof cannot be learned for new points: against a fixed reference
+            embedding the objective has no interior optimum in dof, so
+            ``dof="auto"`` raises a ``ValueError``.
 
         Returns
         -------
@@ -1185,7 +1181,6 @@ class TSNEEmbedding(np.ndarray):
             initialization=initialization,
             k=k,
             dof=dof,
-            initial_dof=initial_dof,
             **affinity_params,
         )
 
@@ -1223,7 +1218,6 @@ class TSNEEmbedding(np.ndarray):
         initialization="median",
         k=25,
         dof="inherit",
-        initial_dof=None,
         **affinity_params,
     ):
         """Prepare a partial embedding which can be optimized.
@@ -1246,25 +1240,15 @@ class TSNEEmbedding(np.ndarray):
             initial point positions.
 
         dof: Union[float, str]
-            Degrees of freedom for the partial embedding. One of:
+            Degrees of freedom for the partial embedding, held fixed. One of:
 
-            - ``"inherit"`` (default): pin dof at the parent embedding's
-              effective dof (``parent.dof_``), so the new points live in the
-              same kernel as the reference. This is almost always what you
-              want.
-            - ``"auto"``: learn dof for the partial embedding independently of
-              the parent. Warm-starts from ``initial_dof`` if given, otherwise
-              from ``parent.dof_`` if available, otherwise from 1.0. Note that
-              dof is only weakly identified here: with the reference fixed, the
-              objective decreases monotonically (with sharply diminishing
-              returns) as dof grows, so the learned value drifts upward with
-              more iterations rather than settling. ``"inherit"`` is preferred
-              unless you specifically want the new points to relearn dof.
-            - a float: use that fixed dof for the partial embedding.
+            - ``"inherit"`` (default): use the embedding's ``dof_``, so the
+              new points live in the same kernel as the reference.
+            - a float: use that fixed value.
 
-        initial_dof: Optional[float]
-            Starting value for the learnable dof when ``dof="auto"``. Ignored
-            otherwise.
+            dof cannot be learned for new points: against a fixed reference
+            embedding the objective has no interior optimum in dof, so
+            ``dof="auto"`` raises a ``ValueError``.
 
         **affinity_params: dict
             Additional params to be passed to the ``Affinities.to_new`` method.
@@ -1316,71 +1300,21 @@ class TSNEEmbedding(np.ndarray):
             raise ValueError(f"Unrecognized initialization scheme `{initialization}`.")
 
         gd_params = dict(self.gradient_descent_params)
-        gd_params, warm_start_dof = self._resolve_partial_dof(
-            gd_params, dof, initial_dof
-        )
+        if dof == "inherit":
+            gd_params["dof"] = float(self.dof_)
+        elif dof == "auto":
+            raise ValueError(_DOF_AUTO_FOR_NEW_POINTS_ERROR)
+        elif isinstance(dof, (int, float)) and not isinstance(dof, bool):
+            gd_params["dof"] = float(dof)
+        else:
+            raise ValueError(f"`dof` must be 'inherit' or a float; got {dof!r}.")
 
-        partial = PartialTSNEEmbedding(
+        return PartialTSNEEmbedding(
             embedding,
             self,
             P=P,
             **gd_params,
         )
-        # For `dof="auto"` with no explicit `initial_dof`, warm-start the
-        # partial's `dof_` so the optimizer continues from the parent's
-        # learned value rather than restarting from 1.0.
-        if warm_start_dof is not None:
-            partial.dof_ = warm_start_dof
-        return partial
-
-    def _resolve_partial_dof(self, gd_params, dof, initial_dof):
-        """Resolve the partial-embedding dof mode.
-
-        Returns a (gd_params, warm_start_dof) pair: ``gd_params`` is the
-        merged param dict to hand to ``PartialTSNEEmbedding``, and
-        ``warm_start_dof`` is an optional float to assign to ``partial.dof_``
-        after construction (used only by the ``dof="auto"`` warm-start path).
-        """
-        warm_start_dof = None
-
-        if dof == "inherit":
-            gd_params["dof"] = float(self.dof_)
-            gd_params.pop("initial_dof", None)
-            if initial_dof is not None:
-                warnings.warn(
-                    "`initial_dof` is ignored when `dof='inherit'`.",
-                    stacklevel=3,
-                )
-        elif dof == "auto":
-            warnings.warn(
-                "Learning dof for new points (`dof='auto'` on transform / "
-                "prepare_partial) is uncharted territory: against a fixed "
-                "reference embedding the objective has no interior optimum in "
-                "dof, so the learned value drifts upward with more iterations "
-                "rather than settling. Use at your own risk; `dof='inherit'` "
-                "(the default) is recommended.",
-                stacklevel=3,
-            )
-            gd_params["dof"] = "auto"
-            gd_params["initial_dof"] = initial_dof
-            # If the user did not pin `initial_dof` and the parent has a
-            # learned dof, warm-start from it. Explicit `initial_dof` wins.
-            if initial_dof is None and self.dof_ is not None:
-                warm_start_dof = float(self.dof_)
-        elif isinstance(dof, (int, float)) and not isinstance(dof, bool):
-            gd_params["dof"] = float(dof)
-            gd_params.pop("initial_dof", None)
-            if initial_dof is not None:
-                warnings.warn(
-                    "`initial_dof` is ignored when `dof` is a fixed float.",
-                    stacklevel=3,
-                )
-        else:
-            raise ValueError(
-                f"`dof` must be 'inherit', 'auto', or a float; got {dof!r}."
-            )
-
-        return gd_params, warm_start_dof
 
     def prepare_interpolation_grid(self, padding=0.25):
         """Evaluate and save the interpolation grid coefficients.
@@ -1581,7 +1515,8 @@ class TSNE(BaseEstimator):
         set to a value other than 1, learning emits a warning, since the dof
         gradient is then not the gradient of the KL divergence. The learned
         value is written to ``embedding.dof_``, and further ``optimize()``
-        calls continue learning from it.
+        calls continue learning from it. dof cannot be learned for new points
+        added with ``transform``; they use the embedding's ``dof_``.
 
     initial_dof: Optional[float]
         Value that dof learning starts from at the beginning of the normal
@@ -2056,6 +1991,11 @@ def kl_divergence_bh(
     pairwise_normalization = reference_embedding is None
     if reference_embedding is None:
         reference_embedding = embedding
+    elif compute_dof_grad:
+        raise ValueError(
+            "The dof gradient is only defined when optimizing an embedding "
+            "with respect to itself, not against a reference embedding."
+        )
 
     # Compute negative gradient
     tree = QuadTree(reference_embedding)
@@ -2111,11 +2051,11 @@ def kl_divergence_fft(
 ):
     gradient = np.zeros_like(embedding, dtype=np.float64, order="C")
 
-    # The dof gradient is only implemented for self-embeddings: the grid-based
-    # (transform) path does not compute its negative term; see the guard in
-    # `gradient_descent.__call__`.
-    if reference_embedding is not None:
-        compute_dof_grad = False
+    if reference_embedding is not None and compute_dof_grad:
+        raise ValueError(
+            "The dof gradient is only defined when optimizing an embedding "
+            "with respect to itself, not against a reference embedding."
+        )
     alpha_grad_neg = 0.0
 
     # Compute negative gradient.
@@ -2285,9 +2225,10 @@ class gradient_descent:
             Degrees of freedom of the Student's t-distribution. If
             ``dof="auto"``, the degrees of freedom are learned during
             optimization, starting from ``initial_dof`` if given, otherwise
-            from ``embedding.dof_``. With ``exaggeration != 1`` learning emits
-            a warning, since the dof gradient is then not the gradient of the
-            KL divergence.
+            from ``embedding.dof_``. Learning is not supported against a
+            ``reference_embedding`` and raises a ``ValueError``; with
+            ``exaggeration != 1`` it emits a warning, since the dof gradient
+            is then not the gradient of the KL divergence.
 
         initial_dof: Optional[float]
             Value to restart dof learning from when ``dof="auto"``; it
@@ -2425,6 +2366,8 @@ class gradient_descent:
         # Validate the dof arguments before `P` is exaggerated in place, so a
         # rejected call leaves the affinities intact
         if dof == "auto":
+            if reference_embedding is not None:
+                raise ValueError(_DOF_AUTO_FOR_NEW_POINTS_ERROR)
             if initial_dof is not None:
                 _check_initial_dof(initial_dof)
             if exaggeration != 1:
@@ -2486,21 +2429,6 @@ class gradient_descent:
             compute_dof_grad = False
 
         initial_iter = getattr(embedding, "optimization_iters_", 0) or 0
-
-        if (
-            dof == "auto"
-            and objective_function is kl_divergence_fft
-            and reference_embedding is not None
-        ):
-            log.warning(
-                "Learning the degrees of freedom (`dof='auto'`) with the FFT "
-                "objective is only implemented for self-embeddings. When "
-                "embedding new points into an existing embedding, the dof "
-                "gradient is not computed, so dof will remain fixed at %s. Set "
-                "`negative_gradient_method='bh'` to learn dof during "
-                "transform.",
-                dof_,
-            )
 
         for iteration in range(n_iter):
             should_call_callback = (

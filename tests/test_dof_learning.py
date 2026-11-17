@@ -684,40 +684,6 @@ class TestDofAutoLearning(unittest.TestCase):
             f"bh dof_={emb_bh.dof_:.4f}, fft dof_={emb_fft.dof_:.4f}",
         )
 
-    def test_fft_transform_auto_warns_and_keeps_dof_fixed(self):
-        # The FFT dof gradient is only implemented for self-embeddings: when
-        # optimizing against a fixed reference (transform), the FFT path must
-        # warn and keep dof fixed.
-        rng = np.random.RandomState(0)
-        idx = rng.permutation(len(self.x))
-        x_train, x_new = self.x[idx[:120]], self.x[idx[120:]]
-
-        reference = TSNE_FFT(
-            dof="auto", early_exaggeration_iter=5, n_iter=20,
-        ).fit(x_train)
-        learned_dof = reference.dof_
-
-        with warnings.catch_warnings():
-            # prepare_partial(dof="auto") itself warns about uncharted
-            # territory; that is not the warning under test.
-            warnings.simplefilter("ignore")
-            partial = reference.prepare_partial(x_new, dof="auto")
-
-        history = []
-        with self.assertLogs("openTSNE.tsne", level="WARNING") as cm:
-            partial.optimize(
-                n_iter=5,
-                inplace=True,
-                callbacks=lambda s: history.append(s.dof),
-                callbacks_every_iters=1,
-            )
-        self.assertTrue(
-            any("self-embeddings" in msg for msg in cm.output),
-            f"Expected transform dof warning, got: {cm.output}",
-        )
-        self.assertTrue(history)
-        self.assertTrue(all(d == learned_dof for d in history))
-
 
 class TestDofLearningStability(unittest.TestCase):
     """The learnable dof is optimized in log space with an
@@ -1319,7 +1285,8 @@ class TestTransformWithLearnedDof(unittest.TestCase):
 
 
 class TestPartialDofModes(unittest.TestCase):
-    """Three-mode dof API on prepare_partial / transform."""
+    """New points use either the reference's dof (`"inherit"`) or a fixed one;
+    dof is never learned for them."""
 
     @classmethod
     def setUpClass(cls):
@@ -1373,84 +1340,6 @@ class TestPartialDofModes(unittest.TestCase):
         for d in self._dof_history(partial):
             self.assertEqual(d, 5.0)
 
-    def test_inherit_warns_when_initial_dof_passed(self):
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter("always")
-            self.auto_reference.prepare_partial(self.x_new, initial_dof=2.0)
-        self.assertTrue(
-            any("initial_dof" in str(w.message) for w in caught),
-            f"Expected initial_dof warning, got {[str(w.message) for w in caught]}",
-        )
-
-    # --- auto: learn a fresh dof for the partial --------------------------
-
-    def test_auto_warm_starts_from_parent_learned_dof(self):
-        # Without `initial_dof`, the partial warm-starts from the parent's
-        # learned value but is allowed to move from there.
-        partial = self.auto_reference.prepare_partial(self.x_new, dof="auto")
-        self.assertEqual(partial.gradient_descent_params["dof"], "auto")
-        self.assertEqual(partial.dof_, self.learned_dof)
-
-        history = self._dof_history(partial)
-        self.assertEqual(history[0], self.learned_dof)
-        # With enough iterations dof should actually move; for a tight test
-        # just confirm the final value is a float and that learning ran
-        # without error.
-        self.assertIsInstance(history[-1], float)
-
-    def test_auto_dof_stays_positive_over_long_run(self):
-        # Regression: the partial (transform) objective row-normalizes each new
-        # point's q_{ij}s by that point's own sum, so the dof gradient's
-        # negative term must use the same per-point normalization. A previous
-        # bug normalized it by the global sum_Q instead, leaving it ~N times too
-        # small; the positive term then dominated and drove dof to large
-        # negative values (internally clamped, but reported as nonsense). Over a
-        # realistic number of iterations the learned partial dof must stay
-        # positive and finite.
-        partial = self.auto_reference.prepare_partial(self.x_new, dof="auto")
-        history = []
-        partial.optimize(
-            n_iter=250,
-            inplace=True,
-            callbacks=lambda s: history.append(s.dof),
-            callbacks_every_iters=10,
-        )
-        self.assertTrue(history)
-        for d in history:
-            self.assertGreater(d, 0.0)
-            self.assertTrue(np.isfinite(d))
-
-    def test_auto_warns_uncharted_territory(self):
-        # `dof="auto"` against a fixed reference is weakly identified and must
-        # warn the user that they are off the beaten path.
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter("always")
-            self.auto_reference.prepare_partial(self.x_new, dof="auto")
-        self.assertTrue(
-            any("uncharted territory" in str(w.message) for w in caught),
-            f"Expected uncharted-territory warning, got "
-            f"{[str(w.message) for w in caught]}",
-        )
-
-    def test_auto_with_initial_dof_overrides_warm_start(self):
-        partial = self.auto_reference.prepare_partial(
-            self.x_new, dof="auto", initial_dof=2.0,
-        )
-        self.assertEqual(partial.gradient_descent_params["dof"], "auto")
-        self.assertEqual(partial.gradient_descent_params["initial_dof"], 2.0)
-        # Explicit initial_dof wins: partial.dof_ stays None so the optimizer
-        # falls through to initial_dof=2.0.
-        self.assertIsNone(partial.dof_)
-
-        history = self._dof_history(partial)
-        self.assertEqual(history[0], 2.0)
-
-    def test_auto_from_fixed_parent_warm_starts_from_fixed_value(self):
-        partial = self.fixed_reference.prepare_partial(self.x_new, dof="auto")
-        self.assertEqual(partial.dof_, 5.0)
-        history = self._dof_history(partial)
-        self.assertEqual(history[0], 5.0)
-
     # --- fixed float ------------------------------------------------------
 
     def test_fixed_float_dof(self):
@@ -1460,37 +1349,58 @@ class TestPartialDofModes(unittest.TestCase):
         for d in self._dof_history(partial):
             self.assertEqual(d, 3.0)
 
-    def test_fixed_float_warns_when_initial_dof_passed(self):
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter("always")
-            self.auto_reference.prepare_partial(
-                self.x_new, dof=3.0, initial_dof=2.0,
-            )
-        self.assertTrue(
-            any("initial_dof" in str(w.message) for w in caught),
-            f"Expected initial_dof warning, got {[str(w.message) for w in caught]}",
-        )
-
     # --- validation -------------------------------------------------------
 
     def test_unknown_dof_string_raises(self):
         with self.assertRaisesRegex(ValueError, "dof"):
             self.auto_reference.prepare_partial(self.x_new, dof="nonsense")
 
+    def test_auto_raises(self):
+        # Against a fixed reference the objective has no interior optimum in
+        # dof, so learning it for new points is rejected on every entry point
+        for name, TSNE_ in (("bh", TSNE_BH), ("fft", TSNE_FFT)):
+            with self.subTest(method=name):
+                reference = TSNE_(
+                    dof="auto", early_exaggeration_iter=5, n_iter=20,
+                ).fit(self.x_train)
+                with self.assertRaisesRegex(ValueError, "new points"):
+                    reference.prepare_partial(self.x_new, dof="auto")
+                with self.assertRaisesRegex(ValueError, "new points"):
+                    reference.transform(self.x_new, dof="auto")
+
+                partial = reference.prepare_partial(self.x_new)
+                P_before = partial.P.copy()
+                with self.assertRaisesRegex(ValueError, "new points"):
+                    partial.optimize(5, dof="auto")
+                np.testing.assert_array_equal(partial.P.data, P_before.data)
+
+    def test_objectives_reject_dof_gradient_against_reference(self):
+        partial = self.auto_reference.prepare_partial(self.x_new)
+        self.auto_reference.prepare_interpolation_grid()
+        common = dict(
+            embedding=np.asarray(partial),
+            P=partial.P,
+            dof=1.5,
+            reference_embedding=self.auto_reference,
+            compute_dof_grad=True,
+        )
+        with self.assertRaisesRegex(ValueError, "reference embedding"):
+            kl_divergence_bh(bh_params={"theta": 0.5}, **common)
+        with self.assertRaisesRegex(ValueError, "reference embedding"):
+            kl_divergence_fft(
+                fft_params={
+                    "n_interpolation_points": 3,
+                    "min_num_intervals": 50,
+                    "ints_in_interval": 1,
+                },
+                **common,
+            )
+
     # --- transform() threading --------------------------------------------
 
     def test_transform_default_inherit(self):
         new_embedding = self.auto_reference.transform(self.x_new)
         self.assertEqual(new_embedding.dof_, self.learned_dof)
-
-    def test_transform_auto_relearns(self):
-        new_embedding = self.auto_reference.transform(
-            self.x_new, dof="auto", n_iter=20,
-        )
-        # The transformed embedding's `dof_` should be a float, but it can
-        # have moved away from the parent's learned value because the
-        # optimizer was free to relearn.
-        self.assertIsInstance(new_embedding.dof_, float)
 
     def test_transform_fixed_float(self):
         new_embedding = self.auto_reference.transform(
