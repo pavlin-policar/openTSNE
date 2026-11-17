@@ -20,6 +20,10 @@ def _exclude_self(indices, distances):
     own nearest neighbor. Rows that do not contain the point itself drop their
     furthest result.
 
+    Exactly one entry is removed from each row. Approximate indices can list
+    the same neighbor more than once (e.g. pynndescent under a non-metric
+    distance), in which case only the first occurrence of the point is removed.
+
     Returns
     -------
     indices: np.ndarray
@@ -29,8 +33,9 @@ def _exclude_self(indices, distances):
     """
     n_samples, k = indices.shape[0], indices.shape[1] - 1
     is_self = indices == np.arange(n_samples)[:, None]
-    is_self[~is_self.any(axis=1), -1] = True
-    keep = ~is_self
+    drop = np.where(is_self.any(axis=1), is_self.argmax(axis=1), k)
+    keep = np.ones_like(is_self)
+    keep[np.arange(n_samples), drop] = False
     return indices[keep].reshape(n_samples, k), distances[keep].reshape(n_samples, k)
 
 
@@ -588,7 +593,7 @@ class NNDescent(KNNIndex):
         timer.__exit__()
 
         # pynndescent returns float32 distances; the other indices return float64
-        return indices[:, 1:], distances[:, 1:].astype(np.float64)
+        return _exclude_self(indices, distances.astype(np.float64))
 
     def query(self, query, k):
         timer = utils.Timer(
