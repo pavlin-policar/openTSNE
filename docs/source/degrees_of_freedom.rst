@@ -36,8 +36,7 @@ Two related names appear throughout the API, and it helps to keep them apart:
     A parameter that tells openTSNE *how* to treat the degrees of freedom on a
     given call. It may be a number, in which case the degrees of freedom are
     held **fixed** at that value, or the string ``"auto"``, in which case they
-    are **learned** during optimization. A third value, ``"inherit"``, is
-    available when adding new data and is described below.
+    are **learned** during optimization.
 
 ``dof_``
     An attribute on every embedding holding the degrees of freedom that were
@@ -92,25 +91,39 @@ value is written to ``dof_`` once optimization finishes:
     embedding = TSNE(dof="auto").fit(x)
     embedding.dof_                   # e.g. 0.73, the learned value
 
-When learning, optimization starts from ``1`` by default. A different starting
-point can be supplied with ``initial_dof``:
+Learning the degrees of freedom is supported with both the Barnes-Hut
+(``negative_gradient_method="bh"``) and the interpolation-based FFT
+(``negative_gradient_method="fft"``) gradients.
+
+Learning and exaggeration
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+t-SNE runs in two phases: an *early exaggeration* phase, which multiplies the
+attractive forces to let clusters form, followed by the normal optimization
+phase. Exaggeration scales the attractive term of the dof gradient in the same
+way, but not its repulsive term. Under exaggeration, the dof gradient is
+therefore not the gradient of the KL divergence, and learning settles on a
+value that does not minimize it. In practice this can change which clusters
+split apart. For this reason, :class:`~openTSNE.TSNE` holds the degrees of
+freedom at ``1`` during early exaggeration and learns them only in the normal
+phase.
+
+Learning starts from ``1`` by default. A different starting point can be
+supplied with ``initial_dof``, which takes effect at the start of the normal
+phase:
 
 .. code-block:: python
 
     embedding = TSNE(dof="auto", initial_dof=2).fit(x)
+    # early exaggeration: dof held at 1
+    # normal phase:       learning starts from 2
 
 ``initial_dof`` only applies when ``dof="auto"``; it is ignored (with a warning)
 for a fixed ``dof``.
 
-.. note::
-
-    Learning the degrees of freedom is supported with both the Barnes-Hut
-    (``negative_gradient_method="bh"``) and the interpolation-based FFT
-    (``negative_gradient_method="fft"``) gradients. The one exception is
-    embedding new points into an existing embedding
-    (:meth:`~openTSNE.TSNEEmbedding.transform`): there only Barnes-Hut computes
-    the dof gradient, and the FFT path keeps the degrees of freedom fixed and
-    emits a warning.
+Learning still runs under exaggeration if you ask for it, for instance with
+``TSNE(dof="auto", exaggeration=4)``, or by optimizing a ``dof="auto"``
+embedding with ``exaggeration=12``, but openTSNE emits a warning.
 
 Optimizing in phases
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -128,9 +141,11 @@ the current value.
     embedding = embedding.optimize(250)   # continues learning from embedding.dof_
 
 The same applies when constructing an embedding by hand rather than through the
-:class:`~openTSNE.TSNE` estimator. The starting value lives on the embedding,
-so a freshly built ``dof="auto"`` embedding learns from ``1`` (or from
-``initial_dof``), and each further call resumes from the value learned so far:
+:class:`~openTSNE.TSNE` estimator. The starting value lives on the embedding:
+a freshly built ``dof="auto"`` embedding has ``dof_`` set to ``1`` (or to
+``initial_dof``), and each call resumes from the current ``dof_``. To follow
+the same schedule as :class:`~openTSNE.TSNE`, hold the degrees of freedom fixed
+during early exaggeration:
 
 .. code-block:: python
 
@@ -140,83 +155,27 @@ so a freshly built ``dof="auto"`` embedding learns from ``1`` (or from
     init = initialization.pca(x)
 
     embedding = TSNEEmbedding(init, affinities, dof="auto", negative_gradient_method="bh")
-    embedding = embedding.optimize(250, exaggeration=12)
-    embedding = embedding.optimize(500)
+    embedding = embedding.optimize(250, exaggeration=12, dof=1)   # dof held at 1
+    embedding = embedding.optimize(500)                           # learns, starting from 1
 
-Passing a number on any call fixes the degrees of freedom at that value for the
-run. This is the natural way to freeze a learned value before continuing:
-
-.. code-block:: python
-
-    embedding = TSNE(dof="auto").fit(x)               # learns, e.g. dof_ == 0.73
-    embedding = embedding.optimize(250, dof=embedding.dof_)   # freeze at 0.73
-
-Adding new data
----------------
-
-When embedding new points into an existing embedding with
-:meth:`~openTSNE.TSNEEmbedding.transform` (or
-:meth:`~openTSNE.TSNEEmbedding.prepare_partial`), the ``dof`` parameter accepts
-the same numeric and ``"auto"`` values, plus a third option, ``"inherit"``,
-which is the default. The new points should normally live in the same kernel as
-the reference embedding, so by default they take the parent's degrees of freedom
-and keep them fixed.
+Passing a number to :meth:`~openTSNE.TSNEEmbedding.optimize` fixes the degrees of
+freedom at that value for that call only. The mode the embedding was created
+with is unchanged, so a later call without ``dof`` goes back to learning. This
+is also how to run with the learned value frozen:
 
 .. code-block:: python
 
-    embedding = TSNE(dof="auto").fit(x)   # embedding.dof_ == 0.73, say
+    embedding = TSNE(dof="auto").fit(x)                       # learns, e.g. dof_ == 0.73
+    embedding = embedding.optimize(250, dof=embedding.dof_)   # frozen at 0.73
+    embedding = embedding.optimize(250)                       # learning resumes from 0.73
 
-    # Default: inherit the parent's degrees of freedom, held fixed
-    new = embedding.transform(x_new)
-    new.dof_                              # 0.73
-
-The other modes mirror the standard case. Setting ``dof="auto"`` learns a
-separate value for the new points, warm-started from the parent's value so the
-optimization continues smoothly:
+To restart learning from a particular value, pass ``initial_dof`` to
+:meth:`~openTSNE.TSNEEmbedding.optimize`. It sets ``dof_`` to that value before
+the call learns from it, and like ``dof``, it applies to that call only:
 
 .. code-block:: python
 
-    new = embedding.transform(x_new, dof="auto")          # starts at 0.73, then learns
-
-The warm-start can be overridden with ``initial_dof``:
-
-.. code-block:: python
-
-    new = embedding.transform(x_new, dof="auto", initial_dof=5)   # starts at 5, then learns
-
-Finally, a number pins the new points to a specific value, ignoring the parent:
-
-.. code-block:: python
-
-    new = embedding.transform(x_new, dof=3)
-    new.dof_                              # 3.0
-
-.. warning::
-
-    Learning the degrees of freedom for new points (``dof="auto"`` on
-    ``transform``) is uncharted territory and should be used at your own risk.
-    With the reference embedding held fixed, the objective has no interior
-    optimum in the degrees of freedom — it keeps improving slightly as they
-    grow, with sharply diminishing returns — so the learned value drifts upward
-    with more iterations rather than settling. openTSNE emits a warning when
-    this mode is used. ``"inherit"`` (the default) is recommended.
-
-The four behaviours can be summarized as follows.
-
-.. list-table::
-   :header-rows: 1
-   :widths: 35 65
-
-   * - ``dof`` on ``transform``
-     - Behaviour
-   * - ``"inherit"`` *(default)*
-     - Use the parent's ``dof_``, held fixed.
-   * - ``"auto"``
-     - Learn a new value, warm-started from the parent.
-   * - ``"auto"`` with ``initial_dof``
-     - Learn a new value, warm-started from ``initial_dof``.
-   * - a number
-     - Hold the degrees of freedom fixed at that number.
+    embedding = embedding.optimize(250, initial_dof=2)        # learning restarts from 2
 
 A worked example: the Swiss roll
 --------------------------------
@@ -252,7 +211,7 @@ around ``5`` — reflecting that the Swiss roll should stay connected:
     standard = TSNE(dof=1, random_state=42).fit(x)
     learned  = TSNE(dof="auto", random_state=42).fit(x)
 
-    learned.dof_   # ~5.0
+    learned.dof_   # ~5.2
 
 Side by side, the three embeddings show the progression from a fragmented
 heavy-tailed embedding, through standard t-SNE, to the smooth unrolled sheet
@@ -266,13 +225,10 @@ Building the embedding by hand
 
 The estimator above is a convenient wrapper. For finer control the affinities,
 the initialization, and the optimizer can be assembled directly and optimized in
-phases. The ``dof`` mode can even be varied between phases. Here we hold
-``dof=1`` (standard t-SNE) during early exaggeration, while the broad layout of
-the manifold forms, and only switch on learning with ``dof="auto"`` for the main
-phase. Passing ``dof="auto"`` to a single
-:meth:`~openTSNE.TSNEEmbedding.optimize` call overrides the embedding's mode for
-that call, so the degrees of freedom start learning from their current value of
-``1``.
+phases. Here we reproduce what ``TSNE(dof="auto")`` does. The embedding is
+created with ``dof="auto"``, and passing ``dof=1`` to the early exaggeration
+call holds the degrees of freedom fixed for that call only. The main phase then
+learns them, starting from the current ``dof_`` of ``1``.
 
 .. code-block:: python
 
@@ -281,70 +237,18 @@ that call, so the degrees of freedom start learning from their current value of
     affinities = affinity.PerplexityBasedNN(x, perplexity=30, random_state=42)
     init = initialization.pca(x, random_state=42)
 
-    # Construct with the default dof=1, i.e. standard t-SNE
     embedding = TSNEEmbedding(
-        init, affinities, negative_gradient_method="bh", random_state=42
+        init, affinities, dof="auto", negative_gradient_method="bh", random_state=42
     )
-    embedding = embedding.optimize(250, exaggeration=12)   # dof held fixed at 1
-    embedding = embedding.optimize(500, dof="auto")        # main phase: learn dof
-    embedding.dof_                                         # ~4.9
+    embedding = embedding.optimize(250, exaggeration=12, dof=1)   # dof held at 1
+    embedding = embedding.optimize(500)                           # main phase: learn dof
+    embedding.dof_                                                # ~5.2
 
-Holding ``dof=1`` through early exaggeration lets the broad structure settle
-under the familiar t-SNE kernel; learning then refines the degrees of freedom to
-about ``5`` during the main phase, recovering the same light-tailed kernel the
-estimator finds.
+The learned value matches what the estimator finds.
 
 .. image:: examples/07_degrees_of_freedom/output_20_0.png
    :align: center
    :width: 60%
-
-Embedding new points
-~~~~~~~~~~~~~~~~~~~~~~
-
-Finally, we map unseen points into an existing embedding. We split the swiss
-roll into a reference set, which we embed first, and a set of new points, which
-we then place into that same space with
-:meth:`~openTSNE.TSNEEmbedding.transform`.
-
-.. code-block:: python
-
-    from sklearn.model_selection import train_test_split
-
-    x_ref, x_new, t_ref, t_new = train_test_split(x, t, test_size=0.33, random_state=42)
-
-    reference = TSNE(dof="auto", random_state=42).fit(x_ref)
-    reference.dof_                        # ~5.4
-
-By default ``transform`` uses ``dof="inherit"``: the new points adopt the
-reference's degrees of freedom and hold them fixed, so they live in exactly the
-same kernel as the points they are mapped against.
-
-.. code-block:: python
-
-    new = reference.transform(x_new)      # dof="inherit" by default
-    new.dof_                              # 5.4, inherited from the reference
-
-.. image:: examples/07_degrees_of_freedom/output_25_0.png
-   :align: center
-   :width: 60%
-
-The new points (outlined) slot smoothly into the reference (drawn faintly),
-continuing its colour gradient. The other modes behave as described above:
-``dof="auto"`` relearns a value for the new points, and a number pins them to a
-fixed value. Because ``"auto"`` is only weakly identified against a fixed
-reference it tends to a larger value here (around ``19``), while a fixed
-``dof=1`` deliberately uses a heavier-tailed kernel than the reference. In all
-three cases the embedding itself is barely affected — the choice of ``dof`` for
-new points changes the learned value far more than where the points land.
-
-.. code-block:: python
-
-    new_inherit = reference.transform(x_new)               # 5.4
-    new_auto    = reference.transform(x_new, dof="auto")   # ~19, drifts upward
-    new_fixed   = reference.transform(x_new, dof=1)        # 1.0
-
-.. image:: examples/07_degrees_of_freedom/output_28_0.png
-   :align: center
 
 A better initialization
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -364,7 +268,7 @@ embedding therefore *starts* unrolled, and optimization only has to refine it:
 .. code-block:: python
 
     spectral = TSNE(initialization="spectral", dof="auto", random_state=0).fit(x)
-    spectral.dof_   # ~30
+    spectral.dof_   # ~31
 
 Starting from the unrolled spectral layout, the sheet now stays unrolled: the
 colour gradient runs smoothly from one end to the other across a single
@@ -375,8 +279,19 @@ rather than tearing it apart. For a manifold like the Swiss roll a good
 initialization matters at least as much as the kernel, and spectral
 initialization is the better choice.
 
-.. image:: examples/07_degrees_of_freedom/output_33_0.png
+.. image:: examples/07_degrees_of_freedom/output_25_0.png
    :align: center
+
+Limitations
+-----------
+
+The degrees of freedom cannot be learned when adding new points to an existing
+embedding with :meth:`~openTSNE.TSNEEmbedding.transform` or
+:meth:`~openTSNE.TSNEEmbedding.prepare_partial`. With the reference embedding
+held fixed, the objective has no interior optimum in the degrees of freedom: it
+keeps improving slightly as they grow, so a learned value drifts upward instead
+of settling. Passing ``dof="auto"`` there raises a ``ValueError``. New points
+use the embedding's ``dof_`` by default, or a fixed value passed as ``dof``.
 
 References
 ----------
