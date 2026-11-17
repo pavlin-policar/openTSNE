@@ -1174,7 +1174,7 @@ class TestTransformWithLearnedDof(unittest.TestCase):
         self.assertEqual(new_embedding.shape, (self.x_new.shape[0], 2))
         self.assertEqual(new_embedding.dof_, reference.dof_)
 
-    def test_transform_inherits_fixed_parent_dof(self):
+    def test_transform_uses_fixed_parent_dof(self):
         # Symmetric case: parent fitted with a fixed non-default dof. The
         # partial embedding (and the transformed result) must use the same
         # value — the new points should live in the same kernel.
@@ -1201,10 +1201,10 @@ class TestTransformWithLearnedDof(unittest.TestCase):
         new_embedding = reference.transform(self.x_new)
         self.assertEqual(new_embedding.dof_, 5.0)
 
-    def test_inherit_from_unoptimized_auto_parent(self):
+    def test_unoptimized_auto_parent_passes_its_starting_dof(self):
         # A parent constructed with `dof="auto"` but never optimized already
         # holds the value learning would start from in `dof_`, i.e.
-        # `initial_dof` or 1, so `dof="inherit"` uses that.
+        # `initial_dof` or 1, so new points use that.
         from openTSNE import TSNEEmbedding
         from openTSNE import affinity, initialization
 
@@ -1223,9 +1223,9 @@ class TestTransformWithLearnedDof(unittest.TestCase):
                 self.assertEqual(partial.dof_, expected)
 
 
-class TestPartialDofModes(unittest.TestCase):
-    """New points use either the reference's dof (`"inherit"`) or a fixed one;
-    dof is never learned for them."""
+class TestPartialDof(unittest.TestCase):
+    """New points always use the dof the reference embedding was optimized
+    with; dof is never learned for them."""
 
     @classmethod
     def setUpClass(cls):
@@ -1259,9 +1259,7 @@ class TestPartialDofModes(unittest.TestCase):
         )
         return history
 
-    # --- inherit (default) -------------------------------------------------
-
-    def test_inherit_from_auto_parent(self):
+    def test_uses_learned_dof_of_auto_parent(self):
         partial = self.auto_reference.prepare_partial(self.x_new)
         self.assertEqual(partial.dof_, self.learned_dof)
         self.assertEqual(
@@ -1272,41 +1270,21 @@ class TestPartialDofModes(unittest.TestCase):
         for d in history:
             self.assertEqual(d, self.learned_dof)
 
-    def test_inherit_from_fixed_parent(self):
+    def test_uses_dof_of_fixed_parent(self):
         partial = self.fixed_reference.prepare_partial(self.x_new)
         self.assertEqual(partial.dof_, 5.0)
         self.assertEqual(partial.gradient_descent_params["dof"], 5.0)
         for d in self._dof_history(partial):
             self.assertEqual(d, 5.0)
 
-    # --- fixed float ------------------------------------------------------
-
-    def test_fixed_float_dof(self):
-        partial = self.auto_reference.prepare_partial(self.x_new, dof=3.0)
-        self.assertEqual(partial.gradient_descent_params["dof"], 3.0)
-        self.assertEqual(partial.dof_, 3.0)
-        for d in self._dof_history(partial):
-            self.assertEqual(d, 3.0)
-
-    # --- validation -------------------------------------------------------
-
-    def test_unknown_dof_string_raises(self):
-        with self.assertRaisesRegex(ValueError, "dof"):
-            self.auto_reference.prepare_partial(self.x_new, dof="nonsense")
-
-    def test_auto_raises(self):
+    def test_learning_dof_for_new_points_raises(self):
         # Against a fixed reference the objective has no interior optimum in
-        # dof, so learning it for new points is rejected on every entry point
+        # dof, so the optimizer rejects learning it
         for name, TSNE_ in (("bh", TSNE_BH), ("fft", TSNE_FFT)):
             with self.subTest(method=name):
                 reference = TSNE_(
                     dof="auto", early_exaggeration_iter=5, n_iter=20,
                 ).fit(self.x_train)
-                with self.assertRaisesRegex(ValueError, "new points"):
-                    reference.prepare_partial(self.x_new, dof="auto")
-                with self.assertRaisesRegex(ValueError, "new points"):
-                    reference.transform(self.x_new, dof="auto")
-
                 partial = reference.prepare_partial(self.x_new)
                 P_before = partial.P.copy()
                 with self.assertRaisesRegex(ValueError, "new points"):
@@ -1334,18 +1312,6 @@ class TestPartialDofModes(unittest.TestCase):
                 },
                 **common,
             )
-
-    # --- transform() threading --------------------------------------------
-
-    def test_transform_default_inherit(self):
-        new_embedding = self.auto_reference.transform(self.x_new)
-        self.assertEqual(new_embedding.dof_, self.learned_dof)
-
-    def test_transform_fixed_float(self):
-        new_embedding = self.auto_reference.transform(
-            self.x_new, dof=3.0, n_iter=10,
-        )
-        self.assertEqual(new_embedding.dof_, 3.0)
 
 
 if __name__ == "__main__":

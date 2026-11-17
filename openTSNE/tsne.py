@@ -175,14 +175,6 @@ def _adapt_callback(c):
     )
 
 
-_DOF_AUTO_FOR_NEW_POINTS_ERROR = (
-    "`dof='auto'` is not supported when embedding new points into an existing "
-    "embedding. Against a fixed reference embedding the objective has no "
-    "interior optimum in dof, so the learned value drifts upward instead of "
-    "settling. Use `dof='inherit'` (the default) or a fixed number."
-)
-
-
 def _check_initial_dof(initial_dof):
     try:
         valid = bool(np.isfinite(initial_dof) and initial_dof > 0)
@@ -422,9 +414,8 @@ class PartialTSNEEmbedding(np.ndarray):
         The KL divergence or error of the embedding.
 
     dof_: float
-        The degrees of freedom the new points are optimized with. dof is
-        never learned for new points; see
-        :meth:`TSNEEmbedding.prepare_partial`.
+        The degrees of freedom the new points are optimized with, which is
+        the reference embedding's ``dof_``.
 
     optimization_iters_: int
         The total number of optimization iterations this embedding has
@@ -467,11 +458,7 @@ class PartialTSNEEmbedding(np.ndarray):
         obj.optimizer = optimizer
 
         obj.kl_divergence_ = None
-        # New points are always optimized with a fixed dof
-        partial_dof = gradient_descent_params.get("dof", 1)
-        if partial_dof == "auto":
-            raise ValueError(_DOF_AUTO_FOR_NEW_POINTS_ERROR)
-        obj.dof_ = partial_dof
+        obj.dof_ = gradient_descent_params.get("dof", 1)
         obj.optimization_iters_ = 0
 
         return obj
@@ -1015,7 +1002,6 @@ class TSNEEmbedding(np.ndarray):
         final_momentum=0.8,
         max_grad_norm=0.25,
         max_step_norm=None,
-        dof="inherit",
     ):
         """Embed new points into the existing embedding.
 
@@ -1093,17 +1079,6 @@ class TSNEEmbedding(np.ndarray):
             clipped. This prevents points from "shooting off" from
             the embedding.
 
-        dof: Union[float, str]
-            Degrees of freedom for the new points, held fixed. One of:
-
-            - ``"inherit"`` (default): use the embedding's ``dof_``, so the
-              new points live in the same kernel as the reference.
-            - a float: use that fixed value.
-
-            dof cannot be learned for new points: against a fixed reference
-            embedding the objective has no interior optimum in dof, so
-            ``dof="auto"`` raises a ``ValueError``.
-
         Returns
         -------
         PartialTSNEEmbedding
@@ -1133,7 +1108,6 @@ class TSNEEmbedding(np.ndarray):
             X,
             initialization=initialization,
             k=k,
-            dof=dof,
             **affinity_params,
         )
 
@@ -1170,7 +1144,6 @@ class TSNEEmbedding(np.ndarray):
         X,
         initialization="median",
         k=25,
-        dof="inherit",
         **affinity_params,
     ):
         """Prepare a partial embedding which can be optimized.
@@ -1191,17 +1164,6 @@ class TSNEEmbedding(np.ndarray):
             the point onto the embedding. This is different from ``perpelxity``
             because perplexity affects optimization while this only affects the
             initial point positions.
-
-        dof: Union[float, str]
-            Degrees of freedom for the partial embedding, held fixed. One of:
-
-            - ``"inherit"`` (default): use the embedding's ``dof_``, so the
-              new points live in the same kernel as the reference.
-            - a float: use that fixed value.
-
-            dof cannot be learned for new points: against a fixed reference
-            embedding the objective has no interior optimum in dof, so
-            ``dof="auto"`` raises a ``ValueError``.
 
         **affinity_params: dict
             Additional params to be passed to the ``Affinities.to_new`` method.
@@ -1253,22 +1215,10 @@ class TSNEEmbedding(np.ndarray):
         else:
             raise ValueError(f"Unrecognized initialization scheme `{initialization}`.")
 
-        gd_params = dict(self.gradient_descent_params)
-        if dof == "inherit":
-            gd_params["dof"] = float(self.dof_)
-        elif dof == "auto":
-            raise ValueError(_DOF_AUTO_FOR_NEW_POINTS_ERROR)
-        elif isinstance(dof, (int, float)) and not isinstance(dof, bool):
-            gd_params["dof"] = float(dof)
-        else:
-            raise ValueError(f"`dof` must be 'inherit' or a float; got {dof!r}.")
-
-        return PartialTSNEEmbedding(
-            embedding,
-            self,
-            P=P,
-            **gd_params,
-        )
+        # New points use the dof the reference embedding was optimized with,
+        # which, unlike the stored `dof`, is never "auto"
+        gd_params = dict(self.gradient_descent_params, dof=self.dof_)
+        return PartialTSNEEmbedding(embedding, self, P=P, **gd_params)
 
     def prepare_interpolation_grid(self, padding=0.25):
         """Evaluate and save the interpolation grid coefficients.
@@ -2322,7 +2272,11 @@ class gradient_descent:
         # rejected call leaves the affinities intact
         if dof == "auto":
             if reference_embedding is not None:
-                raise ValueError(_DOF_AUTO_FOR_NEW_POINTS_ERROR)
+                raise ValueError(
+                    "`dof='auto'` is not supported when embedding new points "
+                    "into an existing embedding: against a fixed reference "
+                    "embedding the objective has no interior optimum in dof."
+                )
             if initial_dof is not None:
                 _check_initial_dof(initial_dof)
             if exaggeration != 1:
