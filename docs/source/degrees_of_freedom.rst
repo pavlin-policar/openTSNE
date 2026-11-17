@@ -56,11 +56,9 @@ In short, ``dof`` is the *instruction* and ``dof_`` is the *result*.
 
     Unlike most fitted attributes, ``dof_`` is not purely informational.
     openTSNE reads it back to decide where to continue from: a subsequent
-    ``dof="auto"`` optimization warm-starts from ``embedding.dof_``, and
-    :meth:`~openTSNE.TSNEEmbedding.transform` places new points using the
-    reference embedding's ``dof_`` unless given a fixed ``dof``. Overwriting
-    ``embedding.dof_`` by hand therefore changes later optimization and
-    transforms — it is not a cosmetic relabelling. To run with a different
+    ``dof="auto"`` optimization warm-starts from ``embedding.dof_``.
+    Overwriting ``embedding.dof_`` by hand therefore changes later
+    optimization — it is not a cosmetic relabelling. To run with a different
     value, pass ``dof`` to :meth:`~openTSNE.TSNEEmbedding.optimize` or
     :class:`~openTSNE.TSNE` rather than assigning to ``dof_``.
 
@@ -290,8 +288,7 @@ embedding with :meth:`~openTSNE.TSNEEmbedding.transform` or
 :meth:`~openTSNE.TSNEEmbedding.prepare_partial`. With the reference embedding
 held fixed, the objective has no interior optimum in the degrees of freedom: it
 keeps improving slightly as they grow, so a learned value drifts upward instead
-of settling, and ``dof="auto"`` raises a ``ValueError``. New points use the
-reference embedding's ``dof_`` by default, or a fixed value passed as ``dof``.
+of settling. Passing ``dof="auto"`` there raises a ``ValueError``.
 
 References
 ----------
