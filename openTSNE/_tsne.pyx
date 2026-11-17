@@ -15,13 +15,14 @@ from libc.stdlib cimport malloc, free
 from .quad_tree cimport QuadTree, Node, is_close
 from ._matrix_mul.matrix_mul cimport matrix_multiply_fft_1d, matrix_multiply_fft_2d
 
-from libc.math cimport sqrt, log, pow, exp, fabs, fmax, INFINITY  # Add pow and log
+
 cdef double EPSILON = np.finfo(np.float64).eps
 
 
 cdef extern from "math.h":
     double sqrt(double x) nogil
     double log(double x) nogil
+    double pow(double x, double y) nogil
     double exp(double x) nogil
     double fabs(double x) nogil
     double fmax(double x, double y) nogil
@@ -130,7 +131,7 @@ cpdef tuple estimate_positive_gradient_nn(
     # Degrees of freedom cannot be negative
     if dof <= 0:
         dof = 1e-8
-    
+
     with nogil, parallel(num_threads=num_threads):
         # Use `malloc` here instead of `PyMem_Malloc` because we're in a
         # `nogil` clause and we won't be allocating much memory
@@ -179,6 +180,7 @@ cpdef tuple estimate_positive_gradient_nn(
                         kl_divergence += p_ij * log((p_ij / (q_ij ** dof + EPSILON)) + EPSILON)                    
                     else:
                         kl_divergence += p_ij * log((p_ij / (q_ij + EPSILON)) + EPSILON)
+
         free(diff)
 
     return sum_P, kl_divergence, alpha_grad_pos

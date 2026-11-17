@@ -20,6 +20,7 @@ from openTSNE.optimizer import (
 )
 from openTSNE.quad_tree import QuadTree
 
+
 EPSILON = np.finfo(np.float64).eps
 
 log = logging.getLogger(__name__)
@@ -873,6 +874,7 @@ class TSNEEmbedding(np.ndarray):
         obj.interp_coeffs = None
         obj.box_x_lower_bounds = None
         obj.box_y_lower_bounds = None
+
         return obj
 
     def optimize(
@@ -1262,6 +1264,7 @@ class TSNEEmbedding(np.ndarray):
             optimization.
 
         """
+
         # To maintain perfect backwards compatibility and to handle the very
         # specific case when the user wants to pass in `perplexity` to the
         # multiscale affinity object (multiscale accepts `perplexities`), rename
@@ -1823,6 +1826,7 @@ class TSNE(BaseEstimator):
             optimization.
 
         """
+
         # Either `X` or `affinities` must be specified
         if X is None and affinities is None and initialization is None:
             raise ValueError(
