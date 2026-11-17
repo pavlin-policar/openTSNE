@@ -515,8 +515,7 @@ class TestDofAutoLearning(unittest.TestCase):
     def test_fixed_then_auto_resumes_from_fixed(self):
         # Switching from a fixed dof to dof="auto" must pick up at the fixed
         # value, so the user can use a fixed-dof phase as a warm start for
-        # subsequent dof learning. `initial_dof` is ignored on resume — it
-        # only applies when the embedding has no prior dof.
+        # subsequent dof learning.
         embedding = TSNE_BH(
             dof=5.0, early_exaggeration_iter=0, n_iter=10,
         ).fit(self.x)
@@ -574,11 +573,12 @@ class TestDofAutoLearning(unittest.TestCase):
         self.assertIsInstance(learned.dof_, float)
         self.assertNotEqual(learned.dof_, 1.0)
 
-    def test_dof_attribute_set_at_construction_for_fixed_dof(self):
+    def test_dof_attribute_set_at_construction(self):
         # A freshly-constructed (un-optimized) embedding must already expose
-        # `dof_` matching its fixed `dof`, so callers don't have to branch on
-        # whether optimization has run yet. For `dof="auto"`, `dof_` stays
-        # None until the optimizer warm-starts.
+        # `dof_`, so callers don't have to branch on whether optimization has
+        # run yet: the fixed `dof`, or for `dof="auto"` the value learning
+        # will start from. `initial_dof` is not kept as a parameter, so it
+        # cannot restart learning on later `optimize` calls.
         from openTSNE import TSNEEmbedding
         from openTSNE import affinity, initialization
 
@@ -596,7 +596,13 @@ class TestDofAutoLearning(unittest.TestCase):
         emb_auto = TSNEEmbedding(
             init, aff, negative_gradient_method="bh", dof="auto",
         )
-        self.assertIsNone(emb_auto.dof_)
+        self.assertEqual(emb_auto.dof_, 1.0)
+
+        emb_auto_initial = TSNEEmbedding(
+            init, aff, negative_gradient_method="bh", dof="auto", initial_dof=3,
+        )
+        self.assertEqual(emb_auto_initial.dof_, 3.0)
+        self.assertNotIn("initial_dof", emb_auto_initial.gradient_descent_params)
 
         # `prepare_initial` (the path TSNE.fit goes through) must give the
         # same answer.
@@ -736,12 +742,17 @@ class TestDofLearningStability(unittest.TestCase):
         ).fit(self.x)
         self.assertTrue(all(s.dof > 0 for s in history))
 
-    def test_dof_does_not_diverge_under_strong_early_exaggeration(self):
-        # The old exaggeration coupling sent dof to hundreds/thousands at high
-        # early_exaggeration. With the normalized gradient it must stay sane.
+    def test_dof_does_not_diverge_when_learned_under_strong_exaggeration(self):
+        # `fit` never learns dof under exaggeration, but chained `optimize`
+        # calls can, with a warning. The exaggeration-normalized learning rate
+        # must still keep dof sane there; without it, dof ran off to the
+        # hundreds or thousands at high exaggeration.
         learned = {}
         for ee in (4, 12, 32):
-            emb = TSNE_BH(dof="auto", early_exaggeration=ee, n_iter=250).fit(self.x)
+            emb = TSNE_BH(dof="auto").prepare_initial(self.x)
+            with self.assertWarnsRegex(UserWarning, "exaggeration"):
+                emb.optimize(250, exaggeration=ee, inplace=True)
+            emb.optimize(250, inplace=True)
             learned[ee] = emb.dof_
             self.assertLess(emb.dof_, 20.0, f"dof diverged at ee={ee}: {emb.dof_}")
             self.assertGreater(emb.dof_, 0.1)
@@ -749,27 +760,121 @@ class TestDofLearningStability(unittest.TestCase):
         vals = np.array(list(learned.values()))
         self.assertLess(vals.std() / vals.mean(), 0.4)
 
-    def test_dof_is_well_behaved_across_exaggeration_phases(self):
-        # `fit` runs an early-exaggeration phase before the main one, and the
-        # dof gradient is normalized by the exaggeration factor. Both
-        # objectives must therefore keep dof finite, positive and sane through
-        # the exaggerated phase and the transition out of it.
+
+class TestDofEarlyExaggeration(unittest.TestCase):
+    """`TSNE.fit` holds dof at 1 through early exaggeration, where the dof
+    gradient is not that of the KL divergence, and learns it only in the normal
+    phase, starting from `initial_dof`."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.x = datasets.load_iris()["data"]
+
+    def _fit_with_history(self, TSNE_, **kwargs):
+        history = []
+        params = dict(
+            dof="auto",
+            early_exaggeration_iter=10,
+            n_iter=20,
+            callbacks=history.append,
+            callbacks_every_iters=1,
+        )
+        params.update(kwargs)
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            embedding = TSNE_(**params).fit(self.x)
+        return embedding, history, caught
+
+    def test_dof_held_at_one_during_early_exaggeration(self):
         for name, TSNE_ in (("bh", TSNE_BH), ("fft", TSNE_FFT)):
-            history = []
-            emb = TSNE_(
-                dof="auto",
-                early_exaggeration_iter=25,
-                n_iter=50,
-                callbacks=history.append,
-                callbacks_every_iters=1,
+            with self.subTest(method=name):
+                embedding, history, _ = self._fit_with_history(TSNE_)
+                early = [s for s in history if s.exaggeration == 12]
+                normal = [s for s in history if s.exaggeration == 1]
+                self.assertEqual(len(early), 10)
+                self.assertEqual(len(normal), 20)
+                self.assertTrue(all(s.dof == 1 for s in early))
+                self.assertTrue(all(s.dof_grad == 0 for s in early))
+                self.assertTrue(all(s.dof_grad != 0 for s in normal))
+                self.assertNotEqual(embedding.dof_, 1.0)
+
+    def test_learning_starts_from_initial_dof_after_early_exaggeration(self):
+        embedding, history, caught = self._fit_with_history(TSNE_BH, initial_dof=2)
+        early = [s for s in history if s.exaggeration == 12]
+        normal = [s for s in history if s.exaggeration == 1]
+        self.assertTrue(all(s.dof == 1 for s in early))
+        self.assertEqual(normal[0].dof, 2.0)
+        # Neither the pinned phase nor the hand-off warns
+        messages = [str(w.message) for w in caught]
+        self.assertFalse(
+            any("initial_dof" in m or "exaggeration" in m for m in messages),
+            messages,
+        )
+
+    def test_zero_normal_iterations_records_initial_dof(self):
+        # The normal phase sets `dof_` to `initial_dof` even if it runs no
+        # iterations, just as a fixed `dof` is recorded on `dof_`
+        for initial_dof, expected in ((None, 1.0), (2, 2.0)):
+            with self.subTest(initial_dof=initial_dof):
+                embedding = TSNE_BH(
+                    dof="auto",
+                    initial_dof=initial_dof,
+                    early_exaggeration_iter=10,
+                    n_iter=0,
+                ).fit(self.x)
+                self.assertEqual(embedding.dof_, expected)
+
+    def test_initial_dof_on_optimize_restarts_learning(self):
+        embedding = TSNE_BH(
+            dof="auto", early_exaggeration_iter=0, n_iter=20,
+        ).fit(self.x)
+        self.assertNotEqual(embedding.dof_, 3.0)
+
+        history = []
+        embedding.optimize(
+            n_iter=2,
+            initial_dof=3,
+            inplace=True,
+            callbacks=history.append,
+            callbacks_every_iters=1,
+        )
+        self.assertEqual(history[0].dof, 3.0)
+
+        # A restart with no iterations still moves `dof_` to `initial_dof`
+        restarted = embedding.optimize(n_iter=0, initial_dof=4)
+        self.assertEqual(restarted.dof_, 4.0)
+
+    def test_learning_under_exaggeration_warns_but_learns(self):
+        embedding = TSNE_BH(
+            dof="auto", early_exaggeration_iter=0, n_iter=5,
+        ).fit(self.x)
+        for exaggeration in (4, 0.5):
+            with self.subTest(exaggeration=exaggeration):
+                before = embedding.dof_
+                with self.assertWarnsRegex(UserWarning, "exaggeration"):
+                    embedding.optimize(5, exaggeration=exaggeration, inplace=True)
+                self.assertNotEqual(embedding.dof_, before)
+
+        # The normal phase of `fit` warns too when it is exaggerated
+        with self.assertWarnsRegex(UserWarning, "exaggeration"):
+            TSNE_BH(
+                dof="auto", early_exaggeration_iter=5, n_iter=5, exaggeration=4,
             ).fit(self.x)
-            phases = {s.exaggeration for s in history}
-            self.assertEqual(phases, {12, 1}, f"{name}: missing a phase, {phases}")
-            self.assertTrue(
-                all(np.isfinite(s.dof) and s.dof > 0 for s in history),
-                f"{name}: dof left the positive reals, {[s.dof for s in history]}",
-            )
-            self.assertTrue(0.1 < emb.dof_ < 20.0, f"{name}: dof_={emb.dof_}")
+
+    def test_fixed_dof_under_exaggeration_does_not_warn(self):
+        embedding = TSNE_BH(dof=2, early_exaggeration_iter=0, n_iter=5).fit(self.x)
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            embedding.optimize(5, exaggeration=4, inplace=True)
+
+    def test_rejected_initial_dof_leaves_affinities_intact(self):
+        # The exaggerated optimizer scales P in place, so validation must run
+        # before that or a rejected call would corrupt the affinities
+        embedding = TSNE_BH(dof="auto").prepare_initial(self.x)
+        P_before = embedding.affinities.P.copy()
+        with self.assertRaisesRegex(ValueError, "initial_dof"):
+            embedding.optimize(5, exaggeration=12, initial_dof=-1)
+        np.testing.assert_array_equal(embedding.affinities.P.data, P_before.data)
 
     def test_dof_lr_is_n_independent(self):
         # The same dof_lr should give comparable learned dof regardless of the
@@ -1191,11 +1296,10 @@ class TestTransformWithLearnedDof(unittest.TestCase):
         new_embedding = reference.transform(self.x_new)
         self.assertEqual(new_embedding.dof_, 5.0)
 
-    def test_inherit_falls_back_to_one_when_auto_parent_has_no_learned_dof(self):
-        # Edge case: parent was constructed with `dof="auto"` (no
-        # `initial_dof`) but never optimized, so there is no learned value
-        # to inherit. Default `dof="inherit"` falls back to 1.0 — the same
-        # default the optimizer uses when bootstrapping.
+    def test_inherit_from_unoptimized_auto_parent(self):
+        # A parent constructed with `dof="auto"` but never optimized already
+        # holds the value learning would start from in `dof_`, i.e.
+        # `initial_dof` or 1, so `dof="inherit"` uses that.
         from openTSNE import TSNEEmbedding
         from openTSNE import affinity, initialization
 
@@ -1203,39 +1307,15 @@ class TestTransformWithLearnedDof(unittest.TestCase):
             self.x_train, perplexity=15, random_state=42
         )
         init = initialization.pca(self.x_train, random_state=42)
-        reference = TSNEEmbedding(
-            init, aff, negative_gradient_method="bh", dof="auto",
-        )
-        self.assertIsNone(reference.dof_)
-
-        partial = reference.prepare_partial(self.x_new)
-        self.assertEqual(partial.gradient_descent_params["dof"], 1.0)
-        self.assertEqual(partial.dof_, 1.0)
-
-    def test_inherit_uses_initial_dof_when_auto_parent_unoptimized(self):
-        # When the parent was constructed with `dof="auto"` and an explicit
-        # `initial_dof`, but never optimized, `dof="inherit"` should fall
-        # back to that `initial_dof` rather than the optimizer bootstrap of
-        # 1.0 — it is the closest expression of the user's intent.
-        from openTSNE import TSNEEmbedding
-        from openTSNE import affinity, initialization
-
-        aff = affinity.PerplexityBasedNN(
-            self.x_train, perplexity=15, random_state=42
-        )
-        init = initialization.pca(self.x_train, random_state=42)
-        reference = TSNEEmbedding(
-            init, aff, negative_gradient_method="bh",
-            dof="auto", initial_dof=3.5,
-        )
-        self.assertIsNone(reference.dof_)
-        self.assertEqual(
-            reference.gradient_descent_params.get("initial_dof"), 3.5
-        )
-
-        partial = reference.prepare_partial(self.x_new)
-        self.assertEqual(partial.gradient_descent_params["dof"], 3.5)
-        self.assertEqual(partial.dof_, 3.5)
+        for initial_dof, expected in ((None, 1.0), (3.5, 3.5)):
+            with self.subTest(initial_dof=initial_dof):
+                reference = TSNEEmbedding(
+                    init, aff, negative_gradient_method="bh",
+                    dof="auto", initial_dof=initial_dof,
+                )
+                partial = reference.prepare_partial(self.x_new)
+                self.assertEqual(partial.gradient_descent_params["dof"], expected)
+                self.assertEqual(partial.dof_, expected)
 
 
 class TestPartialDofModes(unittest.TestCase):

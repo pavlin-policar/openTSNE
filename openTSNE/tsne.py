@@ -224,6 +224,17 @@ def _adapt_objective(objective_function):
     return wrapped
 
 
+def _check_initial_dof(initial_dof):
+    try:
+        valid = bool(np.isfinite(initial_dof) and initial_dof > 0)
+    except (TypeError, ValueError):
+        valid = False
+    if not valid:
+        raise ValueError(
+            f"`initial_dof` must be a positive, finite number; got {initial_dof!r}."
+        )
+
+
 def _check_callbacks(callbacks):
     if callbacks is not None:
         # If list was passed, make sure all of them are actually callable
@@ -692,15 +703,15 @@ class TSNEEmbedding(np.ndarray):
         reveal a finer cluster structure in t-SNE visualisations", 2019.
         If ``dof="auto"``, the degrees of freedom are learned during
         optimization, with either the Barnes-Hut or the FFT negative gradient
-        method. The optimizer warm-starts from the embedding's current
-        ``dof_`` if set, otherwise from ``initial_dof``, otherwise from 1.0.
-        The latest learned value is written back to ``embedding.dof_``.
+        method. Each :func:`optimize` call resumes from the embedding's
+        current ``dof_`` and writes the learned value back to it. Learning is
+        only well defined without exaggeration; :func:`optimize` warns when
+        ``dof="auto"`` is combined with ``exaggeration != 1``.
 
     initial_dof: Optional[float]
-        Starting value for the learnable degrees of freedom when
-        ``dof="auto"`` and the embedding has no prior ``dof_`` set. Ignored
-        otherwise (and a warning is emitted if given alongside a fixed
-        ``dof``).
+        Value of ``dof_`` that learning starts from when ``dof="auto"``,
+        1 by default. Ignored otherwise (and a warning is emitted if given
+        alongside a fixed ``dof``).
 
     momentum: float
         Momentum accounts for gradient directions from previous iterations,
@@ -773,9 +784,10 @@ class TSNEEmbedding(np.ndarray):
     kl_divergence_: float
         The KL divergence or error of the embedding.
 
-    dof_: float or None
-        The degrees-of-freedom the embedding was last optimized with. See
-        :class:`IterationState` for details.
+    dof_: float
+        The degrees of freedom the embedding was last optimized with. Before
+        the first optimization, this is the fixed ``dof`` or, for
+        ``dof="auto"``, ``initial_dof`` (1 by default).
 
     optimization_iters_: int
         The total number of optimization iterations this embedding has
@@ -795,6 +807,7 @@ class TSNEEmbedding(np.ndarray):
         embedding,
         affinities,
         dof=1,
+        initial_dof=None,
         n_interpolation_points=3,
         min_num_intervals=50,
         ints_in_interval=1,
@@ -804,6 +817,16 @@ class TSNEEmbedding(np.ndarray):
         **gradient_descent_params,
     ):
         init_checks.num_samples(embedding.shape[0], affinities.P.shape[0])
+        if dof == "auto":
+            if initial_dof is not None:
+                _check_initial_dof(initial_dof)
+        elif initial_dof is not None:
+            warnings.warn(
+                "`initial_dof=%s` is ignored because `dof=%s` is fixed; "
+                "`initial_dof` only applies when `dof='auto'`."
+                % (initial_dof, dof),
+                stacklevel=2,
+            )
 
         obj = np.array(embedding, dtype=np.float64, order="C").view(TSNEEmbedding)
 
@@ -830,11 +853,13 @@ class TSNEEmbedding(np.ndarray):
         obj.optimizer = optimizer
 
         obj.kl_divergence_ = None
-        # Reflect the requested dof on the embedding immediately. For fixed
-        # dof, this matches the value the optimizer will use; for `dof="auto"`,
-        # leave it as None so the optimizer can warm-start from
-        # `initial_dof`/1.0 on first run.
-        obj.dof_ = dof if isinstance(dof, (int, float)) else None
+        # `dof_` holds the value the next optimization starts from: the fixed
+        # dof, or for `dof="auto"`, `initial_dof` (1 by default). It is not
+        # stored as a parameter, so later `optimize` calls resume from `dof_`
+        if dof == "auto":
+            obj.dof_ = float(initial_dof) if initial_dof is not None else 1.0
+        else:
+            obj.dof_ = dof
         obj.optimization_iters_ = 0
 
         # Interpolation grid variables
@@ -876,18 +901,20 @@ class TSNEEmbedding(np.ndarray):
         dof: Union[float, str]
             Degrees of freedom as described in Kobak et al. "Heavy-tailed
             kernels reveal a finer cluster structure in t-SNE visualisations",
-            2019. If ``dof="auto"``, the degrees of freedom are learned
-            during optimization, with either the Barnes-Hut or the FFT
-            negative gradient method. The optimizer warm-starts from the
-            embedding's current ``dof_`` if set, otherwise from
-            ``initial_dof``, otherwise from 1.0. The latest learned value is
-            written back to ``embedding.dof_``.
+            2019. Defaults to the mode the embedding was created with, so an
+            embedding created with ``dof="auto"`` keeps learning unless a
+            fixed value is passed for this call (e.g. ``dof=embedding.dof_``
+            to freeze the current value). If ``dof="auto"``, learning resumes
+            from the embedding's current ``dof_`` and the learned value is
+            written back to it. Combining ``dof="auto"`` with
+            ``exaggeration != 1`` emits a warning, since the dof gradient is
+            then not the gradient of the KL divergence.
 
         initial_dof: Optional[float]
-            Starting value for the learnable degrees of freedom when
-            ``dof="auto"`` and the embedding has no prior ``dof_`` set.
-            Ignored otherwise (and a warning is emitted if given alongside a
-            fixed ``dof``).
+            Restart dof learning from this value instead of the current
+            ``dof_`` when ``dof="auto"``. Applies only to this call. Ignored
+            otherwise (and a warning is emitted if given alongside a fixed
+            ``dof``).
 
         momentum: float
             Momentum accounts for gradient directions from previous iterations,
@@ -1317,16 +1344,7 @@ class TSNEEmbedding(np.ndarray):
         warm_start_dof = None
 
         if dof == "inherit":
-            inherited = self.dof_
-            if inherited is None:
-                # `parent.dof_ is None` only when the parent was constructed
-                # with `dof="auto"` and never optimized — for fixed-dof
-                # parents the constructor mirrors the value into `dof_`. With
-                # nothing learned to inherit, fall back to the parent's
-                # `initial_dof`, then to 1.0 (the optimizer's bootstrap).
-                parent_initial = self.gradient_descent_params.get("initial_dof")
-                inherited = parent_initial if parent_initial is not None else 1.0
-            gd_params["dof"] = float(inherited)
+            gd_params["dof"] = float(self.dof_)
             gd_params.pop("initial_dof", None)
             if initial_dof is not None:
                 warnings.warn(
@@ -1387,21 +1405,13 @@ class TSNEEmbedding(np.ndarray):
             raise RuntimeError("Cannot prepare interpolation grid for >2d embeddings")
 
         # The grid encodes the reference kernel, so it must be built with the
-        # dof actually in effect: for `dof="auto"` that is the learned `dof_`,
-        # falling back through the same cascade as `_resolve_partial_dof` when
-        # the embedding was never optimized.
-        dof = self.gradient_descent_params["dof"]
-        if not isinstance(dof, (int, float)):
-            dof = self.dof_
-            if dof is None:
-                dof = self.gradient_descent_params.get("initial_dof") or 1.0
-
+        # dof the embedding was last optimized with
         result = f(
             self.ravel() if self.shape[1] == 1 else self,
             self.gradient_descent_params["n_interpolation_points"],
             self.gradient_descent_params["min_num_intervals"],
             self.gradient_descent_params["ints_in_interval"],
-            dof,
+            self.dof_,
             padding=padding,
         )
 
@@ -1564,18 +1574,20 @@ class TSNE(BaseEstimator):
     dof: Union[float, str]
         Degrees of freedom as described in Kobak et al. "Heavy-tailed kernels
         reveal a finer cluster structure in t-SNE visualisations", 2019. If
-        ``dof="auto"``, the degrees of freedom are learned during optimization
-        jointly with the embedding. Supported by both the Barnes-Hut and FFT
-        negative gradient methods; when embedding new points into an existing
-        embedding (``transform``), only Barnes-Hut computes the dof gradient
-        and the FFT path will warn and keep dof fixed. The latest learned
-        value is written back to ``embedding.dof_`` and persists across
-        consecutive ``optimize()`` calls.
+        ``dof="auto"``, the degrees of freedom are learned jointly with the
+        embedding, with either the Barnes-Hut or the FFT negative gradient
+        method. dof is held at 1 during the early exaggeration phase and
+        learned only in the normal optimization phase. If ``exaggeration`` is
+        set to a value other than 1, learning emits a warning, since the dof
+        gradient is then not the gradient of the KL divergence. The learned
+        value is written to ``embedding.dof_``, and further ``optimize()``
+        calls continue learning from it.
 
     initial_dof: Optional[float]
-        Starting value for the learnable degrees of freedom when
-        ``dof="auto"``. If unset, learning starts at 1.0. Ignored when
-        ``dof`` is a fixed float (a warning is emitted in that case).
+        Value that dof learning starts from at the beginning of the normal
+        optimization phase when ``dof="auto"``. If unset, learning starts at
+        1. Ignored when ``dof`` is a fixed float (a warning is emitted in that
+        case).
 
     theta: float
         Only used when ``negative_gradient_method="bh"`` or its other aliases.
@@ -1800,6 +1812,14 @@ class TSNE(BaseEstimator):
 
         embedding = self.prepare_initial(X, affinities, initialization)
 
+        # With `dof="auto"`, dof is held at 1 during early exaggeration, where
+        # its gradient is not that of the KL divergence, and is learned only
+        # in the normal phase, starting from `initial_dof`
+        early_dof_params, dof_params = {}, {}
+        if self.dof == "auto":
+            early_dof_params = {"dof": 1}
+            dof_params = {"initial_dof": self.initial_dof}
+
         try:
             # Early exaggeration with lower momentum to allow points to find more
             # easily move around and find their neighbors
@@ -1809,6 +1829,7 @@ class TSNE(BaseEstimator):
                 momentum=self.initial_momentum,
                 inplace=True,
                 propagate_exception=True,
+                **early_dof_params,
             )
 
             # Restore actual affinity probabilities and increase momentum to get
@@ -1819,6 +1840,7 @@ class TSNE(BaseEstimator):
                 momentum=self.final_momentum,
                 inplace=True,
                 propagate_exception=True,
+                **dof_params,
             )
 
         except OptimizationInterrupt as ex:
@@ -2262,16 +2284,16 @@ class gradient_descent:
         dof: Union[float, str]
             Degrees of freedom of the Student's t-distribution. If
             ``dof="auto"``, the degrees of freedom are learned during
-            optimization (supported by both the Barnes-Hut and FFT objectives
-            for self-embeddings; only Barnes-Hut when embedding into a
-            reference embedding); the optimizer warm-starts from
-            ``embedding.dof_`` if set, otherwise from ``initial_dof``,
-            otherwise from 1.0.
+            optimization, starting from ``initial_dof`` if given, otherwise
+            from ``embedding.dof_``. With ``exaggeration != 1`` learning emits
+            a warning, since the dof gradient is then not the gradient of the
+            KL divergence.
 
         initial_dof: Optional[float]
-            Starting value for the learnable degrees of freedom when
-            ``dof="auto"``. Ignored otherwise (and a warning is emitted if
-            given alongside a fixed ``dof``).
+            Value to restart dof learning from when ``dof="auto"``; it
+            replaces ``embedding.dof_`` and resets the dof optimizer state.
+            Ignored otherwise (and a warning is emitted if given alongside a
+            fixed ``dof``).
 
         dof_lr: float
             Base learning rate for the learnable degrees of freedom when
@@ -2397,10 +2419,33 @@ class gradient_descent:
             "ints_in_interval": ints_in_interval,
         }
 
-        # Lie about the P values for bigger attraction forces
         if exaggeration is None:
             exaggeration = 1
 
+        # Validate the dof arguments before `P` is exaggerated in place, so a
+        # rejected call leaves the affinities intact
+        if dof == "auto":
+            if initial_dof is not None:
+                _check_initial_dof(initial_dof)
+            if exaggeration != 1:
+                warnings.warn(
+                    "Learning the degrees of freedom (`dof='auto'`) with "
+                    "exaggeration=%s is not well defined: exaggeration rescales "
+                    "the attractive term of the dof gradient but not the "
+                    "repulsive one, so the learned value does not minimize the "
+                    "KL divergence. Learn dof with `exaggeration=1`, or pass a "
+                    "fixed `dof` for exaggerated phases." % exaggeration,
+                    stacklevel=2,
+                )
+        elif initial_dof is not None:
+            warnings.warn(
+                "`initial_dof=%s` is ignored because `dof=%s` is fixed; "
+                "`initial_dof` only applies when `dof='auto'`."
+                % (initial_dof, dof),
+                stacklevel=2,
+            )
+
+        # Lie about the P values for bigger attraction forces
         if exaggeration != 1:
             P *= exaggeration
 
@@ -2421,35 +2466,22 @@ class gradient_descent:
             start_time = time()
 
         if dof == "auto":
+            # An explicit `initial_dof` restarts learning from that value with
+            # fresh optimizer state; otherwise learning resumes from the
+            # embedding's current `dof_`
             if initial_dof is not None:
-                try:
-                    valid = bool(np.isfinite(initial_dof) and initial_dof > 0)
-                except (TypeError, ValueError):
-                    valid = False
-                if not valid:
-                    raise ValueError(
-                        "`initial_dof` must be a positive, finite number; got "
-                        f"{initial_dof!r}."
-                    )
+                dof_ = float(initial_dof)
+                self.optimizers.pop("dof", None)
+            elif embedding.dof_ is not None:
+                dof_ = embedding.dof_
+            else:
+                dof_ = 1.0
             if "dof" not in self.optimizers:
                 # Cap the gain at 1 to prevent runaway, unrecoverable dof during
                 # exaggerated phases of the optimization
                 self.optimizers["dof"] = DeltaBarDeltaOptimizer(max_gain=1)
-            if embedding.dof_ is not None:
-                dof_ = embedding.dof_
-            elif initial_dof is not None:
-                dof_ = initial_dof
-            else:
-                dof_ = 1.0
             compute_dof_grad = True
         else:
-            if initial_dof is not None:
-                warnings.warn(
-                    "`initial_dof=%s` is ignored because `dof=%s` is fixed; "
-                    "`initial_dof` only applies when `dof='auto'`."
-                    % (initial_dof, dof),
-                    stacklevel=2,
-                )
             dof_ = dof
             compute_dof_grad = False
 
