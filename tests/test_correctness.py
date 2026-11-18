@@ -514,7 +514,17 @@ class TestFFTGradientThreadCounts(unittest.TestCase):
                     )
                     results.append((gradient, sum_q, dof_grad))
 
+                # FFTW gives identical results for every thread count. scipy's
+                # pocketfft does not: it hands each worker a block of lines,
+                # and the lines at the block boundaries come out a few ulps
+                # different (deterministically for a given thread count, at
+                # least on arm64). That error is relative to the transform,
+                # which scales with the whole gradient, so small elements can
+                # differ far beyond `rtol`. Errors from splitting the work
+                # wrongly are of the gradient's own size.
+                reference = results[0][0]
+                atol = 1e-10 * np.sqrt(np.mean(reference ** 2))
                 for gradient, sum_q, dof_grad in results[1:]:
-                    np.testing.assert_allclose(gradient, results[0][0], rtol=1e-10)
+                    np.testing.assert_allclose(gradient, reference, rtol=1e-10, atol=atol)
                     np.testing.assert_allclose(sum_q, results[0][1], rtol=1e-10)
                     np.testing.assert_allclose(dof_grad, results[0][2], rtol=1e-10)
