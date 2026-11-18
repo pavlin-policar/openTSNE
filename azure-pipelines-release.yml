@@ -19,11 +19,6 @@ jobs:
 
     strategy:
       matrix:
-        osx - python310:
-          image.name: 'macos-latest'
-          python.version: '3.10'
-          ciwb.build: cp310-macosx_universal2
-          ciwb.archs: universal2
         osx - python311:
           image.name: 'macos-latest'
           python.version: '3.11'
@@ -45,11 +40,6 @@ jobs:
           ciwb.build: cp314-macosx_universal2
           ciwb.archs: universal2
 
-        windows - python310:
-          image.name: 'windows-latest'
-          python.version: '3.10'
-          ciwb.build: cp310-win_amd64
-          ciwb.archs: AMD64
         windows - python311:
           image.name: 'windows-latest'
           python.version: '3.11'
@@ -71,11 +61,6 @@ jobs:
           ciwb.build: cp314-win_amd64
           ciwb.archs: AMD64
 
-        linux - python310:
-          image.name: 'ubuntu-latest'
-          python.version: '3.10'
-          ciwb.build: cp310-manylinux_x86_64
-          ciwb.archs: auto
         linux - python311:
           image.name: 'ubuntu-latest'
           python.version: '3.11'
@@ -177,9 +162,9 @@ jobs:
 
     steps:
       - task: UsePythonVersion@0
-        displayName: 'Use Python 3.10'
+        displayName: 'Use Python 3.11'
         inputs:
-          versionSpec: '3.10'
+          versionSpec: '3.11'
 
       - script: python -m pip install build
         displayName: Installing build tools

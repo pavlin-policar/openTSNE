@@ -455,7 +455,7 @@ setup(
     ],
 
     packages=setuptools.find_packages(include=["openTSNE", "openTSNE.*"]),
-    python_requires=">=3.9",
+    python_requires=">=3.11",
     install_requires=[
         "numpy>=1.16.6",
         "scikit-learn>=0.20",
