@@ -489,3 +489,32 @@ class TestFFTGradientConcurrentThreads(unittest.TestCase):
         self.check_concurrent_calls_match_serial(
             2, _tsne.estimate_negative_gradient_fft_2d, spans=(5, 20, 60)
         )
+
+
+class TestFFTGradientThreadCounts(unittest.TestCase):
+    """The FFT backend may split the transforms across threads. How it splits
+    them must not change the result."""
+
+    def test_2d(self):
+        from openTSNE import _tsne
+
+        random_state = np.random.RandomState(0)
+        # Extents of 30, 200 and 400 give grids of 180, 1200 and 2400 points a
+        # side: too small to split, and large enough to split across every
+        # thread count below, into chunks that do not divide evenly
+        for extent in (30, 200, 400):
+            embedding = random_state.uniform(0, extent, (2000, 2))
+            for dof in (1, 0.7):
+                results = []
+                for num_threads in (1, 2, 3, 8):
+                    gradient = np.zeros_like(embedding)
+                    sum_q, dof_grad = _tsne.estimate_negative_gradient_fft_2d(
+                        embedding, gradient, dof=dof, num_threads=num_threads,
+                        compute_dof_grad=True,
+                    )
+                    results.append((gradient, sum_q, dof_grad))
+
+                for gradient, sum_q, dof_grad in results[1:]:
+                    np.testing.assert_allclose(gradient, results[0][0], rtol=1e-10)
+                    np.testing.assert_allclose(sum_q, results[0][1], rtol=1e-10)
+                    np.testing.assert_allclose(dof_grad, results[0][2], rtol=1e-10)

@@ -39,4 +39,4 @@ Please note that openTSNE requires a C/C++ compiler to be available on the syste
 
 In order for openTSNE to utilize multiple threads, the C/C++ compiler must support ``OpenMP``. In practice, almost all compilers implement this with the exception of older version of ``clang`` on OSX systems.
 
-To squeeze the most out of openTSNE, you may also consider installing FFTW3 prior to installation. FFTW3 implements the Fast Fourier Transform, which is heavily used in openTSNE. If FFTW3 is not available, openTSNE will use numpy’s implementation of the FFT, which is slightly slower than FFTW. The difference is only noticeable with large data sets containing millions of data points.
+To squeeze the most out of openTSNE, you may also consider installing FFTW3 prior to installation. FFTW3 implements the Fast Fourier Transform, which is heavily used in openTSNE. If FFTW3 is not available, openTSNE will use scipy’s implementation of the FFT, which is slower than FFTW. The difference is most noticeable when running on multiple threads (``n_jobs``) and when the embedding needs a large interpolation grid, e.g. with larger data sets or a finer grid (``ints_in_interval``).
