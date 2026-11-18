@@ -145,6 +145,12 @@ jobs:
           HNSWLIB_NO_NATIVE: 1  # -march=native is not available on clang, so just disable it
         displayName: 'Install optional dependencies - hnswlib'
 
+      # Only for Apple silicon Macs, as in azure-pipelines.yml
+      - script: 'pip install --only-binary=:all: mlxvs && python -c "import mlxvs" || pip uninstall -y mlxvs mlx'
+        condition: eq(variables['Agent.OS'], 'Darwin')
+        continueOnError: true
+        displayName: 'Install optional dependencies - mlxvs'
+
       - bash: pip install pytest
         displayName: 'Install pytest'
 

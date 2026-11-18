@@ -1,7 +1,9 @@
 import base64
 import pickle
 import platform
+import sys
 import tempfile
+import types
 import unittest
 import warnings
 from os import path
@@ -14,7 +16,7 @@ from sklearn import datasets
 
 from sklearn.utils import check_random_state
 
-from openTSNE import nearest_neighbors
+from openTSNE import affinity, nearest_neighbors
 from openTSNE.utils import is_package_installed
 from .test_tsne import check_mock_called_with_kwargs
 
@@ -369,6 +371,185 @@ class TestSklearn(KNNIndexTestMixin, unittest.TestCase):
             )
             knn_index.build()
             check_mock_called_with_kwargs(mock, params)
+
+
+@unittest.skipIf(not is_package_installed("mlxvs"), "`mlxvs` is not installed")
+class TestMLXVS(KNNIndexTestMixin, unittest.TestCase):
+    knn_index = nearest_neighbors.MLXVS
+
+    def test_approximate_neighbors_and_query(self):
+        """Above `exact_below` points, the NN-Descent graph and the graph search
+        find nearly all of the exact neighbors."""
+        x = np.random.RandomState(0).normal(size=(5000, 10))
+        exact = nearest_neighbors.Sklearn(x, 15)
+        exact_build, _ = exact.build()
+        exact_query, _ = exact.query(x[:500], 15)
+        for metric in ["euclidean", "cosine"]:
+            knn_index = nearest_neighbors.MLXVS(
+                x, 15, metric=metric, knn_kwargs={"exact_below": 1000}
+            )
+            if metric == "cosine":
+                exact = nearest_neighbors.Sklearn(x, 15, metric="cosine")
+                exact_build, _ = exact.build()
+                exact_query, _ = exact.query(x[:500], 15)
+            indices, distances = knn_index.build()
+            self.assertEqual(indices.shape, (5000, 15))
+            self.assertFalse((indices == np.arange(5000)[:, None]).any())
+            recall = np.mean([len(set(a) & set(b)) / 15 for a, b in zip(indices, exact_build)])
+            self.assertGreater(recall, 0.95)
+            indices, distances = knn_index.query(x[:500], 15)
+            recall = np.mean([len(set(a) & set(b)) / 15 for a, b in zip(indices, exact_query)])
+            self.assertGreater(recall, 0.95)
+            self.assertTrue((np.diff(distances, axis=1) >= -1e-12).all())
+
+    def test_pickle_without_built_index(self):
+        knn_index = nearest_neighbors.MLXVS(self.iris, k=30)
+        self.assertIsNone(knn_index.index)
+
+        with tempfile.TemporaryDirectory() as dirname:
+            with open(path.join(dirname, "index.pkl"), "wb") as f:
+                pickle.dump(knn_index, f)
+
+            with open(path.join(dirname, "index.pkl"), "rb") as f:
+                loaded_obj = pickle.load(f)
+
+        self.assertIsNone(loaded_obj.index)
+
+
+def _numpy_mlxvs():
+    """A stand-in for the mlxvs module that searches exactly with NumPy, so
+    that the MLXVS index runs on platforms where mlxvs cannot."""
+    def brute_force_knn(base, queries, k, metric):
+        # mlxvs returns squared euclidean distances for "l2"
+        d = cdist(queries, base, "cosine" if metric == "cosine" else "sqeuclidean")
+        indices = np.argsort(d, axis=1, kind="stable")[:, :k]
+        return indices.astype(np.uint32), np.take_along_axis(d, indices, axis=1)
+
+    def all_neighbors(rows, k, metric):
+        indices, distances = brute_force_knn(rows, rows, k + 1, metric)
+        return nearest_neighbors._exclude_self(indices.astype(np.int64), distances)
+
+    class CagraIndex:
+        @classmethod
+        def build(cls, rows, graph_degree, metric):
+            index = cls()
+            index.rows, index.graph_degree, index.metric = rows, graph_degree, metric
+            return index
+
+        def search(self, queries, k, itopk_size):
+            self.itopk_size = itopk_size
+            return brute_force_knn(self.rows, queries, k, self.metric)
+
+    module = types.ModuleType("mlxvs")
+    module.brute_force_knn = brute_force_knn
+    module.all_neighbors = all_neighbors
+    module.CagraIndex = CagraIndex
+    return module
+
+
+class TestMLXVSOnAnyPlatform(unittest.TestCase):
+    """The MLXVS index outside of mlxvs: the errors on platforms mlxvs does not
+    support, and the index with a NumPy stand-in for mlxvs, on every platform."""
+
+    def setUp(self):
+        random_state = np.random.RandomState(0)
+        self.x_train = random_state.normal(0, 1, (200, 5))
+        self.x_test = random_state.normal(0, 1, (50, 5))
+
+    @staticmethod
+    def _platform(name, machine):
+        return [
+            patch.object(sys, "platform", name),
+            patch("platform.machine", return_value=machine),
+        ]
+
+    def test_unsupported_platform_raises_import_error(self):
+        platforms = [
+            ("linux", "x86_64"),
+            ("linux", "aarch64"),
+            ("win32", "AMD64"),
+            ("darwin", "x86_64"),  # an Intel Mac, or Intel Python on Rosetta
+        ]
+        for name, machine in platforms:
+            with self.subTest(platform=name, machine=machine):
+                patches = self._platform(name, machine)
+                with patches[0], patches[1], patch.dict(sys.modules, {"mlxvs": _numpy_mlxvs()}):
+                    with self.assertRaisesRegex(ImportError, "Apple silicon"):
+                        nearest_neighbors.MLXVS(self.x_train, 15)
+                    with self.assertRaisesRegex(ImportError, "Apple silicon"):
+                        affinity.PerplexityBasedNN(
+                            self.x_train, perplexity=5, method="mlxvs"
+                        )
+
+    def test_missing_package_raises_import_error(self):
+        patches = self._platform("darwin", "arm64")
+        # `None` in `sys.modules` makes `import mlxvs` raise an ImportError
+        with patches[0], patches[1], patch.dict(sys.modules, {"mlxvs": None}):
+            with self.assertRaisesRegex(ImportError, "pip install mlxvs"):
+                nearest_neighbors.MLXVS(self.x_train, 15)
+
+    def test_same_result_as_exact_search(self):
+        k = 15
+        patches = self._platform("darwin", "arm64")
+        with patches[0], patches[1], patch.dict(sys.modules, {"mlxvs": _numpy_mlxvs()}):
+            for metric in ["euclidean", "l2", "cosine"]:
+                exact_index = nearest_neighbors.Sklearn(self.x_train, k, metric)
+                true_indices, true_distances = exact_index.build()
+                true_query_indices, true_query_distances = exact_index.query(
+                    self.x_test, k
+                )
+                # Below `exact_below` points, and above, through the graph paths
+                for exact_below in [nearest_neighbors.MLXVS.EXACT_BELOW, 100]:
+                    with self.subTest(metric=metric, exact_below=exact_below):
+                        knn_index = nearest_neighbors.MLXVS(
+                            self.x_train, k, metric,
+                            knn_kwargs=dict(exact_below=exact_below),
+                        )
+                        indices, distances = knn_index.build()
+                        query_indices, query_distances = knn_index.query(
+                            self.x_test, k
+                        )
+
+                        self.assertEqual(indices.dtype, np.int64)
+                        self.assertEqual(distances.dtype, np.float64)
+                        np.testing.assert_array_equal(indices, true_indices)
+                        np.testing.assert_allclose(distances, true_distances)
+                        np.testing.assert_array_equal(
+                            query_indices, true_query_indices
+                        )
+                        np.testing.assert_allclose(
+                            query_distances, true_query_distances
+                        )
+
+    def test_graph_settings_from_knn_kwargs(self):
+        patches = self._platform("darwin", "arm64")
+        with patches[0], patches[1], patch.dict(sys.modules, {"mlxvs": _numpy_mlxvs()}):
+            knn_index = nearest_neighbors.MLXVS(
+                self.x_train, 5, knn_kwargs=dict(exact_below=100)
+            )
+            knn_index.query(self.x_test, 5)
+            self.assertEqual(knn_index.index.graph_degree, 32)
+            self.assertEqual(knn_index.index.itopk_size, 64)
+
+            knn_index = nearest_neighbors.MLXVS(
+                self.x_train, 5,
+                knn_kwargs=dict(exact_below=100, graph_degree=16, itopk_size=8),
+            )
+            knn_index.query(self.x_test, 15)
+            self.assertEqual(knn_index.index.graph_degree, 16)
+            # The search keeps at least k candidates
+            self.assertEqual(knn_index.index.itopk_size, 15)
+
+    def test_distances_in_blocks(self):
+        patches = self._platform("darwin", "arm64")
+        with patches[0], patches[1], patch.dict(sys.modules, {"mlxvs": _numpy_mlxvs()}):
+            knn_index = nearest_neighbors.MLXVS(self.x_train, 15)
+            expected = knn_index.build()
+            # A bound that fits only a few points per block
+            with patch.object(nearest_neighbors.MLXVS, "DISTANCE_BLOCK_BYTES", 3000):
+                indices, distances = knn_index.build()
+            np.testing.assert_array_equal(indices, expected[0])
+            np.testing.assert_allclose(distances, expected[1])
 
 
 @unittest.skipIf(not is_package_installed("hnswlib"), "`hnswlib`is not installed")
