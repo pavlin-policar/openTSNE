@@ -745,6 +745,153 @@ cdef double[:, ::1] interpolate(double[::1] y_in_box, double[::1] y_tilde):
     return interpolated_values
 
 
+# The FFT interpolation scatters a few charges per point onto the grid and
+# gathers the same number of potentials back. With dof = 1 there are
+# n_dims + 1 of them (the normalization recovers the |y_j|^2 potential from
+# the zeroth one, see `estimate_negative_gradient_fft_2d`), and with any other
+# dof n_dims + 2. The scatter and gather are compiled once per case:
+# `if _interpolation_terms is _DofOne` is resolved by Cython, so n_terms is a
+# constant in each variant and the C compiler unrolls the per-term loop.
+cdef struct _DofOne:
+    char unused
+
+cdef struct _DofOther:
+    char unused
+
+ctypedef fused _interpolation_terms:
+    _DofOne
+    _DofOther
+
+
+cdef void _scatter_1d(
+    _interpolation_terms terms,
+    double[:, ::1] q_j,
+    double[:, ::1] interpolated_values,
+    int *point_box_idx,
+    Py_ssize_t n_interpolation_points,
+    double[:, ::1] w_coefficients,
+) noexcept nogil:
+    cdef Py_ssize_t n_terms, i, j, d, box_idx
+    if _interpolation_terms is _DofOne:
+        n_terms = 2
+    else:
+        n_terms = 3
+
+    for i in range(q_j.shape[0]):
+        box_idx = point_box_idx[i] * n_interpolation_points
+        for j in range(n_interpolation_points):
+            for d in range(n_terms):
+                w_coefficients[box_idx + j, d] += interpolated_values[i, j] * q_j[i, d]
+
+
+cdef double _gather_1d(
+    _interpolation_terms terms,
+    double[:, ::1] y_tilde_values,
+    double[:, ::1] dof_y_tilde_values,
+    bint compute_dof_grad,
+    double[:, ::1] interpolated_values,
+    int *point_box_idx,
+    Py_ssize_t n_interpolation_points,
+    double[:, ::1] phi,
+) noexcept nogil:
+    """Add the interpolated potentials to `phi` and return the unnormalized
+    negative dof gradient, which is zero unless `compute_dof_grad` is set."""
+    cdef Py_ssize_t n_terms, i, j, d, box_idx
+    cdef double dof_grad_neg_unnormalized = 0
+    if _interpolation_terms is _DofOne:
+        n_terms = 2
+    else:
+        n_terms = 3
+
+    for i in range(phi.shape[0]):
+        box_idx = point_box_idx[i] * n_interpolation_points
+        for j in range(n_interpolation_points):
+            for d in range(n_terms):
+                phi[i, d] += interpolated_values[i, j] * y_tilde_values[box_idx + j, d]
+            if compute_dof_grad:
+                dof_grad_neg_unnormalized += \
+                    interpolated_values[i, j] * dof_y_tilde_values[box_idx + j, 0]
+
+    return dof_grad_neg_unnormalized
+
+
+cdef void _scatter_2d(
+    _interpolation_terms terms,
+    double[:, ::1] q_j,
+    double[:, ::1] x_interpolated_values,
+    double[:, ::1] y_interpolated_values,
+    int *point_box_idx,
+    Py_ssize_t n_boxes_1d,
+    Py_ssize_t n_interpolation_points,
+    double[:, ::1] w_coefficients,
+) noexcept nogil:
+    cdef Py_ssize_t n_terms, i, d, box_idx, box_i, box_j, interp_i, interp_j, idx
+    if _interpolation_terms is _DofOne:
+        n_terms = 3
+    else:
+        n_terms = 4
+
+    for i in range(q_j.shape[0]):
+        box_idx = point_box_idx[i]
+        box_i = box_idx % n_boxes_1d
+        box_j = box_idx // n_boxes_1d
+        for interp_i in range(n_interpolation_points):
+            for interp_j in range(n_interpolation_points):
+                idx = (box_i * n_interpolation_points + interp_i) * \
+                      (n_boxes_1d * n_interpolation_points) + \
+                      (box_j * n_interpolation_points) + \
+                      interp_j
+                for d in range(n_terms):
+                    w_coefficients[idx, d] += \
+                        x_interpolated_values[i, interp_i] * \
+                        y_interpolated_values[i, interp_j] * \
+                        q_j[i, d]
+
+
+cdef double _gather_2d(
+    _interpolation_terms terms,
+    double[:, ::1] y_tilde_values,
+    double[:, ::1] dof_y_tilde_values,
+    bint compute_dof_grad,
+    double[:, ::1] x_interpolated_values,
+    double[:, ::1] y_interpolated_values,
+    int *point_box_idx,
+    Py_ssize_t n_boxes_1d,
+    Py_ssize_t n_interpolation_points,
+    double[:, ::1] phi,
+) noexcept nogil:
+    """Add the interpolated potentials to `phi` and return the unnormalized
+    negative dof gradient, which is zero unless `compute_dof_grad` is set."""
+    cdef Py_ssize_t n_terms, i, d, box_idx, box_i, box_j, interp_i, interp_j, idx
+    cdef double dof_grad_neg_unnormalized = 0
+    if _interpolation_terms is _DofOne:
+        n_terms = 3
+    else:
+        n_terms = 4
+
+    for i in range(phi.shape[0]):
+        box_idx = point_box_idx[i]
+        box_i = box_idx % n_boxes_1d
+        box_j = box_idx // n_boxes_1d
+        for interp_i in range(n_interpolation_points):
+            for interp_j in range(n_interpolation_points):
+                idx = (box_i * n_interpolation_points + interp_i) * \
+                      (n_boxes_1d * n_interpolation_points) + \
+                      (box_j * n_interpolation_points) + \
+                      interp_j
+                for d in range(n_terms):
+                    phi[i, d] += x_interpolated_values[i, interp_i] * \
+                                 y_interpolated_values[i, interp_j] * \
+                                 y_tilde_values[idx, d]
+                if compute_dof_grad:
+                    dof_grad_neg_unnormalized += \
+                        x_interpolated_values[i, interp_i] * \
+                        y_interpolated_values[i, interp_j] * \
+                        dof_y_tilde_values[idx, 0]
+
+    return dof_grad_neg_unnormalized
+
+
 cdef double[::1] compute_kernel_tilde_1d(
     KernelKind kind,
     Py_ssize_t n_interpolation_points_1d,
@@ -900,7 +1047,10 @@ cpdef tuple estimate_negative_gradient_fft_1d(
 
     # STEP 1: Compute the w coefficients
     # Set up q_j values
-    cdef int n_terms = 3
+    # With dof = 1, Z needs no potential for q_j = y_j^2 (see below)
+    cdef int n_terms = 3 if dof != 1 else 2
+    cdef _DofOne dof_one = _DofOne(unused=0)
+    cdef _DofOther dof_other = _DofOther(unused=0)
     cdef double[:, ::1] q_j = np.empty((n_samples, n_terms), dtype=float)
     if dof != 1:
         for i in range(n_samples):
@@ -911,7 +1061,6 @@ cpdef tuple estimate_negative_gradient_fft_1d(
         for i in range(n_samples):
             q_j[i, 0] = 1
             q_j[i, 1] = embedding[i]
-            q_j[i, 2] = embedding[i] ** 2
 
     # Compute the relative position of each reference point in its box
     cdef double[::1] y_in_box = np.empty(n_samples, dtype=float)
@@ -924,11 +1073,12 @@ cpdef tuple estimate_negative_gradient_fft_1d(
 
     # Actually compute w_{ij}s
     cdef double[:, ::1] w_coefficients = np.zeros((n_interpolation_points_1d, n_terms), dtype=float)
-    for i in range(n_samples):
-        box_idx = point_box_idx[i] * n_interpolation_points
-        for j in range(n_interpolation_points):
-            for d in range(n_terms):
-                w_coefficients[box_idx + j, d] += interpolated_values[i, j] * q_j[i, d]
+    if dof == 1:
+        _scatter_1d(dof_one, q_j, interpolated_values, point_box_idx,
+                    n_interpolation_points, w_coefficients)
+    else:
+        _scatter_1d(dof_other, q_j, interpolated_values, point_box_idx,
+                    n_interpolation_points, w_coefficients)
 
     # STEP 2: Compute the kernel values evaluated at the interpolation nodes
     cdef double[:, ::1] y_tilde_values = np.empty((n_interpolation_points_1d, n_terms))
@@ -947,28 +1097,37 @@ cpdef tuple estimate_negative_gradient_fft_1d(
 
     # STEP 3: Compute the potentials \tilde{\phi(y_i)}
     cdef double[:, ::1] phi = np.zeros((n_samples, n_terms), dtype=float)
-    cdef double dof_grad_neg_unnormalized = 0
-    for i in range(n_samples):
-        box_idx = point_box_idx[i] * n_interpolation_points
-        for j in range(n_interpolation_points):
-            for d in range(n_terms):
-                phi[i, d] += interpolated_values[i, j] * y_tilde_values[box_idx + j, d]
-            if compute_dof_grad:
-                dof_grad_neg_unnormalized += \
-                    interpolated_values[i, j] * dof_y_tilde_values[box_idx + j, 0]
+    cdef double dof_grad_neg_unnormalized
+    if dof == 1:
+        dof_grad_neg_unnormalized = _gather_1d(
+            dof_one, y_tilde_values, dof_y_tilde_values, compute_dof_grad,
+            interpolated_values, point_box_idx, n_interpolation_points, phi,
+        )
+    else:
+        dof_grad_neg_unnormalized = _gather_1d(
+            dof_other, y_tilde_values, dof_y_tilde_values, compute_dof_grad,
+            interpolated_values, point_box_idx, n_interpolation_points, phi,
+        )
 
     PyMem_Free(point_box_idx)
 
     # Compute the normalization term Z or sum of q_{ij}s
-    cdef double sum_Q = 0
+    cdef double sum_Q = 0, sum_Q_spread = 0
     if dof != 1:
         for i in range(n_samples):
             sum_Q += phi[i, 2]
     else:
+        # With dof = 1, q_ij = k~_ij (1 + |y_i - y_j|^2), where k~ is the
+        # interpolated squared kernel. Since k~ is symmetric,
+        # sum_ij k~_ij |y_j|^2 = sum_j |y_j|^2 phi_0[j], so
+        # Z = sum_i phi_0[i] + 2 sum_i y_i (y_i phi_0[i] - phi_1[i]). The two
+        # sums are accumulated apart: while the embedding is compact, phi_0 is
+        # nearly equal at every point, and summands that close together would
+        # round the same way at every step of one combined sum.
         for i in range(n_samples):
-            sum_Q += (1 + embedding[i] ** 2) * phi[i, 0] - \
-                     2 * embedding[i] * phi[i, 1] + \
-                     phi[i, 2]
+            sum_Q += phi[i, 0]
+            sum_Q_spread += embedding[i] * (embedding[i] * phi[i, 0] - phi[i, 1])
+        sum_Q += 2 * sum_Q_spread
 
     sum_Q -= n_samples
 
@@ -1380,7 +1539,10 @@ cpdef tuple estimate_negative_gradient_fft_2d(
 
     # STEP 1: Compute the w coefficients
     # Set up q_j values
-    cdef int n_terms = 4
+    # With dof = 1, Z needs no potential for q_j = |y_j|^2 (see below)
+    cdef int n_terms = 4 if dof != 1 else 3
+    cdef _DofOne dof_one = _DofOne(unused=0)
+    cdef _DofOther dof_other = _DofOther(unused=0)
     cdef double[:, ::1] q_j = np.empty((n_samples, n_terms), dtype=float)
     if dof != 1:
         for i in range(n_samples):
@@ -1393,7 +1555,6 @@ cpdef tuple estimate_negative_gradient_fft_2d(
             q_j[i, 0] = 1
             q_j[i, 1] = embedding[i, 0]
             q_j[i, 2] = embedding[i, 1]
-            q_j[i, 3] = embedding[i, 0] ** 2 + embedding[i, 1] ** 2
 
     # Compute the relative position of each reference point in its box
     cdef:
@@ -1416,23 +1577,13 @@ cpdef tuple estimate_negative_gradient_fft_2d(
     cdef:
         int total_interpolation_points = n_total_boxes * n_interpolation_points ** 2
         double[:, ::1] w_coefficients = np.zeros((total_interpolation_points, n_terms), dtype=float)
-        Py_ssize_t box_i, box_j, interp_i, interp_j, idx
 
-    for i in range(n_samples):
-        box_idx = point_box_idx[i]
-        box_i = box_idx % n_boxes_1d
-        box_j = box_idx // n_boxes_1d
-        for interp_i in range(n_interpolation_points):
-            for interp_j in range(n_interpolation_points):
-                idx = (box_i * n_interpolation_points + interp_i) * \
-                      (n_boxes_1d * n_interpolation_points) + \
-                      (box_j * n_interpolation_points) + \
-                      interp_j
-                for d in range(n_terms):
-                    w_coefficients[idx, d] += \
-                        x_interpolated_values[i, interp_i] * \
-                        y_interpolated_values[i, interp_j] * \
-                        q_j[i, d]
+    if dof == 1:
+        _scatter_2d(dof_one, q_j, x_interpolated_values, y_interpolated_values,
+                    point_box_idx, n_boxes_1d, n_interpolation_points, w_coefficients)
+    else:
+        _scatter_2d(dof_other, q_j, x_interpolated_values, y_interpolated_values,
+                    point_box_idx, n_boxes_1d, n_interpolation_points, w_coefficients)
 
     # STEP 2: Compute the kernel values evaluated at the interpolation nodes
     cdef double[:, ::1] y_tilde_values = np.empty((total_interpolation_points, n_terms))
@@ -1451,42 +1602,43 @@ cpdef tuple estimate_negative_gradient_fft_2d(
 
     # STEP 3: Compute the potentials \tilde{\phi(y_i)}
     cdef double[:, ::1] phi = np.zeros((n_samples, n_terms), dtype=float)
-    cdef double dof_grad_neg_unnormalized = 0
-    for i in range(n_samples):
-        box_idx = point_box_idx[i]
-        box_i = box_idx % n_boxes_1d
-        box_j = box_idx // n_boxes_1d
-        for interp_i in range(n_interpolation_points):
-            for interp_j in range(n_interpolation_points):
-                idx = (box_i * n_interpolation_points + interp_i) * \
-                      (n_boxes_1d * n_interpolation_points) + \
-                      (box_j * n_interpolation_points) + \
-                      interp_j
-                for d in range(n_terms):
-                    phi[i, d] += x_interpolated_values[i, interp_i] * \
-                                 y_interpolated_values[i, interp_j] * \
-                                 y_tilde_values[idx, d]
-                if compute_dof_grad:
-                    dof_grad_neg_unnormalized += \
-                        x_interpolated_values[i, interp_i] * \
-                        y_interpolated_values[i, interp_j] * \
-                        dof_y_tilde_values[idx, 0]
+    cdef double dof_grad_neg_unnormalized
+    if dof == 1:
+        dof_grad_neg_unnormalized = _gather_2d(
+            dof_one, y_tilde_values, dof_y_tilde_values, compute_dof_grad,
+            x_interpolated_values, y_interpolated_values, point_box_idx,
+            n_boxes_1d, n_interpolation_points, phi,
+        )
+    else:
+        dof_grad_neg_unnormalized = _gather_2d(
+            dof_other, y_tilde_values, dof_y_tilde_values, compute_dof_grad,
+            x_interpolated_values, y_interpolated_values, point_box_idx,
+            n_boxes_1d, n_interpolation_points, phi,
+        )
 
     PyMem_Free(point_box_idx)
 
     # Compute the normalization term Z or sum of q_{ij}s
-    cdef double sum_Q = 0, y1, y2
+    cdef double sum_Q = 0, sum_Q_spread = 0, y1, y2
     if dof != 1:
         for i in range(n_samples):
             sum_Q += phi[i, 3]
     else:
+        # With dof = 1, q_ij = k~_ij (1 + |y_i - y_j|^2), where k~ is the
+        # interpolated squared kernel. Since k~ is symmetric,
+        # sum_ij k~_ij |y_j|^2 = sum_j |y_j|^2 phi_0[j], so
+        # Z = sum_i phi_0[i] + 2 sum_i y_i . (y_i phi_0[i] - phi_{1,2}[i]).
+        # The two sums are accumulated apart: while the embedding is compact,
+        # phi_0 is nearly equal at every point, and summands that close
+        # together would round the same way at every step of one combined sum.
         for i in range(n_samples):
             y1 = embedding[i, 0]
             y2 = embedding[i, 1]
 
-            sum_Q += (1 + y1 ** 2 + y2 ** 2) * phi[i, 0] - \
-                     2 * (y1 * phi[i, 1] + y2 * phi[i, 2]) + \
-                     phi[i, 3]
+            sum_Q += phi[i, 0]
+            sum_Q_spread += y1 * (y1 * phi[i, 0] - phi[i, 1]) + \
+                            y2 * (y2 * phi[i, 0] - phi[i, 2])
+        sum_Q += 2 * sum_Q_spread
 
     sum_Q -= n_samples
 
