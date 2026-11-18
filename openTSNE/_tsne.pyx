@@ -103,6 +103,369 @@ cpdef double[:, ::1] compute_gaussian_perplexity(
     return P
 
 
+# The attractive forces. `estimate_positive_gradient_nn` dispatches to one of
+# the functions below, each of which adds sum_j p_ij q_ij (y_i - y_j) to every
+# point's gradient with q_ij left unnormalized; the caller normalizes once
+# sum_Q is known.
+#
+# One, two and three dimensional embeddings account for all but a handful of
+# uses, so each has its own function, where the per-point accumulators stay in
+# registers and the coordinate loop has a compile-time trip count. Higher
+# dimensionalities, which only Barnes-Hut supports, take the general one.
+#
+# Almost every iteration needs the gradient alone. A few also need the KL
+# divergence or the positive dof gradient, and evaluating those costs a log
+# per neighbour. Each function is therefore compiled twice, once per mode:
+# `if _positive_gradient_mode is _WithTerms` is resolved by Cython, so the
+# `_Plain` variant contains none of that code, not even a branch around it.
+cdef struct _Plain:
+    char unused
+
+cdef struct _WithTerms:
+    char unused
+
+ctypedef fused _positive_gradient_mode:
+    _Plain
+    _WithTerms
+
+
+cdef void _positive_gradient_1d(
+    _positive_gradient_mode mode,
+    sparse_index_type[:] indices,
+    sparse_index_type[:] indptr,
+    double[:] P_data,
+    double[:, ::1] embedding,
+    double[:, ::1] reference_embedding,
+    double[:, ::1] gradient,
+    double dof,
+    Py_ssize_t num_threads,
+    bint should_eval_error,
+    bint compute_dof_grad,
+    double * sum_P_out,
+    double * kl_divergence_out,
+    double * alpha_grad_pos_out,
+) noexcept nogil:
+    cdef:
+        Py_ssize_t i, j, k
+        double y_i0, diff_0, d_ij, p_ij, q_ij, pq_ij, grad_0, log_s, frac
+        double sum_P = 0, kl_divergence = 0, alpha_grad_pos = 0
+        double * emb = &embedding[0, 0]
+        double * ref = &reference_embedding[0, 0]
+        double * grad = &gradient[0, 0]
+
+    for i in prange(gradient.shape[0], schedule="guided", num_threads=num_threads):
+        y_i0 = emb[i]
+        grad_0 = 0
+
+        for k in range(indptr[i], indptr[i + 1]):
+            j = indices[k]
+            p_ij = P_data[k]
+            diff_0 = y_i0 - ref[j]
+            d_ij = diff_0 * diff_0
+
+            # No need exp by dof here because the terms cancel out
+            if dof != 1:
+                q_ij = 1 / (1 + d_ij / dof)
+            else:
+                q_ij = 1 / (1 + d_ij)
+
+            pq_ij = q_ij * p_ij
+            grad_0 = grad_0 + pq_ij * diff_0
+
+            if _positive_gradient_mode is _WithTerms:
+                if compute_dof_grad:
+                    log_s = log(1.0 + d_ij / dof)
+                    frac = d_ij / (dof + d_ij)
+                    alpha_grad_pos += p_ij * (log_s - frac)
+
+                if should_eval_error:
+                    sum_P += p_ij
+                    if dof != 1:
+                        # Now we need to do the exp by dof
+                        kl_divergence += p_ij * log((p_ij / (q_ij ** dof + EPSILON)) + EPSILON)
+                    else:
+                        kl_divergence += p_ij * log((p_ij / (q_ij + EPSILON)) + EPSILON)
+
+        grad[i] += grad_0
+
+    if _positive_gradient_mode is _WithTerms:
+        sum_P_out[0] = sum_P
+        kl_divergence_out[0] = kl_divergence
+        alpha_grad_pos_out[0] = alpha_grad_pos
+
+
+cdef void _positive_gradient_2d(
+    _positive_gradient_mode mode,
+    sparse_index_type[:] indices,
+    sparse_index_type[:] indptr,
+    double[:] P_data,
+    double[:, ::1] embedding,
+    double[:, ::1] reference_embedding,
+    double[:, ::1] gradient,
+    double dof,
+    Py_ssize_t num_threads,
+    bint should_eval_error,
+    bint compute_dof_grad,
+    double * sum_P_out,
+    double * kl_divergence_out,
+    double * alpha_grad_pos_out,
+) noexcept nogil:
+    cdef:
+        Py_ssize_t i, j, k
+        double y_i0, y_i1, diff_0, diff_1, d_ij, p_ij, q_ij, pq_ij
+        double grad_0, grad_1, log_s, frac
+        double sum_P = 0, kl_divergence = 0, alpha_grad_pos = 0
+        double * emb = &embedding[0, 0]
+        double * ref = &reference_embedding[0, 0]
+        double * grad = &gradient[0, 0]
+
+    for i in prange(gradient.shape[0], schedule="guided", num_threads=num_threads):
+        y_i0 = emb[2 * i]
+        y_i1 = emb[2 * i + 1]
+        grad_0 = 0
+        grad_1 = 0
+
+        for k in range(indptr[i], indptr[i + 1]):
+            j = indices[k]
+            p_ij = P_data[k]
+            diff_0 = y_i0 - ref[2 * j]
+            diff_1 = y_i1 - ref[2 * j + 1]
+            d_ij = diff_0 * diff_0 + diff_1 * diff_1
+
+            # No need exp by dof here because the terms cancel out
+            if dof != 1:
+                q_ij = 1 / (1 + d_ij / dof)
+            else:
+                q_ij = 1 / (1 + d_ij)
+
+            pq_ij = q_ij * p_ij
+            grad_0 = grad_0 + pq_ij * diff_0
+            grad_1 = grad_1 + pq_ij * diff_1
+
+            if _positive_gradient_mode is _WithTerms:
+                if compute_dof_grad:
+                    log_s = log(1.0 + d_ij / dof)
+                    frac = d_ij / (dof + d_ij)
+                    alpha_grad_pos += p_ij * (log_s - frac)
+
+                if should_eval_error:
+                    sum_P += p_ij
+                    if dof != 1:
+                        # Now we need to do the exp by dof
+                        kl_divergence += p_ij * log((p_ij / (q_ij ** dof + EPSILON)) + EPSILON)
+                    else:
+                        kl_divergence += p_ij * log((p_ij / (q_ij + EPSILON)) + EPSILON)
+
+        grad[2 * i] += grad_0
+        grad[2 * i + 1] += grad_1
+
+    if _positive_gradient_mode is _WithTerms:
+        sum_P_out[0] = sum_P
+        kl_divergence_out[0] = kl_divergence
+        alpha_grad_pos_out[0] = alpha_grad_pos
+
+
+cdef void _positive_gradient_3d(
+    _positive_gradient_mode mode,
+    sparse_index_type[:] indices,
+    sparse_index_type[:] indptr,
+    double[:] P_data,
+    double[:, ::1] embedding,
+    double[:, ::1] reference_embedding,
+    double[:, ::1] gradient,
+    double dof,
+    Py_ssize_t num_threads,
+    bint should_eval_error,
+    bint compute_dof_grad,
+    double * sum_P_out,
+    double * kl_divergence_out,
+    double * alpha_grad_pos_out,
+) noexcept nogil:
+    cdef:
+        Py_ssize_t i, j, k
+        double y_i0, y_i1, y_i2, diff_0, diff_1, diff_2, d_ij, p_ij, q_ij, pq_ij
+        double grad_0, grad_1, grad_2, log_s, frac
+        double sum_P = 0, kl_divergence = 0, alpha_grad_pos = 0
+        double * emb = &embedding[0, 0]
+        double * ref = &reference_embedding[0, 0]
+        double * grad = &gradient[0, 0]
+
+    for i in prange(gradient.shape[0], schedule="guided", num_threads=num_threads):
+        y_i0 = emb[3 * i]
+        y_i1 = emb[3 * i + 1]
+        y_i2 = emb[3 * i + 2]
+        grad_0 = 0
+        grad_1 = 0
+        grad_2 = 0
+
+        for k in range(indptr[i], indptr[i + 1]):
+            j = indices[k]
+            p_ij = P_data[k]
+            diff_0 = y_i0 - ref[3 * j]
+            diff_1 = y_i1 - ref[3 * j + 1]
+            diff_2 = y_i2 - ref[3 * j + 2]
+            d_ij = diff_0 * diff_0 + diff_1 * diff_1 + diff_2 * diff_2
+
+            # No need exp by dof here because the terms cancel out
+            if dof != 1:
+                q_ij = 1 / (1 + d_ij / dof)
+            else:
+                q_ij = 1 / (1 + d_ij)
+
+            pq_ij = q_ij * p_ij
+            grad_0 = grad_0 + pq_ij * diff_0
+            grad_1 = grad_1 + pq_ij * diff_1
+            grad_2 = grad_2 + pq_ij * diff_2
+
+            if _positive_gradient_mode is _WithTerms:
+                if compute_dof_grad:
+                    log_s = log(1.0 + d_ij / dof)
+                    frac = d_ij / (dof + d_ij)
+                    alpha_grad_pos += p_ij * (log_s - frac)
+
+                if should_eval_error:
+                    sum_P += p_ij
+                    if dof != 1:
+                        # Now we need to do the exp by dof
+                        kl_divergence += p_ij * log((p_ij / (q_ij ** dof + EPSILON)) + EPSILON)
+                    else:
+                        kl_divergence += p_ij * log((p_ij / (q_ij + EPSILON)) + EPSILON)
+
+        grad[3 * i] += grad_0
+        grad[3 * i + 1] += grad_1
+        grad[3 * i + 2] += grad_2
+
+    if _positive_gradient_mode is _WithTerms:
+        sum_P_out[0] = sum_P
+        kl_divergence_out[0] = kl_divergence
+        alpha_grad_pos_out[0] = alpha_grad_pos
+
+
+cdef int _positive_gradient_nd(
+    _positive_gradient_mode mode,
+    sparse_index_type[:] indices,
+    sparse_index_type[:] indptr,
+    double[:] P_data,
+    double[:, ::1] embedding,
+    double[:, ::1] reference_embedding,
+    double[:, ::1] gradient,
+    double dof,
+    Py_ssize_t num_threads,
+    bint should_eval_error,
+    bint compute_dof_grad,
+    double * sum_P_out,
+    double * kl_divergence_out,
+    double * alpha_grad_pos_out,
+) except -1 nogil:
+    cdef:
+        Py_ssize_t n_dims = gradient.shape[1]
+        Py_ssize_t i, j, k, d
+        double * diff
+        double d_ij, p_ij, q_ij, pq_ij, log_s, frac
+        double sum_P = 0, kl_divergence = 0, alpha_grad_pos = 0
+        double * emb = &embedding[0, 0]
+        double * ref = &reference_embedding[0, 0]
+        double * grad = &gradient[0, 0]
+
+    with parallel(num_threads=num_threads):
+        # Use `malloc` here instead of `PyMem_Malloc` because we're in a
+        # `nogil` clause and we won't be allocating much memory
+        diff = <double *>malloc(n_dims * sizeof(double))
+        if not diff:
+            with gil:
+                raise MemoryError()
+
+        for i in prange(gradient.shape[0], schedule="guided"):
+            # Iterate over all the neighbors `j` and sum up their contribution
+            for k in range(indptr[i], indptr[i + 1]):
+                j = indices[k]
+                p_ij = P_data[k]
+                # Compute the direction of the points attraction and the
+                # squared euclidean distance between the points
+                d_ij = 0
+                for d in range(n_dims):
+                    diff[d] = emb[i * n_dims + d] - ref[j * n_dims + d]
+                    d_ij = d_ij + diff[d] * diff[d]
+
+                # No need exp by dof here because the terms cancel out
+                if dof != 1:
+                    q_ij = 1 / (1 + d_ij / dof)
+                else:
+                    q_ij = 1 / (1 + d_ij)
+
+                # Compute F_{attr} of point `j` on point `i`
+                pq_ij = q_ij * p_ij
+                for d in range(n_dims):
+                    grad[i * n_dims + d] += pq_ij * diff[d]
+
+                if _positive_gradient_mode is _WithTerms:
+                    if compute_dof_grad:
+                        log_s = log(1.0 + d_ij / dof)
+                        frac = d_ij / (dof + d_ij)
+                        alpha_grad_pos += p_ij * (log_s - frac)
+
+                    if should_eval_error:
+                        sum_P += p_ij
+                        if dof != 1:
+                            # Now we need to do the exp by dof
+                            kl_divergence += p_ij * log((p_ij / (q_ij ** dof + EPSILON)) + EPSILON)
+                        else:
+                            kl_divergence += p_ij * log((p_ij / (q_ij + EPSILON)) + EPSILON)
+
+        free(diff)
+
+    if _positive_gradient_mode is _WithTerms:
+        sum_P_out[0] = sum_P
+        kl_divergence_out[0] = kl_divergence
+        alpha_grad_pos_out[0] = alpha_grad_pos
+    return 0
+
+
+cdef int _positive_gradient(
+    _positive_gradient_mode mode,
+    sparse_index_type[:] indices,
+    sparse_index_type[:] indptr,
+    double[:] P_data,
+    double[:, ::1] embedding,
+    double[:, ::1] reference_embedding,
+    double[:, ::1] gradient,
+    double dof,
+    Py_ssize_t num_threads,
+    bint should_eval_error,
+    bint compute_dof_grad,
+    double * sum_P_out,
+    double * kl_divergence_out,
+    double * alpha_grad_pos_out,
+) except -1 nogil:
+    cdef Py_ssize_t n_dims = gradient.shape[1]
+
+    if n_dims == 1:
+        _positive_gradient_1d(
+            mode, indices, indptr, P_data, embedding, reference_embedding,
+            gradient, dof, num_threads, should_eval_error, compute_dof_grad,
+            sum_P_out, kl_divergence_out, alpha_grad_pos_out,
+        )
+    elif n_dims == 2:
+        _positive_gradient_2d(
+            mode, indices, indptr, P_data, embedding, reference_embedding,
+            gradient, dof, num_threads, should_eval_error, compute_dof_grad,
+            sum_P_out, kl_divergence_out, alpha_grad_pos_out,
+        )
+    elif n_dims == 3:
+        _positive_gradient_3d(
+            mode, indices, indptr, P_data, embedding, reference_embedding,
+            gradient, dof, num_threads, should_eval_error, compute_dof_grad,
+            sum_P_out, kl_divergence_out, alpha_grad_pos_out,
+        )
+    else:
+        _positive_gradient_nd(
+            mode, indices, indptr, P_data, embedding, reference_embedding,
+            gradient, dof, num_threads, should_eval_error, compute_dof_grad,
+            sum_P_out, kl_divergence_out, alpha_grad_pos_out,
+        )
+    return 0
+
+
 cpdef tuple estimate_positive_gradient_nn(
     sparse_index_type[:] indices,
     sparse_index_type[:] indptr,
@@ -117,71 +480,35 @@ cpdef tuple estimate_positive_gradient_nn(
 ):
     cdef:
         Py_ssize_t n_samples = gradient.shape[0]
-        Py_ssize_t n_dims = gradient.shape[1]
-        double * diff
-        double d_ij, p_ij, q_ij, kl_divergence = 0, sum_P = 0
-        double alpha_grad_pos = 0.0
-        double log_s, frac
-
-        Py_ssize_t i, j, k, d
+        double kl_divergence = 0, sum_P = 0, alpha_grad_pos = 0
+        _Plain plain = _Plain(unused=0)
+        _WithTerms with_terms = _WithTerms(unused=0)
 
     if num_threads < 1:
         num_threads = 1
+
+    if n_samples == 0:
+        return sum_P, kl_divergence, alpha_grad_pos
 
     # Degrees of freedom cannot be negative
     if dof <= 0:
         dof = 1e-8
 
-    with nogil, parallel(num_threads=num_threads):
-        # Use `malloc` here instead of `PyMem_Malloc` because we're in a
-        # `nogil` clause and we won't be allocating much memory
-        diff = <double *>malloc(n_dims * sizeof(double))
-        if not diff:
-            with gil:
-                raise MemoryError()
-
-        for i in prange(n_samples, schedule="guided"):
-            # Iterate over all the neighbors `j` and sum up their contribution
-            for k in range(indptr[i], indptr[i + 1]):
-                j = indices[k]
-                p_ij = P_data[k]
-                # Compute the direction of the points attraction and the
-                # squared euclidean distance between the points
-                d_ij = 0
-                for d in range(n_dims):
-                    diff[d] = embedding[i, d] - reference_embedding[j, d]
-                    d_ij = d_ij + diff[d] * diff[d]
-
-                if dof != 1:
-                    # No need exp by dof here because the terms cancel out
-                    q_ij = 1 / (1 + d_ij / dof)
-                else:
-                    q_ij = 1 / (1 + d_ij)
-
-                # Compute F_{attr} of point `j` on point `i`
-                for d in range(n_dims):
-                    gradient[i, d] = gradient[i, d] + q_ij * p_ij * diff[d]
-
-                # Compute the alpha gradient positive term (only when needed
-                # for dof learning — this adds a log + divide per edge).
-                if compute_dof_grad:
-                    log_s = log(1.0 + d_ij / dof)
-                    frac = d_ij / (dof + d_ij)
-                    alpha_grad_pos += p_ij * (log_s - frac)
-
-                # Evaluating the following expressions can slow things down
-                # considerably if evaluated every iteration. Note that the q_ij
-                # is unnormalized, so we need to normalize once the sum of q_ij
-                # is known
-                if should_eval_error:
-                    sum_P += p_ij
-                    if dof != 1:
-                        # Now we need to do the exp by dof
-                        kl_divergence += p_ij * log((p_ij / (q_ij ** dof + EPSILON)) + EPSILON)                    
-                    else:
-                        kl_divergence += p_ij * log((p_ij / (q_ij + EPSILON)) + EPSILON)
-
-        free(diff)
+    with nogil:
+        if should_eval_error or compute_dof_grad:
+            _positive_gradient(
+                with_terms, indices, indptr, P_data, embedding,
+                reference_embedding, gradient, dof, num_threads,
+                should_eval_error, compute_dof_grad,
+                &sum_P, &kl_divergence, &alpha_grad_pos,
+            )
+        else:
+            _positive_gradient(
+                plain, indices, indptr, P_data, embedding,
+                reference_embedding, gradient, dof, num_threads,
+                should_eval_error, compute_dof_grad,
+                &sum_P, &kl_divergence, &alpha_grad_pos,
+            )
 
     return sum_P, kl_divergence, alpha_grad_pos
 
