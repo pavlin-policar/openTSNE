@@ -492,8 +492,138 @@ class TestFFTGradientConcurrentThreads(unittest.TestCase):
 
 
 class TestFFTGradientThreadCounts(unittest.TestCase):
-    """The FFT backend may split the transforms across threads. How it splits
-    them must not change the result."""
+    """The FFT gradient splits its transforms, and the scatter onto and gather
+    from the interpolation grid, across threads. How it splits them must not
+    change the result."""
+
+    @staticmethod
+    def assert_all_match_first(results):
+        # FFTW gives identical results for every thread count, but scipy's
+        # pocketfft may not (see `test_2d`), so this allows a few ulps relative
+        # to the whole array. A race in the scatter or gather produces errors
+        # of the array's own size.
+        reference = results[0]
+        for result in results[1:]:
+            for value, expected in zip(result, reference):
+                atol = 1e-10 * np.sqrt(np.mean(np.square(expected)))
+                np.testing.assert_allclose(value, expected, rtol=1e-10, atol=atol)
+
+    @staticmethod
+    def clustered_embedding(random_state, n_dims):
+        # Dense clusters pile thousands of points into a few boxes and leave
+        # most columns of boxes empty, next to a sparse uniform background
+        centers = random_state.uniform(-30, 30, (6, n_dims))
+        clusters = [random_state.normal(c, 0.3, (3000, n_dims)) for c in centers]
+        background = random_state.uniform(-30, 30, (2000, n_dims))
+        return np.ascontiguousarray(np.concatenate(clusters + [background]))
+
+    def test_1d(self):
+        from openTSNE import _tsne
+
+        random_state = np.random.RandomState(0)
+        embedding = self.clustered_embedding(random_state, 1).ravel()
+        for dof in (1, 0.7):
+            for n_interpolation_points in (3, 5):
+                results = []
+                for num_threads in (1, 2, 3, 8):
+                    gradient = np.zeros_like(embedding)
+                    sum_q, dof_grad = _tsne.estimate_negative_gradient_fft_1d(
+                        embedding, gradient,
+                        n_interpolation_points=n_interpolation_points,
+                        dof=dof, num_threads=num_threads, compute_dof_grad=True,
+                    )
+                    results.append((gradient, sum_q, dof_grad))
+                self.assert_all_match_first(results)
+
+    def test_2d_clustered(self):
+        from openTSNE import _tsne
+
+        random_state = np.random.RandomState(0)
+        embedding = self.clustered_embedding(random_state, 2)
+        for dof in (1, 0.7):
+            for n_interpolation_points in (3, 5):
+                results = []
+                for num_threads in (1, 2, 3, 8):
+                    gradient = np.zeros_like(embedding)
+                    sum_q, dof_grad = _tsne.estimate_negative_gradient_fft_2d(
+                        embedding, gradient,
+                        n_interpolation_points=n_interpolation_points,
+                        dof=dof, num_threads=num_threads, compute_dof_grad=True,
+                    )
+                    results.append((gradient, sum_q, dof_grad))
+                self.assert_all_match_first(results)
+
+    def test_interpolation_grid_1d(self):
+        from openTSNE import _tsne
+
+        random_state = np.random.RandomState(0)
+        reference = self.clustered_embedding(random_state, 1).ravel()
+        reference -= (reference.max() + reference.min()) / 2
+        new = np.ascontiguousarray(reference[::20] * 1.1)
+        for dof in (1, 0.7):
+            results = []
+            for num_threads in (1, 2, 3, 8):
+                y_tilde_values, box_lower_bounds = (
+                    _tsne.prepare_negative_gradient_fft_interpolation_grid_1d(
+                        reference, dof=dof, padding=0.25, num_threads=num_threads,
+                    )
+                )
+                gradient = np.zeros_like(new)
+                sum_q = _tsne.estimate_negative_gradient_fft_1d_with_grid(
+                    new, gradient, y_tilde_values, box_lower_bounds, 3, dof,
+                    num_threads=num_threads,
+                )
+                results.append((y_tilde_values, gradient, sum_q))
+            self.assert_all_match_first(results)
+
+    def test_interpolation_grid_2d(self):
+        from openTSNE import _tsne
+
+        random_state = np.random.RandomState(0)
+        reference = self.clustered_embedding(random_state, 2)
+        reference -= (reference.max(axis=0) + reference.min(axis=0)) / 2
+        new = np.ascontiguousarray(reference[::20] * 1.1)
+        for dof in (1, 0.7):
+            results = []
+            for num_threads in (1, 2, 3, 8):
+                y_tilde_values, box_x_lower_bounds, box_y_lower_bounds = (
+                    _tsne.prepare_negative_gradient_fft_interpolation_grid_2d(
+                        reference, dof=dof, padding=0.25, num_threads=num_threads,
+                    )
+                )
+                gradient = np.zeros_like(new)
+                sum_q = _tsne.estimate_negative_gradient_fft_2d_with_grid(
+                    new, gradient, y_tilde_values, box_x_lower_bounds,
+                    box_y_lower_bounds, 3, dof, num_threads=num_threads,
+                )
+                results.append((y_tilde_values, gradient, sum_q))
+            self.assert_all_match_first(results)
+
+    def test_interpolation_grid_rejects_wrong_number_of_potentials(self):
+        from openTSNE import _tsne
+
+        embedding = np.random.RandomState(0).uniform(-5, 5, (100, 2))
+        y_tilde_values, box_x_lower_bounds, box_y_lower_bounds = (
+            _tsne.prepare_negative_gradient_fft_interpolation_grid_2d(embedding)
+        )
+        with self.assertRaises(ValueError):
+            _tsne.estimate_negative_gradient_fft_2d_with_grid(
+                embedding, np.zeros_like(embedding),
+                np.ascontiguousarray(y_tilde_values[:, :3]),
+                box_x_lower_bounds, box_y_lower_bounds, 3, 1,
+            )
+
+        y_tilde_values, box_lower_bounds = (
+            _tsne.prepare_negative_gradient_fft_interpolation_grid_1d(
+                np.ascontiguousarray(embedding[:, 0])
+            )
+        )
+        with self.assertRaises(ValueError):
+            _tsne.estimate_negative_gradient_fft_1d_with_grid(
+                np.ascontiguousarray(embedding[:, 0]), np.zeros(100),
+                np.ascontiguousarray(y_tilde_values[:, :2]),
+                box_lower_bounds, 3, 1,
+            )
 
     def test_2d(self):
         from openTSNE import _tsne

@@ -2012,6 +2012,7 @@ def kl_divergence_fft(
                 reference_embedding.box_x_lower_bounds,
                 fft_params["n_interpolation_points"],
                 dof=dof,
+                num_threads=n_jobs,
             )
         else:
             sum_Q, alpha_grad_neg = _tsne.estimate_negative_gradient_fft_1d(
@@ -2032,6 +2033,7 @@ def kl_divergence_fft(
                 reference_embedding.box_y_lower_bounds,
                 fft_params["n_interpolation_points"],
                 dof=dof,
+                num_threads=n_jobs,
             )
         else:
             sum_Q, alpha_grad_neg = _tsne.estimate_negative_gradient_fft_2d(

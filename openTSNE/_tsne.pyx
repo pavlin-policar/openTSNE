@@ -392,14 +392,33 @@ cdef inline double dof_grad_g(double sq_dist, double dof) noexcept nogil:
     return log(1.0 + x) - x / (1.0 + x)
 
 
-cdef double[:, ::1] interpolate(double[::1] y_in_box, double[::1] y_tilde):
+cdef inline void _interpolate_point(
+    double y,
+    const double * y_tilde,
+    const double * denominator,
+    Py_ssize_t n_interpolation_points,
+    double * out,
+) noexcept nogil:
+    cdef Py_ssize_t j, k
+    cdef double value
+    for j in range(n_interpolation_points):
+        value = 1
+        for k in range(n_interpolation_points):
+            if j != k:
+                value = value * (y - y_tilde[k])
+        out[j] = value / denominator[j]
+
+
+cdef double[:, ::1] interpolate(
+    double[::1] y_in_box, double[::1] y_tilde, Py_ssize_t num_threads
+):
     """Lagrangian polynomial interpolation."""
     cdef Py_ssize_t N = y_in_box.shape[0]
     cdef Py_ssize_t n_interpolation_points = y_tilde.shape[0]
 
     cdef double[:, ::1] interpolated_values = np.empty((N, n_interpolation_points), dtype=float)
     cdef double[::1] denominator = np.empty(n_interpolation_points, dtype=float)
-    cdef Py_ssize_t i, j, k
+    cdef Py_ssize_t i, j
 
     for i in range(n_interpolation_points):
         denominator[i] = 1
@@ -407,15 +426,386 @@ cdef double[:, ::1] interpolate(double[::1] y_in_box, double[::1] y_tilde):
             if i != j:
                 denominator[i] *= y_tilde[i] - y_tilde[j]
 
-    for i in range(N):
-        for j in range(n_interpolation_points):
-            interpolated_values[i, j] = 1
-            for k in range(n_interpolation_points):
-                if j != k:
-                    interpolated_values[i, j] *= y_in_box[i] - y_tilde[k]
-            interpolated_values[i, j] /= denominator[j]
+    if N == 0:
+        return interpolated_values
+
+    cdef:
+        const double * y_tilde_ptr = &y_tilde[0]
+        const double * denominator_ptr = &denominator[0]
+        double * out = &interpolated_values[0, 0]
+
+    # The single-threaded loop is kept outside OpenMP: inside a parallel region
+    # the compiler optimizes the same body measurably worse
+    if num_threads <= 1:
+        for i in range(N):
+            _interpolate_point(
+                y_in_box[i], y_tilde_ptr, denominator_ptr,
+                n_interpolation_points, out + i * n_interpolation_points,
+            )
+    else:
+        for i in prange(N, nogil=True, schedule="static", num_threads=num_threads):
+            _interpolate_point(
+                y_in_box[i], y_tilde_ptr, denominator_ptr,
+                n_interpolation_points, out + i * n_interpolation_points,
+            )
 
     return interpolated_values
+
+
+# The scatter and gather below are shared by every FFT gradient function. Both
+# produce the same bits for any thread count: the scatter because each grid
+# node still sums its points in input order, the gather because each point
+# writes only its own row, and the dof-gradient sum because it is collected per
+# point and added up in point order. The single-threaded paths run the same
+# per-point functions outside OpenMP, where the compiler optimizes them better.
+
+
+# How many potentials each point carries through the transforms: in one
+# dimension 1, y and y^2 (or 1 again when dof != 1); in two, 1, x, y and
+# x^2 + y^2 (or 1). As compile-time constants the innermost loops over them
+# unroll, which a runtime count does not allow.
+cdef enum:
+    N_TERMS_1D = 3
+    N_TERMS_2D = 4
+
+
+cdef void _group_points(
+    int * point_box_idx,
+    Py_ssize_t n_samples,
+    Py_ssize_t n_groups,
+    Py_ssize_t[::1] group_start,
+    Py_ssize_t[::1] sorted_idx,
+) noexcept nogil:
+    """Stable counting sort of point indices by `point_box_idx % n_groups`.
+
+    Fills `group_start` (length `n_groups + 1`) with each group's offset into
+    `sorted_idx`. Stability keeps the points of a group in input order.
+    """
+    cdef Py_ssize_t i, g
+
+    for g in range(n_groups + 1):
+        group_start[g] = 0
+    for i in range(n_samples):
+        group_start[point_box_idx[i] % n_groups + 1] += 1
+    for g in range(n_groups):
+        group_start[g + 1] += group_start[g]
+
+    # Advance each group's start as its points are placed, then shift the
+    # starts back into place, which saves a separate cursor array
+    for i in range(n_samples):
+        g = point_box_idx[i] % n_groups
+        sorted_idx[group_start[g]] = i
+        group_start[g] += 1
+    for g in range(n_groups, 0, -1):
+        group_start[g] = group_start[g - 1]
+    group_start[0] = 0
+
+
+cdef inline void _scatter_point_1d(
+    double * w,
+    Py_ssize_t node,
+    const double * weights,
+    const double * q,
+    Py_ssize_t n_interpolation_points,
+    Py_ssize_t n_terms,
+) noexcept nogil:
+    cdef Py_ssize_t j, d
+    for j in range(n_interpolation_points):
+        for d in range(n_terms):
+            w[(node + j) * n_terms + d] = w[(node + j) * n_terms + d] + weights[j] * q[d]
+
+
+cdef void _scatter_1d(
+    double[:, ::1] w_coefficients,
+    double[:, ::1] interpolated_values,
+    double[:, ::1] q_j,
+    int * point_box_idx,
+    Py_ssize_t n_samples,
+    Py_ssize_t n_boxes,
+    Py_ssize_t n_interpolation_points,
+    Py_ssize_t num_threads,
+):
+    """Accumulate the w coefficients, one box per thread.
+
+    A box owns the `n_interpolation_points` nodes inside it and no other box
+    writes to them, so with the points grouped by box the accumulation has no
+    write conflicts.
+    """
+    if n_samples == 0:
+        return
+
+    cdef:
+        Py_ssize_t g, k, i
+        double * w = &w_coefficients[0, 0]
+        const double * weights = &interpolated_values[0, 0]
+        const double * q = &q_j[0, 0]
+        Py_ssize_t[::1] group_start
+        Py_ssize_t[::1] sorted_idx
+
+    if num_threads <= 1:
+        for i in range(n_samples):
+            _scatter_point_1d(
+                w, point_box_idx[i] * n_interpolation_points,
+                weights + i * n_interpolation_points, q + i * N_TERMS_1D,
+                n_interpolation_points, N_TERMS_1D,
+            )
+        return
+
+    group_start = np.empty(n_boxes + 1, dtype=np.intp)
+    sorted_idx = np.empty(n_samples, dtype=np.intp)
+    with nogil:
+        _group_points(point_box_idx, n_samples, n_boxes, group_start, sorted_idx)
+        for g in prange(n_boxes, schedule="guided", num_threads=num_threads):
+            for k in range(group_start[g], group_start[g + 1]):
+                i = sorted_idx[k]
+                _scatter_point_1d(
+                    w, g * n_interpolation_points,
+                    weights + i * n_interpolation_points, q + i * N_TERMS_1D,
+                    n_interpolation_points, N_TERMS_1D,
+                )
+
+
+cdef inline double _gather_point_1d(
+    double * phi_row,
+    const double * values,
+    const double * dof_values,
+    bint gather_dof,
+    Py_ssize_t node,
+    const double * weights,
+    Py_ssize_t n_interpolation_points,
+    Py_ssize_t n_terms,
+) noexcept nogil:
+    cdef Py_ssize_t j, d
+    cdef double contribution = 0
+    for j in range(n_interpolation_points):
+        for d in range(n_terms):
+            phi_row[d] = phi_row[d] + weights[j] * values[(node + j) * n_terms + d]
+        if gather_dof:
+            contribution = contribution + weights[j] * dof_values[node + j]
+    return contribution
+
+
+cdef double _gather_1d(
+    double[:, ::1] phi,
+    double[:, ::1] interpolated_values,
+    double[:, ::1] y_tilde_values,
+    double[:, ::1] dof_y_tilde_values,
+    int * point_box_idx,
+    Py_ssize_t n_samples,
+    Py_ssize_t n_interpolation_points,
+    bint gather_dof,
+    Py_ssize_t num_threads,
+):
+    """Interpolate the potentials at the nodes back to the points, into `phi`.
+
+    With `gather_dof`, also interpolates `dof_y_tilde_values` (one column) and
+    returns its sum over all points; otherwise returns 0.
+    """
+    if n_samples == 0:
+        return 0
+
+    cdef:
+        Py_ssize_t i
+        double contribution, total = 0
+        double * phi_ptr = &phi[0, 0]
+        const double * weights = &interpolated_values[0, 0]
+        const double * values = &y_tilde_values[0, 0]
+        const double * dof_values = &dof_y_tilde_values[0, 0]
+        double[::1] dof_per_point
+
+    if num_threads <= 1:
+        for i in range(n_samples):
+            contribution = _gather_point_1d(
+                phi_ptr + i * N_TERMS_1D, values, dof_values, gather_dof,
+                point_box_idx[i] * n_interpolation_points,
+                weights + i * n_interpolation_points,
+                n_interpolation_points, N_TERMS_1D,
+            )
+            total += contribution
+        return total if gather_dof else 0
+
+    dof_per_point = np.zeros(n_samples, dtype=float)
+    cdef double * dof_per_point_ptr = &dof_per_point[0]
+    for i in prange(n_samples, nogil=True, schedule="static", num_threads=num_threads):
+        dof_per_point_ptr[i] = _gather_point_1d(
+            phi_ptr + i * N_TERMS_1D, values, dof_values, gather_dof,
+            point_box_idx[i] * n_interpolation_points,
+            weights + i * n_interpolation_points,
+            n_interpolation_points, N_TERMS_1D,
+        )
+    if not gather_dof:
+        return 0
+    for i in range(n_samples):
+        total += dof_per_point_ptr[i]
+    return total
+
+
+cdef inline void _scatter_point_2d(
+    double * w,
+    Py_ssize_t box_i,
+    Py_ssize_t box_j,
+    Py_ssize_t grid_1d,
+    const double * x_weights,
+    const double * y_weights,
+    const double * q,
+    Py_ssize_t n_interpolation_points,
+    Py_ssize_t n_terms,
+) noexcept nogil:
+    cdef Py_ssize_t interp_i, interp_j, idx, d
+    cdef double wxy
+    for interp_i in range(n_interpolation_points):
+        for interp_j in range(n_interpolation_points):
+            idx = (box_i * n_interpolation_points + interp_i) * grid_1d + \
+                  box_j * n_interpolation_points + interp_j
+            wxy = x_weights[interp_i] * y_weights[interp_j]
+            for d in range(n_terms):
+                w[idx * n_terms + d] = w[idx * n_terms + d] + wxy * q[d]
+
+
+cdef void _scatter_2d(
+    double[:, ::1] w_coefficients,
+    double[:, ::1] x_interpolated_values,
+    double[:, ::1] y_interpolated_values,
+    double[:, ::1] q_j,
+    int * point_box_idx,
+    Py_ssize_t n_samples,
+    Py_ssize_t n_boxes_1d,
+    Py_ssize_t n_interpolation_points,
+    Py_ssize_t num_threads,
+):
+    """Accumulate the w coefficients, one column of boxes per thread.
+
+    A box at `box_idx` writes only to the grid rows `box_i *
+    n_interpolation_points` up to the next column's, where `box_i = box_idx %
+    n_boxes_1d`, so grouping the points by `box_i` gives each group rows no
+    other group touches. That is fewer, larger groups than one per box, which
+    stay worth handing out once the embedding has spread out to more boxes than
+    points, and each thread writes one contiguous block of rows.
+    """
+    if n_samples == 0:
+        return
+
+    cdef:
+        Py_ssize_t grid_1d = n_boxes_1d * n_interpolation_points
+        Py_ssize_t g, k, i
+        double * w = &w_coefficients[0, 0]
+        const double * x_weights = &x_interpolated_values[0, 0]
+        const double * y_weights = &y_interpolated_values[0, 0]
+        const double * q = &q_j[0, 0]
+        Py_ssize_t[::1] group_start
+        Py_ssize_t[::1] sorted_idx
+
+    if num_threads <= 1:
+        for i in range(n_samples):
+            _scatter_point_2d(
+                w, point_box_idx[i] % n_boxes_1d, point_box_idx[i] // n_boxes_1d,
+                grid_1d, x_weights + i * n_interpolation_points,
+                y_weights + i * n_interpolation_points, q + i * N_TERMS_2D,
+                n_interpolation_points, N_TERMS_2D,
+            )
+        return
+
+    group_start = np.empty(n_boxes_1d + 1, dtype=np.intp)
+    sorted_idx = np.empty(n_samples, dtype=np.intp)
+    with nogil:
+        _group_points(point_box_idx, n_samples, n_boxes_1d, group_start, sorted_idx)
+        for g in prange(n_boxes_1d, schedule="guided", num_threads=num_threads):
+            for k in range(group_start[g], group_start[g + 1]):
+                i = sorted_idx[k]
+                _scatter_point_2d(
+                    w, g, point_box_idx[i] // n_boxes_1d, grid_1d,
+                    x_weights + i * n_interpolation_points,
+                    y_weights + i * n_interpolation_points, q + i * N_TERMS_2D,
+                    n_interpolation_points, N_TERMS_2D,
+                )
+
+
+cdef inline double _gather_point_2d(
+    double * phi_row,
+    const double * values,
+    const double * dof_values,
+    bint gather_dof,
+    Py_ssize_t box_i,
+    Py_ssize_t box_j,
+    Py_ssize_t grid_1d,
+    const double * x_weights,
+    const double * y_weights,
+    Py_ssize_t n_interpolation_points,
+    Py_ssize_t n_terms,
+) noexcept nogil:
+    cdef Py_ssize_t interp_i, interp_j, idx, d
+    cdef double wxy, contribution = 0
+    for interp_i in range(n_interpolation_points):
+        for interp_j in range(n_interpolation_points):
+            idx = (box_i * n_interpolation_points + interp_i) * grid_1d + \
+                  box_j * n_interpolation_points + interp_j
+            wxy = x_weights[interp_i] * y_weights[interp_j]
+            for d in range(n_terms):
+                phi_row[d] = phi_row[d] + wxy * values[idx * n_terms + d]
+            if gather_dof:
+                contribution = contribution + wxy * dof_values[idx]
+    return contribution
+
+
+cdef double _gather_2d(
+    double[:, ::1] phi,
+    double[:, ::1] x_interpolated_values,
+    double[:, ::1] y_interpolated_values,
+    double[:, ::1] y_tilde_values,
+    double[:, ::1] dof_y_tilde_values,
+    int * point_box_idx,
+    Py_ssize_t n_samples,
+    Py_ssize_t n_boxes_1d,
+    Py_ssize_t n_interpolation_points,
+    bint gather_dof,
+    Py_ssize_t num_threads,
+):
+    """Interpolate the potentials at the nodes back to the points, into `phi`.
+
+    With `gather_dof`, also interpolates `dof_y_tilde_values` (one column) and
+    returns its sum over all points; otherwise returns 0.
+    """
+    if n_samples == 0:
+        return 0
+
+    cdef:
+        Py_ssize_t grid_1d = n_boxes_1d * n_interpolation_points
+        Py_ssize_t i
+        double contribution, total = 0
+        double * phi_ptr = &phi[0, 0]
+        const double * x_weights = &x_interpolated_values[0, 0]
+        const double * y_weights = &y_interpolated_values[0, 0]
+        const double * values = &y_tilde_values[0, 0]
+        const double * dof_values = &dof_y_tilde_values[0, 0]
+        double[::1] dof_per_point
+
+    if num_threads <= 1:
+        for i in range(n_samples):
+            contribution = _gather_point_2d(
+                phi_ptr + i * N_TERMS_2D, values, dof_values, gather_dof,
+                point_box_idx[i] % n_boxes_1d, point_box_idx[i] // n_boxes_1d,
+                grid_1d, x_weights + i * n_interpolation_points,
+                y_weights + i * n_interpolation_points,
+                n_interpolation_points, N_TERMS_2D,
+            )
+            total += contribution
+        return total if gather_dof else 0
+
+    dof_per_point = np.zeros(n_samples, dtype=float)
+    cdef double * dof_per_point_ptr = &dof_per_point[0]
+    for i in prange(n_samples, nogil=True, schedule="static", num_threads=num_threads):
+        dof_per_point_ptr[i] = _gather_point_2d(
+            phi_ptr + i * N_TERMS_2D, values, dof_values, gather_dof,
+            point_box_idx[i] % n_boxes_1d, point_box_idx[i] // n_boxes_1d,
+            grid_1d, x_weights + i * n_interpolation_points,
+            y_weights + i * n_interpolation_points,
+            n_interpolation_points, N_TERMS_2D,
+        )
+    if not gather_dof:
+        return 0
+    for i in range(n_samples):
+        total += dof_per_point_ptr[i]
+    return total
 
 
 cdef double[::1] compute_kernel_tilde_1d(
@@ -593,15 +983,14 @@ cpdef tuple estimate_negative_gradient_fft_1d(
         y_in_box[i] = (embedding[i] - box_lower_bounds[box_idx]) / box_width
 
     # Interpolate kernel using Lagrange polynomials
-    cdef double[:, ::1] interpolated_values = interpolate(y_in_box, y_tilde)
+    cdef double[:, ::1] interpolated_values = interpolate(y_in_box, y_tilde, num_threads)
 
     # Actually compute w_{ij}s
     cdef double[:, ::1] w_coefficients = np.zeros((n_interpolation_points_1d, n_terms), dtype=float)
-    for i in range(n_samples):
-        box_idx = point_box_idx[i] * n_interpolation_points
-        for j in range(n_interpolation_points):
-            for d in range(n_terms):
-                w_coefficients[box_idx + j, d] += interpolated_values[i, j] * q_j[i, d]
+    _scatter_1d(
+        w_coefficients, interpolated_values, q_j, point_box_idx, n_samples,
+        n_boxes, n_interpolation_points, num_threads,
+    )
 
     # STEP 2: Compute the kernel values evaluated at the interpolation nodes
     cdef double[:, ::1] y_tilde_values = np.empty((n_interpolation_points_1d, n_terms))
@@ -617,18 +1006,17 @@ cpdef tuple estimate_negative_gradient_fft_1d(
     if compute_dof_grad:
         dof_y_tilde_values = np.empty((n_interpolation_points_1d, 1), dtype=float)
         matrix_multiply_fft_1d(dof_kernel_tilde, w_coefficients[:, :1], dof_y_tilde_values, num_threads)
+    else:
+        # Never read, but the gather takes it either way
+        dof_y_tilde_values = np.empty((1, 1), dtype=float)
 
     # STEP 3: Compute the potentials \tilde{\phi(y_i)}
     cdef double[:, ::1] phi = np.zeros((n_samples, n_terms), dtype=float)
-    cdef double dof_grad_neg_unnormalized = 0
-    for i in range(n_samples):
-        box_idx = point_box_idx[i] * n_interpolation_points
-        for j in range(n_interpolation_points):
-            for d in range(n_terms):
-                phi[i, d] += interpolated_values[i, j] * y_tilde_values[box_idx + j, d]
-            if compute_dof_grad:
-                dof_grad_neg_unnormalized += \
-                    interpolated_values[i, j] * dof_y_tilde_values[box_idx + j, 0]
+    cdef double dof_grad_neg_unnormalized = _gather_1d(
+        phi, interpolated_values, y_tilde_values, dof_y_tilde_values,
+        point_box_idx, n_samples, n_interpolation_points, compute_dof_grad,
+        num_threads,
+    )
 
     PyMem_Free(point_box_idx)
 
@@ -758,15 +1146,17 @@ cpdef tuple prepare_negative_gradient_fft_interpolation_grid_1d(
         reference_y_in_box[i] = (reference_embedding[i] - box_lower_bounds[box_idx]) / box_width
 
     # Interpolate kernel using Lagrange polynomials
-    cdef double[:, ::1] reference_interpolated_values = interpolate(reference_y_in_box, y_tilde)
+    cdef double[:, ::1] reference_interpolated_values = interpolate(
+        reference_y_in_box, y_tilde, num_threads
+    )
 
     # Actually compute w_{ij}s
     cdef double[:, ::1] w_coefficients = np.zeros((n_interpolation_points_1d, n_terms), dtype=float)
-    for i in range(n_reference_samples):
-        box_idx = reference_point_box_idx[i] * n_interpolation_points
-        for j in range(n_interpolation_points):
-            for d in range(n_terms):
-                w_coefficients[box_idx + j, d] += reference_interpolated_values[i, j] * q_j[i, d]
+    _scatter_1d(
+        w_coefficients, reference_interpolated_values, q_j,
+        reference_point_box_idx, n_reference_samples, n_boxes,
+        n_interpolation_points, num_threads,
+    )
 
     # STEP 2: Compute the kernel values evaluated at the interpolation nodes
     cdef double[:, ::1] y_tilde_values = np.empty((n_interpolation_points_1d, n_terms))
@@ -788,6 +1178,7 @@ cpdef double estimate_negative_gradient_fft_1d_with_grid(
     double[::1] box_lower_bounds,
     Py_ssize_t n_interpolation_points,
     double dof,
+    Py_ssize_t num_threads=1,
 ):
     cdef:
         Py_ssize_t i, j, d, box_idx
@@ -796,6 +1187,13 @@ cpdef double estimate_negative_gradient_fft_1d_with_grid(
         Py_ssize_t n_boxes = box_lower_bounds.shape[0]
         double y_min = box_lower_bounds[0]
         double box_width = box_lower_bounds[1] - box_lower_bounds[0]
+    if num_threads < 1:
+        num_threads = 1
+    if n_terms != N_TERMS_1D:
+        raise ValueError(
+            "Expected an interpolation grid with %d potentials, got %d"
+            % (N_TERMS_1D, n_terms)
+        )
 
     # Determine which box each point belongs to
     cdef int *point_box_idx = <int *>PyMem_Malloc(n_samples * sizeof(int))
@@ -824,15 +1222,14 @@ cpdef double estimate_negative_gradient_fft_1d_with_grid(
         y_in_box[i] = (embedding[i] - box_lower_bounds[box_idx]) / box_width
 
     # Interpolate kernel using Lagrange polynomials
-    cdef double[:, ::1] interpolated_values = interpolate(y_in_box, y_tilde)
+    cdef double[:, ::1] interpolated_values = interpolate(y_in_box, y_tilde, num_threads)
 
     # Actually compute \tilde{\phi(y_i)}
     cdef double[:, ::1] phi = np.zeros((n_samples, n_terms), dtype=float)
-    for i in range(n_samples):
-        box_idx = point_box_idx[i] * n_interpolation_points
-        for j in range(n_interpolation_points):
-            for d in range(n_terms):
-                phi[i, d] += interpolated_values[i, j] * y_tilde_values[box_idx + j, d]
+    _gather_1d(
+        phi, interpolated_values, y_tilde_values, np.empty((1, 1), dtype=float),
+        point_box_idx, n_samples, n_interpolation_points, False, num_threads,
+    )
 
     PyMem_Free(point_box_idx)
 
@@ -1082,30 +1479,19 @@ cpdef tuple estimate_negative_gradient_fft_2d(
         y_in_box[i] = (embedding[i, 1] - y_min) / box_width
 
     # Interpolate kernel using Lagrange polynomials
-    cdef double[:, ::1] x_interpolated_values = interpolate(x_in_box, y_tilde)
-    cdef double[:, ::1] y_interpolated_values = interpolate(y_in_box, y_tilde)
+    cdef double[:, ::1] x_interpolated_values = interpolate(x_in_box, y_tilde, num_threads)
+    cdef double[:, ::1] y_interpolated_values = interpolate(y_in_box, y_tilde, num_threads)
 
     # Actually compute w_{ij}s
     cdef:
         int total_interpolation_points = n_total_boxes * n_interpolation_points ** 2
         double[:, ::1] w_coefficients = np.zeros((total_interpolation_points, n_terms), dtype=float)
-        Py_ssize_t box_i, box_j, interp_i, interp_j, idx
 
-    for i in range(n_samples):
-        box_idx = point_box_idx[i]
-        box_i = box_idx % n_boxes_1d
-        box_j = box_idx // n_boxes_1d
-        for interp_i in range(n_interpolation_points):
-            for interp_j in range(n_interpolation_points):
-                idx = (box_i * n_interpolation_points + interp_i) * \
-                      (n_boxes_1d * n_interpolation_points) + \
-                      (box_j * n_interpolation_points) + \
-                      interp_j
-                for d in range(n_terms):
-                    w_coefficients[idx, d] += \
-                        x_interpolated_values[i, interp_i] * \
-                        y_interpolated_values[i, interp_j] * \
-                        q_j[i, d]
+    _scatter_2d(
+        w_coefficients, x_interpolated_values, y_interpolated_values, q_j,
+        point_box_idx, n_samples, n_boxes_1d, n_interpolation_points,
+        num_threads,
+    )
 
     # STEP 2: Compute the kernel values evaluated at the interpolation nodes
     cdef double[:, ::1] y_tilde_values = np.empty((total_interpolation_points, n_terms))
@@ -1121,29 +1507,17 @@ cpdef tuple estimate_negative_gradient_fft_2d(
     if compute_dof_grad:
         dof_y_tilde_values = np.empty((total_interpolation_points, 1), dtype=float)
         matrix_multiply_fft_2d(dof_kernel_tilde, w_coefficients[:, :1], dof_y_tilde_values, num_threads)
+    else:
+        # Never read, but the gather takes it either way
+        dof_y_tilde_values = np.empty((1, 1), dtype=float)
 
     # STEP 3: Compute the potentials \tilde{\phi(y_i)}
     cdef double[:, ::1] phi = np.zeros((n_samples, n_terms), dtype=float)
-    cdef double dof_grad_neg_unnormalized = 0
-    for i in range(n_samples):
-        box_idx = point_box_idx[i]
-        box_i = box_idx % n_boxes_1d
-        box_j = box_idx // n_boxes_1d
-        for interp_i in range(n_interpolation_points):
-            for interp_j in range(n_interpolation_points):
-                idx = (box_i * n_interpolation_points + interp_i) * \
-                      (n_boxes_1d * n_interpolation_points) + \
-                      (box_j * n_interpolation_points) + \
-                      interp_j
-                for d in range(n_terms):
-                    phi[i, d] += x_interpolated_values[i, interp_i] * \
-                                 y_interpolated_values[i, interp_j] * \
-                                 y_tilde_values[idx, d]
-                if compute_dof_grad:
-                    dof_grad_neg_unnormalized += \
-                        x_interpolated_values[i, interp_i] * \
-                        y_interpolated_values[i, interp_j] * \
-                        dof_y_tilde_values[idx, 0]
+    cdef double dof_grad_neg_unnormalized = _gather_2d(
+        phi, x_interpolated_values, y_interpolated_values, y_tilde_values,
+        dof_y_tilde_values, point_box_idx, n_samples, n_boxes_1d,
+        n_interpolation_points, compute_dof_grad, num_threads,
+    )
 
     PyMem_Free(point_box_idx)
 
@@ -1302,30 +1676,24 @@ cpdef tuple prepare_negative_gradient_fft_interpolation_grid_2d(
         reference_y_in_box[i] = (reference_embedding[i, 1] - y_min) / box_width
 
     # Interpolate kernel using Lagrange polynomials
-    cdef double[:, ::1] reference_x_interpolated_values = interpolate(reference_x_in_box, y_tilde)
-    cdef double[:, ::1] reference_y_interpolated_values = interpolate(reference_y_in_box, y_tilde)
+    cdef double[:, ::1] reference_x_interpolated_values = interpolate(
+        reference_x_in_box, y_tilde, num_threads
+    )
+    cdef double[:, ::1] reference_y_interpolated_values = interpolate(
+        reference_y_in_box, y_tilde, num_threads
+    )
 
     # Actually compute w_{ij}s
     cdef:
         int total_interpolation_points = n_total_boxes * n_interpolation_points ** 2
         double[:, ::1] w_coefficients = np.zeros((total_interpolation_points, n_terms), dtype=float)
-        Py_ssize_t box_i, box_j, interp_i, interp_j, idx
 
-    for i in range(n_reference_samples):
-        box_idx = reference_point_box_idx[i]
-        box_i = box_idx % n_boxes_1d
-        box_j = box_idx // n_boxes_1d
-        for interp_i in range(n_interpolation_points):
-            for interp_j in range(n_interpolation_points):
-                idx = (box_i * n_interpolation_points + interp_i) * \
-                      (n_boxes_1d * n_interpolation_points) + \
-                      (box_j * n_interpolation_points) + \
-                      interp_j
-                for d in range(n_terms):
-                    w_coefficients[idx, d] += \
-                        reference_x_interpolated_values[i, interp_i] * \
-                        reference_y_interpolated_values[i, interp_j] * \
-                        q_j[i, d]
+    _scatter_2d(
+        w_coefficients, reference_x_interpolated_values,
+        reference_y_interpolated_values, q_j, reference_point_box_idx,
+        n_reference_samples, n_boxes_1d, n_interpolation_points,
+        num_threads,
+    )
 
     # STEP 2: Compute the kernel values evaluated at the interpolation nodes
     cdef double[:, ::1] y_tilde_values = np.empty((total_interpolation_points, n_terms))
@@ -1350,6 +1718,7 @@ cpdef double estimate_negative_gradient_fft_2d_with_grid(
     double[::1] box_y_lower_bounds,
     Py_ssize_t n_interpolation_points,
     double dof,
+    Py_ssize_t num_threads=1,
 ):
     cdef:
         Py_ssize_t i, j, d, box_idx
@@ -1358,6 +1727,13 @@ cpdef double estimate_negative_gradient_fft_2d_with_grid(
         Py_ssize_t n_boxes_1d = int(sqrt(box_x_lower_bounds.shape[0]))
         double coord_min = box_x_lower_bounds[0]
         double box_width = box_x_lower_bounds[1] - box_x_lower_bounds[0]
+    if num_threads < 1:
+        num_threads = 1
+    if n_terms != N_TERMS_2D:
+        raise ValueError(
+            "Expected an interpolation grid with %d potentials, got %d"
+            % (N_TERMS_2D, n_terms)
+        )
 
     # Determine which box each point belongs to
     cdef int box_x_idx, box_y_idx
@@ -1397,27 +1773,16 @@ cpdef double estimate_negative_gradient_fft_2d_with_grid(
         y_in_box[i] = (embedding[i, 1] - y_min) / box_width
 
     # Interpolate kernel using Lagrange polynomials
-    cdef double[:, ::1] x_interpolated_values = interpolate(x_in_box, y_tilde)
-    cdef double[:, ::1] y_interpolated_values = interpolate(y_in_box, y_tilde)
+    cdef double[:, ::1] x_interpolated_values = interpolate(x_in_box, y_tilde, num_threads)
+    cdef double[:, ::1] y_interpolated_values = interpolate(y_in_box, y_tilde, num_threads)
 
     # Actually compute \tilde{\phi(y_i)}
-    cdef Py_ssize_t box_i, box_j, interp_i, interp_j, idx
-
     cdef double[:, ::1] phi = np.zeros((n_samples, n_terms), dtype=float)
-    for i in range(n_samples):
-        box_idx = point_box_idx[i]
-        box_i = box_idx % n_boxes_1d
-        box_j = box_idx // n_boxes_1d
-        for interp_i in range(n_interpolation_points):
-            for interp_j in range(n_interpolation_points):
-                idx = (box_i * n_interpolation_points + interp_i) * \
-                      (n_boxes_1d * n_interpolation_points) + \
-                      (box_j * n_interpolation_points) + \
-                      interp_j
-                for d in range(n_terms):
-                    phi[i, d] += x_interpolated_values[i, interp_i] * \
-                                 y_interpolated_values[i, interp_j] * \
-                                 y_tilde_values[idx, d]
+    _gather_2d(
+        phi, x_interpolated_values, y_interpolated_values, y_tilde_values,
+        np.empty((1, 1), dtype=float), point_box_idx, n_samples, n_boxes_1d,
+        n_interpolation_points, False, num_threads,
+    )
 
     PyMem_Free(point_box_idx)
 
