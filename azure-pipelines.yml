@@ -88,6 +88,17 @@ jobs:
       HNSWLIB_NO_NATIVE: 1  # -march=native is not available on clang, so just disable it
     displayName: 'Install optional dependencies - hnswlib'
 
+  # Optional, and only for Apple silicon Macs: mlxvs runs on their GPU, and has
+  # wheels for macOS on arm64 alone. Wheels only, so other agents (Linux,
+  # Windows, Intel macOS, or an x64 Python) skip it rather than try to build
+  # the sdist, and the install is kept only if it imports. The tests requiring
+  # mlxvs skip themselves when it is missing; those running the MLXVS index on a
+  # NumPy stand-in for mlxvs, and its errors on other platforms, run everywhere.
+  - script: 'pip install --only-binary=:all: mlxvs && python -c "import mlxvs" || pip uninstall -y mlxvs mlx'
+    condition: eq(variables['Agent.OS'], 'Darwin')
+    continueOnError: true
+    displayName: 'Install optional dependencies - mlxvs'
+
   # Since Python automatically adds `cwd` to `sys.path`, it's important we remove the local folder
   # containing our code from the working directory. Otherwise, the tests will use the local copy
   # instead of the installed package. We can easily achieve this by renaming the source folder.

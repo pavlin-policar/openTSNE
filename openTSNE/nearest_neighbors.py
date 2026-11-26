@@ -1,4 +1,6 @@
 import logging
+import platform
+import sys
 import warnings
 
 import numpy as np
@@ -796,6 +798,205 @@ class HNSW(KNNIndex):
             state["index"] = index
 
         self.__dict__.update(state)
+
+
+class MLXVS(KNNIndex):
+    """Nearest neighbor search on the GPU of Apple silicon Macs, using mlxvs.
+
+    mlxvs (https://github.com/mikepapadim/mlxvs) runs on Apple's MLX and needs
+    macOS 14 or later on an Apple silicon (M1 or later) Mac, with an arm64
+    build of Python. Its GPU code is written for Metal on Apple silicon, so
+    there are no builds for Linux, Windows or Intel Macs; there, creating this
+    index raises an ``ImportError`` that names the platform.
+
+    Up to ``exact_below`` points the neighbors are exact: a matrix multiply and
+    a top-k on the GPU, the same on every run. Larger data sets get approximate
+    neighbors from NN-Descent k-nearest neighbor graphs, built in overlapping
+    k-means clusters; these can differ slightly between runs, even with a fixed
+    ``random_state``. ``query`` then searches a CAGRA graph index of the
+    training data. Distances are recomputed in double precision for the
+    returned neighbors: euclidean distances for ``euclidean`` and ``l2``, one
+    minus the cosine similarity for ``cosine``.
+
+    These entries of ``knn_kwargs`` change the defaults:
+
+    - ``exact_below`` (50,000): the number of points below which the search is
+      exact.
+    - ``graph_degree`` (32): the number of neighbors of each point in the CAGRA
+      graph that ``query`` searches. More are more accurate, but take longer to
+      build and search.
+    - ``itopk_size`` (64): the number of candidates the CAGRA search keeps
+      while it walks the graph, at least ``k``. More are more accurate and
+      slower.
+
+    """
+    VALID_METRICS = [
+        "cosine",
+        "euclidean",
+        "l2",
+    ]
+
+    # Defaults of the settings in ``knn_kwargs``; see the class docstring
+    EXACT_BELOW = 50_000
+    GRAPH_DEGREE = 32
+    ITOPK_SIZE = 64
+
+    # Upper bound on the double precision neighbor vectors `_distances` holds
+    # in memory at once
+    DISTANCE_BLOCK_BYTES = 64 * 2**20
+
+    def __init__(self, *args, **kwargs):
+        # Fail with a clear message, rather than a failed import or install,
+        # wherever mlxvs cannot run. ``platform.machine()`` is ``x86_64`` on
+        # Intel Macs, and also for an Intel build of Python run through
+        # Rosetta on Apple silicon; mlxvs needs a native arm64 Python.
+        if sys.platform != "darwin" or platform.machine() != "arm64":
+            raise ImportError(
+                "mlxvs runs only on Apple silicon Macs (M1 or later), with an "
+                f"arm64 build of Python, not on {sys.platform} "
+                f"({platform.machine()}). Please use another nearest neighbor "
+                "method, such as `hnsw`, `annoy` or `pynndescent`."
+            )
+        try:
+            import mlxvs  # pylint: disable=unused-import,unused-variable
+        except ImportError:
+            raise ImportError(
+                "Please install mlxvs (macOS on Apple silicon only): "
+                "`pip install mlxvs`."
+            )
+        super().__init__(*args, **kwargs)
+
+    def _setting(self, name, default):
+        if self.knn_kwargs is not None and name in self.knn_kwargs:
+            return self.knn_kwargs[name]
+        return default
+
+    def _mlxvs_metric(self):
+        # mlxvs ranks by squared euclidean distance, which orders neighbors the
+        # same as the euclidean distance; `_distances` takes the square root
+        return "cosine" if self.metric == "cosine" else "l2"
+
+    def _exact(self):
+        return self.n_samples < self._setting("exact_below", self.EXACT_BELOW)
+
+    def build(self):
+        import mlxvs
+
+        data, k = np.ascontiguousarray(self.data, dtype=np.float32), self.k
+
+        timer = utils.Timer(
+            f"Finding {k} nearest neighbors using mlxvs on the GPU "
+            f"({'exact' if self._exact() else 'approximate'} search) using "
+            f"{self.metric} distance...",
+            verbose=self.verbose,
+        )
+        timer.__enter__()
+
+        if self._exact():
+            # Searching the data for its own neighbors finds each point as its
+            # own nearest neighbor, so ask for one more and drop the point
+            indices, _ = mlxvs.brute_force_knn(
+                base=data,
+                queries=data,
+                k=min(k + 1, self.n_samples),
+                metric=self._mlxvs_metric(),
+            )
+            indices = np.asarray(indices).astype(np.int64)
+            indices = _exclude_self(indices, indices)[0]
+        else:
+            if self.random_state is not None:
+                warnings.warn(
+                    "mlxvs builds approximate nearest neighbor graphs of more "
+                    f"than {self._setting('exact_below', self.EXACT_BELOW)} "
+                    "points with NN-Descent, which is not deterministic, so "
+                    "the nearest neighbors may differ slightly between runs "
+                    "even with a fixed `random_state`."
+                )
+            # The graph of all points leaves out each point's own index
+            indices, _ = mlxvs.all_neighbors(
+                rows=data, k=k, metric=self._mlxvs_metric()
+            )
+            indices = np.asarray(indices).astype(np.int64)
+
+        timer.__exit__()
+
+        return indices, self._distances(self.data, indices)
+
+    def query(self, query, k):
+        import mlxvs
+
+        timer = utils.Timer(
+            f"Finding {k} nearest neighbors in existing embedding using mlxvs "
+            f"on the GPU...",
+            self.verbose,
+        )
+        timer.__enter__()
+
+        query32 = np.ascontiguousarray(query, dtype=np.float32)
+        # There cannot be more neighbors than training points
+        k_ = min(k, self.n_samples)
+        if self._exact():
+            indices, _ = mlxvs.brute_force_knn(
+                base=np.ascontiguousarray(self.data, dtype=np.float32),
+                queries=query32,
+                k=k_,
+                metric=self._mlxvs_metric(),
+            )
+        else:
+            # Build the graph index of the training data on the first query
+            # and keep it for later ones
+            if self.index is None:
+                self.index = mlxvs.CagraIndex.build(
+                    np.ascontiguousarray(self.data, dtype=np.float32),
+                    graph_degree=self._setting("graph_degree", self.GRAPH_DEGREE),
+                    metric=self._mlxvs_metric(),
+                )
+            # The search keeps `itopk_size` candidates, so it must be at least k
+            itopk_size = max(self._setting("itopk_size", self.ITOPK_SIZE), k_)
+            indices, _ = self.index.search(query32, k_, itopk_size=itopk_size)
+        indices = np.asarray(indices).astype(np.int64)
+
+        timer.__exit__()
+
+        return indices, self._distances(query, indices)
+
+    def _distances(self, points, indices):
+        """The distances from each point to its neighbors, in double precision,
+        computed in blocks of points so that memory stays bounded."""
+        points = np.asarray(points)
+        data = np.asarray(self.data)
+        n, k = indices.shape
+        distances = np.empty((n, k), dtype=np.float64)
+        # A point's k neighbors take k * dimensions float64 values (8 bytes
+        # each), so a block of this many points stays under the bound
+        bytes_per_point = 8 * max(1, k * data.shape[1])
+        block = max(1, self.DISTANCE_BLOCK_BYTES // bytes_per_point)
+        for start in range(0, n, block):
+            rows = slice(start, min(n, start + block))
+            p = points[rows].astype(np.float64)  # (block, dimensions)
+            # (block, k, dimensions): the neighbors of each point in the block
+            neighbors = data[indices[rows]].astype(np.float64)
+            if self.metric == "cosine":
+                # 1 - <p, q> / (|p| |q|), with the norms kept above zero so
+                # that an all-zero vector does not divide by zero
+                dots = np.einsum("ij,ikj->ik", p, neighbors)
+                norms = np.linalg.norm(p, axis=1)[:, None] * np.linalg.norm(
+                    neighbors, axis=2
+                )
+                distances[rows] = 1 - dots / np.maximum(
+                    norms, np.finfo(np.float64).tiny
+                )
+            else:
+                distances[rows] = np.sqrt(
+                    ((neighbors - p[:, None, :]) ** 2).sum(axis=2)
+                )
+        return distances
+
+    def __getstate__(self):
+        # the GPU index is rebuilt on demand
+        state = dict(self.__dict__)
+        state["index"] = None
+        return state
 
 
 class PrecomputedDistanceMatrix(KNNIndex):
