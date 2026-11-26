@@ -488,9 +488,10 @@ class NNDescent(KNNIndex):
     def check_metric(self, metric):
         import pynndescent
 
-        if not np.array_equal(
-            list(pynndescent.distances.named_distances), self.VALID_METRICS
-        ):
+        # Metrics that newer pynndescent releases add (e.g. ``direct_cosine`` and
+        # ``inner_product`` in 0.7) are not offered here and need no warning; only
+        # warn if pynndescent no longer provides a metric that openTSNE accepts.
+        if not set(self.VALID_METRICS) <= set(pynndescent.distances.named_distances):
             warnings.warn(
                 "`pynndescent` has recently changed which distance metrics are supported, "
                 "and `openTSNE.nearest_neighbors` has not been updated. Please notify the "
