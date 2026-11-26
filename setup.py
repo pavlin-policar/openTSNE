@@ -463,7 +463,7 @@ setup(
     ],
     extras_require={
         "hnsw": "hnswlib>=0.5.0",
-        "pynndescent": "pynndescent~=0.5.0",
+        "pynndescent": "pynndescent>=0.5.0,<0.8",
     },
     ext_modules=extensions,
     cmdclass={"build_ext": CythonBuildExt, "convert_notebooks": ConvertNotebooksToDocs},

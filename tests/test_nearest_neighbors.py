@@ -632,6 +632,25 @@ class TestNNDescent(KNNIndexTestMixin, unittest.TestCase):
             nndescent.assert_called_once()
             check_mock_called_with_kwargs(nndescent, {"random_state": random_state})
 
+    def test_check_metric_warns_only_when_metrics_are_removed(self):
+        import pynndescent
+
+        knn_index = nearest_neighbors.NNDescent(self.x1, 30, "euclidean")
+        named = dict.fromkeys(knn_index.VALID_METRICS)
+
+        # A newer pynndescent with extra metrics: nothing to warn about
+        with patch.object(
+            pynndescent.distances, "named_distances", {**named, "new_metric": None}
+        ), warnings.catch_warnings():
+            warnings.simplefilter("error")
+            knn_index.check_metric("euclidean")
+
+        # A metric openTSNE accepts is gone from pynndescent
+        del named["yule"]
+        with patch.object(pynndescent.distances, "named_distances", named):
+            with self.assertWarnsRegex(UserWarning, "recently changed"):
+                knn_index.check_metric("euclidean")
+
     def test_uncompiled_callable_is_compiled(self):
         knn_index = nearest_neighbors.NNDescent(self.x1, 30, "manhattan")
 
